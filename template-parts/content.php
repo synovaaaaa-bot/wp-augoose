@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 /**
  * Template part for displaying posts
  *
- * @package Minimal_Ecommerce
+ * @package WP_Augoose
  */
 ?>
 
@@ -33,7 +33,7 @@
         the_content(sprintf(
             wp_kses(
                 /* translators: %s: Name of current post. Only visible to screen readers */
-                __('Continue reading<span class="screen-reader-text"> "%s"</span>', 'minimal-ecommerce'),
+                __('Continue reading<span class="screen-reader-text"> "%s"</span>', 'wp-augoose'),
                 array(
                     'span' => array(
                         'class' => array(),
@@ -44,7 +44,7 @@
         ));
 
         wp_link_pages(array(
-            'before' => '<div class="page-links">' . esc_html__('Pages:', 'minimal-ecommerce'),
+            'before' => '<div class="page-links">' . esc_html__('Pages:', 'wp-augoose'),
             'after' => '</div>',
         ));
         ?>

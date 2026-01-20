@@ -1,0 +1,81 @@
+/**
+ * Single Product Page - Sale Badge Fix
+ * Sale badge harusnya di dalam/atas gambar, bukan icon jelek
+ */
+
+/* Product Gallery Wrapper - handled by product-gallery-fixed.css */
+
+/* WooCommerce Sale Flash - Compact & Clean */
+.woocommerce span.onsale {
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    background: #e74c3c !important;
+    color: #fff !important;
+    padding: 4px 8px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    z-index: 10 !important;
+    border-radius: 2px !important;
+    min-width: auto !important;
+    min-height: auto !important;
+    line-height: 1 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    display: inline-block !important;
+}
+
+/* Sale badge di product loop - Compact */
+.woocommerce ul.products li.product .onsale,
+.woocommerce .product-thumbnail .onsale {
+    position: absolute !important;
+    top: 12px !important;
+    left: 12px !important;
+    background: #e74c3c !important;
+    color: #fff !important;
+    padding: 4px 8px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    z-index: 10 !important;
+    border-radius: 2px !important;
+    display: inline-block !important;
+}
+
+/* Product Images Container */
+.woocommerce-product-gallery {
+    position: relative;
+    overflow: hidden;
+}
+
+.woocommerce-product-gallery__wrapper {
+    position: relative;
+}
+
+.woocommerce-product-gallery__image {
+    position: relative;
+}
+
+/* Hide default sale flash yang jelek */
+.woocommerce .product-gallery-wrapper .onsale:not(.woocommerce span.onsale) {
+    display: none !important;
+}
+
+/* Ensure sale badge visible */
+.woocommerce-product-gallery__image .onsale,
+.woocommerce-product-gallery .onsale {
+    display: block !important;
+}
+
+/* Hide Zoom Icon Completely */
+.woocommerce-product-gallery__trigger,
+.woocommerce-product-gallery__image .woocommerce-product-gallery__trigger,
+.woocommerce-product-gallery__trigger img {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}

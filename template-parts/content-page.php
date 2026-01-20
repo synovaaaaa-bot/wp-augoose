@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 /**
  * Template part for displaying page content
  *
- * @package Minimal_Ecommerce
+ * @package WP_Augoose
  */
 ?>
 
@@ -11,14 +11,18 @@
         <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
     </header><!-- .entry-header -->
 
-    <?php minimal_ecommerce_post_thumbnail(); ?>
+    <?php
+    if ( has_post_thumbnail() ) {
+        the_post_thumbnail( 'large', array( 'class' => 'entry-thumbnail' ) );
+    }
+    ?>
 
     <div class="entry-content">
         <?php
         the_content();
 
         wp_link_pages(array(
-            'before' => '<div class="page-links">' . esc_html__('Pages:', 'minimal-ecommerce'),
+            'before' => '<div class="page-links">' . esc_html__('Pages:', 'wp-augoose'),
             'after' => '</div>',
         ));
         ?>
@@ -31,7 +35,7 @@
                 sprintf(
                     wp_kses(
                         /* translators: %s: Name of current post. Only visible to screen readers */
-                        __('Edit <span class="screen-reader-text">%s</span>', 'minimal-ecommerce'),
+                        __('Edit <span class="screen-reader-text">%s</span>', 'wp-augoose'),
                         array(
                             'span' => array(
                                 'class' => array(),

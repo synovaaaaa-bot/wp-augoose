@@ -1,0 +1,254 @@
+/*
+Theme Name: WP Augoose
+Theme URI: https://github.com/synovaaaaa-bot/wp-augoose
+Author: Augoose Team
+Author URI: https://github.com/synovaaaaa-bot
+Description: A custom WordPress theme for Augoose with WooCommerce support
+Version: 1.0.0
+Requires at least: 5.0
+Tested up to: 6.4
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: wp-augoose
+Tags: woocommerce, custom-theme, e-commerce
+*/
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #fff;
+    letter-spacing: 0.5px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #1a1a1a;
+}
+
+a {
+    color: #1a1a1a;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: #666;
+}
+
+/* WordPress Core */
+.alignleft {
+    float: left;
+    margin-right: 1.5em;
+}
+
+.alignright {
+    float: right;
+    margin-left: 1.5em;
+}
+
+.aligncenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Header */
+.top-announcement {
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #1a1a1a;
+}
+
+.top-announcement-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.top-announcement-center {
+    grid-column: 2;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.top-announcement-right {
+    grid-column: 3;
+    text-align: right;
+    opacity: 0.7;
+}
+
+.site-header {
+    background: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 25px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 40px;
+}
+
+.site-branding {
+    margin: 0;
+}
+
+.site-title {
+    font-size: 22px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 3px;
+}
+
+.site-title a {
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+.main-navigation {
+    flex: 1;
+    text-align: center;
+}
+
+.main-navigation ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 40px;
+    justify-content: center;
+}
+
+.main-navigation a {
+    color: #1a1a1a;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+.main-navigation a:hover {
+    color: #666;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.cart-icon {
+    color: #1a1a1a;
+    text-decoration: none;
+    font-weight: 500;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.cart-count {
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .main-navigation ul {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+}
+
+/* Main Content */
+.site-main {
+    padding: 40px 0;
+}
+
+/* Full width for WooCommerce checkout and cart */
+body.woocommerce-checkout .site-main,
+body.woocommerce-cart .site-main,
+body.page-template-page-checkout .site-main,
+body.page-template-page-cart .site-main {
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Hide sidebar on checkout and cart */
+body.woocommerce-checkout #secondary,
+body.woocommerce-cart #secondary,
+body.page-template-page-checkout #secondary,
+body.page-template-page-cart #secondary {
+    display: none !important;
+}
+
+/* Footer */
+.site-footer {
+    background: #2c3e50;
+    color: #fff;
+    border-top: none;
+    padding: 60px 0 30px;
+    margin-top: 80px;
+}
+
+.site-footer a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.site-footer a:hover {
+    color: #ddd;
+}
+
+.site-info {
+    text-align: center;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 12px;
+    color: #bbb;
+}

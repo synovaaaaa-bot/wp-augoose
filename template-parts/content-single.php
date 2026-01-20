@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 /**
  * Template part for displaying single posts
  *
- * @package Minimal_Ecommerce
+ * @package WP_Augoose
  */
 ?>
 
@@ -27,7 +27,7 @@
         the_content();
 
         wp_link_pages(array(
-            'before' => '<div class="page-links">' . esc_html__('Pages:', 'minimal-ecommerce'),
+            'before' => '<div class="page-links">' . esc_html__('Pages:', 'wp-augoose'),
             'after' => '</div>',
         ));
         ?>

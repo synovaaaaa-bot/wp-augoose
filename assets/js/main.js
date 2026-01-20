@@ -1,7 +1,7 @@
 ﻿/**
  * Main JavaScript file
  * 
- * @package Minimal_Ecommerce
+ * @package WP_Augoose
  */
 
 (function($) {
@@ -97,12 +97,12 @@
 
             // Load product via AJAX
             $.ajax({
-                url: minimalEcommerce.ajaxUrl,
+                url: wpAugoose.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'quick_view_product',
                     product_id: productId,
-                    nonce: minimalEcommerce.nonce
+                    nonce: wpAugoose.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -127,7 +127,7 @@
         });
     }
 
-    // Add to Wishlist
+    // Add to Wishlist (Integrated - server cookie/user meta)
     function initWishlist() {
         $(document).on('click', '.add-to-wishlist', function(e) {
             e.preventDefault();
@@ -135,37 +135,70 @@
             const productId = button.data('product-id');
 
             button.addClass('loading');
-
-            // Get existing wishlist from localStorage
-            let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-
-            // Check if product already in wishlist
-            const index = wishlist.indexOf(productId);
-            if (index > -1) {
-                wishlist.splice(index, 1);
-                button.removeClass('active');
-                showNotification('Product removed from wishlist');
-            } else {
-                wishlist.push(productId);
-                button.addClass('active');
-                showNotification('Product added to wishlist');
-            }
-
-            // Save to localStorage
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
-
-            button.removeClass('loading');
-        });
-
-        // Initialize wishlist buttons
-        function updateWishlistButtons() {
-            const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            $('.add-to-wishlist').each(function() {
-                const productId = $(this).data('product-id');
-                if (wishlist.includes(productId)) {
-                    $(this).addClass('active');
+            
+            $.ajax({
+                url: wpAugoose.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'wp_augoose_wishlist_toggle',
+                    product_id: productId,
+                    nonce: wpAugoose.nonce
+                },
+                success: function(res) {
+                    if (res && res.success) {
+                        if (res.data.action === 'added') {
+                            button.addClass('active');
+                            showNotification('Product added to wishlist');
+                        } else {
+                            button.removeClass('active');
+                            showNotification('Product removed from wishlist');
+                        }
+                        const count = res.data.count || 0;
+                        const $badge = $('.wishlist-count');
+                        if ($badge.length) {
+                            if (count > 0) {
+                                $badge.text(count).show();
+                            } else {
+                                $badge.hide();
+                            }
+                        }
+                    } else {
+                        showNotification('Error updating wishlist', 'error');
+                    }
+                },
+                error: function() {
+                    showNotification('Error updating wishlist', 'error');
+                },
+                complete: function() {
+                    button.removeClass('loading');
                 }
             });
+        });
+
+        // Initialize wishlist buttons from server
+        function updateWishlistButtons() {
+            $.post(wpAugoose.ajaxUrl, { action: 'wp_augoose_wishlist_get', nonce: wpAugoose.nonce })
+                .done(function(res) {
+                    if (res && res.success) {
+                        const count = res.data.count || 0;
+                        const html = res.data.html || '';
+                        // derive ids by parsing data-product-id in HTML (lightweight)
+                        const ids = [];
+                        const $tmp = $('<div>').html(html);
+                        $tmp.find('.wishlist-item').each(function() {
+                            ids.push(parseInt($(this).data('product-id'), 10));
+                        });
+                        $('.add-to-wishlist').each(function() {
+                            const pid = parseInt($(this).data('product-id'), 10);
+                            if (ids.includes(pid)) $(this).addClass('active');
+                        });
+                        const $badge = $('.wishlist-count');
+                        if ($badge.length) {
+                            if (count > 0) $badge.text(count).show();
+                            else $badge.hide();
+                        }
+                    }
+                });
         }
 
         updateWishlistButtons();
@@ -182,13 +215,13 @@
             button.addClass('loading').prop('disabled', true);
 
             $.ajax({
-                url: minimalEcommerce.ajaxUrl,
+                url: wpAugoose.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'minimal_ecommerce_add_to_cart',
+                    action: 'wp_augoose_add_to_cart',
                     product_id: productId,
                     quantity: quantity,
-                    nonce: minimalEcommerce.nonce
+                    nonce: wpAugoose.nonce
                 },
                 success: function(response) {
                     if (response.success) {
@@ -304,12 +337,12 @@
             const email = form.find('input[type="email"]').val();
 
             $.ajax({
-                url: minimalEcommerce.ajaxUrl,
+                url: wpAugoose.ajaxUrl,
                 type: 'POST',
                 data: {
                     action: 'subscribe_newsletter',
                     email: email,
-                    nonce: minimalEcommerce.nonce
+                    nonce: wpAugoose.nonce
                 },
                 success: function(response) {
                     if (response.success) {

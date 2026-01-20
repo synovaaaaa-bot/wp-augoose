@@ -1,29 +1,47 @@
-﻿<?php
+<?php
 /**
  * The template for displaying product content in the single-product.php template
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/content-single-product.php.
  *
- * @package Minimal_Ecommerce
+ * @package WP_Augoose
  * @version 3.6.0
  */
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 global $product;
 
 /**
  * Hook: woocommerce_before_single_product.
  */
-do_action('woocommerce_before_single_product');
+do_action( 'woocommerce_before_single_product' );
 
-if (post_password_required()) {
-    echo get_the_password_form(); // WPCS: XSS ok.
-    return;
+if ( post_password_required() ) {
+	echo get_the_password_form(); // WPCS: XSS ok.
+	return;
 }
 ?>
 
-<div id="product-<?php the_ID(); ?>" <?php wc_product_class('single-product-wrapper', $product); ?>>
+<div id="product-<?php the_ID(); ?>" <?php wc_product_class( 'single-product-wrapper', $product ); ?>>
+    
+    <!-- Breadcrumb -->
+    <div class="product-breadcrumb">
+        <div class="container">
+            <?php
+            if ( function_exists( 'woocommerce_breadcrumb' ) ) {
+                woocommerce_breadcrumb( array(
+                    'delimiter'   => ' / ',
+                    'wrap_before' => '<nav class="woocommerce-breadcrumb">',
+                    'wrap_after'  => '</nav>',
+                    'before'      => '',
+                    'after'       => '',
+                    'home'        => 'Home',
+                ) );
+            }
+            ?>
+        </div>
+    </div>
     
     <div class="product-main-content">
         <div class="container">
@@ -42,81 +60,67 @@ if (post_password_required()) {
                     ?>
                 </div>
 
-                <!-- Product Summary (Enhanced Figma Design) -->
+                <!-- Product Summary (Figma Design) -->
                 <div class="product-summary-wrapper">
                     <div class="summary entry-summary">
+                        
+                        <!-- Product Title -->
+                        <h1 class="product_title entry-title"><?php echo esc_html( $product->get_name() ); ?></h1>
+                        
+                        <!-- Product Price -->
+                        <div class="price">
+                            <?php echo $product->get_price_html(); ?>
+                        </div>
+                        
+                        <!-- Short Description -->
                         <?php
-                        /**
-                         * Hook: woocommerce_single_product_summary.
-                         *
-                         * @hooked woocommerce_template_single_title - 5
-                         * @hooked woocommerce_template_single_rating - 10
-                         * @hooked woocommerce_template_single_price - 10
-                         * @hooked woocommerce_template_single_excerpt - 20
-                         * @hooked woocommerce_template_single_add_to_cart - 30
-                         * @hooked woocommerce_template_single_meta - 40
-                         * @hooked woocommerce_template_single_sharing - 50
-                         */
-                        do_action('woocommerce_single_product_summary');
+                        if ( $product->get_short_description() ) {
+                            echo '<div class="woocommerce-product-details__short-description">';
+                            echo wp_kses_post( $product->get_short_description() );
+                            echo '</div>';
+                        } elseif ( $product->get_description() ) {
+                            // Fallback to full description if short description is empty
+                            echo '<div class="woocommerce-product-details__short-description">';
+                            echo wp_kses_post( wp_trim_words( $product->get_description(), 30, '...' ) );
+                            echo '</div>';
+                        }
                         ?>
                         
-                        <!-- Size Guide Accordion (Figma Design) -->
-                        <div class="product-size-guide">
-                            <button class="size-guide-toggle" type="button">
-                                <span>≡ƒôÅ SIZE GUIDE</span>
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                    <path d="M4.5 6l3.5 3.5L11.5 6"></path>
-                                </svg>
-                            </button>
-                            <div class="size-guide-content">
-                                <table class="size-chart">
-                                    <thead>
-                                        <tr>
-                                            <th>Size</th>
-                                            <th>Chest (in)</th>
-                                            <th>Waist (in)</th>
-                                            <th>Length (in)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>S</td>
-                                            <td>36-38</td>
-                                            <td>30-32</td>
-                                            <td>28</td>
-                                        </tr>
-                                        <tr>
-                                            <td>M</td>
-                                            <td>39-41</td>
-                                            <td>33-35</td>
-                                            <td>29</td>
-                                        </tr>
-                                        <tr>
-                                            <td>L</td>
-                                            <td>42-44</td>
-                                            <td>36-38</td>
-                                            <td>30</td>
-                                        </tr>
-                                        <tr>
-                                            <td>XL</td>
-                                            <td>45-47</td>
-                                            <td>39-41</td>
-                                            <td>31</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <!-- Variations Form -->
+                        <?php
+                        if ( $product->is_type( 'variable' ) ) {
+                            woocommerce_variable_add_to_cart();
+                        } else {
+                            woocommerce_simple_add_to_cart();
+                        }
+                        ?>
+                        
+                        <!-- Material Info -->
+                        <?php
+                        $material = get_post_meta( get_the_ID(), '_product_material', true );
+                        if ( $material ) : ?>
+                            <div class="product-material-info">
+                                <div class="material-label">MATERIAL</div>
+                                <div class="material-value"><?php echo esc_html( $material ); ?></div>
                             </div>
+                        <?php endif; ?>
+                        
+                        <!-- Shipping Info -->
+                        <div class="product-shipping-info">
+                            <div class="shipping-label">SHIPPING</div>
+                            <div class="shipping-value">Free shipping on orders over $200</div>
                         </div>
                         
-                        <!-- Product Features (Figma Design) -->
-                        <div class="product-features">
-                            <ul>
-                                <li>Γ£ô <strong>American Workwear Design</strong></li>
-                                <li>Γ£ô <strong>Premium Quality Fabric</strong></li>
-                                <li>Γ£ô <strong>Durable Construction</strong></li>
-                                <li>Γ£ô <strong>Sustainably Made in Indonesia</strong></li>
-                            </ul>
+                        <!-- Share Button -->
+                        <div class="product-share">
+                            <button type="button" class="share-button">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M12 10c-.8 0-1.5.3-2 .8L6.5 8.5c.1-.2.1-.3.1-.5s0-.3-.1-.5L10 5.2c.5.5 1.2.8 2 .8 1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3c0 .2 0 .3.1.5L5.6 5.8C5.1 5.3 4.4 5 3.5 5c-1.7 0-3 1.3-3 3s1.3 3 3 3c.9 0 1.6-.3 2.1-.8l3.5 2.3c0 .2-.1.3-.1.5 0 1.7 1.3 3 3 3s3-1.3 3-3-1.3-3-3-3z"/>
+                                </svg>
+                                SHARE
+                            </button>
                         </div>
+                        
                     </div>
                 </div>
 
@@ -126,16 +130,185 @@ if (post_password_required()) {
 
     <div class="product-additional-info">
         <div class="container">
-            <?php
-            /**
-             * Hook: woocommerce_after_single_product_summary.
-             *
-             * @hooked woocommerce_output_product_data_tabs - 10
-             * @hooked woocommerce_upsell_display - 15
-             * @hooked woocommerce_output_related_products - 20
-             */
-            do_action('woocommerce_after_single_product_summary');
-            ?>
+            
+            <!-- Custom Tabs -->
+            <div class="product-tabs-custom">
+                <ul class="tabs-nav">
+                    <li class="active"><a href="#tab-details">DETAILS</a></li>
+                    <li><a href="#tab-materials">MATERIALS & CARE</a></li>
+                    <li><a href="#tab-shipping">SHIPPING</a></li>
+                </ul>
+                <div class="tabs-content">
+                    <div id="tab-details" class="tab-panel active">
+                        <?php 
+                        $content = get_the_content();
+                        if ( ! empty( $content ) ) {
+                            echo '<div class="product-full-description">';
+                            echo wp_kses_post( apply_filters( 'the_content', $content ) );
+                            echo '</div>';
+                        }
+                        ?>
+                        
+                        <?php
+                        // Features: derive from WooCommerce product attributes (non-variation attributes)
+                        $attributes = method_exists( $product, 'get_attributes' ) ? $product->get_attributes() : array();
+                        $feature_items = array();
+                        if ( ! empty( $attributes ) ) {
+                            foreach ( $attributes as $attribute ) {
+                                if ( ! is_a( $attribute, 'WC_Product_Attribute' ) ) {
+                                    continue;
+                                }
+                                // Skip variation attributes (Color/Size) in features list
+                                if ( $attribute->get_variation() ) {
+                                    continue;
+                                }
+                                $name = $attribute->get_name();
+                                $label = wc_attribute_label( $name );
+                                $values = array();
+                                if ( $attribute->is_taxonomy() ) {
+                                    $terms = wc_get_product_terms( $product->get_id(), $name, array( 'fields' => 'names' ) );
+                                    if ( is_array( $terms ) ) {
+                                        $values = $terms;
+                                    }
+                                } else {
+                                    $values = $attribute->get_options();
+                                }
+                                if ( empty( $values ) ) {
+                                    continue;
+                                }
+                                // If attribute is "Features" we split values as list; otherwise show "Label: value"
+                                if ( stripos( $label, 'feature' ) !== false ) {
+                                    foreach ( $values as $v ) {
+                                        $v = trim( (string) $v );
+                                        if ( $v !== '' ) {
+                                            $feature_items[] = $v;
+                                        }
+                                    }
+                                } else {
+                                    $feature_items[] = $label . ': ' . implode( ', ', array_map( 'trim', $values ) );
+                                }
+                            }
+                        }
+
+                        if ( ! empty( $feature_items ) ) {
+                            echo '<h3>Features:</h3>';
+                            echo '<ul class="product-features-list">';
+                            foreach ( $feature_items as $item ) {
+                                echo '<li>' . esc_html( $item ) . '</li>';
+                            }
+                            echo '</ul>';
+                        }
+                        ?>
+                    </div>
+                    <div id="tab-materials" class="tab-panel">
+                        <?php
+                        // Materials & Care: use product short description and/or specific attributes if present.
+                        $short = $product->get_short_description();
+                        $material_attr = '';
+                        if ( method_exists( $product, 'get_attribute' ) ) {
+                            // common attribute names: pa_material or material
+                            $material_attr = $product->get_attribute( 'pa_material' );
+                            if ( ! $material_attr ) {
+                                $material_attr = $product->get_attribute( 'material' );
+                            }
+                        }
+
+                        if ( $material_attr || $short ) {
+                            if ( $material_attr ) {
+                                echo '<h3>Material</h3>';
+                                echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
+                            }
+                            if ( $short ) {
+                                echo '<h3>Care</h3>';
+                                echo '<div class="material-tab-content">';
+                                echo wp_kses_post( apply_filters( 'the_content', $short ) );
+                                echo '</div>';
+                            }
+                        }
+                        ?>
+                    </div>
+                    <div id="tab-shipping" class="tab-panel">
+                        <?php
+                        // Shipping tab: show your product shipping class + link to shop shipping/returns pages if present.
+                        $shipping_class = $product->get_shipping_class();
+                        if ( $shipping_class ) {
+                            $term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
+                            if ( $term && ! is_wp_error( $term ) ) {
+                                echo '<h3>Shipping Class</h3>';
+                                echo '<p>' . esc_html( $term->name ) . '</p>';
+                            }
+                        }
+
+                        // Optional: show product weight/dimensions if set
+                        $weight = $product->get_weight();
+                        $dims   = wc_format_dimensions( $product->get_dimensions( false ) );
+                        if ( $weight || $dims ) {
+                            echo '<h3>Package</h3>';
+                            echo '<p>';
+                            if ( $weight ) {
+                                echo esc_html__( 'Weight:', 'wp-augoose' ) . ' ' . esc_html( $weight ) . ' ' . esc_html( get_option( 'woocommerce_weight_unit' ) ) . '<br>';
+                            }
+                            if ( $dims && $dims !== 'N/A' ) {
+                                echo esc_html__( 'Dimensions:', 'wp-augoose' ) . ' ' . esc_html( $dims );
+                            }
+                            echo '</p>';
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Related Products -->
+            <div class="related-products-section">
+                <h2>YOU MAY ALSO LIKE</h2>
+                <?php
+                // Get related products
+                $related_ids = wc_get_related_products( $product->get_id(), 4 );
+                
+                if ( ! empty( $related_ids ) ) {
+                    $args = array(
+                        'post_type'      => 'product',
+                        'posts_per_page' => 4,
+                        'post__in'        => $related_ids,
+                        'orderby'         => 'post__in',
+                    );
+                    
+                    $related_products = new WP_Query( $args );
+                    
+                    if ( $related_products->have_posts() ) {
+                        echo '<ul class="products related-products-grid">';
+                        while ( $related_products->have_posts() ) {
+                            $related_products->the_post();
+                            wc_get_template_part( 'content', 'product' );
+                        }
+                        echo '</ul>';
+                        wp_reset_postdata();
+                    }
+                } else {
+                    // Fallback: show recent products if no related products
+                    $args = array(
+                        'post_type'      => 'product',
+                        'posts_per_page' => 4,
+                        'orderby'        => 'date',
+                        'order'          => 'DESC',
+                        'post__not_in'   => array( $product->get_id() ),
+                    );
+                    
+                    $recent_products = new WP_Query( $args );
+                    
+                    if ( $recent_products->have_posts() ) {
+                        echo '<ul class="products related-products-grid">';
+                        while ( $recent_products->have_posts() ) {
+                            $recent_products->the_post();
+                            wc_get_template_part( 'content', 'product' );
+                        }
+                        echo '</ul>';
+                        wp_reset_postdata();
+                    }
+                }
+                ?>
+            </div>
+            
         </div>
     </div>
 

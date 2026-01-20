@@ -1,0 +1,85 @@
+/**
+ * NUCLEAR OPTION - Override Everything WooCommerce
+ * Load with HIGHEST priority
+ */
+
+/* Completely override WooCommerce product grid - NUCLEAR OPTION */
+.latest-collection .woocommerce ul.products[class*="columns"] {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 30px !important;
+    flex-direction: unset !important;
+    flex-wrap: unset !important;
+    align-items: unset !important;
+    box-sizing: border-box !important;
+    min-width: unset !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+.latest-collection .woocommerce ul.products[class*="columns"] li.product {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    display: block !important;
+    flex: none !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    box-sizing: border-box !important;
+}
+
+.latest-collection .woocommerce ul.products[class*="columns"] li.product:hover {
+    border-color: #1a1a1a !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.latest-collection .woocommerce ul.products[class*="columns"] li.product img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 !important;
+}
+
+.latest-collection .woocommerce ul.products[class*="columns"] li.product h2,
+.latest-collection .woocommerce ul.products[class*="columns"] li.product .woocommerce-loop-product__title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    margin: 16px 16px 8px !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+.latest-collection .woocommerce ul.products[class*="columns"] li.product .price {
+    font-size: 13px !important;
+    color: #666 !important;
+    margin: 0 16px 16px !important;
+    text-align: left !important;
+    font-weight: 500 !important;
+}
+
+.latest-collection .woocommerce ul.products[class*="columns"] li.product .button,
+.latest-collection .woocommerce ul.products[class*="columns"] li.product .added_to_cart {
+    display: none !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .latest-collection .woocommerce ul.products[class*="columns"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .latest-collection .woocommerce ul.products[class*="columns"] {
+        grid-template-columns: 1fr !important;
+    }
+}

@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 /**
  * Template part for displaying results in search pages
  *
- * @package Minimal_Ecommerce
+ * @package WP_Augoose
  */
 ?>
 

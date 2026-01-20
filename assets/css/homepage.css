@@ -1,429 +1,533 @@
-﻿/**
- * Augoose Homepage Styles
- * American-inspired workwear aesthetic
+/**
+ * Homepage Styles - Minimal Design
+ * @package WP_Augoose
  */
 
-/* ============================================
-   Hero Section
-   ============================================ */
-.hero-section {
-    position: relative;
-    min-height: 85vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    color: #fff;
-    margin-bottom: 0;
+/* CRITICAL OVERRIDE - HIGHEST PRIORITY */
+.latest-collection .woocommerce ul.products,
+.latest-collection .woocommerce ul.products.columns-4,
+.latest-collection .woocommerce ul.products.latest,
+.latest-collection ul.products,
+.latest-collection ul.products.columns-4,
+.latest-collection ul.products.latest {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 30px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    flex-direction: unset !important;
+    flex-wrap: unset !important;
+    align-items: unset !important;
 }
 
-.hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 100%);
+.latest-collection .woocommerce ul.products li.product,
+.latest-collection .woocommerce ul.products.columns-4 li.product,
+.latest-collection .woocommerce ul.products.latest li.product,
+.latest-collection ul.products li.product,
+.latest-collection ul.products.columns-4 li.product,
+.latest-collection ul.products.latest li.product {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    display: block !important;
+    flex: none !important;
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    box-sizing: border-box !important;
+}
+
+/* ===================================
+   Hero Section (Figma-like)
+   =================================== */
+.hero-section {
+    /* Put your real hero image here:
+       wp-augoose/assets/img/hero.jpg
+    */
+    background:
+        linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
+        url('../img/hero.jpg');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+}
+
+.hero-inner {
+    width: 100%;
 }
 
 .hero-content {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    padding: 60px 20px;
+    max-width: 520px;
+    text-align: left;
 }
 
-.hero-logo {
-    max-width: 380px;
-    width: 100%;
-    height: auto;
-    margin: 0 auto 20px;
-}
-
-.hero-title {
-    font-size: 4rem;
-    font-weight: 700;
-    margin: 0 0 20px;
-    line-height: 1.2;
-    letter-spacing: -1px;
-}
-
-.hero-description {
-    font-size: 1.125rem;
-    margin: 0 0 30px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    opacity: 0.95;
-}
-
-.btn-hero {
-    padding: 16px 48px;
-    font-size: 1rem;
-    font-weight: 600;
+.hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    opacity: .85;
+    margin-bottom: 18px;
+    color: #fff;
 }
 
-/* ============================================
-   Latest Collection Section
-   ============================================ */
-.latest-collection-section {
-    padding: 100px 0;
-    background-color: #f8f8f8;
+.hero-content h1 {
+    font-size: 52px;
+    margin-bottom: 14px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #fff;
 }
 
-.section-header {
-    margin-bottom: 60px;
+.hero-subtitle {
+    font-size: 12px;
+    margin-bottom: 28px;
+    opacity: .9;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: #fff;
+}
+
+.hero-cta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 18px 50px;
+    text-decoration: none;
+    border-radius: 0;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 2px solid transparent;
+}
+
+.btn-primary {
+    background: #fff;
+    color: #1a1a1a;
+    border-color: #fff;
+}
+
+.btn-primary:hover {
+    background: transparent;
+    color: #fff;
+    border-color: #fff;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #fff;
+    border-color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #fff;
+    color: #1a1a1a;
+    border-color: #fff;
+}
+
+/* ===================================
+   Latest Collection
+   =================================== */
+.latest-collection {
+    padding: 60px 0 80px;
+    background: #fff;
+}
+
+.latest-collection .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.latest-collection .section-head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 50px;
+    width: 100%;
+}
+
+.latest-collection .section-title {
+    font-size: 32px;
+    text-align: center;
+    margin: 0 auto;
+    position: relative;
+    padding-bottom: 16px;
+    letter-spacing: 4px;
+    font-weight: 700;
+    color: #1a1a1a;
+    font-family: Georgia, 'Times New Roman', serif;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.latest-collection .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 2px;
+    background: #1a1a1a;
+}
+
+.latest-collection .section-link {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #666;
+    font-weight: 500;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #666;
+    transition: all 0.2s ease;
+}
+
+.latest-collection .section-link:hover {
+    color: #1a1a1a;
+    border-bottom-color: #1a1a1a;
+}
+
+.section-link {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid #1a1a1a;
+    padding-bottom: 2px;
+}
+
+.section-link:hover {
+    opacity: .7;
 }
 
 .section-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0 0 15px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.section-description {
-    font-size: 1.125rem;
-    color: #666;
-    margin: 0;
-}
-
-.products-grid {
-    margin-bottom: 50px;
-}
-
-.section-footer {
-    margin-top: 40px;
-}
-
-/* ============================================
-   How to Order Section (Figma Design Match)
-   ============================================ */
-.how-to-order-section {
-    padding: 80px 0;
-    background-color: #fff;
-    border-top: 1px solid #D1D5DB;
-}
-
-.order-steps {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 24px;
-    margin-top: 50px;
-}
-
-.order-step {
-    text-align: left;
-    padding: 32px 24px;
-    border: 2px solid #D1D5DB;
-    border-radius: 0;
-    transition: all 0.3s ease;
-    background-color: #FFFFFF;
-}
-
-.order-step:hover {
-    border-color: #30475E;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(48, 71, 94, 0.15);
-}
-
-.step-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #30475E;
-    margin-bottom: 16px;
-    line-height: 1;
-    font-family: 'Killarney', Georgia, serif;
-}
-
-.step-title {
-    font-size: 0.875rem;
-    font-weight: 700;
-    margin: 0 0 8px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #30475E;
-    font-family: 'Killarney', Georgia, serif;
-}
-
-.step-description {
-    font-size: 0.875rem;
-    color: #000000;
-    opacity: 0.7;
-    margin: 0;
-    line-height: 1.5;
-}
-
-/* ============================================
-   Featured Categories Section
-   ============================================ */
-.featured-categories-section {
-    padding: 80px 0;
-    background-color: #f8f8f8;
-}
-
-.categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-    margin-top: 50px;
-}
-
-.category-item {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 60px;
     position: relative;
-    overflow: hidden;
-    border-radius: 0;
+    padding-bottom: 20px;
+    letter-spacing: 4px;
+    font-weight: 700;
+    color: #1a1a1a;
 }
 
-.category-link {
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: #1a1a1a;
+}
+
+/* Latest Collection Products Grid - Override WooCommerce defaults */
+.latest-collection .woocommerce ul.products,
+.latest-collection ul.products,
+.latest-collection .woocommerce ul.products.columns-4,
+.latest-collection ul.products.columns-4 {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 30px !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    clear: both !important;
+    flex-direction: unset !important;
+    flex-wrap: unset !important;
+    align-items: unset !important;
+}
+
+.latest-collection .woocommerce ul.products li.product,
+.latest-collection ul.products li.product,
+.latest-collection .woocommerce ul.products.columns-4 li.product,
+.latest-collection ul.products.columns-4 li.product {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    transition: all 0.3s ease !important;
+    width: auto !important;
+    display: block !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+}
+
+.latest-collection .woocommerce ul.products li.product:hover,
+.latest-collection ul.products li.product:hover {
+    border-color: #1a1a1a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.latest-collection .woocommerce ul.products li.product .woocommerce-loop-product__link,
+.latest-collection ul.products li.product .woocommerce-loop-product__link {
     display: block;
     text-decoration: none;
     color: inherit;
 }
 
-.category-image {
-    position: relative;
-    padding-bottom: 125%;
-    overflow: hidden;
+/* Image styling di-handle oleh product-card-fixed.css untuk aspect ratio 3:4 */
+.latest-collection .woocommerce ul.products li.product img,
+.latest-collection ul.products li.product img {
+    /* Aspect ratio 3:4 di-handle oleh .product-thumbnail di product-card-fixed.css */
 }
 
-.category-image img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-}
-
-.category-item:hover .category-image img {
-    transform: scale(1.1);
-}
-
-.category-info {
-    padding: 20px;
-    background-color: #fff;
-    text-align: center;
-}
-
-.category-name {
-    font-size: 1.125rem;
-    font-weight: 700;
-    margin: 0 0 5px;
+.latest-collection .woocommerce ul.products li.product .woocommerce-loop-product__title,
+.latest-collection ul.products li.product .woocommerce-loop-product__title,
+.latest-collection .woocommerce ul.products li.product h2,
+.latest-collection ul.products li.product h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 16px 16px 8px;
+    text-align: left;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-.category-count {
-    font-size: 0.875rem;
+.latest-collection .woocommerce ul.products li.product .price,
+.latest-collection ul.products li.product .price {
+    font-size: 13px;
     color: #666;
+    margin: 0 16px 16px;
+    text-align: left;
+    font-weight: 500;
 }
 
-/* ============================================
-   Newsletter Section
-   ============================================ */
-.newsletter-section {
-    padding: 80px 0;
-    background-color: #000;
-    color: #fff;
+.latest-collection .woocommerce ul.products li.product .price del,
+.latest-collection ul.products li.product .price del {
+    opacity: 0.6;
+    margin-right: 8px;
 }
 
-.newsletter-wrapper {
+.latest-collection .woocommerce ul.products li.product .price ins,
+.latest-collection ul.products li.product .price ins {
+    text-decoration: none;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.latest-collection .woocommerce ul.products li.product .button,
+.latest-collection .woocommerce ul.products li.product .added_to_cart,
+.latest-collection ul.products li.product .button,
+.latest-collection ul.products li.product .added_to_cart {
+    display: none !important;
+}
+
+/* Ensure no WooCommerce default styling interferes */
+.latest-collection .woocommerce ul.products li.product,
+.latest-collection ul.products li.product {
+    float: none !important;
+    width: auto !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Override WooCommerce theme CSS specifically */
+.latest-collection .woocommerce ul.products.columns-4 li.product {
+    width: auto !important;
+    margin: 0 !important;
+}
+
+/* Force override all WooCommerce default product grid styles */
+body .latest-collection .woocommerce ul.products,
+body .latest-collection ul.products {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    flex-direction: unset !important;
+    flex-wrap: unset !important;
+    align-items: unset !important;
+}
+
+body .latest-collection .woocommerce ul.products li.product,
+body .latest-collection ul.products li.product {
+    display: block !important;
+    float: none !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+}
+
+/* ===================================
+   Info row
+   =================================== */
+.info-row {
+    padding: 70px 0;
+    background: #fff;
+}
+
+.info-row-grid {
     display: grid;
-    grid-template-columns: 1fr 1.5fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 60px;
-    align-items: center;
+    text-align: center;
 }
 
-.newsletter-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 15px;
-    text-transform: uppercase;
+.info-row-item {
+    padding: 10px 0;
+}
+
+.info-row-icon {
+    font-size: 22px;
+    margin-bottom: 14px;
+    color: #1a1a1a;
+    opacity: .9;
+}
+
+.info-row-item h3 {
+    font-size: 12px;
+    margin-bottom: 10px;
     letter-spacing: 2px;
 }
 
-.newsletter-description {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin: 0;
+.info-row-item p {
+    font-size: 13px;
+    line-height: 1.8;
+    color: #666;
+    max-width: 320px;
+    margin: 0 auto;
 }
 
-.newsletter-form-wrapper {
-    display: flex;
-    gap: 10px;
-}
-
-.newsletter-form-wrapper input[type="email"] {
-    flex: 1;
-    padding: 16px 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: transparent;
-    color: #fff;
-    font-size: 1rem;
-    border-radius: 0;
-}
-
-.newsletter-form-wrapper input[type="email"]::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.newsletter-form-wrapper input[type="email"]:focus {
-    outline: none;
-    border-color: #fff;
-}
-
-.newsletter-form-wrapper button {
-    padding: 16px 40px;
-    white-space: nowrap;
-}
-
-/* ============================================
-   Buttons
-   ============================================ */
-.btn {
-    display: inline-block;
-    padding: 14px 32px;
-    font-size: 0.95rem;
-    font-weight: 600;
+/* ===================================
+   How to order
+   =================================== */
+.how-to-order {
+    padding: 80px 0 90px;
+    background: #f5f5f5;
     text-align: center;
-    text-decoration: none;
+}
+
+.section-subtitle {
+    margin-top: -30px;
+    margin-bottom: 40px;
+    font-size: 12px;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 2px solid transparent;
-    border-radius: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    color: #666;
 }
 
-.btn-primary {
-    background-color: #000;
-    color: #fff;
-    border-color: #000;
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 30px;
 }
 
-.btn-primary:hover {
-    background-color: #333;
-    border-color: #333;
+.step-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 22px 18px;
+    text-align: left;
+    min-height: 130px;
 }
 
-.btn-outline {
-    background-color: transparent;
-    color: #000;
-    border-color: #000;
+.step-no {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 10px;
 }
 
-.btn-outline:hover {
-    background-color: #000;
-    color: #fff;
+.step-title {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #1a1a1a;
 }
 
-/* ============================================
-   Responsive Design
-   ============================================ */
-@media (max-width: 1024px) {
-    .hero-title {
-        font-size: 3rem;
+.step-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 60vh;
     }
-
+    
+    .hero-content h1 {
+        font-size: 34px;
+        letter-spacing: 3px;
+    }
+    
+    .info-row-grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+    
     .section-title {
-        font-size: 2rem;
+        font-size: 24px;
+    }
+    
+    .latest-collection {
+        padding: 50px 0 30px;
     }
 
-    .order-steps {
-        grid-template-columns: repeat(2, 1fr);
+    .latest-collection .container {
+        padding: 0 20px;
+    }
+
+    .latest-collection .section-head {
+        flex-direction: column;
+        align-items: center;
         gap: 20px;
     }
 
-    .newsletter-wrapper {
+    .latest-collection .section-link {
+        position: static;
+        transform: none;
+    }
+
+    .latest-collection .section-title {
+        font-size: 24px;
+    }
+
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products,
+    .latest-collection .woocommerce ul.products.columns-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+    }
+
+    .steps-grid {
         grid-template-columns: 1fr;
-        gap: 40px;
     }
-}
-
-@media (max-width: 768px) {
-    .hero-section {
-        min-height: 65vh;
-    }
-
-    .hero-logo {
-        max-width: 280px;
-    }
-
-    .hero-title {
-        font-size: 2.5rem;
-    }
-
-    .hero-description {
-        font-size: 1rem;
-    }
-
-    .latest-collection-section,
-    .how-to-order-section,
-    .featured-categories-section,
-    .newsletter-section {
-        padding: 60px 0;
-    }
-
-    .section-title {
-        font-size: 1.75rem;
-    }
-
-    .order-steps {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-    
-    .order-step {
-        padding: 24px 20px;
-    }
-
-    .newsletter-form-wrapper {
-        flex-direction: column;
-    }
-
-    .newsletter-form-wrapper button {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-content {
-        padding: 40px 15px;
-    }
-
-    .hero-logo {
-        max-width: 240px;
-    }
-
-    .hero-title {
-        font-size: 2rem;
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-    }
-
-    .step-number {
-        font-size: 2rem;
-    }
-}
-
-/* ============================================
-   Utility Classes
-   ============================================ */
-.text-center {
-    text-align: center;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
 }

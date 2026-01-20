@@ -1,0 +1,129 @@
+/**
+ * Homepage Critical Override CSS - Maximum Priority
+ * @package WP_Augoose
+ */
+
+/* ULTRA HIGH PRIORITY: Override ALL WooCommerce product layouts */
+html body div.latest-collection div.container div.woocommerce ul.products,
+html body div.latest-collection div.container ul.products,
+html body section.latest-collection div.container div.woocommerce ul.products,
+html body section.latest-collection div.container ul.products,
+html body .latest-collection .woocommerce ul.products.columns-1,
+html body .latest-collection .woocommerce ul.products.columns-2,
+html body .latest-collection .woocommerce ul.products.columns-3,
+html body .latest-collection .woocommerce ul.products.columns-4,
+html body .latest-collection .woocommerce ul.products.columns-5,
+html body .latest-collection .woocommerce ul.products.columns-6,
+html body .latest-collection .woocommerce ul.products.latest {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 30px !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    clear: both !important;
+    flex-direction: unset !important;
+    flex-wrap: unset !important;
+    align-items: unset !important;
+    box-sizing: border-box !important;
+    min-width: unset !important;
+    /* Nuclear option - override everything */
+    flex: none !important;
+    word-break: unset !important;
+}
+
+html body div.latest-collection div.container div.woocommerce ul.products li.product,
+html body div.latest-collection div.container ul.products li.product,
+html body section.latest-collection div.container div.woocommerce ul.products li.product,
+html body section.latest-collection div.container ul.products li.product,
+html body .latest-collection .woocommerce ul.products li.product,
+html body .latest-collection ul.products li.product {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    border: 1px solid #e0e0e0 !important;
+    transition: all 0.3s ease !important;
+    width: auto !important;
+    display: block !important;
+    flex-direction: unset !important;
+    justify-content: unset !important;
+    align-items: unset !important;
+    float: none !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    /* Nuclear override */
+    flex: none !important;
+    margin-bottom: 0 !important;
+}
+
+html body .latest-collection .woocommerce ul.products li.product:hover,
+html body .latest-collection ul.products li.product:hover {
+    border-color: #1a1a1a !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Force product content styling */
+html body .latest-collection .woocommerce ul.products li.product .woocommerce-loop-product__link,
+html body .latest-collection ul.products li.product .woocommerce-loop-product__link {
+    display: block !important;
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+html body .latest-collection .woocommerce ul.products li.product img,
+html body .latest-collection ul.products li.product img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 !important;
+}
+
+html body .latest-collection .woocommerce ul.products li.product .woocommerce-loop-product__title,
+html body .latest-collection ul.products li.product .woocommerce-loop-product__title,
+html body .latest-collection .woocommerce ul.products li.product h2,
+html body .latest-collection ul.products li.product h2 {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    margin: 16px 16px 8px !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+html body .latest-collection .woocommerce ul.products li.product .price,
+html body .latest-collection ul.products li.product .price {
+    font-size: 13px !important;
+    color: #666 !important;
+    margin: 0 16px 16px !important;
+    text-align: left !important;
+    font-weight: 500 !important;
+}
+
+html body .latest-collection .woocommerce ul.products li.product .button,
+html body .latest-collection .woocommerce ul.products li.product .added_to_cart,
+html body .latest-collection ul.products li.product .button,
+html body .latest-collection ul.products li.product .added_to_cart {
+    display: none !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    html body .latest-collection .woocommerce ul.products,
+    html body .latest-collection ul.products,
+    html body .latest-collection .woocommerce ul.products.columns-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    html body .latest-collection .woocommerce ul.products,
+    html body .latest-collection ul.products,
+    html body .latest-collection .woocommerce ul.products.columns-4 {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+}
