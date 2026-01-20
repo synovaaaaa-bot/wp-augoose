@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * The template for displaying product content in the single-product.php template
  *
@@ -63,7 +63,7 @@ if (post_password_required()) {
                         <!-- Size Guide Accordion (Figma Design) -->
                         <div class="product-size-guide">
                             <button class="size-guide-toggle" type="button">
-                                <span>📏 SIZE GUIDE</span>
+                                <span>≡ƒôÅ SIZE GUIDE</span>
                                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                                     <path d="M4.5 6l3.5 3.5L11.5 6"></path>
                                 </svg>
@@ -111,10 +111,10 @@ if (post_password_required()) {
                         <!-- Product Features (Figma Design) -->
                         <div class="product-features">
                             <ul>
-                                <li>✓ <strong>American Workwear Design</strong></li>
-                                <li>✓ <strong>Premium Quality Fabric</strong></li>
-                                <li>✓ <strong>Durable Construction</strong></li>
-                                <li>✓ <strong>Sustainably Made in Indonesia</strong></li>
+                                <li>Γ£ô <strong>American Workwear Design</strong></li>
+                                <li>Γ£ô <strong>Premium Quality Fabric</strong></li>
+                                <li>Γ£ô <strong>Durable Construction</strong></li>
+                                <li>Γ£ô <strong>Sustainably Made in Indonesia</strong></li>
                             </ul>
                         </div>
                     </div>

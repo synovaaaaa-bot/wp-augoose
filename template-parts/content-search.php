@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * Template part for displaying single posts
+ * Template part for displaying results in search pages
  *
  * @package Minimal_Ecommerce
  */
@@ -8,7 +8,7 @@
 
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
     <header class="entry-header">
-        <?php the_title('<h1 class="entry-title">', '</h1>'); ?>
+        <?php the_title(sprintf('<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url(get_permalink())), '</a></h2>'); ?>
 
         <?php if ('post' === get_post_type()) : ?>
         <div class="entry-meta">
@@ -22,16 +22,9 @@
 
     <?php minimal_ecommerce_post_thumbnail(); ?>
 
-    <div class="entry-content">
-        <?php
-        the_content();
-
-        wp_link_pages(array(
-            'before' => '<div class="page-links">' . esc_html__('Pages:', 'minimal-ecommerce'),
-            'after' => '</div>',
-        ));
-        ?>
-    </div><!-- .entry-content -->
+    <div class="entry-summary">
+        <?php the_excerpt(); ?>
+    </div><!-- .entry-summary -->
 
     <footer class="entry-footer">
         <?php minimal_ecommerce_entry_footer(); ?>

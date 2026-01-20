@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AUGOOSE Brand Guidelines - Official Styles
  * Based on: Augoose - Brand Guideline.pdf
  * 
@@ -92,15 +92,15 @@ select {
 
 /* Do's - Good Contrast Examples */
 .text-on-white {
-    color: var(--augoose-primary);    /* #30475E on #FFFFFF = 70% contrast ✓ */
+    color: var(--augoose-primary);    /* #30475E on #FFFFFF = 70% contrast Γ£ô */
 }
 
 .text-on-primary {
-    color: var(--augoose-white);      /* #FFFFFF on #30475E = 70% contrast ✓ */
+    color: var(--augoose-white);      /* #FFFFFF on #30475E = 70% contrast Γ£ô */
 }
 
 .text-on-secondary {
-    color: var(--augoose-black);      /* #000000 on #F0F9FF = 95% contrast ✓ */
+    color: var(--augoose-black);      /* #000000 on #F0F9FF = 95% contrast Γ£ô */
 }
 
 /* Buttons - Primary Choice per Brand Guide */
@@ -187,8 +187,8 @@ select {
 /* Ensure minimum 60% contrast as per Brand Guide */
 .low-contrast-warning {
     /* Don't use these combinations */
-    /* #F0F9FF on #FFFFFF = Low contrast ✗ */
-    /* #30475E on #000000 = Low contrast ✗ */
+    /* #F0F9FF on #FFFFFF = Low contrast Γ£ù */
+    /* #30475E on #000000 = Low contrast Γ£ù */
 }
 
 /* Safe contrast combinations */

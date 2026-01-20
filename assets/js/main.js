@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Main JavaScript file
  * 
  * @package Minimal_Ecommerce

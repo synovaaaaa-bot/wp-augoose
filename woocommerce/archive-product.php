@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * The Template for displaying product archives, including the main shop page
  * Matches Figma Design: https://fox-oak-07790223.figma.site/
@@ -25,7 +25,7 @@ $grid_columns = isset($_COOKIE['grid_columns']) ? intval($_COOKIE['grid_columns'
 <div class="shop-announcement" style="padding: 12px 0; background-color: #FFFFFF; border-bottom: 1px solid #D1D5DB; text-align: center;">
     <div class="container">
         <p style="margin: 0; font-size: 0.875rem; color: #30475E; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">
-            INTERNATIONAL & DOMESTIC SHIPPING AVAILABLE • FREE SHIPPING OVER $200
+            INTERNATIONAL & DOMESTIC SHIPPING AVAILABLE ΓÇó FREE SHIPPING OVER $200
         </p>
     </div>
 </div>
