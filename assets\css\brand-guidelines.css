@@ -1,0 +1,360 @@
+/**
+ * AUGOOSE Brand Guidelines - Official Styles
+ * Based on: Augoose - Brand Guideline.pdf
+ * 
+ * Brand Personality: Craftsmanship, Confident, Passionate
+ */
+
+/* ============================================
+   BRAND COLORS (Official from Brand Guide)
+   ============================================ */
+:root {
+    /* Official Brand Colors */
+    --augoose-primary: #30475E;      /* RGB: 48, 71, 94 */
+    --augoose-secondary: #F0F9FF;    /* RGB: 240, 249, 255 */
+    --augoose-black: #000000;        /* RGB: 0, 0, 0 */
+    --augoose-white: #FFFFFF;        /* RGB: 255, 255, 255 */
+    
+    /* Typography Colors (from Brand Guide) */
+    --color-headline: var(--augoose-primary);    /* Headlines & Subheads */
+    --color-body: var(--augoose-black);          /* Body copy (predominant) */
+    
+    /* Typography Families */
+    --font-headline: 'Killarney', Georgia, 'Times New Roman', serif;
+    --font-subhead: 'Minion Pro', Georgia, 'Times New Roman', serif;
+    --font-body: 'Minion Pro', Georgia, 'Times New Roman', serif;
+}
+
+/* ============================================
+   TYPOGRAPHY HIERARCHY (Official)
+   ============================================ */
+
+/* Headlines - KILLARNEY (Uppercase) */
+h1, h2, h3, 
+.headline,
+.site-logo a,
+.product-title,
+.section-title {
+    font-family: var(--font-headline);
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-headline);
+    letter-spacing: 0.05em;
+}
+
+/* Sub-heads - Minion Pro Bold */
+h4, h5, h6,
+.sub-headline,
+.product-category,
+.section-subtitle {
+    font-family: var(--font-subhead);
+    font-weight: 700;
+    color: var(--augoose-black);
+}
+
+/* Body Copy - Minion Pro Normal */
+p, 
+body,
+.body-text,
+.product-description,
+input,
+textarea,
+select {
+    font-family: var(--font-body);
+    font-weight: 400;
+    color: var(--color-body);
+    line-height: 1.6;
+}
+
+/* ============================================
+   LOGO STYLE (Critical: Always Italic)
+   ============================================ */
+.site-logo a,
+.site-branding a,
+.brand-name,
+.logo-text {
+    font-family: var(--font-headline);
+    font-style: italic !important;  /* Critical: Always italic per Brand Guide */
+    font-weight: 700;
+    color: var(--augoose-primary);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+}
+
+.site-logo a:hover {
+    opacity: 0.8;
+}
+
+/* ============================================
+   CONTRAST REQUIREMENTS (60% Minimum)
+   ============================================ */
+
+/* Do's - Good Contrast Examples */
+.text-on-white {
+    color: var(--augoose-primary);    /* #30475E on #FFFFFF = 70% contrast ✓ */
+}
+
+.text-on-primary {
+    color: var(--augoose-white);      /* #FFFFFF on #30475E = 70% contrast ✓ */
+}
+
+.text-on-secondary {
+    color: var(--augoose-black);      /* #000000 on #F0F9FF = 95% contrast ✓ */
+}
+
+/* Buttons - Primary Choice per Brand Guide */
+.btn-primary,
+.button-primary,
+.woocommerce-button,
+.single_add_to_cart_button {
+    background-color: var(--augoose-primary);
+    color: var(--augoose-white);
+    font-family: var(--font-headline);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: 2px solid var(--augoose-primary);
+    padding: 14px 32px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--augoose-white);
+    color: var(--augoose-primary);
+    border-color: var(--augoose-primary);
+}
+
+/* Buttons - Secondary */
+.btn-secondary {
+    background-color: var(--augoose-white);
+    color: var(--augoose-primary);
+    border: 2px solid var(--augoose-primary);
+    font-family: var(--font-headline);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 14px 32px;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: var(--augoose-primary);
+    color: var(--augoose-white);
+}
+
+/* ============================================
+   BRAND PERSONALITY APPLICATION
+   ============================================ */
+
+/* Craftsmanship - Attention to detail */
+.craftsmanship-text {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--augoose-primary);
+    opacity: 0.9;
+}
+
+/* Confident - Bold statements */
+.confident-headline {
+    font-family: var(--font-headline);
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--augoose-primary);
+    letter-spacing: 0.05em;
+}
+
+/* Passionate - Energetic feel */
+.passionate-cta {
+    background-color: var(--augoose-primary);
+    color: var(--augoose-white);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 16px 48px;
+    transition: transform 0.3s ease;
+}
+
+.passionate-cta:hover {
+    transform: scale(1.05);
+}
+
+/* ============================================
+   ACCESSIBILITY & LEGIBILITY
+   ============================================ */
+
+/* Ensure minimum 60% contrast as per Brand Guide */
+.low-contrast-warning {
+    /* Don't use these combinations */
+    /* #F0F9FF on #FFFFFF = Low contrast ✗ */
+    /* #30475E on #000000 = Low contrast ✗ */
+}
+
+/* Safe contrast combinations */
+.safe-contrast-primary {
+    background-color: var(--augoose-white);
+    color: var(--augoose-primary);
+}
+
+.safe-contrast-black {
+    background-color: var(--augoose-white);
+    color: var(--augoose-black);
+}
+
+.safe-contrast-reverse {
+    background-color: var(--augoose-primary);
+    color: var(--augoose-white);
+}
+
+/* ============================================
+   HEADINGS SPECIFIC STYLES
+   ============================================ */
+
+h1 {
+    font-size: 3rem;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-size: 2.25rem;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    margin-bottom: 1.25rem;
+}
+
+h3 {
+    font-size: 1.75rem;
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    margin-bottom: 1rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    margin-bottom: 0.875rem;
+}
+
+h5 {
+    font-size: 1.125rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+}
+
+h6 {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 0.625rem;
+}
+
+/* ============================================
+   LINKS & INTERACTIVE ELEMENTS
+   ============================================ */
+
+a {
+    color: var(--augoose-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--augoose-black);
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+input[type="search"],
+textarea,
+select {
+    font-family: var(--font-body);
+    color: var(--augoose-black);
+    border: 2px solid var(--augoose-primary);
+    padding: 12px 16px;
+    background-color: var(--augoose-white);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--augoose-black);
+}
+
+/* ============================================
+   BADGES & TAGS
+   ============================================ */
+
+.badge,
+.tag,
+.onsale,
+.product-badge {
+    background-color: var(--augoose-primary);
+    color: var(--augoose-white);
+    font-family: var(--font-headline);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    display: inline-block;
+}
+
+/* ============================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================ */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.75rem;
+    }
+    
+    h3 {
+        font-size: 1.5rem;
+    }
+    
+    .site-logo a {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .site-logo a {
+        font-size: 1.75rem;
+    }
+}
+
+/* ============================================
+   PRINT STYLES (Maintain Brand Colors)
+   ============================================ */
+
+@media print {
+    * {
+        color: var(--augoose-black) !important;
+    }
+    
+    .site-logo a {
+        color: var(--augoose-primary) !important;
+        font-style: italic !important;
+    }
+}

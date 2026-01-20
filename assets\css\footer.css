@@ -1,0 +1,232 @@
+/**
+ * Footer Styles - Figma Design Match
+ * Based on: https://fox-oak-07790223.figma.site/
+ */
+
+/* ============================================
+   Main Footer
+   ============================================ */
+.site-footer {
+    background-color: #30475E;
+    color: #FFFFFF;
+    padding: 80px 0 0;
+    margin-top: 120px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 48px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   Footer Columns
+   ============================================ */
+.footer-column {
+    color: #FFFFFF;
+}
+
+.footer-widget h3 {
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 24px;
+    color: #FFFFFF;
+}
+
+.footer-widget p {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 16px;
+}
+
+.footer-widget ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-widget ul li {
+    margin-bottom: 12px;
+}
+
+.footer-widget ul li a {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-widget ul li a:hover {
+    color: #FFFFFF;
+}
+
+/* ============================================
+   Social Links
+   ============================================ */
+.social-links {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.social-link:hover {
+    background: #FFFFFF;
+    color: #30475E;
+    transform: translateY(-2px);
+}
+
+.social-link svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================
+   Newsletter Form
+   ============================================ */
+.newsletter-form {
+    margin-top: 16px;
+}
+
+.newsletter-form input[type="email"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #FFFFFF;
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+    transition: all 0.3s;
+}
+
+.newsletter-form input[type="email"]::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.newsletter-form input[type="email"]:focus {
+    outline: none;
+    border-color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.newsletter-form button {
+    width: 100%;
+    padding: 12px 24px;
+    background: #FFFFFF;
+    color: #30475E;
+    border: 2px solid #FFFFFF;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.newsletter-form button:hover {
+    background: transparent;
+    color: #FFFFFF;
+}
+
+/* ============================================
+   Footer Bottom
+   ============================================ */
+.footer-bottom {
+    padding: 32px 0;
+    text-align: center;
+}
+
+.footer-bottom p {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ============================================
+   Footer Menu
+   ============================================ */
+#footer-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#footer-menu li {
+    margin-bottom: 12px;
+}
+
+#footer-menu a {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+#footer-menu a:hover {
+    color: #FFFFFF;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 1024px) {
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .site-footer {
+        padding: 60px 0 0;
+        margin-top: 80px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        padding-bottom: 40px;
+    }
+    
+    .footer-widget {
+        text-align: center;
+    }
+    
+    .social-links {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .site-footer {
+        padding: 40px 0 0;
+        margin-top: 60px;
+    }
+    
+    .footer-content {
+        gap: 32px;
+    }
+    
+    .footer-widget h3 {
+        font-size: 0.75rem;
+    }
+}
