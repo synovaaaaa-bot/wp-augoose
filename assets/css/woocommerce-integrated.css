@@ -194,13 +194,9 @@
     margin: 0 0 30px;
 }
 
-/* Clamp short description to 2 lines in the top section */
+/* Hide short description from top summary - it's now in tabs below */
 .single-product-wrapper .product-summary-wrapper .woocommerce-product-details__short-description {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    margin-bottom: 16px;
+    display: none !important;
 }
 
 /* Add to Cart Button */
