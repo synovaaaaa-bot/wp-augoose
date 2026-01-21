@@ -287,7 +287,12 @@
     function openSizeGuide(guide) {
         guide = guide || 'pants';
         var modal = document.getElementById('size-guide-modal');
-        if (!modal) return;
+        if (!modal) {
+            console.error('Size guide modal not found in DOM');
+            return;
+        }
+        
+        console.log('Opening size guide:', guide);
         
         // Show correct guide
         var tabs = modal.querySelectorAll('.size-guide-tab');
@@ -304,13 +309,19 @@
         for (var i = 0; i < wrappers.length; i++) {
             if (wrappers[i].getAttribute('data-guide') === guide) {
                 wrappers[i].style.display = 'block';
+                wrappers[i].style.visibility = 'visible';
             } else {
                 wrappers[i].style.display = 'none';
             }
         }
         
+        // Force show modal
         modal.style.display = 'flex';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
         document.body.classList.add('size-guide-open');
+        
+        console.log('Modal should be visible now');
     }
     
     function closeSizeGuide() {
@@ -322,54 +333,64 @@
     }
     
     // Wait for DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-    
     function init() {
+        console.log('Initializing size guide...');
+        
         // Footer links
         var footerLinks = document.querySelectorAll('.footer-size-guide-link');
+        console.log('Found footer links:', footerLinks.length);
         for (var i = 0; i < footerLinks.length; i++) {
             footerLinks[i].addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 var guide = this.getAttribute('data-guide') || 'pants';
+                console.log('Footer link clicked:', guide);
                 openSizeGuide(guide);
             });
         }
         
         // Product page SIZE GUIDE link
         var sizeGuideLinks = document.querySelectorAll('.size-guide-link');
+        console.log('Found size guide links:', sizeGuideLinks.length);
         for (var i = 0; i < sizeGuideLinks.length; i++) {
             sizeGuideLinks[i].addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 var guide = 'pants';
                 var url = window.location.href.toLowerCase();
                 var title = document.title.toLowerCase();
                 if (url.includes('jacket') || url.includes('shirt') || title.includes('jacket') || title.includes('shirt')) {
                     guide = 'jackets';
                 }
+                console.log('Size guide link clicked:', guide);
                 openSizeGuide(guide);
             });
         }
         
         // Close buttons
         var closeBtns = document.querySelectorAll('.size-guide-close, .size-guide-overlay');
+        console.log('Found close buttons:', closeBtns.length);
         for (var i = 0; i < closeBtns.length; i++) {
             closeBtns[i].addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
+                console.log('Close button clicked');
                 closeSizeGuide();
             });
         }
         
         // Tab switching
         var tabs = document.querySelectorAll('.size-guide-tab');
+        console.log('Found tabs:', tabs.length);
         for (var i = 0; i < tabs.length; i++) {
             tabs[i].addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 var guide = this.getAttribute('data-guide');
-                if (guide) openSizeGuide(guide);
+                if (guide) {
+                    console.log('Tab clicked:', guide);
+                    openSizeGuide(guide);
+                }
             });
         }
         
@@ -379,7 +400,18 @@
                 closeSizeGuide();
             }
         });
+        
+        console.log('Size guide initialized');
     }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+    // Also try after a short delay to ensure everything is loaded
+    setTimeout(init, 500);
 })();
 </script>
 
