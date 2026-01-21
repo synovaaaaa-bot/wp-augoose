@@ -732,7 +732,9 @@ add_filter(
 );
 
 /**
- * Size filter: limit size terms per category (pants vs jackets/shirts).
+ * Size filter: dynamically show size terms based on actual product data per category.
+ * - Pants: numeric sizes (28, 30, 32, 34, 36, 38, etc.)
+ * - Jackets/Shirts: alpha sizes (S, M, L, XL, etc.)
  */
 add_filter(
 	'woocommerce_layered_nav_term_html',
@@ -743,39 +745,47 @@ add_filter(
 
 		// Only affect size taxonomy terms.
 		$tax = isset( $term->taxonomy ) ? (string) $term->taxonomy : '';
-		if ( stripos( $tax, 'size' ) === false ) {
+		if ( stripos( $tax, 'size' ) === false && stripos( $tax, 'pa_size' ) === false ) {
 			return $term_html;
 		}
 
 		$slug = strtolower( (string) $term->slug );
+		$name = strtolower( (string) $term->name );
 
 		// Determine current category context.
 		$current_slug = '';
+		$current_cat_ids = array();
 		if ( function_exists( 'is_product_category' ) && is_product_category() ) {
 			$q = get_queried_object();
 			if ( $q && isset( $q->slug ) ) {
 				$current_slug = strtolower( (string) $q->slug );
+				$current_cat_ids[] = $q->term_id;
 			}
+		} elseif ( function_exists( 'is_shop' ) && is_shop() ) {
+			// On shop page, check all products to infer category
 		}
 
-		// Pants: numeric waist sizes only.
+		// Check if term name/slug is numeric (pants) or alpha (jackets/shirts).
+		$is_numeric = is_numeric( $slug ) || is_numeric( $name );
+		$is_alpha = preg_match( '/^[a-z]+$/i', $slug ) || preg_match( '/^[a-z]+$/i', $name );
+
+		// Pants category: show only numeric sizes.
 		if ( in_array( $current_slug, array( 'pants', 'pant' ), true ) ) {
-			$allowed = array( '28', '30', '32', '34', '36', '38' );
-			if ( ! in_array( $slug, $allowed, true ) ) {
+			if ( ! $is_numeric ) {
 				return '';
 			}
 			return $term_html;
 		}
 
-		// Jackets/Shirts: S-XL only.
+		// Jackets/Shirts: show only alpha sizes (S, M, L, XL, XXL, etc.).
 		if ( in_array( $current_slug, array( 'jackets', 'jacket', 'shirts', 'shirt' ), true ) ) {
-			$allowed = array( 's', 'm', 'l', 'xl' );
-			if ( ! in_array( $slug, $allowed, true ) ) {
+			if ( ! $is_alpha ) {
 				return '';
 			}
 			return $term_html;
 		}
 
+		// If no category context, show all sizes (fallback).
 		return $term_html;
 	},
 	10,
@@ -792,12 +802,12 @@ add_filter(
 			return $fields;
 		}
 
-		// Billing fields
+		// Billing fields - ALL LABELS IN ENGLISH
 		if ( isset( $fields['billing'] ) && is_array( $fields['billing'] ) ) {
-			// Name: keep first_name as "Nama", remove last_name
+			// Name: keep first_name, remove last_name
 			if ( isset( $fields['billing']['billing_first_name'] ) ) {
-				$fields['billing']['billing_first_name']['label']       = __( 'Nama', 'wp-augoose' );
-				$fields['billing']['billing_first_name']['placeholder'] = __( 'Nama lengkap', 'wp-augoose' );
+				$fields['billing']['billing_first_name']['label']       = 'Full Name';
+				$fields['billing']['billing_first_name']['placeholder'] = 'Enter your full name';
 				$fields['billing']['billing_first_name']['required']    = true;
 			}
 			if ( isset( $fields['billing']['billing_last_name'] ) ) {
@@ -806,42 +816,42 @@ add_filter(
 
 			// Address
 			if ( isset( $fields['billing']['billing_address_1'] ) ) {
-				$fields['billing']['billing_address_1']['label']       = __( 'Address', 'wp-augoose' );
-				$fields['billing']['billing_address_1']['placeholder'] = __( 'Street address', 'wp-augoose' );
+				$fields['billing']['billing_address_1']['label']       = 'Address';
+				$fields['billing']['billing_address_1']['placeholder'] = 'Street address';
 				$fields['billing']['billing_address_1']['required']    = true;
 			}
 
 			// Address remarks (optional)
 			if ( isset( $fields['billing']['billing_address_2'] ) ) {
-				$fields['billing']['billing_address_2']['label']       = __( 'Address remarks', 'wp-augoose' );
-				$fields['billing']['billing_address_2']['placeholder'] = __( 'Apartment, suite, etc. (optional)', 'wp-augoose' );
+				$fields['billing']['billing_address_2']['label']       = 'Address Line 2 (Optional)';
+				$fields['billing']['billing_address_2']['placeholder'] = 'Apartment, suite, etc.';
 				$fields['billing']['billing_address_2']['required']    = false;
 			}
 
 			// Postal code
 			if ( isset( $fields['billing']['billing_postcode'] ) ) {
-				$fields['billing']['billing_postcode']['label']       = __( 'Postal Code', 'wp-augoose' );
-				$fields['billing']['billing_postcode']['placeholder'] = __( 'Postal code', 'wp-augoose' );
+				$fields['billing']['billing_postcode']['label']       = 'Postal Code';
+				$fields['billing']['billing_postcode']['placeholder'] = 'Postal code';
 				$fields['billing']['billing_postcode']['required']    = true;
 			}
 
 			// Country
 			if ( isset( $fields['billing']['billing_country'] ) ) {
-				$fields['billing']['billing_country']['label']    = __( 'Country', 'wp-augoose' );
+				$fields['billing']['billing_country']['label']    = 'Country';
 				$fields['billing']['billing_country']['required'] = true;
 			}
 
 			// Phone (country code hint)
 			if ( isset( $fields['billing']['billing_phone'] ) ) {
-				$fields['billing']['billing_phone']['label']       = __( 'Phone number', 'wp-augoose' );
-				$fields['billing']['billing_phone']['placeholder'] = __( 'e.g. +62 812-3456-7890', 'wp-augoose' );
+				$fields['billing']['billing_phone']['label']       = 'Phone Number';
+				$fields['billing']['billing_phone']['placeholder'] = 'e.g. +1 234-567-8900';
 				$fields['billing']['billing_phone']['required']    = true;
 			}
 
 			// Email
 			if ( isset( $fields['billing']['billing_email'] ) ) {
-				$fields['billing']['billing_email']['label']       = __( 'Email', 'wp-augoose' );
-				$fields['billing']['billing_email']['placeholder'] = __( 'you@example.com', 'wp-augoose' );
+				$fields['billing']['billing_email']['label']       = 'Email';
+				$fields['billing']['billing_email']['placeholder'] = 'you@example.com';
 				$fields['billing']['billing_email']['required']    = true;
 			}
 		}
@@ -850,6 +860,15 @@ add_filter(
 		if ( isset( $fields['shipping'] ) && is_array( $fields['shipping'] ) ) {
 			if ( isset( $fields['shipping']['shipping_last_name'] ) ) {
 				unset( $fields['shipping']['shipping_last_name'] );
+			}
+		}
+
+		// Order notes (Additional Information) - English label
+		if ( isset( $fields['order'] ) && is_array( $fields['order'] ) ) {
+			if ( isset( $fields['order']['order_comments'] ) ) {
+				$fields['order']['order_comments']['label']       = 'Order Notes (Optional)';
+				$fields['order']['order_comments']['placeholder'] = 'Notes about your order, e.g., special notes for delivery.';
+				$fields['order']['order_comments']['required']    = false;
 			}
 		}
 

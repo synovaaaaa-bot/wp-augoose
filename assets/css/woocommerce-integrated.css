@@ -321,6 +321,11 @@ body.woocommerce-checkout {
     background: #fff;
 }
 
+/* Avoid duplicated CHECKOUT titles if the page/template prints an entry title */
+body.woocommerce-checkout .entry-title {
+    display: none !important;
+}
+
 /* Match reference width */
 .checkout-page-wrapper .checkout-progress .container,
 .checkout-page-wrapper .checkout-content .container,
