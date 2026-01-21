@@ -427,30 +427,42 @@
             const $body = $('body');
             
             // Detect product category to show correct guide
-            const productCategories = [];
-            $('.product-categories a, .woocommerce-product-attributes').each(function() {
+            let defaultGuide = 'pants'; // Default to pants
+            
+            // Check product categories from WooCommerce
+            $('.product_meta .posted_in a, .woocommerce-product-attributes a, .product-categories a').each(function() {
                 const text = $(this).text().toLowerCase();
-                if (text.includes('jacket') || text.includes('jackets')) {
-                    productCategories.push('jackets');
+                if (text.includes('jacket') || text.includes('jackets') || text.includes('shirt') || text.includes('shirts')) {
+                    defaultGuide = 'jackets';
+                    return false; // Break loop
                 } else if (text.includes('pant') || text.includes('pants') || text.includes('trouser')) {
-                    productCategories.push('pants');
+                    defaultGuide = 'pants';
+                    return false; // Break loop
                 }
             });
             
             // Check URL or page title
             const url = window.location.href.toLowerCase();
             const title = document.title.toLowerCase();
-            if (url.includes('jacket') || title.includes('jacket')) {
-                productCategories.push('jackets');
+            if (url.includes('jacket') || url.includes('shirt') || title.includes('jacket') || title.includes('shirt')) {
+                defaultGuide = 'jackets';
             } else if (url.includes('pant') || url.includes('trouser') || title.includes('pant') || title.includes('trouser')) {
-                productCategories.push('pants');
+                defaultGuide = 'pants';
             }
             
-            // Default to pants if no category found
-            const defaultGuide = productCategories.includes('jackets') ? 'jackets' : 'pants';
+            // Check product title
+            const productTitle = $('.product_title, h1.product-title').text().toLowerCase();
+            if (productTitle.includes('jacket') || productTitle.includes('shirt')) {
+                defaultGuide = 'jackets';
+            } else if (productTitle.includes('pant') || productTitle.includes('trouser')) {
+                defaultGuide = 'pants';
+            }
             
             // Show correct guide
-            $modal.find('.size-guide-tab[data-guide="' + defaultGuide + '"]').click();
+            $modal.find('.size-guide-tab').removeClass('active');
+            $modal.find('.size-guide-tab[data-guide="' + defaultGuide + '"]').addClass('active');
+            $modal.find('.size-guide-table-wrapper').hide();
+            $modal.find('.size-guide-table-wrapper[data-guide="' + defaultGuide + '"]').show();
             
             // Show modal
             $modal.fadeIn(300);
