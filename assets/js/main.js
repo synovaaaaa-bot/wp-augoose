@@ -491,6 +491,24 @@
                 $('body').removeClass('size-guide-open');
             }
         });
+        
+        // Footer size guide links
+        $('.footer-size-guide-link').on('click', function(e) {
+            e.preventDefault();
+            const guide = $(this).data('guide') || 'pants';
+            const $modal = $('#size-guide-modal');
+            const $body = $('body');
+            
+            // Show correct guide
+            $modal.find('.size-guide-tab').removeClass('active');
+            $modal.find('.size-guide-tab[data-guide="' + guide + '"]').addClass('active');
+            $modal.find('.size-guide-table-wrapper').hide();
+            $modal.find('.size-guide-table-wrapper[data-guide="' + guide + '"]').show();
+            
+            // Show modal
+            $modal.fadeIn(300);
+            $body.addClass('size-guide-open');
+        });
     }
 
     // Product Image Auto-Slide (Figma Design)
