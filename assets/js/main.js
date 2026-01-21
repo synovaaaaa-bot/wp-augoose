@@ -500,6 +500,39 @@
         });
     }
 
+    // Product Description Read More Toggle
+    function initReadMore() {
+        $('.read-more-toggle').on('click', function(e) {
+            e.preventDefault();
+            const $toggle = $(this);
+            const $summary = $toggle.closest('.product-description-summary');
+            const $short = $summary.find('.product-description-short');
+            const $full = $summary.find('.product-description-full');
+            const $readMore = $toggle.find('.read-more-text');
+            const $readLess = $toggle.find('.read-less-text');
+            const isExpanded = $toggle.attr('data-expanded') === 'true';
+
+            if (isExpanded) {
+                // Collapse
+                $short.slideDown(300);
+                $full.slideUp(300, function() {
+                    $full.hide();
+                });
+                $readMore.show();
+                $readLess.hide();
+                $toggle.attr('data-expanded', 'false');
+            } else {
+                // Expand
+                $full.show();
+                $short.slideUp(300);
+                $full.slideDown(300);
+                $readMore.hide();
+                $readLess.show();
+                $toggle.attr('data-expanded', 'true');
+            }
+        });
+    }
+
     $(document).ready(function() {
         initMobileMenu();
         initSearchToggle();
@@ -517,6 +550,7 @@
         initSizeGuideToggle(); // Size guide toggle
         initLanguageSwitcher();
         initCurrencySwitcher();
+        initReadMore(); // Product description read more
     });
 
     // Initialize on Window Load

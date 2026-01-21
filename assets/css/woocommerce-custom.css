@@ -251,6 +251,10 @@ body.post-type-archive-product .woocommerce ul.products {
     padding: 0 20px;
 }
 
+.single-product-wrapper .product-main-content {
+    padding-top: 20px; /* Reduced from default to bring image up */
+}
+
 .single-product-wrapper .product-additional-info {
     padding: 40px 0 60px;
     background: #fff;
@@ -513,6 +517,47 @@ body.post-type-archive-product .woocommerce ul.products {
     font-size: 12px;
     color: #666;
     line-height: 1.6;
+}
+
+/* Product Description with Read More */
+.single-product-wrapper .product-description-summary {
+    margin: 20px 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.single-product-wrapper .product-description-short,
+.single-product-wrapper .product-description-full {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.single-product-wrapper .product-description-full p {
+    margin: 0 0 12px;
+}
+
+.single-product-wrapper .product-description-full p:last-child {
+    margin-bottom: 0;
+}
+
+.single-product-wrapper .read-more-toggle {
+    background: transparent;
+    border: none;
+    color: #30475E;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.single-product-wrapper .read-more-toggle:hover {
+    color: #1a1a1a;
 }
 
 /* Add to cart button */

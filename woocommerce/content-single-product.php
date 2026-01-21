@@ -25,24 +25,6 @@ if ( post_password_required() ) {
 
 <div id="product-<?php the_ID(); ?>" <?php wc_product_class( 'single-product-wrapper', $product ); ?>>
     
-    <!-- Breadcrumb -->
-    <div class="product-breadcrumb">
-        <div class="container">
-            <?php
-            if ( function_exists( 'woocommerce_breadcrumb' ) ) {
-                woocommerce_breadcrumb( array(
-                    'delimiter'   => ' / ',
-                    'wrap_before' => '<nav class="woocommerce-breadcrumb">',
-                    'wrap_after'  => '</nav>',
-                    'before'      => '',
-                    'after'       => '',
-                    'home'        => 'Home',
-                ) );
-            }
-            ?>
-        </div>
-    </div>
-    
     <div class="product-main-content">
         <div class="container">
             <div class="product-layout">
@@ -100,6 +82,43 @@ if ( post_password_required() ) {
                         <div class="price">
                             <?php echo $product->get_price_html(); ?>
                         </div>
+                        
+                        <!-- Product Description with Read More -->
+                        <?php
+                        $short_description = $product->get_short_description();
+                        if ( ! empty( $short_description ) ) {
+                            $description_length = strlen( wp_strip_all_tags( $short_description ) );
+                            $max_length = 150; // Characters before showing "read more"
+                            
+                            if ( $description_length > $max_length ) {
+                                $truncated = wp_strip_all_tags( $short_description );
+                                $short_text = mb_substr( $truncated, 0, $max_length ) . '...';
+                                $full_text = $short_description;
+                                ?>
+                                <div class="product-description-summary">
+                                    <div class="product-description-short">
+                                        <?php echo esc_html( $short_text ); ?>
+                                    </div>
+                                    <div class="product-description-full" style="display: none;">
+                                        <?php echo wp_kses_post( apply_filters( 'the_content', $full_text ) ); ?>
+                                    </div>
+                                    <button type="button" class="read-more-toggle" data-expanded="false">
+                                        <span class="read-more-text">READ MORE</span>
+                                        <span class="read-less-text" style="display: none;">READ LESS</span>
+                                    </button>
+                                </div>
+                                <?php
+                            } else {
+                                ?>
+                                <div class="product-description-summary">
+                                    <div class="product-description-full">
+                                        <?php echo wp_kses_post( apply_filters( 'the_content', $short_description ) ); ?>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                        }
+                        ?>
                         
                         <!-- Variations Form -->
                         <?php
