@@ -279,6 +279,7 @@
     border: 2px solid #D1D5DB;
     font-size: 0.875rem;
     color: #000;
+    border-radius: 999px;
 }
 
 .search-form-container input[type="search"]:focus {

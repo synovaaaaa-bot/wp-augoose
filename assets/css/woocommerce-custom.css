@@ -379,9 +379,24 @@ body.post-type-archive-product .woocommerce ul.products {
 .single-product-wrapper .swatch-color-dot {
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.2);
     display: block;
+}
+
+.single-product-wrapper .variation-swatch.is-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+    position: relative;
+}
+
+.single-product-wrapper .variation-swatch.is-disabled::after {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border-top: 1px solid rgba(0,0,0,0.45);
+    transform: rotate(-20deg);
 }
 
 /* White color needs darker border */

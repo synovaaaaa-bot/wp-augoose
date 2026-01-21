@@ -19,6 +19,30 @@ $attribute_keys  = array_keys( $attributes );
 $variations_json = wp_json_encode( $available_variations );
 $variations_attr = function_exists( 'wc_esc_json' ) ? wc_esc_json( $variations_json ) : _wp_specialchars( $variations_json, ENT_QUOTES, 'UTF-8', true );
 
+// Build a map of in-stock attribute values (so we can disable sold-out colors/sizes)
+$in_stock_values = array();
+if ( is_array( $available_variations ) ) {
+	foreach ( $available_variations as $v ) {
+		if ( empty( $v['is_in_stock'] ) ) {
+			continue;
+		}
+		if ( empty( $v['attributes'] ) || ! is_array( $v['attributes'] ) ) {
+			continue;
+		}
+		foreach ( $v['attributes'] as $k => $val ) {
+			$k = (string) $k; // e.g. attribute_pa_color
+			$val = (string) $val;
+			if ( $val === '' ) {
+				continue;
+			}
+			if ( ! isset( $in_stock_values[ $k ] ) ) {
+				$in_stock_values[ $k ] = array();
+			}
+			$in_stock_values[ $k ][ sanitize_title( $val ) ] = true;
+		}
+	}
+}
+
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 <form class="variations_form cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data' data-product_id="<?php echo absint( $product->get_id() ); ?>" data-product_variations="<?php echo $variations_attr; // WPCS: XSS ok. ?>">
@@ -57,6 +81,11 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						foreach ( $options as $option ) {
 							$is_selected = sanitize_title( $selected_value ) === sanitize_title( $option );
 							$option_slug = sanitize_title( $option );
+							$attr_key = 'attribute_' . $attribute_slug;
+							$is_disabled = false;
+							if ( isset( $in_stock_values[ $attr_key ] ) && is_array( $in_stock_values[ $attr_key ] ) ) {
+								$is_disabled = empty( $in_stock_values[ $attr_key ][ $option_slug ] );
+							}
 							
 							// Get color hex if it's a color attribute
 							$color_hex = '';
@@ -92,9 +121,10 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							
 							<button 
 								type="button" 
-								class="variation-swatch <?php echo $is_selected ? 'is-active' : ''; ?> <?php echo $is_color ? 'swatch-color' : ( $is_size ? 'swatch-size' : 'swatch-text' ); ?>"
+								class="variation-swatch <?php echo $is_selected ? 'is-active' : ''; ?> <?php echo $is_disabled ? 'is-disabled' : ''; ?> <?php echo $is_color ? 'swatch-color' : ( $is_size ? 'swatch-size' : 'swatch-text' ); ?>"
 								data-value="<?php echo esc_attr( $option ); ?>"
 								data-attribute="<?php echo esc_attr( $attribute_slug ); ?>"
+								<?php echo $is_disabled ? 'disabled aria-disabled="true"' : ''; ?>
 								<?php if ( $is_color && $color_hex ) : ?>
 									style="--swatch-color: <?php echo esc_attr( $color_hex ); ?>"
 								<?php endif; ?>

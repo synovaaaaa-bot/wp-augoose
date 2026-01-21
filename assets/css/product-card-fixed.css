@@ -258,6 +258,12 @@
     border: 1px solid var(--augoose-primary, #30475E);
 }
 
+.product-add-to-cart .view-product-btn.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .product-add-to-cart .view-product-btn:hover {
     background: var(--augoose-primary, #30475E);
     color: var(--augoose-white, #fff);

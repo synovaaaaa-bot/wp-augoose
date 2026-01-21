@@ -1086,62 +1086,6 @@ function wp_augoose_ajax_add_to_cart() {
 }
 
 /**
- * Customize checkout fields labels
- */
-add_filter( 'woocommerce_checkout_fields', 'wp_augoose_customize_checkout_fields' );
-function wp_augoose_customize_checkout_fields( $fields ) {
-	// Make labels uppercase
-	foreach ( $fields as $field_type => $field_group ) {
-		foreach ( $field_group as $key => $field ) {
-			if ( isset( $field['label'] ) && ! empty( $field['label'] ) ) {
-				$fields[ $field_type ][ $key ]['label'] = strtoupper( $field['label'] );
-			}
-		}
-	}
-	
-	// Simplify checkout - only show essential fields
-	// Hide unnecessary billing fields (keep only email and phone)
-	if ( isset( $fields['billing'] ) ) {
-		$essential_fields = array( 'billing_email', 'billing_phone' );
-		foreach ( $fields['billing'] as $key => $field ) {
-			if ( ! in_array( $key, $essential_fields ) ) {
-				// Make non-essential fields optional and hide them
-				$fields['billing'][ $key ]['required'] = false;
-				$fields['billing'][ $key ]['class'][] = 'hidden-field';
-			}
-		}
-	}
-	
-	// Hide shipping fields if not needed
-	if ( isset( $fields['shipping'] ) ) {
-		foreach ( $fields['shipping'] as $key => $field ) {
-			$fields['shipping'][ $key ]['required'] = false;
-			$fields['shipping'][ $key ]['class'][] = 'hidden-field';
-		}
-	}
-	
-	return $fields;
-}
-
-/**
- * Hide non-essential checkout fields with CSS
- */
-add_action( 'wp_head', 'wp_augoose_hide_checkout_fields' );
-function wp_augoose_hide_checkout_fields() {
-	if ( is_checkout() ) {
-		echo '<style>
-			.woocommerce-checkout .form-row.hidden-field,
-			.woocommerce-checkout .form-row:not([id*="email"]):not([id*="phone"]) {
-				display: none !important;
-			}
-			.woocommerce-checkout .col-2 {
-				display: none !important;
-			}
-		</style>';
-	}
-}
-
-/**
  * AJAX handler for updating cart quantity on checkout
  */
 add_action( 'wp_ajax_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
@@ -1174,49 +1118,5 @@ function wp_augoose_update_checkout_quantity() {
 	) );
 }
 
-/**
- * Enqueue checkout scripts
- */
-add_action( 'wp_enqueue_scripts', 'wp_augoose_checkout_scripts' );
-function wp_augoose_checkout_scripts() {
-	if ( is_checkout() ) {
-		wp_add_inline_script( 'wc-checkout', '
-			jQuery(document).ready(function($) {
-				// Update progress indicator based on form completion
-				function updateProgressIndicator() {
-					var step = 1;
-					
-					// Check if contact info is filled
-					var firstName = $("input[name=billing_first_name]").val();
-					var lastName = $("input[name=billing_last_name]").val();
-					var email = $("input[name=billing_email]").val();
-					
-					if (firstName && lastName && email) {
-						step = 2;
-					}
-					
-					// Check if shipping method is selected
-					if ($("input[name=shipping_method]:checked").length > 0) {
-						step = 3;
-					}
-					
-					// Update progress steps
-					$(".progress-step").removeClass("active");
-					$(".progress-step").each(function(index) {
-						if (index < step) {
-							$(this).addClass("active");
-						}
-					});
-				}
-				
-				// Update on input change
-				$("input, select").on("change input", function() {
-					updateProgressIndicator();
-				});
-				
-				// Initial update
-				updateProgressIndicator();
-			});
-		' );
-	}
-}
+// Checkout field layout is controlled by the theme templates + `functions.php`.
+// Do NOT add CSS/JS here that hides fields; it breaks WooCommerce + WPML checkout flows.

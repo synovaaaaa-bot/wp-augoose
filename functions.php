@@ -736,6 +736,79 @@ add_filter(
 );
 
 /**
+ * Product search form (rounded + no browser autocomplete).
+ * Also adds a datalist that we will populate from site-only search history (localStorage).
+ */
+add_filter(
+	'get_product_search_form',
+	function ( $form ) {
+		$action = esc_url( home_url( '/' ) );
+		$query  = get_search_query();
+
+		$form = '
+		<form role="search" method="get" class="woocommerce-product-search augoose-search" action="' . $action . '" autocomplete="off">
+			<label class="screen-reader-text" for="augoose-product-search-field">' . esc_html__( 'Search for:', 'wp-augoose' ) . '</label>
+			<input type="search"
+				id="augoose-product-search-field"
+				class="search-field"
+				placeholder="' . esc_attr__( 'Search products…', 'wp-augoose' ) . '"
+				value="' . esc_attr( $query ) . '"
+				name="s"
+				autocomplete="off"
+				autocapitalize="off"
+				autocorrect="off"
+				spellcheck="false"
+				list="augoose-search-history" />
+			<datalist id="augoose-search-history"></datalist>
+			<button type="submit" value="' . esc_attr__( 'Search', 'wp-augoose' ) . '">' . esc_html__( 'Search', 'wp-augoose' ) . '</button>
+			<input type="hidden" name="post_type" value="product" />
+		</form>';
+
+		return $form;
+	},
+	20
+);
+
+/**
+ * Browser tab titles
+ * Examples:
+ * - Augoose | Jackets Selections
+ * - Augoose | Your Wishlist
+ * - Augoose | Checkout Your Workwear
+ */
+add_filter(
+	'pre_get_document_title',
+	function ( $title ) {
+		$brand = 'Augoose';
+
+		// Wishlist page (theme template)
+		if ( is_page_template( 'page-wishlist.php' ) ) {
+			return $brand . ' | Your Wishlist';
+		}
+
+		// Checkout page
+		if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+			return $brand . ' | Checkout Your Workwear';
+		}
+
+		// Product category selections
+		if ( function_exists( 'is_product_category' ) && is_product_category() ) {
+			$q = get_queried_object();
+			$name = ( $q && isset( $q->name ) ) ? (string) $q->name : 'Shop';
+			return $brand . ' | ' . $name . ' Selections';
+		}
+
+		// Shop page
+		if ( function_exists( 'is_shop' ) && is_shop() ) {
+			return $brand . ' | Selections';
+		}
+
+		return $title;
+	},
+	20
+);
+
+/**
  * Inject category links into the center menu (Jackets / Pants / Shirts)
  * If the Primary menu already contains them, we won't duplicate.
  */

@@ -59,6 +59,50 @@
         });
     }
 
+    // Site-only search history (localStorage) for product search
+    function initSearchHistory() {
+        const $input = $('#augoose-product-search-field');
+        const $form = $input.closest('form.augoose-search');
+        const $datalist = $('#augoose-search-history');
+        if (!$input.length || !$form.length || !$datalist.length) return;
+
+        const key = 'augoose_search_history_v1';
+
+        function readHistory() {
+            try {
+                const raw = localStorage.getItem(key);
+                const list = raw ? JSON.parse(raw) : [];
+                return Array.isArray(list) ? list : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function writeHistory(list) {
+            try {
+                localStorage.setItem(key, JSON.stringify(list.slice(0, 8)));
+            } catch (e) {}
+        }
+
+        function renderDatalist() {
+            const list = readHistory();
+            $datalist.empty();
+            list.forEach(function(q) {
+                if (!q) return;
+                $datalist.append($('<option>').attr('value', q));
+            });
+        }
+
+        $input.on('focus', renderDatalist);
+        $form.on('submit', function() {
+            const q = ($input.val() || '').trim();
+            if (!q) return;
+            const list = readHistory().filter(function(x) { return x && x !== q; });
+            list.unshift(q);
+            writeHistory(list);
+        });
+    }
+
     // Sticky Header
     function initStickyHeader() {
         const header = $('.site-header');
@@ -435,6 +479,7 @@
     $(document).ready(function() {
         initMobileMenu();
         initSearchToggle();
+        initSearchHistory();
         initStickyHeader();
         initShopFiltersToggle();
         initQuickView();

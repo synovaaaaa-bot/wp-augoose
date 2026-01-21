@@ -15,8 +15,8 @@
 /* Default offset */
 .woocommerce.widget_shopping_cart,
 .widget_shopping_cart {
-  top: 30px !important;            /* geser drawer turun */
-  height: calc(100vh - 30px) !important;
+  top: 0 !important;
+  height: 100vh !important;
 }
 
 /* Jika admin bar WP aktif (desktop admin bar = 32px) */

@@ -190,7 +190,7 @@ if ( empty( $product ) || ! $product->is_visible() ) {
             </div>
         <?php endif; ?>
         
-        <!-- Add to Cart Button -->
+        <!-- CTA Button -->
         <div class="product-add-to-cart">
             <?php
             if ( $product->is_type( 'simple' ) && $product->is_in_stock() ) {
@@ -206,6 +206,16 @@ if ( empty( $product ) || ! $product->is_visible() ) {
                         <span>ADD TO CART</span>
                     </button>
                 </form>
+                <?php
+            } elseif ( $product->is_type( 'variable' ) ) {
+                ?>
+                <a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="view-product-btn">
+                    CHOOSE OPTIONS
+                </a>
+                <?php
+            } elseif ( ! $product->is_in_stock() ) {
+                ?>
+                <span class="view-product-btn is-disabled" aria-disabled="true">SOLD OUT</span>
                 <?php
             } else {
                 ?>
