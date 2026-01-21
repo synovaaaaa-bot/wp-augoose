@@ -26,7 +26,7 @@
 }
 
 .footer-logo img.custom-logo {
-    max-height: 54px;
+    max-height: 44px;
     width: auto;
 }
 
@@ -36,6 +36,31 @@
     gap: 48px;
     padding-bottom: 60px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-fallback {
+    padding-bottom: 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-fallback #footer-menu {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-fallback #footer-menu li {
+    margin: 0;
+}
+
+.footer-tagline {
+    margin: 18px 0 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    letter-spacing: 0.04em;
+    font-family: var(--font-body, Georgia, "Times New Roman", serif);
 }
 
 .footer-widgets .widget {
@@ -71,6 +96,7 @@
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-family: var(--font-body, Georgia, "Times New Roman", serif);
 }
 
 .footer-content {

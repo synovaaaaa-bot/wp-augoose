@@ -16,6 +16,23 @@
                 <div class="footer-widgets">
                     <?php dynamic_sidebar( 'footer-1' ); ?>
                 </div>
+            <?php elseif ( has_nav_menu( 'footer' ) ) : ?>
+                <nav class="footer-fallback" aria-label="<?php esc_attr_e( 'Footer menu', 'wp-augoose' ); ?>">
+                    <?php
+                    wp_nav_menu(
+                        array(
+                            'theme_location' => 'footer',
+                            'menu_id'        => 'footer-menu',
+                            'container'      => false,
+                            'fallback_cb'    => false,
+                            'depth'          => 1,
+                        )
+                    );
+                    ?>
+                </nav>
+                <p class="footer-tagline">
+                    <?php echo esc_html__( 'Authentic apparel, crafted in Indonesia', 'wp-augoose' ); ?>
+                </p>
             <?php endif; ?>
 
             <div class="site-info">

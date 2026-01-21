@@ -115,10 +115,9 @@
 .product-info {
     padding: 16px 16px 12px;
     text-align: left;
-    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 8px;
 }
 
 .woocommerce-loop-product__title,
@@ -132,6 +131,8 @@
     letter-spacing: 0 !important;
     line-height: 1.4 !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    /* Keep card heights consistent so CTA aligns across products */
+    min-height: calc(1.4em * 2);
 }
 
 .product-info .price {
@@ -140,6 +141,7 @@
     color: #1a1a1a !important;
     margin: 0 !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    min-height: 1.2em;
 }
 
 .product-info .price del {
@@ -216,6 +218,7 @@
 /* Add to Cart Button */
 .product-add-to-cart {
     padding: 0 14px 14px;
+    margin-top: auto;
 }
 
 .product-add-to-cart form {
@@ -226,8 +229,8 @@
 .product-add-to-cart .add-to-cart-btn,
 .product-add-to-cart .view-product-btn {
     width: 100%;
-    background: #1a1a1a;
-    color: #fff;
+    background: var(--augoose-primary, #30475E);
+    color: var(--augoose-white, #fff);
     border: none;
     padding: 12px 16px;
     font-size: 11px;
@@ -242,7 +245,7 @@
     justify-content: center;
     gap: 8px;
     border-radius: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-headline, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
     min-height: 46px;
     line-height: 1.1;
     text-align: center;
@@ -251,14 +254,14 @@
 /* Make "VIEW PRODUCT" look premium (secondary/outlined), not like the primary CTA */
 .product-add-to-cart .view-product-btn {
     background: #fff;
-    color: #1a1a1a;
-    border: 1px solid #1a1a1a;
+    color: var(--augoose-primary, #30475E);
+    border: 1px solid var(--augoose-primary, #30475E);
 }
 
 .product-add-to-cart .view-product-btn:hover {
-    background: #1a1a1a;
-    color: #fff;
-    border-color: #1a1a1a;
+    background: var(--augoose-primary, #30475E);
+    color: var(--augoose-white, #fff);
+    border-color: var(--augoose-primary, #30475E);
 }
 
 .product-add-to-cart .add-to-cart-btn svg {
