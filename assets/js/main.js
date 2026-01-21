@@ -421,10 +421,15 @@
     // Size Guide Toggle (Single Product Page)
     function initSizeGuideToggle() {
         // Open size guide modal
-        $('.size-guide-link').on('click', function(e) {
+        $(document).on('click', '.size-guide-link', function(e) {
             e.preventDefault();
             const $modal = $('#size-guide-modal');
             const $body = $('body');
+            
+            if ($modal.length === 0) {
+                console.error('Size guide modal not found');
+                return;
+            }
             
             // Detect product category to show correct guide
             let defaultGuide = 'pants'; // Default to pants
@@ -462,51 +467,62 @@
             $modal.find('.size-guide-tab').removeClass('active');
             $modal.find('.size-guide-tab[data-guide="' + defaultGuide + '"]').addClass('active');
             $modal.find('.size-guide-table-wrapper').hide();
-            $modal.find('.size-guide-table-wrapper[data-guide="' + defaultGuide + '"]').show();
+            const $targetWrapper = $modal.find('.size-guide-table-wrapper[data-guide="' + defaultGuide + '"]');
+            $targetWrapper.show();
             
-            // Show modal
-            $modal.fadeIn(300);
+            // Ensure modal is visible
+            $modal.css('display', 'flex');
             $body.addClass('size-guide-open');
         });
         
         // Close size guide modal
-        $('.size-guide-close, .size-guide-overlay').on('click', function() {
-            $('#size-guide-modal').fadeOut(300);
+        $(document).on('click', '.size-guide-close, .size-guide-overlay', function() {
+            const $modal = $('#size-guide-modal');
+            $modal.css('display', 'none');
             $('body').removeClass('size-guide-open');
         });
         
         // Switch between guides
-        $('.size-guide-tab').on('click', function() {
+        $(document).on('click', '.size-guide-tab', function() {
             const guide = $(this).data('guide');
             $('.size-guide-tab').removeClass('active');
             $(this).addClass('active');
             $('.size-guide-table-wrapper').hide();
-            $('.size-guide-table-wrapper[data-guide="' + guide + '"]').fadeIn(300);
+            $('.size-guide-table-wrapper[data-guide="' + guide + '"]').show();
         });
         
         // Close on ESC key
         $(document).on('keydown', function(e) {
-            if (e.key === 'Escape' && $('#size-guide-modal').is(':visible')) {
-                $('#size-guide-modal').fadeOut(300);
-                $('body').removeClass('size-guide-open');
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                const $modal = $('#size-guide-modal');
+                if ($modal.is(':visible') || $modal.css('display') === 'flex') {
+                    $modal.css('display', 'none');
+                    $('body').removeClass('size-guide-open');
+                }
             }
         });
         
         // Footer size guide links
-        $('.footer-size-guide-link').on('click', function(e) {
+        $(document).on('click', '.footer-size-guide-link', function(e) {
             e.preventDefault();
             const guide = $(this).data('guide') || 'pants';
             const $modal = $('#size-guide-modal');
             const $body = $('body');
             
+            if ($modal.length === 0) {
+                console.error('Size guide modal not found');
+                return;
+            }
+            
             // Show correct guide
             $modal.find('.size-guide-tab').removeClass('active');
             $modal.find('.size-guide-tab[data-guide="' + guide + '"]').addClass('active');
             $modal.find('.size-guide-table-wrapper').hide();
-            $modal.find('.size-guide-table-wrapper[data-guide="' + guide + '"]').show();
+            const $targetWrapper = $modal.find('.size-guide-table-wrapper[data-guide="' + guide + '"]');
+            $targetWrapper.show();
             
-            // Show modal
-            $modal.fadeIn(300);
+            // Ensure modal is visible
+            $modal.css('display', 'flex');
             $body.addClass('size-guide-open');
         });
     }

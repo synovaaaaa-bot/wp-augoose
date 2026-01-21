@@ -2649,7 +2649,7 @@ body.woocommerce-cart .site-main .entry-content {
     width: 100%;
     height: 100%;
     z-index: 99999;
-    display: flex;
+    display: none; /* Changed from flex to none, will be set to flex by JS */
     align-items: center;
     justify-content: center;
 }
