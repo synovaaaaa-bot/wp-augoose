@@ -46,7 +46,7 @@
 
 .header-container {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 16px;
     padding: 10px 0;
@@ -61,6 +61,7 @@
     display: flex;
     align-items: center;
     grid-column: 1;
+    justify-self: start;
 }
 
 .site-branding .custom-logo-link {
@@ -108,9 +109,9 @@
     justify-content: center;
     grid-column: 2;
     justify-self: center;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    position: static;
+    left: auto;
+    transform: none;
 }
 
 .header-category-menu {
@@ -166,6 +167,7 @@
     align-items: flex-end;
     gap: 6px;
     grid-column: 3;
+    justify-self: end;
 }
 
 /* Language / Currency Switchers */

@@ -56,6 +56,123 @@ function wp_augoose_setup() {
 add_action( 'after_setup_theme', 'wp_augoose_setup' );
 
 /**
+ * Create core static pages on theme activation (only if missing).
+ * - About Us
+ * - FAQ
+ * - Terms of Service (includes privacy/cookies/refund/commercial use/contact)
+ */
+function wp_augoose_maybe_create_static_pages() {
+    // Only run in admin context.
+    if ( ! is_admin() ) {
+        return;
+    }
+
+    $pages = array(
+        array(
+            'slug'     => 'about-us',
+            'title'    => 'About Us',
+            'template' => 'page-about-us.php',
+            'content'  =>
+                '<div class="augoose-section">' .
+                '<p class="craftsmanship-text">Started by our vision and love for American workwear.</p>' .
+                '<p>Each of Augoose\'s pieces is built with steady hands, perfected details, and made to endure the weight of real work. Augoose is a workwear brand that crafts versatile pieces using high-quality, locally sourced materials and collaborates with local tailors to create items with timeless design and long-lasting durability.</p>' .
+                '<p>We begin with our signature Double Knee pants and have developed to heavy duty Active Jacket.</p>' .
+                '<p>Each cut is made with precision, ensuring that every detail contributes to the flawless finish of the final product. As we continually refine our technique and craftsmanship, our goal remains simple: to bring you the finest Augoose creations possible.</p>' .
+                '</div>',
+        ),
+        array(
+            'slug'     => 'faq',
+            'title'    => 'FAQ',
+            'template' => 'page-faq.php',
+            'content'  =>
+                '<div class="augoose-section"><h2>PLEASE READ THEM CAREFULLY.</h2></div>' .
+                '<div class="augoose-faq">' .
+                '<details><summary>How do I track my order?</summary><div class="augoose-faq-answer"><p>Once your Augoose order has been shipped, you will receive an email with your tracking information so you may track the package online.</p></div></details>' .
+                '<details><summary>How do I cancel my order?</summary><div class="augoose-faq-answer"><p>Once you place an order, we cannot change or cancel it as we immediately process your orders for shipment. Please carefully review your order before making payment.</p></div></details>' .
+                '<details><summary>Can I change or refund my order?</summary><div class="augoose-faq-answer"><p>At the moment we can\'t accept any refund or change any order unless you received an incorrect, unfinished, or defective product. Please carefully review your order before making payment.</p></div></details>' .
+                '<details><summary>What if I received an incorrect / unfinished / defective product?</summary><div class="augoose-faq-answer"><p>We\'re sorry if it happened to you. Please contact us via email at <a href="mailto:contact@augoose.co">contact@augoose.co</a> for further processing. The product may be exchanged or returned if it meets the following criteria:</p><ol><li>The product has defects or damage to any part of the item.</li><li>The product has a size discrepancy exceeding the acceptable tolerance (±2 cm).</li><li>The product shows a significant color difference.</li><li>The product is received in a damaged condition, such as being torn, etc.</li></ol></div></details>' .
+                '<details><summary>What payment do you accept?</summary><div class="augoose-faq-answer"><p>We accept various payment methods that you can check on the checkout page (PayPal, Credit/Debit card, QRIS, VA for Indonesia, etc).</p></div></details>' .
+                '<details><summary>How long is the delivery time?</summary><div class="augoose-faq-answer"><p>Delivery times are estimates. On average it takes 3–5 days to Southeast Asia, 5–7 days to Asia Pacific and Australia, and 7–10 days to Europe and America. Please check your Air Way Bill (AWB) number sent to the email you registered at checkout and frequently track through the shipping portal.</p></div></details>' .
+                '<details><summary>What is the shipment method?</summary><div class="augoose-faq-answer"><p>We partner with DHL to ship your order.</p></div></details>' .
+                '</div>',
+        ),
+        array(
+            'slug'     => 'terms-of-service',
+            'title'    => 'Terms of Service',
+            'template' => 'page-terms-of-service.php',
+            'content'  =>
+                '<div class="augoose-section"><h2 id="terms-of-use">Terms of Use</h2>' .
+                '<p>By using this site, you agree to these terms of use, as well as any other terms, guidelines, or rules that apply to any portion of this site, without limitation or qualification. If you do not agree to these terms of use, you must exit the site immediately and discontinue any use of information or product from this site.</p>' .
+                '</div>' .
+                '<div class="augoose-section"><h2 id="privacy-policy">Privacy Policy</h2>' .
+                '<p>At Augoose, we are committed to protecting your personal information and ensuring your privacy is respected. You can rest assured that any information you submit to us will not be misused, abused, or sold to any other parties. We only use your personal information to complete your order.</p>' .
+                '</div>' .
+                '<div class="augoose-section"><h2 id="cookies-tracking">Cookies &amp; Tracking</h2>' .
+                '<p>Our website may use cookies to enhance your browsing experience and improve functionality. You can manage your cookie preferences through your browser settings at any time.</p>' .
+                '</div>' .
+                '<div class="augoose-section"><h2 id="return-refund-policy">Return &amp; Refund Policy</h2>' .
+                '<p>We always try our best to keep our items in perfect condition before we ship them to you. Currently, we do not offer refunds under any circumstances. We apologize that once you’ve submitted an order, the product cannot be cancelled or exchanged. Please check your item(s) before submitting an order to prevent any mistakes.</p>' .
+                '<p>If you receive an incorrect, unfinished, or defective product, please contact us at <a href="mailto:contact@augoose.co">contact@augoose.co</a>. The product may be exchanged or returned if it meets the following criteria:</p>' .
+                '<ol><li>The product has defects or damage to any part of the item.</li><li>The product has a size discrepancy exceeding the acceptable tolerance (±2 cm).</li><li>The product shows a significant color difference.</li><li>The product is received in a damaged condition, such as being torn, etc.</li></ol>' .
+                '<p>Please make sure you document an unboxing video as proof.</p>' .
+                '</div>' .
+                '<div class="augoose-section"><h2 id="commercial-use">Commercial Use</h2>' .
+                '<p>You may not copy, reproduce, or sell any content of this site for any commercial use on your own site.</p>' .
+                '</div>' .
+                '<div class="augoose-section"><h2 id="acceptance">Your Acceptance of These Terms</h2>' .
+                '<p>By using this site, you accept these terms of use and the privacy policy. By providing us with your information, you agree to the site’s privacy policy. If you do not agree to this policy, please leave this site immediately.</p>' .
+                '</div>' .
+                '<div class="augoose-section"><h2 id="contact-us">Contact Us</h2>' .
+                '<p>For any privacy-related concerns or questions, please contact us at: <a href="mailto:contact@augoose.co">contact@augoose.co</a></p>' .
+                '</div>',
+        ),
+    );
+
+    foreach ( $pages as $p ) {
+        $existing = get_page_by_path( $p['slug'] );
+        if ( $existing instanceof WP_Post ) {
+            // If template is not set, set it (do not overwrite content).
+            if ( ! empty( $p['template'] ) ) {
+                $current_tpl = get_post_meta( $existing->ID, '_wp_page_template', true );
+                if ( $current_tpl !== $p['template'] ) {
+                    update_post_meta( $existing->ID, '_wp_page_template', $p['template'] );
+                }
+            }
+            continue;
+        }
+
+        $page_id = wp_insert_post(
+            array(
+                'post_type'    => 'page',
+                'post_status'  => 'publish',
+                'post_title'   => $p['title'],
+                'post_name'    => $p['slug'],
+                'post_content' => $p['content'],
+            ),
+            true
+        );
+
+        if ( is_wp_error( $page_id ) ) {
+            continue;
+        }
+
+        if ( ! empty( $p['template'] ) ) {
+            update_post_meta( (int) $page_id, '_wp_page_template', $p['template'] );
+        }
+    }
+}
+function wp_augoose_seed_static_pages_once() {
+    // Seed once, but allow re-seeding if the option is deleted.
+    if ( '1' === get_option( 'wp_augoose_static_pages_seeded', '0' ) ) {
+        return;
+    }
+    wp_augoose_maybe_create_static_pages();
+    update_option( 'wp_augoose_static_pages_seeded', '1' );
+}
+add_action( 'after_switch_theme', 'wp_augoose_seed_static_pages_once' );
+add_action( 'admin_init', 'wp_augoose_seed_static_pages_once' );
+
+/**
  * =========================
  * Integrations: Multi-language + Multi-currency (WooCommerce)
  * - UI is provided by theme.
@@ -380,6 +497,9 @@ function wp_augoose_scripts() {
     }
     if ( file_exists( $theme_dir . '/assets/css/brand-guidelines.css' ) ) {
         wp_enqueue_style( 'wp-augoose-brand', $theme_dir_uri . '/assets/css/brand-guidelines.css', array(), $asset_ver( 'assets/css/brand-guidelines.css' ) );
+    }
+    if ( file_exists( $theme_dir . '/assets/css/pages-static.css' ) ) {
+        wp_enqueue_style( 'wp-augoose-pages-static', $theme_dir_uri . '/assets/css/pages-static.css', array( 'wp-augoose-brand' ), $asset_ver( 'assets/css/pages-static.css' ) );
     }
     
     // WooCommerce Integrated Styles - Fully integrated with WooCommerce & WordPress

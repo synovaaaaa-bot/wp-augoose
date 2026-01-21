@@ -73,7 +73,7 @@ if ( post_password_required() ) {
                     }
                     ?>
 
-                    <div class="product-gallery-two">
+                    <div class="product-gallery-two <?php echo ( count( $image_ids ) === 1 ) ? 'is-single' : ''; ?>">
                         <?php
                         if ( ! empty( $image_ids ) ) {
                             foreach ( $image_ids as $iid ) {
@@ -87,7 +87,6 @@ if ( post_password_required() ) {
                         }
                         ?>
                     </div>
-                    ?>
                 </div>
 
                 <!-- Product Summary (Figma Design) -->

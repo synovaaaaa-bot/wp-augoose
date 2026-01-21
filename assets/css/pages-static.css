@@ -1,0 +1,142 @@
+/**
+ * Static Pages (About / FAQ / Terms)
+ * @package WP_Augoose
+ */
+
+.augoose-static {
+    padding: 44px 0 80px;
+}
+
+.augoose-static .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.augoose-static .augoose-page-title {
+    margin: 0 0 18px;
+    font-family: var(--font-headline, Georgia, "Times New Roman", serif);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--augoose-primary, #30475E);
+    font-size: clamp(28px, 3vw, 44px);
+    line-height: 1.05;
+    text-align: center;
+}
+
+.augoose-static .augoose-page-subtitle {
+    margin: 0 auto 34px;
+    max-width: 64ch;
+    text-align: center;
+    color: rgba(0,0,0,0.72);
+    font-size: 15px;
+    line-height: 1.7;
+    font-family: var(--font-body, Georgia, "Times New Roman", serif);
+}
+
+.augoose-static .augoose-card {
+    border: 1px solid rgba(48, 71, 94, 0.18);
+    background: #fff;
+    padding: 26px 26px;
+}
+
+.augoose-static .augoose-section {
+    margin-top: 30px;
+}
+
+.augoose-static .augoose-section > h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--augoose-primary, #30475E);
+}
+
+.augoose-static .augoose-section > h2::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 2px;
+    background: var(--augoose-primary, #30475E);
+    margin-top: 10px;
+    opacity: 0.9;
+}
+
+.augoose-static p {
+    margin: 0 0 14px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(0,0,0,0.78);
+}
+
+.augoose-static ul,
+.augoose-static ol {
+    margin: 0 0 14px 18px;
+    color: rgba(0,0,0,0.78);
+}
+
+.augoose-static li {
+    margin: 0 0 8px;
+    line-height: 1.7;
+}
+
+/* FAQ Accordion */
+.augoose-faq {
+    display: grid;
+    gap: 12px;
+}
+
+.augoose-faq details {
+    border: 1px solid rgba(48, 71, 94, 0.18);
+    background: #fff;
+}
+
+.augoose-faq summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 16px 18px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #111;
+    font-family: var(--font-subhead, Georgia, "Times New Roman", serif);
+    position: relative;
+}
+
+.augoose-faq summary::-webkit-details-marker {
+    display: none;
+}
+
+.augoose-faq summary::after {
+    content: "+";
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--augoose-primary, #30475E);
+}
+
+.augoose-faq details[open] summary::after {
+    content: "−";
+}
+
+.augoose-faq .augoose-faq-answer {
+    padding: 0 18px 16px;
+    border-top: 1px solid rgba(48, 71, 94, 0.12);
+}
+
+.augoose-faq .augoose-faq-answer p {
+    margin-top: 14px;
+}
+
+@media (max-width: 768px) {
+    .augoose-static {
+        padding: 34px 0 60px;
+    }
+    .augoose-static .augoose-card {
+        padding: 20px 18px;
+    }
+}
+

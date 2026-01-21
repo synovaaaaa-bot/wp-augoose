@@ -8,10 +8,21 @@
 
     <footer id="colophon" class="site-footer">
         <div class="container">
-            <div class="footer-logo" aria-label="<?php esc_attr_e( 'Site logo', 'wp-augoose' ); ?>">
-                <?php the_custom_logo(); ?>
-            </div>
-
+            <?php
+            $page_url = static function ( $slug ) {
+                $p = get_page_by_path( (string) $slug );
+                if ( $p instanceof WP_Post ) {
+                    $url = get_permalink( $p );
+                    if ( $url ) {
+                        return $url;
+                    }
+                }
+                return '#';
+            };
+            $url_about = $page_url( 'about-us' );
+            $url_terms = $page_url( 'terms-of-service' );
+            $url_faq   = $page_url( 'faq' );
+            ?>
             <div class="footer-columns">
                 <div class="footer-col">
                     <div class="footer-col-title"><?php echo esc_html__( 'About Augoose', 'wp-augoose' ); ?></div>
@@ -29,8 +40,8 @@
                         ?>
                     <?php else : ?>
                         <ul class="footer-links">
-                            <li><a href="#"><?php echo esc_html__( 'About us', 'wp-augoose' ); ?></a></li>
-                            <li><a href="#"><?php echo esc_html__( 'Terms of service', 'wp-augoose' ); ?></a></li>
+                            <li><a href="<?php echo esc_url( $url_about ); ?>"><?php echo esc_html__( 'About us', 'wp-augoose' ); ?></a></li>
+                            <li><a href="<?php echo esc_url( $url_terms ); ?>"><?php echo esc_html__( 'Terms of service', 'wp-augoose' ); ?></a></li>
                         </ul>
                     <?php endif; ?>
                 </div>
@@ -52,8 +63,8 @@
                     <?php else : ?>
                         <ul class="footer-links">
                             <li><a href="#"><?php echo esc_html__( 'Contact us', 'wp-augoose' ); ?></a></li>
-                            <li><a href="#"><?php echo esc_html__( 'FAQ', 'wp-augoose' ); ?></a></li>
-                            <li><a href="#"><?php echo esc_html__( 'Return or refunds policy', 'wp-augoose' ); ?></a></li>
+                            <li><a href="<?php echo esc_url( $url_faq ); ?>"><?php echo esc_html__( 'FAQ', 'wp-augoose' ); ?></a></li>
+                            <li><a href="<?php echo esc_url( $url_terms . '#return-refund-policy' ); ?>"><?php echo esc_html__( 'Return or refunds policy', 'wp-augoose' ); ?></a></li>
                         </ul>
                     <?php endif; ?>
                 </div>
@@ -89,16 +100,30 @@
                     <div class="footer-payments-title"><?php echo esc_html__( 'Payment Methods', 'wp-augoose' ); ?></div>
                     <div class="footer-payment-icons" aria-hidden="true">
                         <span class="pay-icon pay-visa" title="Visa">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><text x="9" y="14" font-size="11" font-weight="700" fill="#1A1F71" font-family="Arial, sans-serif">VISA</text></svg>
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
+                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+                                <text x="11" y="14" font-size="11" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="1">VISA</text>
+                            </svg>
                         </span>
                         <span class="pay-icon pay-mc" title="Mastercard">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><circle cx="28" cy="10" r="6" fill="#EB001B"/><circle cx="36" cy="10" r="6" fill="#F79E1B" fill-opacity="0.95"/><text x="44" y="13" font-size="7" font-weight="700" fill="#111" font-family="Arial, sans-serif">MC</text></svg>
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
+                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+                                <circle cx="28" cy="10" r="6" fill="#EB001B"/>
+                                <circle cx="36" cy="10" r="6" fill="#F79E1B" fill-opacity="0.95"/>
+                                <text x="44" y="13" font-size="7" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="0.5">MC</text>
+                            </svg>
                         </span>
                         <span class="pay-icon pay-applepay" title="Apple Pay">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><text x="8" y="13" font-size="9" font-weight="700" fill="#111" font-family="Arial, sans-serif">Apple Pay</text></svg>
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
+                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+                                <text x="10" y="13" font-size="9" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="0.3">Apple Pay</text>
+                            </svg>
                         </span>
                         <span class="pay-icon pay-gpay" title="Google Pay">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><text x="10" y="13" font-size="9" font-weight="700" fill="#111" font-family="Arial, sans-serif">G Pay</text></svg>
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
+                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
+                                <text x="14" y="13" font-size="9" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="0.6">G Pay</text>
+                            </svg>
                         </span>
                     </div>
                 </div>

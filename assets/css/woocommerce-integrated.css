@@ -151,6 +151,10 @@
     gap: 18px;
 }
 
+.single-product-wrapper .product-gallery-two.is-single {
+    grid-template-columns: 1fr;
+}
+
 .single-product-wrapper .product-gallery-two__item {
     position: relative;
     overflow: hidden;
@@ -545,7 +549,7 @@ body.woocommerce-checkout {
 }
 
 .woocommerce-checkout .woocommerce-checkout-review-order-table .product-item-summary .product-details {
-    min-width: 160px; /* prevent qty controls collapsing */
+    min-width: 0; /* allow title to wrap instead of truncating */
     flex: 1 1 auto;
     max-width: 100%;
     overflow: hidden;
