@@ -128,11 +128,13 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 								<?php if ( $is_color && $color_hex ) : ?>
 									style="--swatch-color: <?php echo esc_attr( $color_hex ); ?>"
 								<?php endif; ?>
+								aria-label="<?php echo esc_attr( $option ); ?>"
 							>
 								<?php if ( $is_color && $color_hex ) : ?>
 									<span class="swatch-color-dot" style="background-color: <?php echo esc_attr( $color_hex ); ?>"></span>
+								<?php else : ?>
+									<span class="swatch-label"><?php echo esc_html( strtoupper( $option ) ); ?></span>
 								<?php endif; ?>
-								<span class="swatch-label"><?php echo esc_html( strtoupper( $option ) ); ?></span>
 							</button>
 							
 						<?php } ?>

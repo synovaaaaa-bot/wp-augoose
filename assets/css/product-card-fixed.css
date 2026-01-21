@@ -247,8 +247,10 @@
     border-radius: 0;
     font-family: var(--font-headline, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
     min-height: 46px;
+    height: 46px;
     line-height: 1.1;
     text-align: center;
+    box-sizing: border-box;
 }
 
 /* Make "VIEW PRODUCT" look premium (secondary/outlined), not like the primary CTA */
@@ -256,6 +258,9 @@
     background: #fff;
     color: var(--augoose-primary, #30475E);
     border: 1px solid var(--augoose-primary, #30475E);
+    min-height: 46px;
+    height: 46px;
+    box-sizing: border-box;
 }
 
 .product-add-to-cart .view-product-btn.is-disabled {

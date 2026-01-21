@@ -366,6 +366,34 @@ body.post-type-archive-product .woocommerce ul.products {
     min-height: 44px;
 }
 
+/* Color swatches: hanya kotak, tanpa text label */
+.single-product-wrapper .variation-swatch.swatch-color {
+    padding: 0;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.single-product-wrapper .variation-swatch.swatch-color .swatch-color-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 0;
+    border: 1px solid rgba(0,0,0,0.1);
+    display: block;
+}
+
+.single-product-wrapper .variation-swatch.swatch-color.is-active {
+    border: 2px solid #1a1a1a;
+    background: #fff;
+}
+
+.single-product-wrapper .variation-swatch.swatch-color.is-active .swatch-color-dot {
+    border-color: rgba(0,0,0,0.2);
+}
+
 .single-product-wrapper .variation-swatch:hover {
     border-color: #1a1a1a;
 }

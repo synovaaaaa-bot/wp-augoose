@@ -101,20 +101,6 @@ if ( post_password_required() ) {
                             <?php echo $product->get_price_html(); ?>
                         </div>
                         
-                        <!-- Short Description -->
-                        <?php
-                        if ( $product->get_short_description() ) {
-                            echo '<div class="woocommerce-product-details__short-description">';
-                            echo wp_kses_post( $product->get_short_description() );
-                            echo '</div>';
-                        } elseif ( $product->get_description() ) {
-                            // Fallback to full description if short description is empty
-                            echo '<div class="woocommerce-product-details__short-description">';
-                            echo wp_kses_post( wp_trim_words( $product->get_description(), 30, '...' ) );
-                            echo '</div>';
-                        }
-                        ?>
-                        
                         <!-- Variations Form -->
                         <?php
                         if ( $product->is_type( 'variable' ) ) {
