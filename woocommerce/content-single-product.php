@@ -137,40 +137,59 @@ if ( post_password_required() ) {
                             </div>
                             
                             <?php
-                            // Get material attribute from WooCommerce
+                            // Get material attribute from WooCommerce - try multiple methods
                             $material_attr = '';
                             
-                            // Try multiple ways to get material
+                            // Method 1: Try taxonomy attribute (pa_material)
                             if ( method_exists( $product, 'get_attribute' ) ) {
-                                // Try taxonomy attribute first (pa_material)
                                 $material_attr = $product->get_attribute( 'pa_material' );
-                                
-                                // If not found, try custom attribute (material)
-                                if ( empty( $material_attr ) ) {
-                                    $material_attr = $product->get_attribute( 'material' );
-                                }
-                                
-                                // If still not found, try getting from all attributes
-                                if ( empty( $material_attr ) ) {
-                                    $attributes = $product->get_attributes();
-                                    foreach ( $attributes as $attr_name => $attr_obj ) {
-                                        $attr_label = wc_attribute_label( $attr_name );
-                                        // Check if attribute name or label contains "material"
-                                        if ( stripos( $attr_name, 'material' ) !== false || stripos( $attr_label, 'material' ) !== false ) {
-                                            $material_attr = $product->get_attribute( $attr_name );
-                                            break;
-                                        }
+                            }
+                            
+                            // Method 2: Try custom attribute (material)
+                            if ( empty( $material_attr ) && method_exists( $product, 'get_attribute' ) ) {
+                                $material_attr = $product->get_attribute( 'material' );
+                            }
+                            
+                            // Method 3: Search through all attributes
+                            if ( empty( $material_attr ) && method_exists( $product, 'get_attributes' ) ) {
+                                $attributes = $product->get_attributes();
+                                foreach ( $attributes as $attr_name => $attr_obj ) {
+                                    $attr_label = wc_attribute_label( $attr_name );
+                                    // Check if attribute name or label contains "material"
+                                    if ( stripos( $attr_name, 'material' ) !== false || stripos( $attr_label, 'material' ) !== false ) {
+                                        $material_attr = $product->get_attribute( $attr_name );
+                                        break;
                                     }
                                 }
                             }
                             
-                            // Display material if found
-                            if ( ! empty( $material_attr ) ) {
-                                echo '<div class="material-info">';
-                                echo '<strong>MATERIAL</strong>';
-                                echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
-                                echo '</div>';
+                            // Method 4: Try product meta/custom fields
+                            if ( empty( $material_attr ) ) {
+                                $product_id = $product->get_id();
+                                $material_attr = get_post_meta( $product_id, '_material', true );
+                                if ( empty( $material_attr ) ) {
+                                    $material_attr = get_post_meta( $product_id, 'material', true );
+                                }
+                                if ( empty( $material_attr ) ) {
+                                    $material_attr = get_post_meta( $product_id, '_product_material', true );
+                                }
                             }
+                            
+                            // Method 5: Try ACF field if available
+                            if ( empty( $material_attr ) && function_exists( 'get_field' ) ) {
+                                $material_attr = get_field( 'material', $product->get_id() );
+                            }
+                            
+                            // Always display material section (even if empty, for consistency)
+                            echo '<div class="material-info">';
+                            echo '<strong>MATERIAL</strong>';
+                            if ( ! empty( $material_attr ) ) {
+                                echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
+                            } else {
+                                // Show placeholder or leave empty
+                                echo '<p>' . esc_html__( 'Material information not available.', 'wp-augoose' ) . '</p>';
+                            }
+                            echo '</div>';
                             ?>
                         </div>
                         
