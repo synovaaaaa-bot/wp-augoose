@@ -281,6 +281,108 @@
         </div>
     </div>
 
+<script>
+// Size Guide Modal - Simple inline script to ensure it works
+(function() {
+    function openSizeGuide(guide) {
+        guide = guide || 'pants';
+        var modal = document.getElementById('size-guide-modal');
+        if (!modal) return;
+        
+        // Show correct guide
+        var tabs = modal.querySelectorAll('.size-guide-tab');
+        var wrappers = modal.querySelectorAll('.size-guide-table-wrapper');
+        
+        for (var i = 0; i < tabs.length; i++) {
+            if (tabs[i].getAttribute('data-guide') === guide) {
+                tabs[i].classList.add('active');
+            } else {
+                tabs[i].classList.remove('active');
+            }
+        }
+        
+        for (var i = 0; i < wrappers.length; i++) {
+            if (wrappers[i].getAttribute('data-guide') === guide) {
+                wrappers[i].style.display = 'block';
+            } else {
+                wrappers[i].style.display = 'none';
+            }
+        }
+        
+        modal.style.display = 'flex';
+        document.body.classList.add('size-guide-open');
+    }
+    
+    function closeSizeGuide() {
+        var modal = document.getElementById('size-guide-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.classList.remove('size-guide-open');
+        }
+    }
+    
+    // Wait for DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+    function init() {
+        // Footer links
+        var footerLinks = document.querySelectorAll('.footer-size-guide-link');
+        for (var i = 0; i < footerLinks.length; i++) {
+            footerLinks[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                var guide = this.getAttribute('data-guide') || 'pants';
+                openSizeGuide(guide);
+            });
+        }
+        
+        // Product page SIZE GUIDE link
+        var sizeGuideLinks = document.querySelectorAll('.size-guide-link');
+        for (var i = 0; i < sizeGuideLinks.length; i++) {
+            sizeGuideLinks[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                var guide = 'pants';
+                var url = window.location.href.toLowerCase();
+                var title = document.title.toLowerCase();
+                if (url.includes('jacket') || url.includes('shirt') || title.includes('jacket') || title.includes('shirt')) {
+                    guide = 'jackets';
+                }
+                openSizeGuide(guide);
+            });
+        }
+        
+        // Close buttons
+        var closeBtns = document.querySelectorAll('.size-guide-close, .size-guide-overlay');
+        for (var i = 0; i < closeBtns.length; i++) {
+            closeBtns[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                closeSizeGuide();
+            });
+        }
+        
+        // Tab switching
+        var tabs = document.querySelectorAll('.size-guide-tab');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                var guide = this.getAttribute('data-guide');
+                if (guide) openSizeGuide(guide);
+            });
+        }
+        
+        // ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                closeSizeGuide();
+            }
+        });
+    }
+})();
+</script>
+
 <?php wp_footer(); ?>
 
 </body>
