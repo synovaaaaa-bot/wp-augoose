@@ -420,110 +420,94 @@
 
     // Size Guide Toggle (Single Product Page)
     function initSizeGuideToggle() {
-        // Open size guide modal
-        $(document).on('click', '.size-guide-link', function(e) {
-            e.preventDefault();
-            const $modal = $('#size-guide-modal');
-            const $body = $('body');
-            
-            if ($modal.length === 0) {
+        // Simple function to open modal with specific guide
+        function openSizeGuide(guide) {
+            guide = guide || 'pants';
+            const modal = document.getElementById('size-guide-modal');
+            if (!modal) {
                 console.error('Size guide modal not found');
                 return;
             }
             
-            // Detect product category to show correct guide
-            let defaultGuide = 'pants'; // Default to pants
+            // Show correct guide
+            const tabs = modal.querySelectorAll('.size-guide-tab');
+            const wrappers = modal.querySelectorAll('.size-guide-table-wrapper');
             
-            // Check product categories from WooCommerce
-            $('.product_meta .posted_in a, .woocommerce-product-attributes a, .product-categories a').each(function() {
-                const text = $(this).text().toLowerCase();
-                if (text.includes('jacket') || text.includes('jackets') || text.includes('shirt') || text.includes('shirts')) {
-                    defaultGuide = 'jackets';
-                    return false; // Break loop
-                } else if (text.includes('pant') || text.includes('pants') || text.includes('trouser')) {
-                    defaultGuide = 'pants';
-                    return false; // Break loop
+            tabs.forEach(function(tab) {
+                if (tab.getAttribute('data-guide') === guide) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
                 }
             });
             
-            // Check URL or page title
+            wrappers.forEach(function(wrapper) {
+                if (wrapper.getAttribute('data-guide') === guide) {
+                    wrapper.style.display = 'block';
+                } else {
+                    wrapper.style.display = 'none';
+                }
+            });
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.classList.add('size-guide-open');
+        }
+        
+        // Close modal
+        function closeSizeGuide() {
+            const modal = document.getElementById('size-guide-modal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.classList.remove('size-guide-open');
+            }
+        }
+        
+        // Open from product page SIZE GUIDE link
+        $(document).on('click', '.size-guide-link', function(e) {
+            e.preventDefault();
+            let guide = 'pants';
+            
+            // Simple detection
             const url = window.location.href.toLowerCase();
             const title = document.title.toLowerCase();
-            if (url.includes('jacket') || url.includes('shirt') || title.includes('jacket') || title.includes('shirt')) {
-                defaultGuide = 'jackets';
-            } else if (url.includes('pant') || url.includes('trouser') || title.includes('pant') || title.includes('trouser')) {
-                defaultGuide = 'pants';
-            }
-            
-            // Check product title
             const productTitle = $('.product_title, h1.product-title').text().toLowerCase();
-            if (productTitle.includes('jacket') || productTitle.includes('shirt')) {
-                defaultGuide = 'jackets';
-            } else if (productTitle.includes('pant') || productTitle.includes('trouser')) {
-                defaultGuide = 'pants';
+            
+            if (url.includes('jacket') || url.includes('shirt') || title.includes('jacket') || title.includes('shirt') || 
+                productTitle.includes('jacket') || productTitle.includes('shirt')) {
+                guide = 'jackets';
             }
             
-            // Show correct guide
-            $modal.find('.size-guide-tab').removeClass('active');
-            $modal.find('.size-guide-tab[data-guide="' + defaultGuide + '"]').addClass('active');
-            $modal.find('.size-guide-table-wrapper').hide();
-            const $targetWrapper = $modal.find('.size-guide-table-wrapper[data-guide="' + defaultGuide + '"]');
-            $targetWrapper.show();
-            
-            // Ensure modal is visible
-            $modal.css('display', 'flex');
-            $body.addClass('size-guide-open');
+            openSizeGuide(guide);
         });
         
-        // Close size guide modal
-        $(document).on('click', '.size-guide-close, .size-guide-overlay', function() {
-            const $modal = $('#size-guide-modal');
-            $modal.css('display', 'none');
-            $('body').removeClass('size-guide-open');
+        // Open from footer links
+        $(document).on('click', '.footer-size-guide-link', function(e) {
+            e.preventDefault();
+            const guide = $(this).attr('data-guide') || 'pants';
+            openSizeGuide(guide);
         });
         
-        // Switch between guides
-        $(document).on('click', '.size-guide-tab', function() {
-            const guide = $(this).data('guide');
-            $('.size-guide-tab').removeClass('active');
-            $(this).addClass('active');
-            $('.size-guide-table-wrapper').hide();
-            $('.size-guide-table-wrapper[data-guide="' + guide + '"]').show();
+        // Close modal
+        $(document).on('click', '.size-guide-close, .size-guide-overlay', function(e) {
+            e.preventDefault();
+            closeSizeGuide();
+        });
+        
+        // Switch between tabs
+        $(document).on('click', '.size-guide-tab', function(e) {
+            e.preventDefault();
+            const guide = $(this).attr('data-guide');
+            if (guide) {
+                openSizeGuide(guide);
+            }
         });
         
         // Close on ESC key
         $(document).on('keydown', function(e) {
             if (e.key === 'Escape' || e.keyCode === 27) {
-                const $modal = $('#size-guide-modal');
-                if ($modal.is(':visible') || $modal.css('display') === 'flex') {
-                    $modal.css('display', 'none');
-                    $('body').removeClass('size-guide-open');
-                }
+                closeSizeGuide();
             }
-        });
-        
-        // Footer size guide links
-        $(document).on('click', '.footer-size-guide-link', function(e) {
-            e.preventDefault();
-            const guide = $(this).data('guide') || 'pants';
-            const $modal = $('#size-guide-modal');
-            const $body = $('body');
-            
-            if ($modal.length === 0) {
-                console.error('Size guide modal not found');
-                return;
-            }
-            
-            // Show correct guide
-            $modal.find('.size-guide-tab').removeClass('active');
-            $modal.find('.size-guide-tab[data-guide="' + guide + '"]').addClass('active');
-            $modal.find('.size-guide-table-wrapper').hide();
-            const $targetWrapper = $modal.find('.size-guide-table-wrapper[data-guide="' + guide + '"]');
-            $targetWrapper.show();
-            
-            // Ensure modal is visible
-            $modal.css('display', 'flex');
-            $body.addClass('size-guide-open');
         });
     }
 
