@@ -293,7 +293,14 @@ body.post-type-archive-product .woocommerce ul.products {
     font-weight: 700;
 }
 
-.single-product-wrapper .woocommerce-product-details__short-description {
+/* Hide short description from top summary - it's now in tabs below */
+.single-product-wrapper .product-summary-wrapper .woocommerce-product-details__short-description {
+    display: none !important;
+}
+
+/* Show description only in tabs section */
+.single-product-wrapper .product-additional-info .woocommerce-product-details__short-description {
+    display: block;
     color: #666;
     font-size: 12px;
     line-height: 1.8;

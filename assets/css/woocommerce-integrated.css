@@ -560,10 +560,10 @@ body.woocommerce-checkout .entry-title {
 }
 
 .woocommerce-checkout .woocommerce-checkout-review-order-table .product-item-summary .product-details {
-    min-width: 0; /* allow title to wrap instead of truncating */
+    min-width: 160px; /* prevent qty controls collapsing */
     flex: 1 1 auto;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* Order summary item typography + price alignment */
@@ -573,9 +573,12 @@ body.woocommerce-checkout .entry-title {
     letter-spacing: 1px;
     text-transform: uppercase;
     color: #1a1a1a;
-    line-height: 1.25;
+    line-height: 1.4;
     margin: 0 0 6px;
     word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: auto;
 }
 
 /* Single product quantity (Woo default +/- injected by main.js) - make it look clean */
