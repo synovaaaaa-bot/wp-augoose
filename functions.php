@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Theme Setup
  */
 function wp_augoose_setup() {
+    load_theme_textdomain( 'wp-augoose', get_template_directory() . '/languages' );
+
     add_theme_support( 'automatic-feed-links' );
     add_theme_support( 'title-tag' );
     add_theme_support( 'post-thumbnails' );
@@ -20,6 +22,7 @@ function wp_augoose_setup() {
     register_nav_menus( array(
         'primary' => __( 'Primary Menu', 'wp-augoose' ),
         'footer'  => __( 'Footer Menu', 'wp-augoose' ),
+        'language' => __( 'Language Switcher Menu', 'wp-augoose' ),
     ) );
     
     add_theme_support( 'html5', array(
@@ -48,6 +51,125 @@ function wp_augoose_setup() {
     add_theme_support( 'wc-product-gallery-slider' );
 }
 add_action( 'after_setup_theme', 'wp_augoose_setup' );
+
+/**
+ * =========================
+ * Integrations: Multi-language + Multi-currency (WooCommerce)
+ * - UI is provided by theme.
+ * - Actual translation/currency conversion must be handled by plugins.
+ * =========================
+ */
+
+function wp_augoose_render_language_switcher() {
+    // Allow plugins/custom code to override completely.
+    if ( has_action( 'wp_augoose_language_switcher' ) ) {
+        echo '<div class="header-locale header-language">';
+        do_action( 'wp_augoose_language_switcher' );
+        echo '</div>';
+        return;
+    }
+
+    // Polylang
+    if ( function_exists( 'pll_the_languages' ) ) {
+        echo '<div class="header-locale header-language">';
+        echo '<div class="lang-switcher">';
+        pll_the_languages(
+            array(
+                'show_flags' => 1,
+                'show_names' => 0,
+                'dropdown'   => 1,
+            )
+        );
+        echo '</div>';
+        echo '</div>';
+        return;
+    }
+
+    // WPML
+    if ( function_exists( 'icl_get_languages' ) ) {
+        $langs = icl_get_languages( 'skip_missing=0&orderby=code' );
+        if ( is_array( $langs ) && ! empty( $langs ) ) {
+            echo '<div class="header-locale header-language"><div class="lang-switcher"><select class="lang-select" onchange="if(this.value){window.location.href=this.value;}">';
+            foreach ( $langs as $l ) {
+                $selected = ! empty( $l['active'] ) ? ' selected' : '';
+                $url      = isset( $l['url'] ) ? $l['url'] : '';
+                $name     = isset( $l['native_name'] ) ? $l['native_name'] : ( isset( $l['translated_name'] ) ? $l['translated_name'] : ( isset( $l['language_code'] ) ? $l['language_code'] : '' ) );
+                printf( '<option value="%s"%s>%s</option>', esc_url( $url ), $selected, esc_html( $name ) );
+            }
+            echo '</select></div></div>';
+        }
+        return;
+    }
+
+    // TranslatePress (if they use its shortcode)
+    if ( shortcode_exists( 'language-switcher' ) ) {
+        echo '<div class="header-locale header-language">';
+        echo do_shortcode( '[language-switcher]' );
+        echo '</div>';
+        return;
+    }
+
+    // Fallback: WP menu location "language" (user can populate it manually)
+    if ( has_nav_menu( 'language' ) ) {
+        echo '<div class="header-locale header-language">';
+        wp_nav_menu(
+            array(
+                'theme_location' => 'language',
+                'menu_id'        => 'language-menu',
+                'container'      => false,
+                'fallback_cb'    => false,
+                'depth'          => 1,
+            )
+        );
+        echo '</div>';
+    }
+}
+
+function wp_augoose_render_currency_switcher() {
+    if ( ! class_exists( 'WooCommerce' ) ) {
+        return;
+    }
+
+    // Allow plugins/custom code to override completely.
+    if ( has_action( 'wp_augoose_currency_switcher' ) ) {
+        echo '<div class="header-locale header-currency">';
+        do_action( 'wp_augoose_currency_switcher' );
+        echo '</div>';
+        return;
+    }
+
+    // WPML WooCommerce Multilingual (WCML)
+    if ( has_action( 'wcml_currency_switcher' ) ) {
+        echo '<div class="header-locale header-currency">';
+        do_action( 'wcml_currency_switcher', array( 'switcher_style' => 'wcml-dropdown' ) );
+        echo '</div>';
+        return;
+    }
+
+    // WOOCS (WooCommerce Currency Switcher) common shortcode
+    if ( shortcode_exists( 'woocs' ) ) {
+        echo '<div class="header-locale header-currency">';
+        echo do_shortcode( '[woocs]' );
+        echo '</div>';
+        return;
+    }
+
+    // Aelia Currency Switcher shortcode (if installed)
+    if ( shortcode_exists( 'aelia_currency_selector_widget' ) ) {
+        echo '<div class="header-locale header-currency">';
+        echo do_shortcode( '[aelia_currency_selector_widget]' );
+        echo '</div>';
+        return;
+    }
+
+    // CURCY / Woo Multi Currency (varies by plugin; try common shortcode)
+    if ( shortcode_exists( 'woo_multi_currency' ) ) {
+        echo '<div class="header-locale header-currency">';
+        echo do_shortcode( '[woo_multi_currency]' );
+        echo '</div>';
+        return;
+    }
+}
 
 /**
  * Customizer: Announcement / Discount text (integrated with WP; header prefers Woo Store Notice if enabled).

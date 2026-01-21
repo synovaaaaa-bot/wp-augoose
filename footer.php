@@ -8,6 +8,10 @@
 
     <footer id="colophon" class="site-footer">
         <div class="container">
+            <div class="footer-logo" aria-label="<?php esc_attr_e( 'Site logo', 'wp-augoose' ); ?>">
+                <?php the_custom_logo(); ?>
+            </div>
+
             <?php if ( is_active_sidebar( 'footer-1' ) ) : ?>
                 <div class="footer-widgets">
                     <?php dynamic_sidebar( 'footer-1' ); ?>
@@ -16,10 +20,7 @@
 
             <div class="site-info">
                 <p>
-                    &copy; <?php echo date('Y'); ?> 
-                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php bloginfo( 'name' ); ?></a>
-                    <span class="sep"> | </span>
-                    <?php printf( esc_html__( 'Theme: %s', 'wp-augoose' ), 'WP Augoose' ); ?>
+                    &copy; <?php echo date('Y'); ?>
                 </p>
             </div>
         </div>

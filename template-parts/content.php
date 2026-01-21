@@ -27,7 +27,7 @@
     </header><!-- .entry-header -->
 
     <?php minimal_ecommerce_post_thumbnail(); ?>
-
+    
     <div class="entry-content">
         <?php
         the_content(sprintf(

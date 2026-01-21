@@ -243,6 +243,9 @@
     gap: 8px;
     border-radius: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 46px;
+    line-height: 1.1;
+    text-align: center;
 }
 
 /* Make "VIEW PRODUCT" look premium (secondary/outlined), not like the primary CTA */
@@ -372,10 +375,18 @@
     
     .woocommerce-loop-product__title,
     .product-info h2 {
-        font-size: 12px !important;
+        font-size: 13px !important;
     }
     
     .product-info .price {
-        font-size: 13px !important;
+        font-size: 14px !important;
+    }
+
+    .product-add-to-cart .add-to-cart-btn,
+    .product-add-to-cart .view-product-btn {
+        min-height: 44px;
+        font-size: 11px;
+        letter-spacing: 1.6px;
+        padding: 12px 12px;
     }
 }

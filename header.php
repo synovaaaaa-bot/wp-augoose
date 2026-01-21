@@ -41,16 +41,10 @@
             <div class="site-branding">
                     <?php
                     the_custom_logo();
-                    if ( is_front_page() && is_home() ) :
-                        ?>
-                        <h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
-                        <?php
-                    else :
-                        ?>
-                        <p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></p>
-                        <?php
-                    endif;
                     ?>
+                    <p class="site-title screen-reader-text">
+                        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a>
+                    </p>
                 </div>
 
                 <nav id="site-navigation" class="main-navigation" aria-label="<?php esc_attr_e( 'Primary', 'wp-augoose' ); ?>">
@@ -96,6 +90,17 @@
                 <?php endif; ?>
 
             <div class="header-actions" aria-label="<?php esc_attr_e( 'Header actions', 'wp-augoose' ); ?>">
+
+                    <?php
+                    // Multi-language + Multi-currency (only renders if plugins/menus are available)
+                    if ( function_exists( 'wp_augoose_render_language_switcher' ) ) {
+                        wp_augoose_render_language_switcher();
+                    }
+                    if ( function_exists( 'wp_augoose_render_currency_switcher' ) ) {
+                        wp_augoose_render_currency_switcher();
+                    }
+                    ?>
+
                     <div class="header-search">
                         <button type="button" class="search-toggle" aria-label="<?php esc_attr_e( 'Search', 'wp-augoose' ); ?>">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
