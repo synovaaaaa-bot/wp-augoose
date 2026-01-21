@@ -200,6 +200,150 @@ if ( post_password_required() ) {
         </div>
     </div>
 
+    <!-- Size Guide Modal -->
+    <div class="size-guide-modal" id="size-guide-modal" style="display: none;">
+        <div class="size-guide-overlay"></div>
+        <div class="size-guide-content-wrapper">
+            <button class="size-guide-close" aria-label="Close size guide">&times;</button>
+            <div class="size-guide-content">
+                <h2 class="size-guide-title">AUGOOSE</h2>
+                <div class="size-guide-tabs">
+                    <button class="size-guide-tab active" data-guide="pants">PANTS SIZE AND FIT GUIDE</button>
+                    <button class="size-guide-tab" data-guide="jackets">JACKETS SIZE AND FIT GUIDE</button>
+                </div>
+                
+                <!-- Pants Size Guide -->
+                <div class="size-guide-table-wrapper" data-guide="pants">
+                    <table class="size-guide-table">
+                        <thead>
+                            <tr>
+                                <th>SIZE</th>
+                                <th>28</th>
+                                <th>30</th>
+                                <th>32</th>
+                                <th>34</th>
+                                <th>36</th>
+                                <th>38</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>WAIST</td>
+                                <td>78</td>
+                                <td>84</td>
+                                <td>89</td>
+                                <td>95</td>
+                                <td>99</td>
+                                <td>104</td>
+                            </tr>
+                            <tr>
+                                <td>INSEAM</td>
+                                <td>31</td>
+                                <td>31</td>
+                                <td>31</td>
+                                <td>31</td>
+                                <td>31</td>
+                                <td>31</td>
+                            </tr>
+                            <tr>
+                                <td>OPEN LEG</td>
+                                <td>22</td>
+                                <td>22</td>
+                                <td>22</td>
+                                <td>23</td>
+                                <td>23</td>
+                                <td>23</td>
+                            </tr>
+                            <tr>
+                                <td>FRONT RISE</td>
+                                <td>31</td>
+                                <td>32</td>
+                                <td>33</td>
+                                <td>33</td>
+                                <td>34</td>
+                                <td>37</td>
+                            </tr>
+                            <tr>
+                                <td>BACK RISE</td>
+                                <td>41</td>
+                                <td>42</td>
+                                <td>43</td>
+                                <td>44</td>
+                                <td>45</td>
+                                <td>48</td>
+                            </tr>
+                            <tr>
+                                <td>THIGH</td>
+                                <td>62</td>
+                                <td>64</td>
+                                <td>66</td>
+                                <td>68</td>
+                                <td>72</td>
+                                <td>74</td>
+                            </tr>
+                            <tr>
+                                <td>KNEE</td>
+                                <td>23.5</td>
+                                <td>24.5</td>
+                                <td>25.5</td>
+                                <td>28</td>
+                                <td>28</td>
+                                <td>30</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="size-guide-disclaimer">*The garments are cut and sewn by hand, so measurement may vary slightly each pairs</p>
+                </div>
+                
+                <!-- Jackets Size Guide -->
+                <div class="size-guide-table-wrapper" data-guide="jackets" style="display: none;">
+                    <table class="size-guide-table">
+                        <thead>
+                            <tr>
+                                <th>SIZE</th>
+                                <th>S</th>
+                                <th>M</th>
+                                <th>L</th>
+                                <th>XL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CHEST</td>
+                                <td>98</td>
+                                <td>104</td>
+                                <td>110</td>
+                                <td>116</td>
+                            </tr>
+                            <tr>
+                                <td>LENGTH</td>
+                                <td>68</td>
+                                <td>70</td>
+                                <td>72</td>
+                                <td>74</td>
+                            </tr>
+                            <tr>
+                                <td>SHOULDER</td>
+                                <td>44</td>
+                                <td>46</td>
+                                <td>48</td>
+                                <td>50</td>
+                            </tr>
+                            <tr>
+                                <td>SLEEVE</td>
+                                <td>62</td>
+                                <td>64</td>
+                                <td>66</td>
+                                <td>68</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="size-guide-disclaimer">*The garments are cut and sewn by hand, so measurement may vary slightly each pairs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="product-additional-info">
         <div class="container">
             
