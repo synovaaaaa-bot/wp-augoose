@@ -70,6 +70,11 @@ defined( 'ABSPATH' ) || exit;
 											</svg>
 										</button>
 									</div>
+									<div class="product-price-mobile">
+										<?php
+										echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // PHPCS: XSS ok.
+										?>
+									</div>
 								</div>
 							</div>
 						</div>

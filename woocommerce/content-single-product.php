@@ -155,12 +155,14 @@ if ( post_password_required() ) {
                 <div class="tabs-content">
                     <div id="tab-details" class="tab-panel active">
                         <?php
-                        // DETAILS tab: Show product description (full content)
+                        // DETAILS tab: Show product description (full content) only
                         $content = get_the_content();
                         if ( ! empty( $content ) ) {
                             echo '<div class="product-full-description">';
                             echo wp_kses_post( apply_filters( 'the_content', $content ) );
                             echo '</div>';
+                        } else {
+                            echo '<p>' . esc_html__( 'No description available.', 'wp-augoose' ) . '</p>';
                         }
                         ?>
                     </div>

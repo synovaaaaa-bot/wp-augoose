@@ -510,6 +510,29 @@ body.woocommerce-checkout .entry-title {
     text-overflow: ellipsis;
 }
 
+/* Move price below product name on mobile/tablet */
+.woocommerce-checkout .woocommerce-checkout-review-order-table .product-price-mobile {
+    display: none;
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+@media (max-width: 768px) {
+    .woocommerce-checkout .woocommerce-checkout-review-order-table .product-total {
+        display: none;
+    }
+    
+    .woocommerce-checkout .woocommerce-checkout-review-order-table .product-price-mobile {
+        display: block;
+    }
+    
+    .woocommerce-checkout .woocommerce-checkout-review-order-table thead th.product-total {
+        display: none;
+    }
+}
+
 .order-summary-wrapper .woocommerce-checkout-review-order-table tfoot {
     border-top: 1px solid #e0e0e0;
 }

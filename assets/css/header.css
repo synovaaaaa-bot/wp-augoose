@@ -260,6 +260,8 @@
 .header-account,
 .header-cart {
     position: relative;
+    flex-shrink: 0;
+    isolation: isolate; /* Create new stacking context */
 }
 
 .header-wishlist {
@@ -294,11 +296,31 @@
     border-radius: 4px;
 }
 
+.header-cart .cart-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    isolation: isolate;
+}
+
 .header-cart .cart-icon svg {
     display: block;
     width: 24px;
     height: 24px;
     flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.header-cart .cart-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
 }
 
 /* Wishlist Badge */
@@ -322,26 +344,67 @@
     top: 100%;
     right: 0;
     margin-top: 12px;
-    background: #FFFFFF;
-    border: 2px solid #30475E;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    padding: 16px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
     min-width: 300px;
     z-index: 1000;
 }
 
-.search-form-container input[type="search"] {
+.search-form-container form,
+.search-form-container .woocommerce-product-search {
+    position: relative;
+    display: flex;
+    align-items: center;
     width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #D1D5DB;
+}
+
+.search-form-container input[type="search"],
+.search-form-container .search-field {
+    width: 100%;
+    padding: 12px 48px 12px 16px;
+    border: 2px solid #30475E;
     font-size: 0.875rem;
     color: #000;
     border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
-.search-form-container input[type="search"]:focus {
+.search-form-container input[type="search"]:focus,
+.search-form-container .search-field:focus {
     outline: none;
     border-color: #30475E;
+}
+
+.search-form-container button[type="submit"],
+.search-form-container .search-submit {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #30475E;
+    z-index: 1;
+}
+
+.search-form-container button[type="submit"]:hover,
+.search-form-container .search-submit:hover {
+    color: #1a1a1a;
+}
+
+.search-form-container button[type="submit"] svg,
+.search-form-container .search-submit svg {
+    width: 18px;
+    height: 18px;
+    display: block;
 }
 
 /* Cart Badge */
