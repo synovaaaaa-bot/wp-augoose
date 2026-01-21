@@ -137,16 +137,35 @@ if ( post_password_required() ) {
                             </div>
                             
                             <?php
-                            // Get material attribute
+                            // Get material attribute from WooCommerce
                             $material_attr = '';
+                            
+                            // Try multiple ways to get material
                             if ( method_exists( $product, 'get_attribute' ) ) {
+                                // Try taxonomy attribute first (pa_material)
                                 $material_attr = $product->get_attribute( 'pa_material' );
-                                if ( ! $material_attr ) {
+                                
+                                // If not found, try custom attribute (material)
+                                if ( empty( $material_attr ) ) {
                                     $material_attr = $product->get_attribute( 'material' );
+                                }
+                                
+                                // If still not found, try getting from all attributes
+                                if ( empty( $material_attr ) ) {
+                                    $attributes = $product->get_attributes();
+                                    foreach ( $attributes as $attr_name => $attr_obj ) {
+                                        $attr_label = wc_attribute_label( $attr_name );
+                                        // Check if attribute name or label contains "material"
+                                        if ( stripos( $attr_name, 'material' ) !== false || stripos( $attr_label, 'material' ) !== false ) {
+                                            $material_attr = $product->get_attribute( $attr_name );
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                             
-                            if ( $material_attr ) {
+                            // Display material if found
+                            if ( ! empty( $material_attr ) ) {
                                 echo '<div class="material-info">';
                                 echo '<strong>MATERIAL</strong>';
                                 echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
