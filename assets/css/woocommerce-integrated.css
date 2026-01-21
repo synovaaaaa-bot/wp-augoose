@@ -213,12 +213,14 @@
     cursor: pointer;
     transition: all 0.3s ease;
     margin-top: 10px; /* push button slightly down from qty */
+    margin-bottom: 24px; /* spacing below button */
     min-height: 46px;
     height: 46px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px; /* spacing between icon and text if icon exists */
 }
 
 .single-product-wrapper .single_add_to_cart_button:hover {

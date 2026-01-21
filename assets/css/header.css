@@ -296,6 +296,9 @@
 
 .header-cart .cart-icon svg {
     display: block;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
 }
 
 /* Wishlist Badge */

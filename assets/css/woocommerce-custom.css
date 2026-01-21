@@ -468,6 +468,36 @@ body.post-type-archive-product .woocommerce ul.products {
     border-bottom: none;
 }
 
+/* Shipping & Material Info Section (Below Add to Cart) */
+.single-product-wrapper .product-shipping-material-info {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.single-product-wrapper .product-shipping-material-info .shipping-info,
+.single-product-wrapper .product-shipping-material-info .material-info {
+    margin-bottom: 16px;
+}
+
+.single-product-wrapper .product-shipping-material-info .shipping-info strong,
+.single-product-wrapper .product-shipping-material-info .material-info strong {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1a1a;
+}
+
+.single-product-wrapper .product-shipping-material-info .shipping-info p,
+.single-product-wrapper .product-shipping-material-info .material-info p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #666;
+    margin: 0;
+}
+
 .single-product-wrapper .material-label,
 .single-product-wrapper .shipping-label {
     font-size: 11px;

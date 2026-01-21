@@ -109,9 +109,32 @@ if ( post_password_required() ) {
                             woocommerce_simple_add_to_cart();
                         }
                         ?>
-                        <?php
-                        // Material / Shipping / Share moved to lower tabs/sections to keep the top summary compact.
-                        ?>
+                        
+                        <!-- Shipping & Material Info (Below Add to Cart) -->
+                        <div class="product-shipping-material-info">
+                            <div class="shipping-info">
+                                <strong>SHIPPING</strong>
+                                <p>Free shipping on orders over $200</p>
+                            </div>
+                            
+                            <?php
+                            // Get material attribute
+                            $material_attr = '';
+                            if ( method_exists( $product, 'get_attribute' ) ) {
+                                $material_attr = $product->get_attribute( 'pa_material' );
+                                if ( ! $material_attr ) {
+                                    $material_attr = $product->get_attribute( 'material' );
+                                }
+                            }
+                            
+                            if ( $material_attr ) {
+                                echo '<div class="material-info">';
+                                echo '<strong>MATERIAL</strong>';
+                                echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
+                                echo '</div>';
+                            }
+                            ?>
+                        </div>
                         
                     </div>
                 </div>
@@ -132,90 +155,31 @@ if ( post_password_required() ) {
                 </ul>
                 <div class="tabs-content">
                     <div id="tab-details" class="tab-panel active">
-                        <?php 
-                        $content = get_the_content();
-                        if ( ! empty( $content ) ) {
-                            echo '<div class="product-full-description">';
-                            echo wp_kses_post( apply_filters( 'the_content', $content ) );
-                            echo '</div>';
-                        }
-                        ?>
-                        
                         <?php
-                        // Features: derive from WooCommerce product attributes (non-variation attributes)
-                        $attributes = method_exists( $product, 'get_attributes' ) ? $product->get_attributes() : array();
-                        $feature_items = array();
-                        if ( ! empty( $attributes ) ) {
-                            foreach ( $attributes as $attribute ) {
-                                if ( ! is_a( $attribute, 'WC_Product_Attribute' ) ) {
-                                    continue;
-                                }
-                                // Skip variation attributes (Color/Size) in features list
-                                if ( $attribute->get_variation() ) {
-                                    continue;
-                                }
-                                $name = $attribute->get_name();
-                                $label = wc_attribute_label( $name );
-                                $values = array();
-                                if ( $attribute->is_taxonomy() ) {
-                                    $terms = wc_get_product_terms( $product->get_id(), $name, array( 'fields' => 'names' ) );
-                                    if ( is_array( $terms ) ) {
-                                        $values = $terms;
-                                    }
-                                } else {
-                                    $values = $attribute->get_options();
-                                }
-                                if ( empty( $values ) ) {
-                                    continue;
-                                }
-                                // If attribute is "Features" we split values as list; otherwise show "Label: value"
-                                if ( stripos( $label, 'feature' ) !== false ) {
-                                    foreach ( $values as $v ) {
-                                        $v = trim( (string) $v );
-                                        if ( $v !== '' ) {
-                                            $feature_items[] = $v;
-                                        }
-                                    }
-                                } else {
-                                    $feature_items[] = $label . ': ' . implode( ', ', array_map( 'trim', $values ) );
-                                }
-                            }
-                        }
-
-                        if ( ! empty( $feature_items ) ) {
-                            echo '<h3>Features:</h3>';
-                            echo '<ul class="product-features-list">';
-                            foreach ( $feature_items as $item ) {
-                                echo '<li>' . esc_html( $item ) . '</li>';
-                            }
-                            echo '</ul>';
-                        }
-                        ?>
-                    </div>
-                    <div id="tab-materials" class="tab-panel">
-                        <?php
-                        // Materials & Care: use product short description and/or specific attributes if present.
-                        $short = $product->get_short_description();
+                        // DETAILS tab: Only show material info
                         $material_attr = '';
                         if ( method_exists( $product, 'get_attribute' ) ) {
-                            // common attribute names: pa_material or material
                             $material_attr = $product->get_attribute( 'pa_material' );
                             if ( ! $material_attr ) {
                                 $material_attr = $product->get_attribute( 'material' );
                             }
                         }
-
-                        if ( $material_attr || $short ) {
-                            if ( $material_attr ) {
-                                echo '<h3>Material</h3>';
-                                echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
-                            }
-                            if ( $short ) {
-                                echo '<h3>Care</h3>';
-                                echo '<div class="material-tab-content">';
-                                echo wp_kses_post( apply_filters( 'the_content', $short ) );
-                                echo '</div>';
-                            }
+                        
+                        if ( $material_attr ) {
+                            echo '<h3>Material</h3>';
+                            echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
+                        }
+                        ?>
+                    </div>
+                    <div id="tab-materials" class="tab-panel">
+                        <?php
+                        // MATERIALS & CARE tab: Only show care info (short description)
+                        $short = $product->get_short_description();
+                        if ( $short ) {
+                            echo '<h3>Care</h3>';
+                            echo '<div class="material-tab-content">';
+                            echo wp_kses_post( apply_filters( 'the_content', $short ) );
+                            echo '</div>';
                         }
                         ?>
                     </div>
