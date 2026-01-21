@@ -483,14 +483,18 @@ body.woocommerce-checkout {
 
 .order-summary-wrapper .woocommerce-checkout-review-order-table .product-name {
     padding: 18px 0;
-    padding-right: 16px;
+    padding-right: 24px;
+    overflow: hidden;
 }
 
 .order-summary-wrapper .woocommerce-checkout-review-order-table .product-total {
     padding: 18px 0;
     text-align: right;
     white-space: nowrap;
-    width: 110px;
+    width: 150px;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .order-summary-wrapper .woocommerce-checkout-review-order-table tfoot {

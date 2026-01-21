@@ -326,7 +326,7 @@ body.admin-bar .widget_shopping_cart {
 /* Buttons */
 .cart-sidebar-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
 }
 

@@ -23,6 +23,9 @@ function wp_augoose_setup() {
         'primary' => __( 'Primary Menu', 'wp-augoose' ),
         'footer'  => __( 'Footer Menu', 'wp-augoose' ),
         'language' => __( 'Language Switcher Menu', 'wp-augoose' ),
+        'footer_about' => __( 'Footer: About', 'wp-augoose' ),
+        'footer_help'  => __( 'Footer: Help', 'wp-augoose' ),
+        'footer_shop'  => __( 'Footer: Shop', 'wp-augoose' ),
     ) );
     
     add_theme_support( 'html5', array(

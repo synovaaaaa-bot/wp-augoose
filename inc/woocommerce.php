@@ -524,7 +524,7 @@ function wp_augoose_mini_cart_html() {
     <div class="cart-sidebar-overlay"></div>
     <div class="woocommerce widget_shopping_cart">
         <div class="cart-sidebar-header">
-            <h2 class="cart-sidebar-title">KERANJANG ANDA</h2>
+            <h2 class="cart-sidebar-title">YOUR CART</h2>
             <button class="cart-sidebar-close" aria-label="Close cart">×</button>
         </div>
         <div class="cart-sidebar-items">
@@ -619,7 +619,8 @@ function wp_augoose_mini_cart_html() {
                     <span class="cart-sidebar-total-amount"><?php wc_cart_totals_order_total_html(); ?></span>
                 </div>
                 <div class="cart-sidebar-buttons">
-                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">PEMBAYARAN</a>
+                <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">PROCEED TO CHECKOUT</a>
+                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">PROCEED TO CHECKOUT</a>
                 </div>
             </div>
         <?php endif; ?>

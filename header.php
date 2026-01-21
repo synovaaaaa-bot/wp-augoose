@@ -91,16 +91,24 @@
 
             <div class="header-actions" aria-label="<?php esc_attr_e( 'Header actions', 'wp-augoose' ); ?>">
 
-                    <?php
-                    // Multi-language + Multi-currency (only renders if plugins/menus are available)
-                    if ( function_exists( 'wp_augoose_render_language_switcher' ) ) {
-                        wp_augoose_render_language_switcher();
-                    }
-                    if ( function_exists( 'wp_augoose_render_currency_switcher' ) ) {
-                        wp_augoose_render_currency_switcher();
-                    }
-                    ?>
+                    <div class="header-locale-stack" aria-label="<?php esc_attr_e( 'Locale', 'wp-augoose' ); ?>">
+                        <div class="header-locale-item header-locale-item--lang" title="Language">
+                            <?php
+                            if ( function_exists( 'wp_augoose_render_language_switcher' ) ) {
+                                wp_augoose_render_language_switcher();
+                            }
+                            ?>
+                        </div>
+                        <div class="header-locale-item header-locale-item--currency" title="Currency">
+                            <?php
+                            if ( function_exists( 'wp_augoose_render_currency_switcher' ) ) {
+                                wp_augoose_render_currency_switcher();
+                            }
+                            ?>
+                        </div>
+                    </div>
 
+                    <div class="header-icon-row">
                     <div class="header-search">
                         <button type="button" class="search-toggle" aria-label="<?php esc_attr_e( 'Search', 'wp-augoose' ); ?>">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -143,6 +151,7 @@
                             </button>
                         </div>
                     <?php endif; ?>
+                    </div><!-- .header-icon-row -->
             </div>
         </div>
     </header>

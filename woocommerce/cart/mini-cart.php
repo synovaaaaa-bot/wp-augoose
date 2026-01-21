@@ -16,7 +16,7 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 
 <div class="woocommerce widget_shopping_cart">
     <div class="cart-sidebar-header">
-        <h2 class="cart-sidebar-title">KERANJANG ANDA</h2>
+        <h2 class="cart-sidebar-title">YOUR CART</h2>
         <button class="cart-sidebar-close" aria-label="Close cart">×</button>
     </div>
     
@@ -120,8 +120,7 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
             </div>
             
             <div class="cart-sidebar-buttons">
-                <a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-view">View Cart</a>
-                <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">Pembayaran</a>
+                <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">PROCEED TO CHECKOUT</a>
             </div>
         </div>
     <?php endif; ?>

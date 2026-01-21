@@ -12,25 +12,75 @@
                 <?php the_custom_logo(); ?>
             </div>
 
-            <?php if ( is_active_sidebar( 'footer-1' ) ) : ?>
-                <div class="footer-widgets">
-                    <?php dynamic_sidebar( 'footer-1' ); ?>
+            <div class="footer-columns">
+                <div class="footer-col">
+                    <div class="footer-col-title"><?php echo esc_html__( 'About Augoose', 'wp-augoose' ); ?></div>
+                    <?php if ( has_nav_menu( 'footer_about' ) ) : ?>
+                        <?php
+                        wp_nav_menu(
+                            array(
+                                'theme_location' => 'footer_about',
+                                'menu_id'        => 'footer-about-menu',
+                                'container'      => false,
+                                'fallback_cb'    => false,
+                                'depth'          => 1,
+                            )
+                        );
+                        ?>
+                    <?php else : ?>
+                        <ul class="footer-links">
+                            <li><a href="#"><?php echo esc_html__( 'About us', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#"><?php echo esc_html__( 'Terms of service', 'wp-augoose' ); ?></a></li>
+                        </ul>
+                    <?php endif; ?>
                 </div>
-            <?php elseif ( has_nav_menu( 'footer' ) ) : ?>
-                <nav class="footer-fallback" aria-label="<?php esc_attr_e( 'Footer menu', 'wp-augoose' ); ?>">
-                    <?php
-                    wp_nav_menu(
-                        array(
-                            'theme_location' => 'footer',
-                            'menu_id'        => 'footer-menu',
-                            'container'      => false,
-                            'fallback_cb'    => false,
-                            'depth'          => 1,
-                        )
-                    );
-                    ?>
-                </nav>
-            <?php endif; ?>
+
+                <div class="footer-col">
+                    <div class="footer-col-title"><?php echo esc_html__( 'Help', 'wp-augoose' ); ?></div>
+                    <?php if ( has_nav_menu( 'footer_help' ) ) : ?>
+                        <?php
+                        wp_nav_menu(
+                            array(
+                                'theme_location' => 'footer_help',
+                                'menu_id'        => 'footer-help-menu',
+                                'container'      => false,
+                                'fallback_cb'    => false,
+                                'depth'          => 1,
+                            )
+                        );
+                        ?>
+                    <?php else : ?>
+                        <ul class="footer-links">
+                            <li><a href="#"><?php echo esc_html__( 'Contact us', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#"><?php echo esc_html__( 'FAQ', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#"><?php echo esc_html__( 'Return or refunds policy', 'wp-augoose' ); ?></a></li>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+
+                <div class="footer-col">
+                    <div class="footer-col-title"><?php echo esc_html__( 'Shop', 'wp-augoose' ); ?></div>
+                    <?php if ( has_nav_menu( 'footer_shop' ) ) : ?>
+                        <?php
+                        wp_nav_menu(
+                            array(
+                                'theme_location' => 'footer_shop',
+                                'menu_id'        => 'footer-shop-menu',
+                                'container'      => false,
+                                'fallback_cb'    => false,
+                                'depth'          => 1,
+                            )
+                        );
+                        ?>
+                    <?php else : ?>
+                        <ul class="footer-links">
+                            <li><a href="#"><?php echo esc_html__( 'Jacket size and fit guide', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#"><?php echo esc_html__( 'Pants size and fit guide', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#"><?php echo esc_html__( 'Order & shipping', 'wp-augoose' ); ?></a></li>
+                        </ul>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
 
         <div class="footer-bottom-bar">
@@ -38,10 +88,18 @@
                 <div class="footer-payments" aria-label="<?php esc_attr_e( 'Payment methods', 'wp-augoose' ); ?>">
                     <div class="footer-payments-title"><?php echo esc_html__( 'Payment Methods', 'wp-augoose' ); ?></div>
                     <div class="footer-payment-icons" aria-hidden="true">
-                        <span class="pay-icon">VISA</span>
-                        <span class="pay-icon">MC</span>
-                        <span class="pay-icon">Apple&nbsp;Pay</span>
-                        <span class="pay-icon">G&nbsp;Pay</span>
+                        <span class="pay-icon pay-visa" title="Visa">
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><text x="9" y="14" font-size="11" font-weight="700" fill="#1A1F71" font-family="Arial, sans-serif">VISA</text></svg>
+                        </span>
+                        <span class="pay-icon pay-mc" title="Mastercard">
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><circle cx="28" cy="10" r="6" fill="#EB001B"/><circle cx="36" cy="10" r="6" fill="#F79E1B" fill-opacity="0.95"/><text x="44" y="13" font-size="7" font-weight="700" fill="#111" font-family="Arial, sans-serif">MC</text></svg>
+                        </span>
+                        <span class="pay-icon pay-applepay" title="Apple Pay">
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><text x="8" y="13" font-size="9" font-weight="700" fill="#111" font-family="Arial, sans-serif">Apple Pay</text></svg>
+                        </span>
+                        <span class="pay-icon pay-gpay" title="Google Pay">
+                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true"><rect width="64" height="20" rx="3" fill="#fff"/><text x="10" y="13" font-size="9" font-weight="700" fill="#111" font-family="Arial, sans-serif">G Pay</text></svg>
+                        </span>
                     </div>
                 </div>
 
