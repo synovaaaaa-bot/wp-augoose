@@ -184,57 +184,6 @@ if ( post_password_required() ) {
     <div class="product-additional-info">
         <div class="container">
             
-            <!-- Custom Tabs -->
-            <div class="product-tabs-custom">
-                <ul class="tabs-nav">
-                    <li class="active"><a href="#tab-details">DETAILS</a></li>
-                    <li><a href="#tab-shipping">SHIPPING</a></li>
-                </ul>
-                <div class="tabs-content">
-                    <div id="tab-details" class="tab-panel active">
-                        <?php
-                        // DETAILS tab: Show product description (full content) only
-                        $content = get_the_content();
-                        if ( ! empty( $content ) ) {
-                            echo '<div class="product-full-description">';
-                            echo wp_kses_post( apply_filters( 'the_content', $content ) );
-                            echo '</div>';
-                        } else {
-                            echo '<p>' . esc_html__( 'No description available.', 'wp-augoose' ) . '</p>';
-                        }
-                        ?>
-                    </div>
-                    <div id="tab-shipping" class="tab-panel">
-                        <?php
-                        // Shipping tab: show your product shipping class + link to shop shipping/returns pages if present.
-                        $shipping_class = $product->get_shipping_class();
-                        if ( $shipping_class ) {
-                            $term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
-                            if ( $term && ! is_wp_error( $term ) ) {
-                                echo '<h3>Shipping Class</h3>';
-                                echo '<p>' . esc_html( $term->name ) . '</p>';
-                            }
-                        }
-
-                        // Optional: show product weight/dimensions if set
-                        $weight = $product->get_weight();
-                        $dims   = wc_format_dimensions( $product->get_dimensions( false ) );
-                        if ( $weight || $dims ) {
-                            echo '<h3>Package</h3>';
-                            echo '<p>';
-                            if ( $weight ) {
-                                echo esc_html__( 'Weight:', 'wp-augoose' ) . ' ' . esc_html( $weight ) . ' ' . esc_html( get_option( 'woocommerce_weight_unit' ) ) . '<br>';
-                            }
-                            if ( $dims && $dims !== 'N/A' ) {
-                                echo esc_html__( 'Dimensions:', 'wp-augoose' ) . ' ' . esc_html( $dims );
-                            }
-                            echo '</p>';
-                        }
-                        ?>
-                    </div>
-                </div>
-            </div>
-            
             <!-- Related Products -->
             <div class="related-products-section">
                 <h2>YOU MAY ALSO LIKE</h2>
