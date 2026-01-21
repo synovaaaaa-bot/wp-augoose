@@ -56,6 +56,44 @@
     gap: 20px;
 }
 
+.shop-filter-toggle {
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid #1a1a1a;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.shop-filter-toggle:hover {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+/* Default state: filters collapsed so product grid can be full width */
+.shop-page:not(.filters-open) .shop-layout {
+    grid-template-columns: 1fr;
+}
+
+.shop-page:not(.filters-open) .shop-filters {
+    display: none;
+}
+
+.shop-page:not(.filters-open) .woocommerce ul.products,
+.shop-page:not(.filters-open) .woocommerce-page ul.products,
+.shop-page:not(.filters-open) ul.products {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.shop-page.filters-open .shop-layout {
+    grid-template-columns: 280px 1fr;
+}
+
 .shop-view-toggle {
     display: flex;
     gap: 4px;
@@ -412,6 +450,10 @@ ul.products li.product {
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         gap: 20px !important;
     }
+
+    .shop-page:not(.filters-open) .woocommerce ul.products {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
 }
 
 @media (max-width: 768px) {
@@ -434,6 +476,15 @@ ul.products li.product {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
+    }
+
+    .shop-toolbar-left {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .shop-page:not(.filters-open) .woocommerce ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
     
     .shop-toolbar-right {

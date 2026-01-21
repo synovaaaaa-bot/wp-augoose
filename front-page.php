@@ -109,7 +109,7 @@ get_header();
 				<div class="step-card"><div class="step-no">02</div><div class="step-title">Add to cart</div><div class="step-desc">Select your items.</div></div>
 				<div class="step-card"><div class="step-no">03</div><div class="step-title">Checkout</div><div class="step-desc">Fill shipping details.</div></div>
 				<div class="step-card"><div class="step-no">04</div><div class="step-title">Payment</div><div class="step-desc">Secure payment options.</div></div>
-				<div class="step-card"><div class="step-no">05</div><div class="step-title">Track shipment</div><div class="step-desc">Receive updates.</div></div>
+				<div class="step-card"><div class="step-no">05</div><div class="step-title">Track shipment</div><div class="step-desc">We’ll send your AWB number for you to track the shipment.</div></div>
 			</div>
 		</div>
 	</section>

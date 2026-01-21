@@ -83,25 +83,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
                                 
                             </div>
 
-                            <!-- Shipping Method -->
-                            <div class="checkout-section">
-                                <h2 class="section-title">SHIPPING METHOD</h2>
-                                <div class="section-fields">
-                                    <?php
-                                    if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) {
-                                        do_action( 'woocommerce_review_order_before_shipping' );
-                                        wc_cart_totals_shipping_html();
-                                        do_action( 'woocommerce_review_order_after_shipping' );
-                                    }
-                                    ?>
-                                </div>
-                                <p class="section-note">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                        <path d="M8 0L0 4v2c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V4L8 0zm0 2.2L14 5.1c-.2 4.5-3.1 8.7-6 10.1-2.9-1.4-5.8-5.6-6-10.1L8 2.2zM7 7h2v2H7V7zm0-4h2v4H7V3z"/>
-                                    </svg>
-                                    Shipping fee automatically calculated
-                                </p>
-                            </div>
+                            <?php /* Shipping method section intentionally hidden (no customer choice). */ ?>
 
 
                             <?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>

@@ -15,7 +15,7 @@ get_header( 'shop' );
 do_action( 'woocommerce_before_main_content' );
 ?>
 
-<div class="shop-page">
+<div class="shop-page" data-shop-page>
 	<header class="woocommerce-products-header">
 		<?php if ( apply_filters( 'woocommerce_show_page_title', true ) ) : ?>
 			<h1 class="woocommerce-products-header__title page-title"><?php woocommerce_page_title(); ?></h1>
@@ -36,16 +36,12 @@ do_action( 'woocommerce_before_main_content' );
 			<?php else : ?>
 				<?php
 				// Fallback: render common Woo widgets if sidebar isn't configured yet.
-				if ( class_exists( 'WC_Widget_Product_Categories' ) ) {
-					the_widget( 'WC_Widget_Product_Categories', array( 'title' => __( 'Category', 'wp-augoose' ) ) );
-				}
 				if ( class_exists( 'WC_Widget_Price_Filter' ) ) {
 					the_widget( 'WC_Widget_Price_Filter', array( 'title' => __( 'Price range', 'wp-augoose' ) ) );
 				}
 				if ( class_exists( 'WC_Widget_Layered_Nav' ) ) {
 					// Try common attributes used in your screenshots.
 					the_widget( 'WC_Widget_Layered_Nav', array( 'title' => __( 'Size', 'wp-augoose' ), 'attribute' => 'size' ) );
-					the_widget( 'WC_Widget_Layered_Nav', array( 'title' => __( 'Color', 'wp-augoose' ), 'attribute' => 'color' ) );
 				}
 				?>
 			<?php endif; ?>
@@ -58,6 +54,9 @@ do_action( 'woocommerce_before_main_content' );
 				?>
 				<div class="shop-toolbar">
 					<div class="shop-toolbar-left">
+						<button type="button" class="shop-filter-toggle" aria-expanded="false">
+							<?php esc_html_e( 'Filter', 'wp-augoose' ); ?>
+						</button>
 						<?php woocommerce_result_count(); ?>
 						<div class="shop-view-toggle" role="group" aria-label="<?php esc_attr_e( 'View', 'wp-augoose' ); ?>">
 							<button type="button" data-view="grid" class="is-active" aria-label="<?php esc_attr_e( 'Grid view', 'wp-augoose' ); ?>">▦</button>

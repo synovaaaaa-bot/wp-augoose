@@ -30,15 +30,24 @@
                     );
                     ?>
                 </nav>
-                <p class="footer-tagline">
-                    <?php echo esc_html__( 'Authentic apparel, crafted in Indonesia', 'wp-augoose' ); ?>
-                </p>
             <?php endif; ?>
+        </div>
 
-            <div class="site-info">
-                <p>
-                    &copy; <?php echo date('Y'); ?>
-                </p>
+        <div class="footer-bottom-bar">
+            <div class="container">
+                <div class="footer-payments" aria-label="<?php esc_attr_e( 'Payment methods', 'wp-augoose' ); ?>">
+                    <div class="footer-payments-title"><?php echo esc_html__( 'Payment Methods', 'wp-augoose' ); ?></div>
+                    <div class="footer-payment-icons" aria-hidden="true">
+                        <span class="pay-icon">VISA</span>
+                        <span class="pay-icon">MC</span>
+                        <span class="pay-icon">Apple&nbsp;Pay</span>
+                        <span class="pay-icon">G&nbsp;Pay</span>
+                    </div>
+                </div>
+
+                <div class="site-info">
+                    <p><?php echo esc_html( 'Augoose.id | ' . date( 'Y' ) . ' All Rights Reserved.' ); ?></p>
+                </div>
             </div>
         </div>
     </footer>

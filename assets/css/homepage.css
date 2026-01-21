@@ -144,7 +144,7 @@
    Latest Collection
    =================================== */
 .latest-collection {
-    padding: 60px 0 80px;
+    padding: 36px 0 64px;
     background: #fff;
 }
 
@@ -169,7 +169,7 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    margin-bottom: 50px;
+    margin-bottom: 34px;
     width: 100%;
 }
 
@@ -427,14 +427,14 @@ body .latest-collection ul.products li.product {
    How to order
    =================================== */
 .how-to-order {
-    padding: 80px 0 90px;
+    padding: 56px 0 64px;
     background: #f5f5f5;
     text-align: center;
 }
 
 .section-subtitle {
-    margin-top: -30px;
-    margin-bottom: 40px;
+    margin-top: 10px;
+    margin-bottom: 28px;
     font-size: 12px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -445,7 +445,7 @@ body .latest-collection ul.products li.product {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 18px;
-    margin-top: 30px;
+    margin-top: 18px;
 }
 
 .step-card {
@@ -502,7 +502,7 @@ body .latest-collection ul.products li.product {
     }
     
     .latest-collection {
-        padding: 50px 0 30px;
+        padding: 28px 0 40px;
     }
 
     .latest-collection .container {

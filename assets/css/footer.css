@@ -7,10 +7,10 @@
    Main Footer
    ============================================ */
 .site-footer {
-    background-color: #30475E;
-    color: #FFFFFF;
-    padding: 80px 0 0;
-    margin-top: 120px;
+    background-color: #f5f5f5;
+    color: #30475E;
+    padding: 60px 0 0;
+    margin-top: 80px;
 }
 
 .footer-logo {
@@ -32,10 +32,10 @@
 
 .footer-widgets {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 48px;
-    padding-bottom: 60px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 48px;
+    border-bottom: 1px solid rgba(48, 71, 94, 0.18);
 }
 
 .footer-fallback {
@@ -64,7 +64,7 @@
 }
 
 .footer-widgets .widget {
-    color: #FFFFFF;
+    color: #30475E;
 }
 
 .footer-widgets .widget-title {
@@ -73,30 +73,74 @@
     text-transform: uppercase;
     letter-spacing: 2px;
     margin: 0 0 24px;
-    color: #FFFFFF;
+    color: #30475E;
 }
 
 .footer-widgets a {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(48, 71, 94, 0.75);
     text-decoration: none;
 }
 
 .footer-widgets a:hover {
-    color: #FFFFFF;
+    color: #30475E;
 }
 
 .site-info {
-    padding: 24px 0;
+    padding: 0;
     text-align: center;
 }
 
 .site-info p {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.85);
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-family: var(--font-body, Georgia, "Times New Roman", serif);
+}
+
+.footer-bottom-bar {
+    background: #30475E;
+    color: #fff;
+    padding: 26px 0;
+    margin-top: 36px;
+}
+
+.footer-payments {
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+    margin-bottom: 16px;
+}
+
+.footer-payments-title {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+}
+
+.footer-payment-icons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-payment-icons .pay-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.95);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.06);
 }
 
 .footer-content {

@@ -63,7 +63,6 @@
     function initStickyHeader() {
         const header = $('.site-header');
         const headerHeight = header.outerHeight();
-        let lastScroll = 0;
 
         $(window).on('scroll', function() {
             const currentScroll = $(this).scrollTop();
@@ -73,15 +72,31 @@
             } else {
                 header.removeClass('scrolled');
             }
+        });
+    }
 
-            // Hide/Show header on scroll
-            if (currentScroll > lastScroll && currentScroll > headerHeight * 2) {
-                header.css('transform', 'translateY(-100%)');
-            } else {
-                header.css('transform', 'translateY(0)');
+    // Shop Filters Toggle (Archive pages)
+    function initShopFiltersToggle() {
+        const $page = $('[data-shop-page]');
+        if (!$page.length) return;
+
+        const $toggle = $page.find('.shop-filter-toggle');
+        if (!$toggle.length) return;
+
+        // Default: collapsed
+        $page.removeClass('filters-open');
+        $toggle.attr('aria-expanded', 'false');
+
+        $toggle.on('click', function() {
+            const isOpen = $page.hasClass('filters-open');
+            $page.toggleClass('filters-open', !isOpen);
+            $toggle.attr('aria-expanded', String(!isOpen));
+
+            if (!isOpen) {
+                const off = $toggle.offset();
+                const top = off ? off.top - 80 : 0;
+                if (top > 0) window.scrollTo({ top, behavior: 'smooth' });
             }
-
-            lastScroll = currentScroll;
         });
     }
 
@@ -421,6 +436,7 @@
         initMobileMenu();
         initSearchToggle();
         initStickyHeader();
+        initShopFiltersToggle();
         initQuickView();
         initWishlist();
         initAjaxAddToCart();

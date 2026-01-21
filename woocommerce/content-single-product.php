@@ -50,13 +50,43 @@ if ( post_password_required() ) {
                 <!-- Product Images -->
                 <div class="product-gallery-wrapper">
                     <?php
-                    /**
-                     * Hook: woocommerce_before_single_product_summary.
-                     *
-                     * @hooked woocommerce_show_product_sale_flash - 10
-                     * @hooked woocommerce_show_product_images - 20
-                     */
-                    do_action('woocommerce_before_single_product_summary');
+                    // Custom 2-image layout (front/back). Uses featured image + first gallery image.
+                    $image_ids = array();
+                    $thumb_id  = $product ? (int) $product->get_image_id() : 0;
+                    if ( $thumb_id ) {
+                        $image_ids[] = $thumb_id;
+                    }
+                    $gallery_ids = $product ? (array) $product->get_gallery_image_ids() : array();
+                    foreach ( $gallery_ids as $gid ) {
+                        $gid = (int) $gid;
+                        if ( $gid && ! in_array( $gid, $image_ids, true ) ) {
+                            $image_ids[] = $gid;
+                        }
+                        if ( count( $image_ids ) >= 2 ) {
+                            break;
+                        }
+                    }
+
+                    // Sale flash (keep WooCommerce logic)
+                    if ( function_exists( 'woocommerce_show_product_sale_flash' ) ) {
+                        woocommerce_show_product_sale_flash();
+                    }
+                    ?>
+
+                    <div class="product-gallery-two">
+                        <?php
+                        if ( ! empty( $image_ids ) ) {
+                            foreach ( $image_ids as $iid ) {
+                                echo '<div class="product-gallery-two__item">';
+                                echo wp_get_attachment_image( $iid, 'large', false, array( 'class' => 'product-gallery-two__img' ) );
+                                echo '</div>';
+                            }
+                        } else {
+                            // Fallback to default images if none set.
+                            do_action( 'woocommerce_before_single_product_summary' );
+                        }
+                        ?>
+                    </div>
                     ?>
                 </div>
 
@@ -94,32 +124,9 @@ if ( post_password_required() ) {
                             woocommerce_simple_add_to_cart();
                         }
                         ?>
-                        
-                        <!-- Material Info -->
                         <?php
-                        $material = get_post_meta( get_the_ID(), '_product_material', true );
-                        if ( $material ) : ?>
-                            <div class="product-material-info">
-                                <div class="material-label">MATERIAL</div>
-                                <div class="material-value"><?php echo esc_html( $material ); ?></div>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <!-- Shipping Info -->
-                        <div class="product-shipping-info">
-                            <div class="shipping-label">SHIPPING</div>
-                            <div class="shipping-value">Free shipping on orders over $200</div>
-                        </div>
-                        
-                        <!-- Share Button -->
-                        <div class="product-share">
-                            <button type="button" class="share-button">
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                    <path d="M12 10c-.8 0-1.5.3-2 .8L6.5 8.5c.1-.2.1-.3.1-.5s0-.3-.1-.5L10 5.2c.5.5 1.2.8 2 .8 1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3c0 .2 0 .3.1.5L5.6 5.8C5.1 5.3 4.4 5 3.5 5c-1.7 0-3 1.3-3 3s1.3 3 3 3c.9 0 1.6-.3 2.1-.8l3.5 2.3c0 .2-.1.3-.1.5 0 1.7 1.3 3 3 3s3-1.3 3-3-1.3-3-3-3z"/>
-                                </svg>
-                                SHARE
-                            </button>
-                        </div>
+                        // Material / Shipping / Share moved to lower tabs/sections to keep the top summary compact.
+                        ?>
                         
                     </div>
                 </div>

@@ -573,6 +573,169 @@ function wp_augoose_scripts() {
 add_action( 'wp_enqueue_scripts', 'wp_augoose_scripts' );
 
 /**
+ * Shop filters: hide unwanted widgets (Category/Color) and keep only Price range + Size.
+ */
+add_filter(
+	'widget_display_callback',
+	function ( $instance, $widget, $args ) {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return $instance;
+		}
+		if ( ! ( function_exists( 'is_shop' ) && is_shop() ) && ! ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() ) ) {
+			return $instance;
+		}
+
+		// Hide categories widget on product archives (user is already browsing a category page or shop listing).
+		if ( $widget instanceof WC_Widget_Product_Categories ) {
+			return false;
+		}
+
+		// Hide layered nav for colors; keep size only.
+		if ( $widget instanceof WC_Widget_Layered_Nav ) {
+			$attr = '';
+			if ( is_array( $instance ) && isset( $instance['attribute'] ) ) {
+				$attr = (string) $instance['attribute'];
+			}
+			$attr = strtolower( $attr );
+			if ( in_array( $attr, array( 'color', 'colour' ), true ) ) {
+				return false;
+			}
+		}
+
+		return $instance;
+	},
+	10,
+	3
+);
+
+/**
+ * Size filter: limit size terms per category (pants vs jackets/shirts).
+ */
+add_filter(
+	'woocommerce_layered_nav_term_html',
+	function ( $term_html, $term, $link, $count ) {
+		if ( ! class_exists( 'WooCommerce' ) || ! ( $term instanceof WP_Term ) ) {
+			return $term_html;
+		}
+
+		// Only affect size taxonomy terms.
+		$tax = isset( $term->taxonomy ) ? (string) $term->taxonomy : '';
+		if ( stripos( $tax, 'size' ) === false ) {
+			return $term_html;
+		}
+
+		$slug = strtolower( (string) $term->slug );
+
+		// Determine current category context.
+		$current_slug = '';
+		if ( function_exists( 'is_product_category' ) && is_product_category() ) {
+			$q = get_queried_object();
+			if ( $q && isset( $q->slug ) ) {
+				$current_slug = strtolower( (string) $q->slug );
+			}
+		}
+
+		// Pants: numeric waist sizes only.
+		if ( in_array( $current_slug, array( 'pants', 'pant' ), true ) ) {
+			$allowed = array( '28', '30', '32', '34', '36', '38' );
+			if ( ! in_array( $slug, $allowed, true ) ) {
+				return '';
+			}
+			return $term_html;
+		}
+
+		// Jackets/Shirts: S-XL only.
+		if ( in_array( $current_slug, array( 'jackets', 'jacket', 'shirts', 'shirt' ), true ) ) {
+			$allowed = array( 's', 'm', 'l', 'xl' );
+			if ( ! in_array( $slug, $allowed, true ) ) {
+				return '';
+			}
+			return $term_html;
+		}
+
+		return $term_html;
+	},
+	10,
+	4
+);
+
+/**
+ * Checkout: revise billing field labels + required/optional rules.
+ */
+add_filter(
+	'woocommerce_checkout_fields',
+	function ( $fields ) {
+		if ( ! is_array( $fields ) ) {
+			return $fields;
+		}
+
+		// Billing fields
+		if ( isset( $fields['billing'] ) && is_array( $fields['billing'] ) ) {
+			// Name: keep first_name as "Nama", remove last_name
+			if ( isset( $fields['billing']['billing_first_name'] ) ) {
+				$fields['billing']['billing_first_name']['label']       = __( 'Nama', 'wp-augoose' );
+				$fields['billing']['billing_first_name']['placeholder'] = __( 'Nama lengkap', 'wp-augoose' );
+				$fields['billing']['billing_first_name']['required']    = true;
+			}
+			if ( isset( $fields['billing']['billing_last_name'] ) ) {
+				unset( $fields['billing']['billing_last_name'] );
+			}
+
+			// Address
+			if ( isset( $fields['billing']['billing_address_1'] ) ) {
+				$fields['billing']['billing_address_1']['label']       = __( 'Address', 'wp-augoose' );
+				$fields['billing']['billing_address_1']['placeholder'] = __( 'Street address', 'wp-augoose' );
+				$fields['billing']['billing_address_1']['required']    = true;
+			}
+
+			// Address remarks (optional)
+			if ( isset( $fields['billing']['billing_address_2'] ) ) {
+				$fields['billing']['billing_address_2']['label']       = __( 'Address remarks', 'wp-augoose' );
+				$fields['billing']['billing_address_2']['placeholder'] = __( 'Apartment, suite, etc. (optional)', 'wp-augoose' );
+				$fields['billing']['billing_address_2']['required']    = false;
+			}
+
+			// Postal code
+			if ( isset( $fields['billing']['billing_postcode'] ) ) {
+				$fields['billing']['billing_postcode']['label']       = __( 'Postal Code', 'wp-augoose' );
+				$fields['billing']['billing_postcode']['placeholder'] = __( 'Postal code', 'wp-augoose' );
+				$fields['billing']['billing_postcode']['required']    = true;
+			}
+
+			// Country
+			if ( isset( $fields['billing']['billing_country'] ) ) {
+				$fields['billing']['billing_country']['label']    = __( 'Country', 'wp-augoose' );
+				$fields['billing']['billing_country']['required'] = true;
+			}
+
+			// Phone (country code hint)
+			if ( isset( $fields['billing']['billing_phone'] ) ) {
+				$fields['billing']['billing_phone']['label']       = __( 'Phone number', 'wp-augoose' );
+				$fields['billing']['billing_phone']['placeholder'] = __( 'e.g. +62 812-3456-7890', 'wp-augoose' );
+				$fields['billing']['billing_phone']['required']    = true;
+			}
+
+			// Email
+			if ( isset( $fields['billing']['billing_email'] ) ) {
+				$fields['billing']['billing_email']['label']       = __( 'Email', 'wp-augoose' );
+				$fields['billing']['billing_email']['placeholder'] = __( 'you@example.com', 'wp-augoose' );
+				$fields['billing']['billing_email']['required']    = true;
+			}
+		}
+
+		// Shipping: keep last_name removed for consistency (optional)
+		if ( isset( $fields['shipping'] ) && is_array( $fields['shipping'] ) ) {
+			if ( isset( $fields['shipping']['shipping_last_name'] ) ) {
+				unset( $fields['shipping']['shipping_last_name'] );
+			}
+		}
+
+		return $fields;
+	},
+	20
+);
+
+/**
  * Inject category links into the center menu (Jackets / Pants / Shirts)
  * If the Primary menu already contains them, we won't duplicate.
  */
