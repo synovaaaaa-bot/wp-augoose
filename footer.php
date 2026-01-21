@@ -138,7 +138,7 @@
 
 
     <!-- Size Guide Modal (Global - accessible from all pages) -->
-    <div class="size-guide-modal" id="size-guide-modal" style="display: none;">
+    <div class="size-guide-modal" id="size-guide-modal" style="display: none !important; visibility: hidden;">
         <div class="size-guide-overlay"></div>
         <div class="size-guide-content-wrapper">
             <button class="size-guide-close" aria-label="Close size guide">&times;</button>
@@ -316,18 +316,16 @@
         }
         
         // Force show modal
-        modal.style.display = 'flex';
-        modal.style.visibility = 'visible';
-        modal.style.opacity = '1';
+        modal.setAttribute('style', 'display: flex !important; visibility: visible !important; opacity: 1 !important;');
         document.body.classList.add('size-guide-open');
         
-        console.log('Modal should be visible now');
+        console.log('Modal should be visible now', modal.style.display);
     }
     
     function closeSizeGuide() {
         var modal = document.getElementById('size-guide-modal');
         if (modal) {
-            modal.style.display = 'none';
+            modal.setAttribute('style', 'display: none !important; visibility: hidden !important;');
             document.body.classList.remove('size-guide-open');
         }
     }
