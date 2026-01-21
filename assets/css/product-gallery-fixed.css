@@ -247,12 +247,18 @@
    to match the rest of the site. */
 .related-products-grid .product-add-to-cart {
     padding: 0 14px 14px;
-    margin-top: 8px;
+    margin-top: auto; /* Push button to bottom of card */
+}
+
+.related-products-grid .product-add-to-cart form {
+    margin: 0;
+    padding: 0;
 }
 
 .related-products-grid .product-add-to-cart .add-to-cart-btn,
 .related-products-grid .product-add-to-cart button,
-.related-products-grid .product-add-to-cart a {
+.related-products-grid .product-add-to-cart a,
+.related-products-grid .product-add-to-cart .view-product-btn {
     width: 100%;
     background: #1a1a1a;
     color: #fff;
@@ -282,15 +288,12 @@
     background: #fff;
     color: #1a1a1a;
     border: 1px solid #1a1a1a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 46px;
-    height: 46px;
-    box-sizing: border-box;
-    line-height: 1.1;
-    text-align: center;
+}
+
+.related-products-grid .product-add-to-cart .view-product-btn.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .related-products-grid .product-add-to-cart .view-product-btn:hover {
@@ -372,10 +375,6 @@
     margin: 0 !important;
 }
 
-.related-products-grid .product-add-to-cart {
-    margin-top: auto;
-    padding: 0 14px 14px;
-}
 
 /* Responsive */
 @media (max-width: 1024px) {

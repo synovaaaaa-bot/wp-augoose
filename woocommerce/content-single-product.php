@@ -150,35 +150,16 @@ if ( post_password_required() ) {
             <div class="product-tabs-custom">
                 <ul class="tabs-nav">
                     <li class="active"><a href="#tab-details">DETAILS</a></li>
-                    <li><a href="#tab-materials">MATERIALS & CARE</a></li>
                     <li><a href="#tab-shipping">SHIPPING</a></li>
                 </ul>
                 <div class="tabs-content">
                     <div id="tab-details" class="tab-panel active">
                         <?php
-                        // DETAILS tab: Only show material info
-                        $material_attr = '';
-                        if ( method_exists( $product, 'get_attribute' ) ) {
-                            $material_attr = $product->get_attribute( 'pa_material' );
-                            if ( ! $material_attr ) {
-                                $material_attr = $product->get_attribute( 'material' );
-                            }
-                        }
-                        
-                        if ( $material_attr ) {
-                            echo '<h3>Material</h3>';
-                            echo '<p>' . esc_html( wp_strip_all_tags( $material_attr ) ) . '</p>';
-                        }
-                        ?>
-                    </div>
-                    <div id="tab-materials" class="tab-panel">
-                        <?php
-                        // MATERIALS & CARE tab: Only show care info (short description)
-                        $short = $product->get_short_description();
-                        if ( $short ) {
-                            echo '<h3>Care</h3>';
-                            echo '<div class="material-tab-content">';
-                            echo wp_kses_post( apply_filters( 'the_content', $short ) );
+                        // DETAILS tab: Show product description (full content)
+                        $content = get_the_content();
+                        if ( ! empty( $content ) ) {
+                            echo '<div class="product-full-description">';
+                            echo wp_kses_post( apply_filters( 'the_content', $content ) );
                             echo '</div>';
                         }
                         ?>
