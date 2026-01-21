@@ -476,6 +476,30 @@
     }
 
     // Initialize on Document Ready
+    // Language Switcher (cookie-based)
+    function initLanguageSwitcher() {
+        $('.augoose-lang-switcher').on('change', function() {
+            const lang = $(this).val();
+            document.cookie = 'wp_augoose_lang=' + lang + '; path=/; max-age=31536000'; // 1 year
+            // Reload page to apply language (if you have translation files)
+            location.reload();
+        });
+    }
+
+    // Currency Switcher (cookie-based + price conversion)
+    function initCurrencySwitcher() {
+        $('.augoose-currency-switcher').on('change', function() {
+            const currency = $(this).val();
+            const rate = parseFloat($(this).find('option:selected').data('rate')) || 1.0;
+            const symbol = $(this).find('option:selected').data('symbol') || '$';
+            document.cookie = 'wp_augoose_currency=' + currency + '; path=/; max-age=31536000';
+            document.cookie = 'wp_augoose_currency_rate=' + rate + '; path=/; max-age=31536000';
+            document.cookie = 'wp_augoose_currency_symbol=' + symbol + '; path=/; max-age=31536000';
+            // Reload to apply currency conversion
+            location.reload();
+        });
+    }
+
     $(document).ready(function() {
         initMobileMenu();
         initSearchToggle();
@@ -491,6 +515,8 @@
         initNewsletterForm();
         initProductImageSlider(); // Auto-slide product images
         initSizeGuideToggle(); // Size guide toggle
+        initLanguageSwitcher();
+        initCurrencySwitcher();
     });
 
     // Initialize on Window Load

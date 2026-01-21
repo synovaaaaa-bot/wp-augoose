@@ -242,7 +242,23 @@ function wp_augoose_render_language_switcher() {
             )
         );
         echo '</div>';
+        return;
     }
+
+    // Built-in fallback: Simple language switcher (cookie-based, UI only - no translation)
+    $current_lang = isset( $_COOKIE['wp_augoose_lang'] ) ? sanitize_text_field( $_COOKIE['wp_augoose_lang'] ) : 'en';
+    $languages = array(
+        'en' => 'English',
+        'id' => 'Indonesia',
+    );
+    echo '<div class="header-locale header-language">';
+    echo '<select class="lang-select augoose-lang-switcher" data-current="' . esc_attr( $current_lang ) . '">';
+    foreach ( $languages as $code => $name ) {
+        $selected = ( $code === $current_lang ) ? ' selected' : '';
+        printf( '<option value="%s"%s>%s</option>', esc_attr( $code ), $selected, esc_html( $name ) );
+    }
+    echo '</select>';
+    echo '</div>';
 }
 
 function wp_augoose_render_currency_switcher() {
@@ -289,6 +305,27 @@ function wp_augoose_render_currency_switcher() {
         echo '</div>';
         return;
     }
+
+    // Built-in fallback: Simple currency switcher (cookie-based + rate conversion)
+    $current_currency = isset( $_COOKIE['wp_augoose_currency'] ) ? sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) : get_woocommerce_currency();
+    $currencies = array(
+        'USD' => array( 'symbol' => '$', 'rate' => 1.0, 'label' => 'USD' ),
+        'IDR' => array( 'symbol' => 'Rp', 'rate' => 15000.0, 'label' => 'IDR' ),
+        'EUR' => array( 'symbol' => '€', 'rate' => 0.92, 'label' => 'EUR' ),
+    );
+    // Get base currency from WooCommerce
+    $base_currency = get_woocommerce_currency();
+    if ( ! isset( $currencies[ $base_currency ] ) ) {
+        $currencies[ $base_currency ] = array( 'symbol' => get_woocommerce_currency_symbol( $base_currency ), 'rate' => 1.0, 'label' => $base_currency );
+    }
+    echo '<div class="header-locale header-currency">';
+    echo '<select class="currency-select augoose-currency-switcher" data-base="' . esc_attr( $base_currency ) . '" data-current="' . esc_attr( $current_currency ) . '">';
+    foreach ( $currencies as $code => $info ) {
+        $selected = ( $code === $current_currency ) ? ' selected' : '';
+        printf( '<option value="%s" data-rate="%s" data-symbol="%s"%s>%s</option>', esc_attr( $code ), esc_attr( $info['rate'] ), esc_attr( $info['symbol'] ), $selected, esc_html( $info['label'] ) );
+    }
+    echo '</select>';
+    echo '</div>';
 }
 
 /**
@@ -1343,6 +1380,57 @@ function wp_augoose_widgets_init() {
     ) );
 }
 add_action( 'widgets_init', 'wp_augoose_widgets_init' );
+
+/**
+ * Currency conversion: Apply rate from cookie to WooCommerce prices.
+ */
+add_filter(
+	'woocommerce_get_price_html',
+	function ( $price_html, $product ) {
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return $price_html;
+		}
+
+		$currency = isset( $_COOKIE['wp_augoose_currency'] ) ? sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) : get_woocommerce_currency();
+		$base_currency = get_woocommerce_currency();
+
+		// If currency matches base, return as-is.
+		if ( $currency === $base_currency ) {
+			return $price_html;
+		}
+
+		$rate = isset( $_COOKIE['wp_augoose_currency_rate'] ) ? floatval( $_COOKIE['wp_augoose_currency_rate'] ) : 1.0;
+		$symbol = isset( $_COOKIE['wp_augoose_currency_symbol'] ) ? sanitize_text_field( $_COOKIE['wp_augoose_currency_symbol'] ) : get_woocommerce_currency_symbol( $currency );
+
+		if ( $rate <= 0 || $rate === 1.0 ) {
+			return $price_html;
+		}
+
+		// Extract numeric price from HTML (simple regex - may need refinement for complex formats).
+		$price = $product->get_price();
+		if ( ! $price ) {
+			return $price_html;
+		}
+
+		$converted_price = $price * $rate;
+
+		// Format with new symbol (simple replacement - WooCommerce formatting is complex).
+		$formatted = $symbol . number_format( $converted_price, 2, '.', ',' );
+
+		// If original had sale price, try to preserve structure.
+		if ( $product->is_on_sale() && $product->get_sale_price() ) {
+			$regular_price = $product->get_regular_price();
+			$sale_price = $product->get_sale_price();
+			$converted_regular = $regular_price * $rate;
+			$converted_sale = $sale_price * $rate;
+			return '<del>' . $symbol . number_format( $converted_regular, 2, '.', ',' ) . '</del> <ins>' . $symbol . number_format( $converted_sale, 2, '.', ',' ) . '</ins>';
+		}
+
+		return $formatted;
+	},
+	10,
+	2
+);
 
 /**
  * Include template functions
