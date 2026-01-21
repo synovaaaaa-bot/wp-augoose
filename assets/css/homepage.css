@@ -43,18 +43,21 @@
    Hero Section (Figma-like)
    =================================== */
 .hero-section {
-    /* Put your real hero image here:
-       wp-augoose/assets/img/hero.jpg
-    */
-    background:
+    /* Hero image is controlled via WP Customizer (theme mod: wp_augoose_home_hero_image).
+       Fallback remains a solid color if no image is set. */
+    --hero-image: none;
+    background-color: #6b6b6b;
+    background-image:
         linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
-        url('../img/hero.jpg');
+        var(--hero-image);
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     color: #fff;
-    min-height: 70vh;
+    min-height: clamp(520px, 70vh, 760px);
     display: flex;
     align-items: center;
+    padding: 70px 0;
 }
 
 .hero-inner {
@@ -480,7 +483,8 @@ body .latest-collection ul.products li.product {
    =================================== */
 @media (max-width: 768px) {
     .hero-section {
-        min-height: 60vh;
+        min-height: clamp(420px, 60vh, 640px);
+        padding: 56px 0;
     }
     
     .hero-content h1 {

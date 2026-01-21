@@ -343,17 +343,50 @@ if ( ! function_exists( 'wp_augoose_woocommerce_cart_link_fragment' ) ) {
 	function wp_augoose_woocommerce_cart_link_fragment( $fragments ) {
 		ob_start();
 		?>
-		<a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="cart-icon">
+		<button type="button" class="cart-icon" data-toggle="cart-sidebar" aria-label="<?php echo esc_attr__( 'Cart', 'wp-augoose' ); ?>">
 			<span class="cart-count"><?php echo WC()->cart->get_cart_contents_count(); ?></span>
-			Cart
-		</a>
+		</button>
 		<?php
-		$fragments['a.cart-icon'] = ob_get_clean();
+		$fragments['button.cart-icon'] = ob_get_clean();
 
 		return $fragments;
 	}
 }
 add_filter( 'woocommerce_add_to_cart_fragments', 'wp_augoose_woocommerce_cart_link_fragment' );
+
+/**
+ * Cart page: redirect to shop and rely on cart sidebar instead.
+ * Adds `?open_cart=1` so JS can auto-open the sidebar.
+ */
+add_action(
+	'template_redirect',
+	function () {
+		if ( is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+			return;
+		}
+		if ( function_exists( 'is_cart' ) && is_cart() ) {
+			$target = '';
+
+			// Prefer returning the user to where they came from (if it's not cart/checkout).
+			$ref = wp_get_referer();
+			if ( $ref ) {
+				$ref_path = wp_parse_url( $ref, PHP_URL_PATH );
+				if ( $ref_path && false === stripos( $ref_path, '/cart' ) && false === stripos( $ref_path, '/checkout' ) ) {
+					$target = $ref;
+				}
+			}
+
+			if ( ! $target ) {
+				$target = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' );
+			}
+
+			$target = add_query_arg( 'open_cart', '1', $target );
+			wp_safe_redirect( $target, 302 );
+			exit;
+		}
+	},
+	20
+);
 
 /**
  * Add mini cart fragments for sidebar

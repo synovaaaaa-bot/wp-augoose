@@ -2260,78 +2260,12 @@ body.woocommerce-cart .site-content .site-main {
     float: none;
 }
 
-/* Ensure no extra content below checkout/cart */
-body.woocommerce-checkout .entry-content > *:not(.checkout-page-wrapper):not(.woocommerce):not(.woocommerce-checkout),
-body.woocommerce-cart .entry-content > *:not(.cart-page-wrapper):not(.woocommerce):not(.woocommerce-cart-form) {
-    display: none;
-}
-
-/* Hide any widgets or sidebar content that might appear */
-body.woocommerce-checkout .widget-area,
-body.woocommerce-cart .widget-area,
-body.woocommerce-checkout aside,
-body.woocommerce-cart aside,
-body.woocommerce-checkout #secondary,
-body.woocommerce-cart #secondary,
-body.woocommerce-checkout .widget,
-body.woocommerce-cart .widget {
-    display: none !important;
-}
-
-/* Hide search form and other widgets that might appear */
-body.woocommerce-checkout .widget_search,
-body.woocommerce-cart .widget_search,
-body.woocommerce-checkout .widget_recent_entries,
-body.woocommerce-cart .widget_recent_entries,
-body.woocommerce-checkout .widget_recent_comments,
-body.woocommerce-cart .widget_recent_comments,
-body.woocommerce-checkout .widget_archive,
-body.woocommerce-cart .widget_archive,
-body.woocommerce-checkout .widget_categories,
-body.woocommerce-cart .widget_categories {
-    display: none !important;
-}
-
-/* Ensure entry-content only shows checkout/cart content */
-body.woocommerce-checkout .entry-content .widget,
-body.woocommerce-cart .entry-content .widget {
-    display: none !important;
-}
-
-/* Hide any content after checkout/cart form */
-body.woocommerce-checkout .entry-content > *:not(.checkout-page-wrapper):not(.woocommerce):not(.woocommerce-checkout),
-body.woocommerce-cart .entry-content > *:not(.cart-page-wrapper):not(.woocommerce):not(.woocommerce-cart-form) {
-    display: none;
-}
-
-/* Specifically hide search, recent posts, comments, archives, categories widgets */
-body.woocommerce-checkout .widget_search,
-body.woocommerce-checkout .widget_recent_entries,
-body.woocommerce-checkout .widget_recent_comments,
-body.woocommerce-checkout .widget_archive,
-body.woocommerce-checkout .widget_categories,
-body.woocommerce-cart .widget_search,
-body.woocommerce-cart .widget_recent_entries,
-body.woocommerce-cart .widget_recent_comments,
-body.woocommerce-cart .widget_archive,
-body.woocommerce-cart .widget_categories {
-    display: none !important;
-}
-
-/* Hide any content that appears after the main checkout/cart content */
-body.woocommerce-checkout .checkout-page-wrapper ~ *,
-body.woocommerce-cart .cart-page-wrapper ~ * {
-    display: none !important;
-}
-
-/* Ensure only checkout/cart content is visible */
-body.woocommerce-checkout .site-main .entry-content {
+/* Checkout/Cart pages
+   Keep the layout full-width and hide sidebars, but DO NOT hide `.woocommerce` output.
+   (WooCommerce shortcodes wrap content in `.woocommerce`, so aggressive `display:none` rules can blank the page.) */
+body.woocommerce-checkout .site-main .entry-content,
+body.woocommerce-cart .site-main .entry-content {
     padding: 0;
-}
-
-body.woocommerce-checkout .site-main .entry-content > *:not(.checkout-page-wrapper),
-body.woocommerce-cart .site-main .entry-content > *:not(.cart-page-wrapper) {
-    display: none !important;
 }
 
 /* ===================================

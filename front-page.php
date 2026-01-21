@@ -11,7 +11,12 @@ get_header();
 <main id="primary" class="site-main">
 	
 	<!-- Hero Section -->
-	<section class="hero-section">
+	<?php
+	$hero_image_id  = (int) get_theme_mod( 'wp_augoose_home_hero_image', 0 );
+	$hero_image_url = $hero_image_id ? wp_get_attachment_image_url( $hero_image_id, 'full' ) : '';
+	$hero_style     = $hero_image_url ? sprintf( '--hero-image: url(%s);', esc_url( $hero_image_url ) ) : '';
+	?>
+	<section class="hero-section" <?php echo $hero_style ? 'style="' . esc_attr( $hero_style ) . '"' : ''; ?>>
 		<div class="container">
 			<div class="hero-inner">
 				<div class="hero-content">

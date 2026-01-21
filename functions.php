@@ -112,6 +112,31 @@ function wp_augoose_customize_register( $wp_customize ) {
             'label'   => __( 'New Arrival: label text', 'wp-augoose' ),
         )
     );
+
+    /**
+     * Homepage Hero Image
+     */
+    $wp_customize->add_setting(
+        'wp_augoose_home_hero_image',
+        array(
+            'default'           => '',
+            'sanitize_callback' => 'absint',
+            'transport'         => 'refresh',
+        )
+    );
+
+    $wp_customize->add_control(
+        new WP_Customize_Media_Control(
+            $wp_customize,
+            'wp_augoose_home_hero_image',
+            array(
+                'section'     => 'title_tagline',
+                'label'       => __( 'Homepage hero image', 'wp-augoose' ),
+                'description' => __( 'Background image for the homepage hero section.', 'wp-augoose' ),
+                'mime_type'   => 'image',
+            )
+        )
+    );
 }
 add_action( 'customize_register', 'wp_augoose_customize_register' );
 

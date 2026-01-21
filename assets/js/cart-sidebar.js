@@ -11,6 +11,15 @@ jQuery(document).ready(function($) {
         openCartSidebar();
     });
 
+    // If redirected from /cart, auto-open sidebar
+    try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('open_cart') === '1') {
+            refreshCartSidebar();
+            openCartSidebar();
+        }
+    } catch (e) {}
+
     // "View cart" button in WooCommerce notice should open sidebar (not go to cart page)
     $(document).on('click', 'a.added_to_cart.wc-forward, .woocommerce-message a.wc-forward, .woocommerce-notices-wrapper a.wc-forward', function(e) {
         e.preventDefault();
@@ -83,8 +92,8 @@ jQuery(document).ready(function($) {
     
     // Update cart count
     $(document.body).on('added_to_cart', function(event, fragments, cart_hash) {
-        if (fragments && fragments['a.cart-icon']) {
-            $('.cart-icon').replaceWith(fragments['a.cart-icon']);
+        if (fragments && fragments['button.cart-icon']) {
+            $('.cart-icon').replaceWith(fragments['button.cart-icon']);
         }
         refreshCartSidebar();
     });

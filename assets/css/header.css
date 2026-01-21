@@ -4,21 +4,24 @@
  */
 
 /* ============================================
-   Announcement Bar (Sticky Top)
+  Header stack (Announcement + Header)
    ============================================ */
-.announcement-bar {
+.header-stack {
     position: sticky;
     top: 0;
     z-index: 200;
+}
+
+.announcement-bar {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid #D1D5DB;
-    padding: 12px 0;
+    padding: 8px 0;
 }
 
 .announcement-bar p {
     color: #30475E;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -26,12 +29,9 @@
 }
 
 /* ============================================
-   Main Header (Sticky Below Announcement)
+  Main Header
    ============================================ */
 .site-header {
-    position: sticky;
-    top: 44px; /* Height of announcement bar */
-    z-index: 100;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid #D1D5DB;
@@ -46,7 +46,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 0;
+    padding: 12px 0;
     max-width: 1200px;
     margin: 0 auto;
     padding-left: 20px;
@@ -60,7 +60,7 @@
 .custom-logo-link {
     font-family: Georgia, 'Times New Roman', serif;
     font-style: italic !important;
-    font-size: 2rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: #30475E;
     text-decoration: none;
@@ -74,7 +74,7 @@
 }
 
 .custom-logo {
-    max-height: 60px;
+    max-height: 44px;
     width: auto;
 }
 
@@ -164,8 +164,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border: none;
     background: transparent;
     color: #30475E;
@@ -293,21 +293,21 @@
     }
     
     .announcement-bar p {
-        font-size: 0.75rem;
+        font-size: 0.6875rem;
     }
     
     .site-logo a {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
 }
 
 @media (max-width: 768px) {
     .header-container {
-        padding: 16px 20px;
+        padding: 10px 20px;
     }
     
     .site-logo a {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
     }
     
     .header-actions {
