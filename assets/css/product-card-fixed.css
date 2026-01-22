@@ -43,6 +43,7 @@
     display: block;
     border: 0;
     margin: 0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .product-thumbnail img {
@@ -229,7 +230,10 @@
 }
 
 .product-add-to-cart .add-to-cart-btn,
-.product-add-to-cart .view-product-btn {
+.product-add-to-cart .view-product-btn,
+.product-actions-overlay .add-to-cart-btn,
+.product-actions-overlay .variable-product-btn,
+.product-actions-overlay button.variable-product-btn {
     width: 100%;
     background: var(--augoose-primary, #30475E);
     color: var(--augoose-white, #fff);
@@ -293,12 +297,33 @@
     transform: translateY(0);
 }
 
+/* Variable product button - same style as add to cart */
+.product-actions-overlay .variable-product-btn,
+.product-add-to-cart .variable-product-btn {
+    background: var(--augoose-primary, #30475E);
+    color: var(--augoose-white, #fff);
+    border: none;
+}
+
+.product-actions-overlay .variable-product-btn:hover,
+.product-add-to-cart .variable-product-btn:hover {
+    background: var(--augoose-primary-dark, #1a252f);
+    color: var(--augoose-white, #fff);
+}
+
+.product-actions-overlay .variable-product-btn svg,
+.product-add-to-cart .variable-product-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
 /* Grid Layout */
 .latest-collection .woocommerce ul.products,
 .shop-content .woocommerce ul.products {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 24px !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 20px !important;
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -355,10 +380,18 @@
     }
 }
 
+@media (max-width: 1024px) {
+    .latest-collection .woocommerce ul.products,
+    .shop-content .woocommerce ul.products {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+}
+
 @media (max-width: 768px) {
     .latest-collection .woocommerce ul.products,
     .shop-content .woocommerce ul.products {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         gap: 12px !important;
     }
     

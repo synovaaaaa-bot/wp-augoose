@@ -24,8 +24,8 @@ body.post-type-archive-product .woocommerce ul.products,
 body.woocommerce-shop ul.products,
 body.post-type-archive-product ul.products {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 30px !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 20px !important;
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -3071,6 +3071,14 @@ body.woocommerce-cart .site-main .entry-content {
 }
 
 @media (max-width: 480px) {
+    body.woocommerce-shop .woocommerce ul.products,
+    body.post-type-archive-product .woocommerce ul.products,
+    body.woocommerce-shop ul.products,
+    body.post-type-archive-product ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+    
     .single-product-wrapper .variation-swatches.is-size {
         grid-template-columns: repeat(2, 1fr);
     }

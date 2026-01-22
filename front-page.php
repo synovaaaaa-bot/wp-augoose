@@ -10,34 +10,6 @@ get_header();
 
 <main id="primary" class="site-main">
 	
-	<!-- Hero Section -->
-	<?php
-	$hero_image_id  = (int) get_theme_mod( 'wp_augoose_home_hero_image', 0 );
-	$hero_image_url = $hero_image_id ? wp_get_attachment_image_url( $hero_image_id, 'full' ) : '';
-	$hero_style     = $hero_image_url ? sprintf( '--hero-image: url(%s);', esc_url( $hero_image_url ) ) : '';
-	?>
-	<section class="hero-section" <?php echo $hero_style ? 'style="' . esc_attr( $hero_style ) . '"' : ''; ?>>
-		<div class="container">
-			<div class="hero-inner">
-				<div class="hero-content">
-					<p class="hero-eyebrow">International &amp; domestic shipping available</p>
-					<h1><?php bloginfo( 'name' ); ?></h1>
-					<p class="hero-subtitle">Authentic apparel, crafted in Indonesia</p>
-					<?php if ( class_exists( 'WooCommerce' ) ) : ?>
-						<div class="hero-cta">
-							<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="btn btn-primary">
-								Shop Now
-							</a>
-							<a href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" class="btn btn-secondary">
-								View Collection
-							</a>
-						</div>
-					<?php endif; ?>
-				</div>
-			</div>
-		</div>
-	</section>
-
 	<?php if ( class_exists( 'WooCommerce' ) ) : ?>
 
 		<!-- Latest Collection -->

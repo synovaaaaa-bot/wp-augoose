@@ -209,9 +209,14 @@ if ( empty( $product ) || ! $product->is_visible() ) {
                 <?php
             } elseif ( $product->is_type( 'variable' ) ) {
                 ?>
-                <a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="view-product-btn">
-                    CHOOSE OPTIONS
-                </a>
+                <button type="button" class="add-to-cart-btn variable-product-btn" data-product-id="<?php echo esc_attr( $product->get_id() ); ?>" data-product-url="<?php echo esc_url( $product->get_permalink() ); ?>">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span>ADD TO CART</span>
+                </button>
                 <?php
             } elseif ( ! $product->is_in_stock() ) {
                 ?>

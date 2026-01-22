@@ -240,6 +240,11 @@
                                 $badge.hide();
                             }
                         }
+                        
+                        // Immediately update wishlist sidebar if open
+                        if ($('.wishlist-sidebar').is(':visible')) {
+                            refreshWishlistSidebar();
+                        }
                     } else {
                         showNotification('Error updating wishlist', 'error');
                     }
@@ -280,6 +285,30 @@
         }
 
         updateWishlistButtons();
+        
+        // Function to refresh wishlist sidebar immediately
+        function refreshWishlistSidebar() {
+            if (!window.wpAugoose) return;
+            const $body = $('.wishlist-sidebar-body');
+            $.post(wpAugoose.ajaxUrl, { action: 'wp_augoose_wishlist_get', nonce: wpAugoose.nonce })
+                .done(function (res) {
+                    if (res && res.success) {
+                        $body.html(res.data.html);
+                        const count = res.data.count || 0;
+                        const $badge = $('.wishlist-count');
+                        if ($badge.length) {
+                            if (count > 0) {
+                                $badge.text(count).show();
+                            } else {
+                                $badge.hide();
+                            }
+                        }
+                    }
+                });
+        }
+        
+        // Expose refresh function globally
+        window.refreshWishlistSidebar = refreshWishlistSidebar;
     }
 
     // AJAX Add to Cart
@@ -323,6 +352,11 @@
                         
                         // Trigger WooCommerce event
                         $(document.body).trigger('added_to_cart', [response.fragments, response.cart_hash, button]);
+                        
+                        // Immediately update cart sidebar if open
+                        if ($('.cart-sidebar').is(':visible')) {
+                            $(document.body).trigger('wc_fragment_refresh');
+                        }
                         
                         // Prevent duplicate buttons
                         $('.single-product-wrapper form.cart .single_add_to_cart_button:not(:first)').remove();
@@ -610,13 +644,21 @@
 
     // Currency Switcher (cookie-based + price conversion)
     function initCurrencySwitcher() {
-        $('.augoose-currency-switcher').on('change', function() {
-            const currency = $(this).val();
-            const rate = parseFloat($(this).find('option:selected').data('rate')) || 1.0;
-            const symbol = $(this).find('option:selected').data('symbol') || '$';
+        // Handle both class selectors
+        $(document).on('change', '.augoose-currency-switcher, .currency-select', function() {
+            const $select = $(this);
+            const currency = $select.val();
+            const rate = parseFloat($select.find('option:selected').data('rate')) || 1.0;
+            const symbol = $select.find('option:selected').data('symbol') || '$';
+            
+            // Set cookies
             document.cookie = 'wp_augoose_currency=' + currency + '; path=/; max-age=31536000';
             document.cookie = 'wp_augoose_currency_rate=' + rate + '; path=/; max-age=31536000';
             document.cookie = 'wp_augoose_currency_symbol=' + symbol + '; path=/; max-age=31536000';
+            
+            // Trigger WooCommerce currency change event if available
+            $(document.body).trigger('wp_augoose_currency_changed', [currency, rate, symbol]);
+            
             // Reload to apply currency conversion
             location.reload();
         });
@@ -801,6 +843,15 @@
         // Also watch for address field updates
         $(document).on('change', 'select[name*="country"]', function() {
             setTimeout(forceCheckoutFieldsEnglish, 200);
+        });
+        
+        // Handle variable product button - redirect to product page
+        $(document).on('click', '.variable-product-btn', function(e) {
+            e.preventDefault();
+            var productUrl = $(this).data('product-url');
+            if (productUrl) {
+                window.location.href = productUrl;
+            }
         });
     });
 
