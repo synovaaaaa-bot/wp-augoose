@@ -2551,6 +2551,8 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     border-top: 1px solid #e0e0e0;
     font-size: 16px;
     font-weight: 700;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 /* Place Order Button */
@@ -2892,6 +2894,34 @@ body.woocommerce-cart .site-main .entry-content {
     .single-product-wrapper .related-products-section > h2 {
         font-size: 12px;
         margin-bottom: 24px;
+    }
+    
+    /* Order Summary Mobile */
+    .woocommerce-checkout-review-order-table tfoot th,
+    .woocommerce-checkout-review-order-table tfoot td {
+        padding: 12px 0;
+        font-size: 12px;
+    }
+    
+    .woocommerce-checkout-review-order-table tfoot .order-total th,
+    .woocommerce-checkout-review-order-table tfoot .order-total td {
+        padding-top: 16px;
+        padding-bottom: 16px;
+        font-size: 14px;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    
+    .woocommerce-checkout-review-order-table tfoot th {
+        font-size: 10px;
+        padding-right: 8px;
+    }
+    
+    .woocommerce-checkout-review-order-table tfoot td {
+        font-size: 12px;
+        text-align: right;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
 }
 
