@@ -596,7 +596,7 @@ function wp_augoose_scripts() {
     // Product Cards Fixed - Image Full & Typography Better
     if ( file_exists( $theme_dir . '/assets/css/product-card-fixed.css' ) ) {
         wp_enqueue_style( 'wp-augoose-product-fixed', $theme_dir_uri . '/assets/css/product-card-fixed.css', array(), $asset_ver( 'assets/css/product-card-fixed.css' ), 'all' );
-        wp_enqueue_style( 'wp-augoose-latest-collection-redesign', $theme_dir_uri . '/assets/css/latest-collection-redesign.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-redesign.css' ), 'all' );
+        wp_enqueue_style( 'wp-augoose-latest-collection-v2', $theme_dir_uri . '/assets/css/latest-collection-v2.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-v2.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-hero-fixed', $theme_dir_uri . '/assets/css/hero-fixed.css', array( 'wp-augoose-homepage' ), $asset_ver( 'assets/css/hero-fixed.css' ), 'all' );
     }
     
@@ -1458,6 +1458,45 @@ if ( file_exists( get_template_directory() . '/inc/template-tags.php' ) ) {
  */
 if ( class_exists( 'WooCommerce' ) && file_exists( get_template_directory() . '/inc/woocommerce.php' ) ) {
     require get_template_directory() . '/inc/woocommerce.php';
+}
+
+/**
+ * Override product template for Latest Collection section
+ * Use custom template content-product-latest.php when products have class "latest"
+ */
+add_filter( 'wc_get_template_part', 'wp_augoose_use_latest_collection_template', 10, 3 );
+function wp_augoose_use_latest_collection_template( $template, $slug, $name ) {
+    // Only override content-product template
+    if ( $slug !== 'content' || $name !== 'product' ) {
+        return $template;
+    }
+    
+    // Check if we're in Latest Collection section
+    // We detect this by checking if we're on homepage and using shortcode with class="latest"
+    if ( is_front_page() && wc_get_loop_prop( 'is_shortcode' ) ) {
+        // Check if products list has class "latest" (set by shortcode [products class="latest"])
+        // We use a global flag to track if we're in Latest Collection
+        static $in_latest_collection = false;
+        
+        // Set flag when we detect Latest Collection section
+        if ( ! $in_latest_collection && did_action( 'woocommerce_shortcode_before_products_loop' ) ) {
+            $in_latest_collection = true;
+        }
+        
+        if ( $in_latest_collection ) {
+            $custom_template = get_template_directory() . '/woocommerce/content-product-latest.php';
+            if ( file_exists( $custom_template ) ) {
+                return $custom_template;
+            }
+        }
+        
+        // Reset flag after loop ends
+        if ( did_action( 'woocommerce_shortcode_after_products_loop' ) ) {
+            $in_latest_collection = false;
+        }
+    }
+    
+    return $template;
 }
 
 // Market Variation Auto-Select (auto-select Market variation based on user country)

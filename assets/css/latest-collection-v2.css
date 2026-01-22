@@ -1,0 +1,474 @@
+/**
+ * Latest Collection V2 - Complete Redesign
+ * Premium Fashion Style (Neighborhood-inspired)
+ * 6x2 Tile Layout: 440px Image + 120px Info = 560px Total
+ * Following AUGOOSE Brand Guidelines
+ */
+
+/* ===================================
+   Section Wrapper - Full Width
+   =================================== */
+.latest-collection {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+}
+
+.latest-collection .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ===================================
+   Grid Layout - 6 Columns Desktop
+   =================================== */
+.latest-collection .woocommerce ul.products,
+.latest-collection ul.products,
+.latest-collection .woocommerce ul.products.columns-6,
+.latest-collection ul.products.columns-6,
+.latest-collection .woocommerce ul.products.latest,
+.latest-collection ul.products.latest {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 16px !important; /* Gap 14-18px */
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 0 0 20px !important; /* Mentok kiri dengan padding kecil 16-24px */
+    width: 100% !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+}
+
+/* ===================================
+   Tile Container - Fixed Height 560px
+   =================================== */
+.latest-collection .woocommerce ul.products li.product-item.lc-card,
+.latest-collection ul.products li.product-item.lc-card,
+.latest-collection .woocommerce ul.products li.product.lc-card,
+.latest-collection ul.products li.product.lc-card {
+    position: relative !important;
+    width: 100% !important;
+    height: 560px !important; /* Fixed: 440px image + 120px info */
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    background: #ffffff !important;
+    border: 1px solid #e6e6e6 !important; /* Border tipis */
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.latest-collection .lc-card .product-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+}
+
+/* ===================================
+   A. Image Area: .lc-thumb (440px)
+   =================================== */
+.latest-collection .lc-card .lc-thumb,
+.latest-collection .lc-card .product-thumbnail.lc-thumb {
+    position: relative;
+    width: 100% !important;
+    height: 440px !important; /* Fixed height */
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+    background: #f3f3f3 !important; /* Background netral untuk contain fallback */
+    border: none !important;
+    flex-shrink: 0;
+}
+
+.latest-collection .lc-card .lc-thumb img,
+.latest-collection .lc-card .product-thumbnail.lc-thumb img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Primary: full-bleed, tidak gepeng */
+    object-position: center center !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+/* Fallback: Jika cover crop terlalu parah, gunakan contain */
+.latest-collection .lc-card .lc-thumb img[style*="contain"] {
+    object-fit: contain !important;
+    background: #f3f3f3 !important;
+}
+
+.latest-collection .lc-card .lc-thumb a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* ===================================
+   Badge Overlay (Top Left)
+   =================================== */
+.latest-collection .lc-card .lc-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 2px;
+    z-index: 10;
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif);
+    line-height: 1.2;
+}
+
+.latest-collection .lc-card .lc-badge--sale {
+    background: #000000;
+    color: #ffffff;
+}
+
+.latest-collection .lc-card .lc-badge--featured {
+    background: #1a1a1a;
+    color: #ffffff;
+}
+
+.latest-collection .lc-card .lc-badge--new {
+    background: #2d5016; /* Hijau gelap */
+    color: #ffffff;
+}
+
+/* ===================================
+   Wishlist Icon - Top Right
+   =================================== */
+.latest-collection .lc-card .product-wishlist {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+}
+
+.latest-collection .lc-card .wishlist-toggle {
+    position: relative;
+    z-index: 11;
+    pointer-events: auto;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.latest-collection .lc-card .wishlist-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.latest-collection .lc-card .wishlist-toggle svg {
+    color: #666;
+    transition: color 0.2s ease;
+    width: 18px;
+    height: 18px;
+}
+
+.latest-collection .lc-card .wishlist-toggle:hover svg,
+.latest-collection .lc-card .wishlist-toggle.active svg {
+    color: #e74c3c;
+    fill: currentColor;
+}
+
+/* ===================================
+   B. Info Area: .lc-info (120px)
+   =================================== */
+.latest-collection .lc-card .lc-info,
+.latest-collection .lc-card .product-info.lc-info {
+    position: relative !important;
+    width: 100% !important;
+    height: 120px !important; /* Fixed height */
+    padding: 14px 14px 16px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e6e6e6 !important; /* Border tipis atas */
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    flex-shrink: 0;
+    box-sizing: border-box !important;
+}
+
+/* ===================================
+   Product Title - Brand Guideline Font
+   =================================== */
+.latest-collection .lc-card .lc-info .woocommerce-loop-product__title,
+.latest-collection .lc-card .lc-info h2,
+.latest-collection .lc-card .lc-info .woocommerce-loop-product__title a {
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: #1a1a1a !important;
+    margin: 0 0 6px !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.2 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-height: calc(1.2em * 2) !important; /* Max 2 baris */
+    text-align: left !important; /* Align kiri */
+    text-decoration: none !important;
+}
+
+.latest-collection .lc-card .lc-info .woocommerce-loop-product__title a:hover {
+    color: #444 !important;
+}
+
+/* ===================================
+   Product Price - Brand Guideline Font
+   =================================== */
+.latest-collection .lc-card .lc-info .price,
+.latest-collection .lc-card .lc-info .woocommerce-Price-amount {
+    font-family: var(--font-body, 'Minion Pro', Georgia, 'Times New Roman', serif) !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    color: #555 !important; /* Soft color */
+    margin: 6px 0 0 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+}
+
+.latest-collection .lc-card .lc-info .price del {
+    color: #999 !important;
+    font-size: 11px !important;
+    margin-right: 6px !important;
+    text-decoration: line-through !important;
+}
+
+.latest-collection .lc-card .lc-info .price ins {
+    color: #1a1a1a !important;
+    text-decoration: none !important;
+    font-weight: 600 !important; /* Lebih tegas untuk sale price */
+}
+
+/* ===================================
+   CTA Button: VIEW PRODUCT
+   =================================== */
+.latest-collection .lc-card .lc-cta {
+    padding: 0 !important;
+    margin: 10px 0 0 !important;
+    width: 100% !important;
+}
+
+.latest-collection .lc-card .lc-button {
+    width: 100% !important;
+    height: 40px !important;
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    border: 1px solid #1a1a1a !important;
+    padding: 0 12px !important;
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.latest-collection .lc-card .lc-button:hover {
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    border-color: #1a1a1a !important;
+}
+
+/* ===================================
+   Hide Elements - Latest Collection Only
+   =================================== */
+.latest-collection .lc-card .product-badges,
+.latest-collection .lc-card .badge,
+.latest-collection .lc-card .badge-new,
+.latest-collection .lc-card .onsale,
+.latest-collection .lc-card .star-rating,
+.latest-collection .lc-card .woocommerce-product-rating,
+.latest-collection .lc-card .product-color-options,
+.latest-collection .lc-card .color-swatches,
+.latest-collection .lc-card .button.add_to_cart_button,
+.latest-collection .lc-card .added_to_cart,
+.latest-collection .lc-card .woocommerce-loop-product__link .button,
+.latest-collection .lc-card .product-add-to-cart,
+.latest-collection .lc-card .add-to-cart-btn {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Ensure our custom elements are visible */
+.latest-collection .lc-card .lc-badge,
+.latest-collection .lc-card .lc-info,
+.latest-collection .lc-card .lc-cta,
+.latest-collection .lc-card .lc-button {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* ===================================
+   Responsive Breakpoints
+   =================================== */
+@media (max-width: 1400px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+        padding: 0 0 0 18px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .lc-card {
+        height: 550px !important;
+    }
+    
+    .latest-collection .lc-card .lc-thumb {
+        height: 430px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info {
+        height: 120px !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+        padding: 0 0 0 16px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .lc-card {
+        height: 540px !important;
+    }
+    
+    .latest-collection .lc-card .lc-thumb {
+        height: 420px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info {
+        height: 120px !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        padding: 0 0 0 14px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .lc-card {
+        height: 530px !important;
+    }
+    
+    .latest-collection .lc-card .lc-thumb {
+        height: 410px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info {
+        height: 120px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        padding: 0 0 0 12px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .lc-card {
+        height: 520px !important;
+    }
+    
+    .latest-collection .lc-card .lc-thumb {
+        height: 400px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info {
+        height: 120px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info .woocommerce-loop-product__title,
+    .latest-collection .lc-card .lc-info h2 {
+        font-size: 11px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info .price {
+        font-size: 11px !important;
+    }
+    
+    .latest-collection .lc-card .lc-button {
+        height: 36px !important;
+        font-size: 10px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+        padding: 0 12px !important;
+    }
+    
+    .latest-collection .lc-card {
+        height: 560px !important;
+    }
+    
+    .latest-collection .lc-card .lc-thumb {
+        height: 440px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info {
+        height: 120px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info .woocommerce-loop-product__title,
+    .latest-collection .lc-card .lc-info h2 {
+        font-size: 12px !important;
+    }
+    
+    .latest-collection .lc-card .lc-info .price {
+        font-size: 12px !important;
+    }
+    
+    .latest-collection .lc-card .lc-button {
+        height: 40px !important;
+        font-size: 11px !important;
+    }
+}

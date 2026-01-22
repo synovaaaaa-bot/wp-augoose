@@ -55,7 +55,10 @@ get_header();
 				) );
 				
 				if ( $products && count( $products ) > 0 ) {
+					// Use custom template for Latest Collection
+					echo '<div class="latest-collection-products">';
 					echo do_shortcode( '[products limit="12" columns="6" orderby="date" class="latest"]' );
+					echo '</div>';
 				} else {
 					// Show dummy products for demo
 					echo '<div class="woocommerce"><ul class="products columns-4 latest">';
