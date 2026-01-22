@@ -13,7 +13,7 @@ get_header();
 	<?php if ( class_exists( 'WooCommerce' ) ) : ?>
 
 		<!-- Latest Collection -->
-		<section class="latest-collection">
+		<section class="latest-collection" style="padding-top: 60px;">
 			<div class="container">
 				<div class="section-head">
 					<h2 class="section-title">LATEST COLLECTION</h2>

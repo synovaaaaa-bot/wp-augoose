@@ -207,10 +207,16 @@
 
     // Add to Wishlist (Integrated - server cookie/user meta)
     function initWishlist() {
-        $(document).on('click', '.add-to-wishlist', function(e) {
+        $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
             e.preventDefault();
+            e.stopPropagation(); // Prevent any parent click handlers
             const button = $(this);
             const productId = button.data('product-id');
+            
+            // Prevent navigation to product page
+            if (!productId) {
+                return false;
+            }
 
             button.addClass('loading');
             
@@ -651,16 +657,21 @@
             const rate = parseFloat($select.find('option:selected').data('rate')) || 1.0;
             const symbol = $select.find('option:selected').data('symbol') || '$';
             
-            // Set cookies
-            document.cookie = 'wp_augoose_currency=' + currency + '; path=/; max-age=31536000';
-            document.cookie = 'wp_augoose_currency_rate=' + rate + '; path=/; max-age=31536000';
-            document.cookie = 'wp_augoose_currency_symbol=' + symbol + '; path=/; max-age=31536000';
+            // Set cookies with proper encoding
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 year
+            
+            document.cookie = 'wp_augoose_currency=' + encodeURIComponent(currency) + '; path=/; expires=' + expires.toUTCString() + '; SameSite=Lax';
+            document.cookie = 'wp_augoose_currency_rate=' + encodeURIComponent(rate) + '; path=/; expires=' + expires.toUTCString() + '; SameSite=Lax';
+            document.cookie = 'wp_augoose_currency_symbol=' + encodeURIComponent(symbol) + '; path=/; expires=' + expires.toUTCString() + '; SameSite=Lax';
             
             // Trigger WooCommerce currency change event if available
             $(document.body).trigger('wp_augoose_currency_changed', [currency, rate, symbol]);
             
-            // Reload to apply currency conversion
-            location.reload();
+            // Small delay to ensure cookies are set, then reload
+            setTimeout(function() {
+                location.reload();
+            }, 100);
         });
     }
 
