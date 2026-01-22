@@ -585,11 +585,11 @@ body.mobile-menu-open .mobile-menu {
     }
     
     .header-actions {
-        gap: 4px;
+        gap: 6px;
         grid-column: 3;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-end;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
         align-self: center;
         flex-wrap: nowrap;
     }
@@ -597,21 +597,25 @@ body.mobile-menu-open .mobile-menu {
     .header-locale-stack {
         order: 1;
         margin: 0;
-        gap: 4px;
+        gap: 6px;
         flex-shrink: 0;
+        flex-direction: column;
+        align-items: flex-end;
     }
     
     .header-icon-row {
         order: 2;
         display: flex;
-        gap: 4px;
-        align-items: center;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-end;
         flex-shrink: 0;
     }
 
     .header-search button,
+    .header-wishlist a,
     .header-cart button,
-    .header-wishlist a {
+    .header-cart a {
         width: 32px;
         height: 32px;
         display: flex !important;
@@ -619,10 +623,22 @@ body.mobile-menu-open .mobile-menu {
     }
     
     .header-search button svg,
+    .header-wishlist a svg,
     .header-cart button svg,
-    .header-wishlist a svg {
+    .header-cart a svg {
         width: 18px;
         height: 18px;
+    }
+    
+    .header-cart .cart-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .header-cart .cart-count {
+        font-size: 0.5rem;
+        padding: 1px 4px;
+        min-width: 16px;
     }
 
     .header-locale select,
@@ -689,15 +705,16 @@ body.mobile-menu-open .mobile-menu {
     }
     
     .header-actions {
-        gap: 3px;
+        gap: 4px;
     }
     
     .header-locale-stack {
-        gap: 3px;
+        gap: 0;
     }
     
     .header-icon-row {
-        gap: 3px;
+        gap: 4px;
+        flex-direction: column;
     }
     
     .header-locale select,
@@ -709,16 +726,29 @@ body.mobile-menu-open .mobile-menu {
     }
     
     .header-search button,
+    .header-wishlist a,
     .header-cart button,
-    .header-wishlist a {
-        width: 30px;
-        height: 30px;
+    .header-cart a {
+        width: 28px;
+        height: 28px;
     }
     
     .header-search button svg,
+    .header-wishlist a svg,
     .header-cart button svg,
-    .header-wishlist a svg {
+    .header-cart a svg {
         width: 16px;
         height: 16px;
+    }
+    
+    .header-cart .cart-icon {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .header-cart .cart-count {
+        font-size: 0.5rem;
+        padding: 1px 4px;
+        min-width: 16px;
     }
 }
