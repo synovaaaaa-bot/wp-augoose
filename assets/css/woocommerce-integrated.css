@@ -145,10 +145,10 @@
 }
 
 /* Two-up gallery (front/back) */
-/* Product Gallery - Portrait Vertical Layout */
+/* Product Gallery - 2 Columns Grid with Portrait Images */
 .single-product-wrapper .product-gallery-portrait {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
 }
 
@@ -174,14 +174,13 @@
 
 /* Keep old class for backward compatibility */
 .single-product-wrapper .product-gallery-two {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
 }
 
 .single-product-wrapper .product-gallery-two.is-single {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: 1fr;
 }
 
 .single-product-wrapper .product-gallery-two__item {
@@ -886,6 +885,7 @@ body.single-product .quantity.buttons_added .qty::-webkit-inner-spin-button {
 
     .single-product-wrapper .product-gallery-two,
     .single-product-wrapper .product-gallery-portrait {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 14px;
     }
     
