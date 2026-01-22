@@ -122,18 +122,22 @@
 }
 
 .footer-contact-label {
+    font-family: var(--font-subhead, 'Minion Pro', Georgia, 'Times New Roman', serif);
     font-size: 11px;
+    font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.7);
-    font-weight: 600;
 }
 
 .footer-contact-link {
+    font-family: var(--font-body, 'Minion Pro', Georgia, 'Times New Roman', serif);
     font-size: 13px;
+    font-weight: 400;
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     transition: color 0.3s ease;
+    font-style: italic; /* Brand naming always italic per brand guideline */
 }
 
 .footer-contact-link:hover {

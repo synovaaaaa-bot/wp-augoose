@@ -34,7 +34,7 @@ get_header();
                 <div class="contact-info-card contact-instagram">
                     <h2 class="contact-label">IG</h2>
                     <p class="contact-value">
-                        <a href="https://instagram.com/augoose.co" target="_blank" rel="noopener noreferrer">@augoose.co</a>
+                        <a href="https://www.instagram.com/augoose.co" target="_blank" rel="noopener noreferrer">@augoose.co</a>
                     </p>
                     <p class="contact-cta">CTA</p>
                 </div>
@@ -43,7 +43,7 @@ get_header();
                 <div class="contact-info-card contact-tiktok">
                     <h2 class="contact-label">TIKTOK</h2>
                     <p class="contact-value">
-                        <a href="https://tiktok.com/@augoose.co" target="_blank" rel="noopener noreferrer">@augoose.co</a>
+                        <a href="https://www.tiktok.com/@augoose.co" target="_blank" rel="noopener noreferrer">@augoose.co</a>
                     </p>
                     <p class="contact-cta">CTA</p>
                 </div>

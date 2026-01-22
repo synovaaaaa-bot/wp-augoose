@@ -1,5 +1,6 @@
 /**
  * Contact Us Page Styles
+ * Following AUGOOSE Brand Guidelines
  */
 
 .contact-us-page {
@@ -9,13 +10,14 @@
 }
 
 .contact-us-page .page-title {
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif);
     font-size: 32px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
     text-align: center;
     margin-bottom: 48px;
-    color: #1a1a1a;
+    color: var(--augoose-primary, #30475E);
 }
 
 .contact-info-grid {
@@ -33,7 +35,7 @@
 }
 
 .contact-info-card:hover {
-    border-color: #1a1a1a;
+    border-color: var(--augoose-primary, #30475E);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -42,40 +44,46 @@
 }
 
 .contact-label {
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif);
     font-size: 18px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
     margin: 0 0 16px;
-    color: #1a1a1a;
-    font-style: italic;
+    color: var(--augoose-black, #000000);
+    font-style: italic; /* Brand naming always italic per brand guideline */
 }
 
 .contact-value {
+    font-family: var(--font-body, 'Minion Pro', Georgia, 'Times New Roman', serif);
     font-size: 16px;
+    font-weight: 400;
     margin: 0 0 12px;
-    color: #1a1a1a;
-    font-style: italic;
+    color: var(--augoose-black, #000000);
+    font-style: italic; /* Brand naming always italic per brand guideline */
 }
 
 .contact-value a {
-    color: #1a1a1a;
+    color: var(--augoose-black, #000000);
     text-decoration: none;
     transition: color 0.3s ease;
+    font-style: italic;
 }
 
 .contact-value a:hover {
-    color: #30475E;
+    color: var(--augoose-primary, #30475E);
     text-decoration: underline;
 }
 
 .contact-cta {
+    font-family: var(--font-body, 'Minion Pro', Georgia, 'Times New Roman', serif);
     font-size: 12px;
+    font-weight: 400;
     letter-spacing: 1px;
     text-transform: uppercase;
     margin: 12px 0 0;
-    color: rgba(26, 26, 26, 0.6);
-    font-style: italic;
+    color: rgba(0, 0, 0, 0.6);
+    font-style: normal; /* CTA not italic per design */
 }
 
 @media (max-width: 768px) {

@@ -140,11 +140,11 @@
                     </div>
                     <div class="footer-contact-item">
                         <span class="footer-contact-label">Instagram:</span>
-                        <a href="https://instagram.com/augoose.co" target="_blank" rel="noopener noreferrer" class="footer-contact-link">@augoose.co</a>
+                        <a href="https://www.instagram.com/augoose.co" target="_blank" rel="noopener noreferrer" class="footer-contact-link">@augoose.co</a>
                     </div>
                     <div class="footer-contact-item">
                         <span class="footer-contact-label">TikTok:</span>
-                        <a href="https://tiktok.com/@augoose.co" target="_blank" rel="noopener noreferrer" class="footer-contact-link">@augoose.co</a>
+                        <a href="https://www.tiktok.com/@augoose.co" target="_blank" rel="noopener noreferrer" class="footer-contact-link">@augoose.co</a>
                     </div>
                 </div>
 
