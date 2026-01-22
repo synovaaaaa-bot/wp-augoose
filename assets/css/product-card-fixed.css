@@ -251,7 +251,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 0 !important; /* Remove gap since no icon */
     border-radius: 8px !important;
     font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
     min-height: 44px !important;
@@ -284,10 +284,19 @@
     border-color: var(--augoose-primary, #30475E);
 }
 
-.product-add-to-cart .add-to-cart-btn svg {
-    width: 16px;
-    height: 16px;
-    stroke-width: 2;
+/* Hide cart icon from all ADD TO CART buttons */
+.product-add-to-cart .add-to-cart-btn svg,
+.product-actions-overlay .add-to-cart-btn svg,
+.product-item .add-to-cart-btn svg,
+.add-to-cart-btn svg,
+.variable-product-btn svg,
+button.add-to-cart-btn svg,
+a.add-to-cart-btn svg {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
 }
 
 .product-add-to-cart .add-to-cart-btn:hover {

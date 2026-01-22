@@ -262,6 +262,37 @@ body.tax-product_cat ul.products .product .product-add-to-cart .add-to-cart-btn:
     transform: translateY(-1px) !important;
 }
 
+/* Hide cart icons from all ADD TO CART buttons */
+.add-to-cart-btn svg,
+.variable-product-btn svg,
+.add_to_cart_button svg,
+button.add-to-cart-btn svg,
+button.variable-product-btn svg,
+a.add-to-cart-btn svg,
+a.add_to_cart_button svg,
+.woocommerce .add-to-cart-btn svg,
+.woocommerce .add_to_cart_button svg,
+.product-add-to-cart .add-to-cart-btn svg,
+.product-actions-overlay .add-to-cart-btn svg,
+.related-products-grid .add-to-cart-btn svg,
+.related-products-grid button svg,
+.related-products-grid a svg {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Remove gap when icon is hidden */
+.add-to-cart-btn,
+.variable-product-btn,
+.add_to_cart_button {
+    gap: 0 !important;
+}
+
 /* Exclude specific buttons that should not use this style */
 .wp-block-search__button,
 .wp-block-button__link,
