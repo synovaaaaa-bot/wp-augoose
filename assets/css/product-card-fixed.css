@@ -112,13 +112,13 @@
 
 /* Product badges are centralized in `woocommerce-integrated.css` to avoid duplication. */
 
-/* Product Info - Better Typography - Minimal padding for larger images */
+/* Product Info - Better Typography */
 .product-info {
-    padding: 8px 12px 8px;
+    padding: 16px 16px 12px;
     text-align: left;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
     flex: 1;
     min-height: 0;
 }
@@ -126,13 +126,12 @@
 .woocommerce-loop-product__title,
 .product-info h2,
 .product-info .woocommerce-loop-product__title {
-    font-size: 12px !important;
+    font-size: 13px !important;
     font-weight: 600 !important;
     color: #1a1a1a !important;
-    margin: 0 0 4px !important;
+    margin: 0 0 8px !important;
     text-transform: none !important;
     letter-spacing: 0 !important;
-    line-height: 1.3 !important;
     line-height: 1.4 !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     /* Keep card heights consistent so CTA aligns across products */
@@ -221,7 +220,7 @@
 
 /* Add to Cart Button */
 .product-add-to-cart {
-    padding: 0 12px 8px;
+    padding: 0 14px 14px;
     margin-top: auto;
 }
 

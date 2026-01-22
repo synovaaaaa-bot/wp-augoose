@@ -56,32 +56,11 @@ jQuery(function ($) {
   $(document).on('click', '.wishlist-remove', function (e) {
     e.preventDefault();
     const productId = $(this).data('product-id');
-    const $btn = $(this);
-    $btn.prop('disabled', true);
-    
     $.post(wpAugoose.ajaxUrl, { action: 'wp_augoose_wishlist_toggle', nonce: wpAugoose.nonce, product_id: productId })
-      .done(function (res) {
-        if (res && res.success) {
-          // Immediately update wishlist sidebar
-          refreshWishlist();
-          
-          // Immediately update heart buttons on product cards
-          $('.add-to-wishlist[data-product-id="' + productId + '"]').removeClass('active');
-          
-          // Update wishlist count badge
-          const count = res.data.count || 0;
-          const $badge = $('.wishlist-count');
-          if ($badge.length) {
-            if (count > 0) {
-              $badge.text(count).show();
-            } else {
-              $badge.hide();
-            }
-          }
-        }
-      })
-      .always(function () {
-        $btn.prop('disabled', false);
+      .done(function () {
+        refreshWishlist();
+        // also update heart buttons
+        $('.add-to-wishlist[data-product-id="' + productId + '"]').removeClass('active');
       });
   });
 

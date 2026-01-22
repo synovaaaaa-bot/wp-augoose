@@ -1410,13 +1410,7 @@ add_filter(
 		$rate = isset( $_COOKIE['wp_augoose_currency_rate'] ) ? floatval( $_COOKIE['wp_augoose_currency_rate'] ) : 1.0;
 		$symbol = isset( $_COOKIE['wp_augoose_currency_symbol'] ) ? sanitize_text_field( $_COOKIE['wp_augoose_currency_symbol'] ) : get_woocommerce_currency_symbol( $currency );
 
-		// Only skip if rate is invalid, but allow rate = 1.0 if currency is different (for symbol change)
-		if ( $rate <= 0 ) {
-			return $price_html;
-		}
-		
-		// If currency is same as base and rate is 1.0, return as-is
-		if ( $currency === $base_currency && $rate === 1.0 ) {
+		if ( $rate <= 0 || $rate === 1.0 ) {
 			return $price_html;
 		}
 

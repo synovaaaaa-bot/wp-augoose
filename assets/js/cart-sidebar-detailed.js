@@ -76,49 +76,14 @@ jQuery(document).ready(function($) {
         });
     });
     
-    // Remove item with confirmation - immediate update
-    $(document).on('click', '.cart-sidebar-remove, .remove-item-btn', function(e) {
+    // Remove item with confirmation
+    $(document).on('click', '.cart-sidebar-remove', function(e) {
         e.preventDefault();
         const $link = $(this);
         const url = $link.attr('href');
-        const $item = $link.closest('.cart-item, .woocommerce-mini-cart-item, .mini_cart_item');
         
         if (confirm('Remove this item from cart?')) {
-            // Block UI
-            $item.addClass('removing');
-            
-            // AJAX remove
-            $.ajax({
-                url: url,
-                type: 'GET',
-                success: function() {
-                    // Immediately trigger WooCommerce fragment refresh
-                    $(document.body).trigger('wc_fragment_refresh');
-                    
-                    // Update cart count immediately
-                    $.get(wc_add_to_cart_params.cart_url || '/cart/', function(data) {
-                        const $html = $(data);
-                        const cartCount = $html.find('.cart-count').text() || '0';
-                        $('.cart-count').text(cartCount);
-                        if (parseInt(cartCount) === 0) {
-                            $('.cart-count').hide();
-                        } else {
-                            $('.cart-count').show();
-                        }
-                    });
-                    
-                    // Remove item from DOM immediately
-                    $item.fadeOut(200, function() {
-                        $(this).remove();
-                        // Refresh cart sidebar content
-                        $(document.body).trigger('updated_wc_div');
-                    });
-                },
-                error: function() {
-                    $item.removeClass('removing');
-                    alert('Error removing item. Please try again.');
-                }
-            });
+            window.location.href = url;
         }
     });
     
