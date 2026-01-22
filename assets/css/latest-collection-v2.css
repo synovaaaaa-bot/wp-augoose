@@ -24,7 +24,7 @@
 }
 
 /* ===================================
-   Grid Layout - 6 Columns Desktop
+   Grid Layout - 6 Columns Desktop (Default - tanpa slider)
    =================================== */
 .latest-collection .woocommerce ul.products,
 .latest-collection ul.products,
@@ -37,7 +37,7 @@
     gap: 16px !important; /* Gap 14-18px */
     list-style: none !important;
     margin: 0 !important;
-    padding: 0 0 0 20px !important; /* Mentok kiri dengan padding kecil 16-24px */
+    padding: 0 20px !important; /* Padding kiri-kanan seimbang 20px */
     width: 100% !important;
     box-sizing: border-box !important;
     max-width: 100% !important;
@@ -73,50 +73,49 @@
 }
 
 /* ===================================
-   A. Image Area: .lc-thumb (440px)
+   A. Image Area: .lc-thumb (440px) - CONTAIN MODE
    =================================== */
 .latest-collection .lc-card .lc-thumb,
 .latest-collection .lc-card .product-thumbnail.lc-thumb {
     position: relative;
     width: 100% !important;
     height: 440px !important; /* Fixed height */
-    padding: 0 !important;
+    padding: 24px !important; /* Padding 18-28px (menggunakan 24px) */
     margin: 0 !important;
     overflow: hidden;
-    background: #f3f3f3 !important; /* Background netral untuk contain fallback */
+    background: #f5f5f5 !important; /* Background terang/abu muda */
     border: none !important;
     flex-shrink: 0;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .latest-collection .lc-card .lc-thumb img,
 .latest-collection .lc-card .product-thumbnail.lc-thumb img {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: relative !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important; /* Primary: full-bleed, tidak gepeng */
+    object-fit: contain !important; /* WAJIB: contain agar produk terlihat utuh */
     object-position: center center !important;
     display: block !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
-}
-
-/* Fallback: Jika cover crop terlalu parah, gunakan contain */
-.latest-collection .lc-card .lc-thumb img[style*="contain"] {
-    object-fit: contain !important;
-    background: #f3f3f3 !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
 }
 
 .latest-collection .lc-card .lc-thumb a {
-    display: block;
+    display: flex;
     width: 100%;
     height: 100%;
     position: absolute;
     top: 0;
     left: 0;
     z-index: 1;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ===================================
@@ -245,47 +244,59 @@
 }
 
 /* ===================================
-   Product Price - Brand Guideline Font
+   Product Price - Brand Guideline Font (WAJIB: Terbaca Jelas)
    =================================== */
 .latest-collection .lc-card .lc-info .price,
 .latest-collection .lc-card .lc-info .woocommerce-Price-amount {
     font-family: var(--font-body, 'Minion Pro', Georgia, 'Times New Roman', serif) !important;
-    font-size: 12px !important;
+    font-size: 13px !important; /* 12-13px untuk kejelasan */
     font-weight: 400 !important;
-    color: #555 !important; /* Soft color */
-    margin: 6px 0 0 !important;
-    line-height: 1.2 !important;
+    color: #111 !important; /* Warna gelap untuk kejelasan (#111 / #333) */
+    margin: 8px 0 0 !important; /* Spacing agar tidak ketutup button */
+    line-height: 1.3 !important;
     text-align: left !important;
+    display: block !important;
 }
 
 .latest-collection .lc-card .lc-info .price del {
     color: #999 !important;
-    font-size: 11px !important;
-    margin-right: 6px !important;
+    font-size: 12px !important;
+    margin-right: 8px !important; /* Spacing rapi */
     text-decoration: line-through !important;
+    display: inline-block !important;
 }
 
 .latest-collection .lc-card .lc-info .price ins {
-    color: #1a1a1a !important;
+    color: #111 !important; /* Warna gelap untuk kejelasan */
     text-decoration: none !important;
     font-weight: 600 !important; /* Lebih tegas untuk sale price */
+    display: inline-block !important;
+}
+
+/* Variable product price range */
+.latest-collection .lc-card .lc-info .price .woocommerce-Price-amount {
+    color: #111 !important;
+    font-size: 13px !important;
 }
 
 /* ===================================
-   CTA Button: VIEW PRODUCT
+   CTA Button: ADD TO CART (WAJIB untuk semua card)
    =================================== */
 .latest-collection .lc-card .lc-cta {
     padding: 0 !important;
-    margin: 10px 0 0 !important;
+    margin: 12px 0 0 !important; /* Spacing dari harga */
     width: 100% !important;
 }
 
-.latest-collection .lc-card .lc-button {
+.latest-collection .lc-card .lc-button,
+.latest-collection .lc-card .add_to_cart_button,
+.latest-collection .lc-card .single_add_to_cart_button,
+.latest-collection .lc-card button.add_to_cart_button {
     width: 100% !important;
-    height: 40px !important;
-    background: #ffffff !important;
-    color: #1a1a1a !important;
-    border: 1px solid #1a1a1a !important;
+    height: 44px !important; /* WAJIB: 44px */
+    background: #000000 !important; /* Background hitam */
+    color: #ffffff !important; /* Text putih */
+    border: none !important;
     padding: 0 12px !important;
     font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
     font-size: 11px !important;
@@ -302,10 +313,15 @@
     box-sizing: border-box !important;
 }
 
-.latest-collection .lc-card .lc-button:hover {
-    background: #1a1a1a !important;
+.latest-collection .lc-card .lc-button:hover,
+.latest-collection .lc-card .add_to_cart_button:hover {
+    background: #333333 !important;
     color: #ffffff !important;
-    border-color: #1a1a1a !important;
+}
+
+.latest-collection .lc-card .lc-button:active,
+.latest-collection .lc-card .add_to_cart_button:active {
+    background: #1a1a1a !important;
 }
 
 /* ===================================
@@ -345,7 +361,7 @@
     .latest-collection ul.products {
         grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
         gap: 14px !important;
-        padding: 0 0 0 18px !important; /* Tetap mentok kiri */
+        padding: 0 18px !important; /* Padding kiri-kanan seimbang */
     }
     
     .latest-collection .lc-card {
@@ -366,7 +382,7 @@
     .latest-collection ul.products {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
         gap: 14px !important;
-        padding: 0 0 0 16px !important; /* Tetap mentok kiri */
+        padding: 0 16px !important; /* Padding kiri-kanan seimbang */
     }
     
     .latest-collection .lc-card {
@@ -387,7 +403,7 @@
     .latest-collection ul.products {
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         gap: 12px !important;
-        padding: 0 0 0 14px !important; /* Tetap mentok kiri */
+        padding: 0 14px !important; /* Padding kiri-kanan seimbang */
     }
     
     .latest-collection .lc-card {
@@ -408,7 +424,7 @@
     .latest-collection ul.products {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 12px !important;
-        padding: 0 0 0 12px !important; /* Tetap mentok kiri */
+        padding: 0 12px !important; /* Padding kiri-kanan seimbang */
     }
     
     .latest-collection .lc-card {
@@ -467,8 +483,92 @@
         font-size: 12px !important;
     }
     
-    .latest-collection .lc-card .lc-button {
-        height: 40px !important;
+    .latest-collection .lc-card .lc-button,
+    .latest-collection .lc-card .add_to_cart_button {
+        height: 44px !important;
         font-size: 11px !important;
+    }
+}
+
+/* ===================================
+   Slider Container - Auto-scroll
+   =================================== */
+.latest-collection .latest-collection-products {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Override grid untuk slider mode */
+.latest-collection .latest-collection-products .woocommerce ul.products,
+.latest-collection .latest-collection-products ul.products {
+    display: flex !important; /* Change from grid to flex for horizontal scroll */
+    flex-direction: row !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    scroll-behavior: smooth !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
+    gap: 16px !important;
+    padding: 0 20px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    list-style: none !important;
+}
+
+.latest-collection .latest-collection-products .woocommerce ul.products::-webkit-scrollbar {
+    display: none !important; /* Chrome/Safari */
+}
+
+.latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card,
+.latest-collection .latest-collection-products ul.products li.product-item.lc-card {
+    flex: 0 0 calc((100% - 100px) / 6) !important; /* 6 columns with gap calculation */
+    min-width: calc((100% - 100px) / 6) !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
+}
+
+/* Pause on hover */
+.latest-collection .latest-collection-products:hover .woocommerce ul.products {
+    scroll-behavior: auto !important;
+}
+
+/* Responsive slider widths */
+@media (max-width: 1400px) {
+    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card {
+        flex: 0 0 calc((100% - 90px) / 5) !important;
+        min-width: calc((100% - 90px) / 5) !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card {
+        flex: 0 0 calc((100% - 80px) / 4) !important;
+        min-width: calc((100% - 80px) / 4) !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card {
+        flex: 0 0 calc((100% - 60px) / 3) !important;
+        min-width: calc((100% - 60px) / 3) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card {
+        flex: 0 0 calc((100% - 40px) / 2) !important;
+        min-width: calc((100% - 40px) / 2) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card {
+        flex: 0 0 calc(100% - 24px) !important;
+        min-width: calc(100% - 24px) !important;
     }
 }

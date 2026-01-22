@@ -102,11 +102,41 @@ if ( $is_on_sale ) {
 			add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5 );
 			?>
 			
-			<!-- CTA Button: VIEW PRODUCT -->
+			<!-- CTA Button: ADD TO CART (WAJIB untuk semua card) -->
 			<div class="lc-cta">
-				<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="lc-button">
-					VIEW PRODUCT
-				</a>
+				<?php
+				// Use WooCommerce add to cart button
+				if ( $product->is_type( 'simple' ) && $product->is_in_stock() ) {
+					?>
+					<form class="cart" action="<?php echo esc_url( $product->get_permalink() ); ?>" method="post" enctype='multipart/form-data'>
+						<input type="hidden" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" />
+						<button type="submit" class="add_to_cart_button lc-button" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>">
+							ADD TO CART
+						</button>
+					</form>
+					<?php
+				} elseif ( $product->is_type( 'variable' ) ) {
+					// Variable product: link to product page
+					?>
+					<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="add_to_cart_button lc-button">
+						ADD TO CART
+					</a>
+					<?php
+				} elseif ( ! $product->is_in_stock() ) {
+					?>
+					<button type="button" class="lc-button" disabled>
+						SOLD OUT
+					</button>
+					<?php
+				} else {
+					// Fallback: link to product page
+					?>
+					<a href="<?php echo esc_url( $product->get_permalink() ); ?>" class="add_to_cart_button lc-button">
+						ADD TO CART
+					</a>
+					<?php
+				}
+				?>
 			</div>
 		</div>
 		

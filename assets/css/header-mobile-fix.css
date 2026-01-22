@@ -1,0 +1,245 @@
+/**
+ * Header Mobile Alignment Fix
+ * Fix: Header elements must align in 1 line, consistent height, announcement bar doesn't push header
+ * Scope: Mobile only (≤768px)
+ */
+
+/* ===================================
+   Announcement Bar - Mobile Fix
+   =================================== */
+@media (max-width: 768px) {
+    .announcement-bar {
+        padding: 6px 0 !important; /* Reduced padding untuk mobile */
+        min-height: auto !important;
+        line-height: 1.3 !important;
+    }
+    
+    .announcement-bar p {
+        font-size: 0.625rem !important;
+        line-height: 1.4 !important;
+        margin: 0 !important;
+        padding: 0 12px !important;
+        /* Allow 2 lines but don't push header */
+        display: block !important;
+        white-space: normal !important;
+        word-wrap: break-word !important;
+    }
+    
+    /* Ensure announcement bar doesn't affect header height */
+    .header-stack {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 200 !important;
+    }
+}
+
+/* ===================================
+   Site Header - Mobile Alignment Fix
+   =================================== */
+@media (max-width: 768px) {
+    .site-header {
+        min-height: 64px !important; /* WAJIB: Konsisten tinggi */
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        position: relative !important;
+        border-bottom: 1px solid #D1D5DB !important;
+    }
+    
+    .header-container {
+        display: flex !important; /* Change from grid to flex */
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        min-height: 64px !important; /* WAJIB: Konsisten tinggi */
+        padding: 0 12px !important;
+        gap: 8px !important;
+        margin: 0 !important;
+        position: relative !important;
+    }
+    
+    /* Mobile Menu Toggle - Left */
+    .mobile-menu-toggle {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 32px !important;
+        height: 32px !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        order: 1 !important;
+    }
+    
+    /* Logo - Center */
+    .site-branding {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        order: 2 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        position: static !important;
+        transform: none !important;
+    }
+    
+    .site-branding .custom-logo-link {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .site-branding .custom-logo {
+        max-height: 24px !important;
+        width: auto !important;
+        margin: 0 !important;
+    }
+    
+    .site-logo a,
+    .custom-logo-link {
+        font-size: 1.1rem !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Header Actions - Right */
+    .header-actions {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 4px !important;
+        flex-shrink: 0 !important;
+        order: 3 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Locale Stack - Horizontal */
+    .header-locale-stack {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Icon Row - Horizontal */
+    .header-icon-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* All icons same size and aligned */
+    .header-search button,
+    .header-wishlist a,
+    .header-cart button,
+    .header-cart a {
+        width: 32px !important;
+        height: 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .header-search button svg,
+    .header-wishlist a svg,
+    .header-cart button svg,
+    .header-cart a svg {
+        width: 18px !important;
+        height: 18px !important;
+        margin: 0 !important;
+    }
+    
+    /* Currency Select */
+    .header-locale select,
+    .header-locale .lang-select {
+        height: 28px !important;
+        padding: 0 20px 0 20px !important;
+        font-size: 8px !important;
+        max-width: 55px !important;
+        min-width: 50px !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+    
+    .header-locale-item--currency::before {
+        position: absolute !important;
+        left: 4px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 12px !important;
+        height: 12px !important;
+        z-index: 1 !important;
+    }
+    
+    .header-locale-item--currency select {
+        padding-left: 20px !important;
+    }
+    
+    /* Badges */
+    .cart-count,
+    .wishlist-count {
+        font-size: 0.5rem !important;
+        padding: 1px 4px !important;
+        min-width: 16px !important;
+        line-height: 1.2 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-container {
+        padding: 0 10px !important;
+        gap: 6px !important;
+        min-height: 60px !important; /* Slightly smaller for very small screens */
+    }
+    
+    .site-logo a,
+    .custom-logo-link {
+        font-size: 1rem !important;
+    }
+    
+    .site-branding .custom-logo {
+        max-height: 22px !important;
+    }
+    
+    .header-search button,
+    .header-wishlist a,
+    .header-cart button,
+    .header-cart a {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    .header-search button svg,
+    .header-wishlist a svg,
+    .header-cart button svg,
+    .header-cart a svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    
+    .header-locale select,
+    .header-locale .lang-select {
+        max-width: 48px !important;
+        min-width: 45px !important;
+        font-size: 7px !important;
+        padding: 0 18px 0 18px !important;
+    }
+}
