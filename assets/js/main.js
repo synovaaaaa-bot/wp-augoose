@@ -207,10 +207,16 @@
 
     // Add to Wishlist (Integrated - server cookie/user meta)
     function initWishlist() {
-        $(document).on('click', '.add-to-wishlist', function(e) {
+        $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
             e.preventDefault();
+            e.stopPropagation(); // Prevent parent link navigation
             const button = $(this);
             const productId = button.data('product-id');
+            
+            // Prevent navigation to product page
+            if (!productId) {
+                return false;
+            }
 
             button.addClass('loading');
             

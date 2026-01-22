@@ -1,0 +1,65 @@
+/**
+ * Hero Section Fixed - Remove Text/Buttons & Remove Gap
+ */
+
+/* Remove gap between header and hero */
+.hero-section {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Ensure no gap from site-main - only on homepage */
+body.home .site-main,
+body.page-template-front-page .site-main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Ensure header-stack doesn't create gap */
+.header-stack + .site-main,
+.header-stack + main,
+.site-header + .site-main,
+.site-header + main {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Ensure hero is directly after header with no gap */
+.site-header ~ .hero-section,
+.header-stack ~ .hero-section,
+.hero-section {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Hide all hero content (text and buttons) */
+.hero-content,
+.hero-inner .hero-content,
+.hero-content .hero-eyebrow,
+.hero-content h1,
+.hero-content .hero-subtitle,
+.hero-content .hero-cta,
+.hero-content .btn,
+.hero-content .btn-primary,
+.hero-content .btn-secondary {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Hero section should just show image, no content */
+.hero-section .container {
+    display: none !important;
+}
+
+/* Alternative: Keep container but hide content */
+.hero-section .container .hero-inner {
+    display: none !important;
+}

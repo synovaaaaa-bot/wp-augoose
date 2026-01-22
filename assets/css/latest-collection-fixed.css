@@ -1,0 +1,267 @@
+/**
+ * Latest Collection - Fixed Layout
+ * PART A: 6 columns desktop, responsive breakpoints, image overlay text
+ */
+
+/* ===================================
+   Grid Layout - 6 Columns Desktop
+   =================================== */
+.latest-collection .woocommerce ul.products,
+.latest-collection ul.products,
+.latest-collection .woocommerce ul.products.columns-4,
+.latest-collection ul.products.columns-4,
+.latest-collection .woocommerce ul.products.latest,
+.latest-collection ul.products.latest {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 0 0 20px !important; /* Mentok kiri dengan padding kecil */
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* ===================================
+   Product Card - Image Overlay Style
+   =================================== */
+.latest-collection .woocommerce ul.products li.product-item,
+.latest-collection ul.products li.product-item,
+.latest-collection .woocommerce ul.products li.product,
+.latest-collection ul.products li.product {
+    position: relative !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    background: transparent !important;
+    border: none !important;
+    overflow: hidden !important;
+}
+
+.latest-collection .product-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ===================================
+   Image - Fixed Height 360-420px
+   =================================== */
+.latest-collection .product-thumbnail {
+    position: relative;
+    width: 100% !important;
+    height: 400px !important; /* Fixed height, mudah diubah 360-420px */
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+    background: #f8f8f8;
+    border: none !important;
+}
+
+.latest-collection .product-thumbnail img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+.latest-collection .product-thumbnail a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* ===================================
+   Text Overlay - White Text on Image
+   =================================== */
+.latest-collection .product-info {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 20px 16px 16px !important;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.latest-collection .woocommerce-loop-product__title,
+.latest-collection .product-info h2,
+.latest-collection .product-info .woocommerce-loop-product__title {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    margin: 0 0 6px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    line-height: 1.3 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-height: calc(1.3em * 2) !important;
+}
+
+.latest-collection .product-info .price,
+.latest-collection .woocommerce ul.products li.product .price,
+.latest-collection ul.products li.product .price {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+
+.latest-collection .product-info .price del {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 11px !important;
+    margin-right: 6px !important;
+}
+
+.latest-collection .product-info .price ins {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+}
+
+/* ===================================
+   Hide Elements - Badges, Swatches, Quantity
+   =================================== */
+.latest-collection .product-badges,
+.latest-collection .badge,
+.latest-collection .badge-new,
+.latest-collection .onsale,
+.latest-collection .product-color-options,
+.latest-collection .color-swatches,
+.latest-collection .product-quantity-wrapper,
+.latest-collection .quantity-input-group {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* ===================================
+   Wishlist - Fix Click Event
+   =================================== */
+.latest-collection .product-wishlist {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+}
+
+.latest-collection .wishlist-toggle {
+    position: relative;
+    z-index: 11;
+    pointer-events: auto;
+}
+
+/* ===================================
+   Button - Hide (only show image + text)
+   =================================== */
+.latest-collection .product-add-to-cart,
+.latest-collection .product-actions-overlay,
+.latest-collection .add-to-cart-btn,
+.latest-collection .view-product-btn,
+.latest-collection .variable-product-btn,
+.latest-collection .button,
+.latest-collection .added_to_cart {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* ===================================
+   Responsive Breakpoints
+   =================================== */
+@media (max-width: 1400px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 380px !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 360px !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 340px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        padding: 0 0 0 12px !important;
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 320px !important;
+    }
+    
+    .latest-collection .woocommerce-loop-product__title,
+    .latest-collection .product-info h2 {
+        font-size: 10px !important;
+    }
+    
+    .latest-collection .product-info .price {
+        font-size: 11px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        padding: 0 12px !important;
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 400px !important;
+    }
+    
+    .latest-collection .woocommerce-loop-product__title,
+    .latest-collection .product-info h2 {
+        font-size: 11px !important;
+    }
+    
+    .latest-collection .product-info .price {
+        font-size: 12px !important;
+    }
+}

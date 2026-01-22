@@ -47,9 +47,7 @@
        Fallback remains a solid color if no image is set. */
     --hero-image: none;
     background-color: #6b6b6b;
-    background-image:
-        linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
-        var(--hero-image);
+    background-image: var(--hero-image);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -57,7 +55,21 @@
     min-height: clamp(520px, 70vh, 760px);
     display: flex;
     align-items: center;
-    padding: 70px 0;
+    padding: 0 !important;
+    margin: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Hide text and buttons in hero */
+.hero-content,
+.hero-eyebrow,
+.hero-subtitle,
+.hero-cta,
+.hero-content h1,
+.hero-content .btn {
+    display: none !important;
+    visibility: hidden !important;
 }
 
 .hero-inner {

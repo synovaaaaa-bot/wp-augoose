@@ -596,6 +596,8 @@ function wp_augoose_scripts() {
     // Product Cards Fixed - Image Full & Typography Better
     if ( file_exists( $theme_dir . '/assets/css/product-card-fixed.css' ) ) {
         wp_enqueue_style( 'wp-augoose-product-fixed', $theme_dir_uri . '/assets/css/product-card-fixed.css', array(), $asset_ver( 'assets/css/product-card-fixed.css' ), 'all' );
+        wp_enqueue_style( 'wp-augoose-latest-collection-fixed', $theme_dir_uri . '/assets/css/latest-collection-fixed.css', array( 'wp-augoose-product-fixed' ), $asset_ver( 'assets/css/latest-collection-fixed.css' ), 'all' );
+        wp_enqueue_style( 'wp-augoose-hero-fixed', $theme_dir_uri . '/assets/css/hero-fixed.css', array( 'wp-augoose-homepage' ), $asset_ver( 'assets/css/hero-fixed.css' ), 'all' );
     }
     
     // Cart page - redirect to shop, menggunakan cart sidebar saja
@@ -1456,4 +1458,9 @@ if ( file_exists( get_template_directory() . '/inc/template-tags.php' ) ) {
  */
 if ( class_exists( 'WooCommerce' ) && file_exists( get_template_directory() . '/inc/woocommerce.php' ) ) {
     require get_template_directory() . '/inc/woocommerce.php';
+}
+
+// Market Variation Auto-Select (auto-select Market variation based on user country)
+if ( class_exists( 'WooCommerce' ) && file_exists( get_template_directory() . '/inc/market-variation-auto-select.php' ) ) {
+    require get_template_directory() . '/inc/market-variation-auto-select.php';
 }
