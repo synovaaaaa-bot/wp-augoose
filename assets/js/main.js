@@ -142,6 +142,25 @@
                 if (top > 0) window.scrollTo({ top, behavior: 'smooth' });
             }
         });
+        
+        // Close filter button
+        $page.on('click', '.shop-filter-close', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $page.removeClass('filters-open');
+            $toggle.attr('aria-expanded', 'false');
+        });
+        
+        // Close filter when clicking overlay (using body click outside)
+        $(document).on('click', function(e) {
+            if ($page.hasClass('filters-open')) {
+                const $target = $(e.target);
+                if (!$target.closest('.shop-filters').length && !$target.closest('.shop-filter-toggle').length) {
+                    $page.removeClass('filters-open');
+                    $toggle.attr('aria-expanded', 'false');
+                }
+            }
+        });
     }
 
     // Product Quick View

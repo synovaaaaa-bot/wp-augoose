@@ -733,7 +733,7 @@ function wp_augoose_scripts() {
 add_action( 'wp_enqueue_scripts', 'wp_augoose_scripts' );
 
 /**
- * Shop filters: hide unwanted widgets (Category/Color) and keep only Price range + Size.
+ * Shop filters: hide unwanted widgets (Category) but keep Price range, Size, and Color.
  */
 add_filter(
 	'widget_display_callback',
@@ -750,17 +750,8 @@ add_filter(
 			return false;
 		}
 
-		// Hide layered nav for colors; keep size only.
-		if ( $widget instanceof WC_Widget_Layered_Nav ) {
-			$attr = '';
-			if ( is_array( $instance ) && isset( $instance['attribute'] ) ) {
-				$attr = (string) $instance['attribute'];
-			}
-			$attr = strtolower( $attr );
-			if ( in_array( $attr, array( 'color', 'colour' ), true ) ) {
-				return false;
-			}
-		}
+		// Allow all layered nav widgets including color
+		// Color filter will now be visible
 
 		return $instance;
 	},

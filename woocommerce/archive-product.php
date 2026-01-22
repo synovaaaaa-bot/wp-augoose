@@ -31,6 +31,12 @@ do_action( 'woocommerce_before_main_content' );
 
 	<div class="shop-layout">
 		<aside class="shop-filters" aria-label="<?php esc_attr_e( 'Shop filters', 'wp-augoose' ); ?>">
+			<button type="button" class="shop-filter-close" aria-label="<?php esc_attr_e( 'Close filters', 'wp-augoose' ); ?>">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
 			<?php if ( is_active_sidebar( 'shop-filters' ) ) : ?>
 				<?php dynamic_sidebar( 'shop-filters' ); ?>
 			<?php else : ?>
@@ -41,7 +47,9 @@ do_action( 'woocommerce_before_main_content' );
 				}
 				if ( class_exists( 'WC_Widget_Layered_Nav' ) ) {
 					// Try common attributes used in your screenshots.
-					the_widget( 'WC_Widget_Layered_Nav', array( 'title' => __( 'Size', 'wp-augoose' ), 'attribute' => 'size' ) );
+					the_widget( 'WC_Widget_Layered_Nav', array( 'title' => __( 'Size', 'wp-augoose' ), 'attribute' => 'pa_size' ) );
+					// Add color filter
+					the_widget( 'WC_Widget_Layered_Nav', array( 'title' => __( 'Color', 'wp-augoose' ), 'attribute' => 'pa_color' ) );
 				}
 				?>
 			<?php endif; ?>
