@@ -2609,6 +2609,21 @@ body.woocommerce-cart .site-main .entry-content {
         gap: 24px;
     }
     
+    .single-product-wrapper .product-gallery-portrait,
+    .single-product-wrapper .product-gallery-two {
+        width: 100%;
+    }
+    
+    .single-product-wrapper .product-gallery-portrait.is-single {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__item {
+        width: 100%;
+        max-width: 100%;
+    }
+    
     .single-product-wrapper .variation-swatches.is-size {
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
