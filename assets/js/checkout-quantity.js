@@ -73,7 +73,19 @@ jQuery(document).ready(function($) {
                 security: wc_checkout_params.update_cart_nonce
             },
             success: function(response) {
-                if (response.success) {
+                // Check if response is valid JSON
+                if (typeof response === 'string') {
+                    try {
+                        response = JSON.parse(response);
+                    } catch (e) {
+                        console.error('Invalid JSON response:', response);
+                        alert('Error updating cart. Page will reload.');
+                        location.reload();
+                        return;
+                    }
+                }
+                
+                if (response && response.success) {
                     // Reload checkout fragments
                     $('body').trigger('update_checkout');
                     
@@ -81,13 +93,21 @@ jQuery(document).ready(function($) {
                     console.log('Cart updated successfully');
                 } else {
                     // Show error
-                    alert(response.data.message || 'Failed to update cart');
+                    alert(response && response.data && response.data.message ? response.data.message : 'Failed to update cart');
                     
                     // Reload page as fallback
                     location.reload();
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                // Check if response is HTML (error page)
+                if (xhr.responseText && xhr.responseText.trim().startsWith('<')) {
+                    console.error('Server returned HTML instead of JSON. This may indicate a PHP error.');
+                    alert('Error updating cart. Please refresh the page.');
+                    location.reload();
+                    return;
+                }
+                
                 // Reload page on error
                 alert('Error updating cart. Page will reload.');
                 location.reload();

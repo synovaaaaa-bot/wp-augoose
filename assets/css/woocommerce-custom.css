@@ -990,10 +990,10 @@ body.post-type-archive-product ul.products {
 }
 
 .cart-page-simple .quantity-simple .quantity input[type="number"] {
-    width: 50px !important;
-    height: 32px !important;
-    padding: 0 8px !important;
-    font-size: 13px !important;
+    width: 40px !important;
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 12px !important;
     text-align: center;
     border: 1px solid #ddd;
     border-radius: 0;
@@ -1002,11 +1002,11 @@ body.post-type-archive-product ul.products {
 .cart-page-simple .quantity-simple .quantity .qty-button,
 .cart-page-simple .quantity-simple .quantity .plus,
 .cart-page-simple .quantity-simple .quantity .minus {
-    width: 28px !important;
-    height: 32px !important;
-    min-width: 28px !important;
+    width: 24px !important;
+    height: 28px !important;
+    min-width: 24px !important;
     padding: 0 !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
     line-height: 1 !important;
     border: 1px solid #ddd;
     background: #fff;
@@ -2682,6 +2682,50 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     align-items: flex-start;
     gap: 8px;
     cursor: pointer;
+}
+
+/* Custom Terms Checkbox - Above Place Order Button */
+.checkout-place-order .terms-checkbox-custom {
+    margin: 0 0 16px 0 !important;
+    padding: 0 !important;
+}
+
+.checkout-place-order .terms-checkbox-custom label {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    color: #1a1a1a !important;
+}
+
+.checkout-place-order .terms-checkbox-custom input[type="checkbox"] {
+    margin: 2px 0 0 0 !important;
+    flex-shrink: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+    cursor: pointer !important;
+}
+
+.checkout-place-order .terms-checkbox-custom .woocommerce-form__label-text {
+    flex: 1 !important;
+    line-height: 1.5 !important;
+}
+
+.checkout-place-order .terms-checkbox-custom .woocommerce-form__label-text a {
+    color: #1a1a1a !important;
+    text-decoration: underline !important;
+    text-underline-offset: 2px !important;
+}
+
+.checkout-place-order .terms-checkbox-custom .woocommerce-form__label-text a:hover {
+    color: #444 !important;
+}
+
+.checkout-place-order .terms-checkbox-custom .required {
+    color: #e74c3c !important;
+    margin-left: 2px !important;
 }
 
 .checkout-place-order .wc-terms-and-conditions input[type="checkbox"] {

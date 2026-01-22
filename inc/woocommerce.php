@@ -1593,7 +1593,7 @@ function wp_augoose_add_terms_checkbox() {
 add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_terms_checkbox' );
 function wp_augoose_validate_terms_checkbox() {
 	if ( empty( $_POST['terms_custom'] ) ) {
-		wc_add_notice( __( 'Please confirm that you have read the Terms of Service.', 'woocommerce' ), 'error' );
+		wc_add_notice( 'Please confirm that you have read the Terms of Service.', 'error' );
 	}
 }
 
@@ -1733,13 +1733,18 @@ function wp_augoose_ajax_add_to_cart() {
 add_action( 'wp_ajax_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
 add_action( 'wp_ajax_nopriv_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
 function wp_augoose_update_checkout_quantity() {
-	check_ajax_referer( 'woocommerce-cart', 'security' );
+	// Verify nonce
+	if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'woocommerce-cart' ) ) {
+		wp_send_json_error( array( 'message' => 'Security check failed.' ) );
+		return;
+	}
 	
 	$cart_key = isset( $_POST['cart_key'] ) ? sanitize_text_field( $_POST['cart_key'] ) : '';
 	$quantity = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
 	
 	if ( ! $cart_key ) {
 		wp_send_json_error( array( 'message' => 'Invalid cart item.' ) );
+		return;
 	}
 	
 	// Update cart

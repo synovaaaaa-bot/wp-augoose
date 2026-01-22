@@ -22,6 +22,7 @@ if ( ! empty( $available_gateways ) ) {
 	<?php do_action( 'woocommerce_checkout_before_terms_and_conditions' ); ?>
 
 	<?php
+	// Hide default WooCommerce terms checkbox (we use custom one)
 	$terms_page_id = wc_terms_and_conditions_page_id();
 	if ( $terms_page_id && apply_filters( 'woocommerce_checkout_show_terms', true ) ) {
 		$terms         = get_post( $terms_page_id );
@@ -29,21 +30,24 @@ if ( ! empty( $available_gateways ) ) {
 		if ( $terms_content ) {
 			echo '<div class="woocommerce-terms-and-conditions-wrapper" style="display:none; max-height:200px; overflow:auto; ' . esc_attr( apply_filters( 'woocommerce_checkout_terms_and_conditions_content_style', '' ) ) . '">' . wp_kses_post( $terms_content ) . '</div>';
 		}
+		// Hide default terms checkbox - we use custom one via hook
 		?>
-		<?php if ( apply_filters( 'woocommerce_checkout_show_terms', true ) ) : ?>
-			<p class="form-row terms wc-terms-and-conditions">
-				<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
-					<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms" <?php checked( apply_filters( 'woocommerce_terms_is_checked_default', isset( $_POST['terms'] ) ), true ); // WPCS: input var ok, csrf ok. ?> id="terms" />
-					<span class="woocommerce-terms-and-conditions-checkbox-text"><?php wc_terms_and_conditions_checkbox_text(); ?></span>&nbsp;<span class="required">*</span>
-				</label>
-				<input type="hidden" name="terms-field" value="1" />
-			</p>
-		<?php endif; ?>
+		<style>
+			.checkout-place-order .wc-terms-and-conditions {
+				display: none !important;
+			}
+		</style>
 		<?php
 	}
 	?>
 
 	<?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
+	
+	<?php
+	// Custom Terms checkbox will be added via woocommerce_review_order_before_submit hook
+	// This ensures it appears right before the Place Order button
+	do_action( 'woocommerce_review_order_before_submit' );
+	?>
 
 	<?php
 	$order_button_text = apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) );

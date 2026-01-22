@@ -206,7 +206,7 @@
     width: 100% !important;
     height: 140px !important; /* Fixed height - increased untuk spacing lebih baik */
     min-height: 140px !important; /* Ensure minimum height */
-    padding: 14px 14px 16px !important; /* Padding konsisten */
+    padding: 16px 14px 16px !important; /* Padding top 16px untuk gap dari gambar */
     background: #ffffff !important;
     border-top: 1px solid #e6e6e6 !important; /* Border tipis atas */
     display: flex !important;
@@ -215,6 +215,7 @@
     flex-shrink: 0 !important;
     box-sizing: border-box !important;
     align-items: stretch !important; /* Stretch children to full width */
+    gap: 8px !important; /* Gap antara title, price, dan button */
 }
 
 /* ===================================
@@ -228,7 +229,7 @@
     font-weight: 700 !important;
     text-transform: uppercase !important;
     color: #1a1a1a !important;
-    margin: 0 0 6px 0 !important; /* Margin bottom 6px untuk spacing dari price */
+    margin: 0 !important; /* Margin dihapus, gap akan handle spacing */
     padding: 0 !important;
     letter-spacing: 0.04em !important;
     line-height: 1.2 !important;
@@ -237,7 +238,7 @@
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-height: calc(1.2em * 2 + 6px) !important; /* Max 2 baris + margin */
+    max-height: calc(1.2em * 2) !important; /* Max 2 baris */
     text-align: left !important; /* Align kiri */
     text-decoration: none !important;
     flex-shrink: 0 !important;
@@ -257,7 +258,7 @@
     font-size: 13px !important; /* 12-13px untuk kejelasan */
     font-weight: 400 !important;
     color: #111 !important; /* Warna gelap untuk kejelasan (#111 / #333) */
-    margin: 0 !important; /* No margin - flexbox will handle spacing */
+    margin: 0 !important; /* No margin - gap will handle spacing */
     padding: 0 !important;
     line-height: 1.4 !important; /* Line height lebih besar untuk readability */
     text-align: left !important;
@@ -315,7 +316,11 @@
 .latest-collection .lc-card .add_to_cart_button,
 .latest-collection .lc-card .single_add_to_cart_button,
 .latest-collection .lc-card button.add_to_cart_button,
-.latest-collection .lc-card a.add_to_cart_button {
+.latest-collection .lc-card a.add_to_cart_button,
+.latest-collection .lc-card .variable-product-btn,
+.latest-collection .lc-card .choose-options-btn,
+.latest-collection .lc-card button[class*="choose"],
+.latest-collection .lc-card a[class*="choose"] {
     width: 100% !important;
     height: 44px !important; /* WAJIB: 44px - konsisten untuk semua card */
     min-height: 44px !important; /* Ensure minimum height */
@@ -342,14 +347,50 @@
 }
 
 .latest-collection .lc-card .lc-button:hover,
-.latest-collection .lc-card .add_to_cart_button:hover {
+.latest-collection .lc-card .add_to_cart_button:hover,
+.latest-collection .lc-card .variable-product-btn:hover,
+.latest-collection .lc-card .choose-options-btn:hover,
+.latest-collection .lc-card button[class*="choose"]:hover,
+.latest-collection .lc-card a[class*="choose"]:hover {
     background: #333333 !important;
     color: #ffffff !important;
 }
 
 .latest-collection .lc-card .lc-button:active,
-.latest-collection .lc-card .add_to_cart_button:active {
+.latest-collection .lc-card .add_to_cart_button:active,
+.latest-collection .lc-card .variable-product-btn:active,
+.latest-collection .lc-card .choose-options-btn:active,
+.latest-collection .lc-card button[class*="choose"]:active,
+.latest-collection .lc-card a[class*="choose"]:active {
     background: #1a1a1a !important;
+}
+
+/* Ensure all buttons in Latest Collection have same style */
+.latest-collection .lc-card .lc-cta button,
+.latest-collection .lc-card .lc-cta a,
+.latest-collection .lc-card .lc-cta .button {
+    width: 100% !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 0 12px !important;
+    margin: 0 !important;
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
 }
 
 /* ===================================
