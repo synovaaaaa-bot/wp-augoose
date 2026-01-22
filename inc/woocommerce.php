@@ -315,6 +315,76 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Catatan pesanan' => 'Order notes',
 			'Detail penagihan' => 'Billing details',
 			'Detail pengiriman' => 'Shipping details',
+			// Coupon
+			'Punya kupon? Klik di sini untuk memasukkan kode Anda' => 'Have a coupon? Click here to enter your code',
+			'Punya kupon?' => 'Have a coupon?',
+			'Klik di sini untuk memasukkan kode Anda' => 'Click here to enter your code',
+			// Payment method error
+			'Maaf, tampaknya tidak ada metode pembayaran yang tersedia untuk lokasi Anda. Silakan hubungi kami jika Anda memerlukan bantuan atau ingin menggunakan alternatif yang lain.' => 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.',
+			'Maaf, tampaknya tidak ada' => 'Sorry, it seems that there are no',
+			'metode pembayaran yang' => 'available payment methods',
+			'tersedia untuk lokasi Anda.' => 'for your location.',
+			'Silakan hubungi kami jika' => 'Please contact us if',
+			'Anda memerlukan bantuan' => 'you require assistance',
+			'atau ingin menggunakan' => 'or wish to use',
+			'alternatif yang lain.' => 'another alternative.',
+			// Newsletter
+			'BERLANGGANAN BULETIN KAMI' => 'SUBSCRIBE TO OUR NEWSLETTER',
+			'Berlangganan buletin kami' => 'Subscribe to our newsletter',
+			'berlangganan buletin kami' => 'subscribe to our newsletter',
+			// Place order
+			'BUAT PESANAN' => 'PLACE ORDER',
+			'Buat pesanan' => 'Place order',
+			'buat pesanan' => 'place order',
+			// Form field labels
+			'Nama depan' => 'First name',
+			'nama depan' => 'First name',
+			'Nama belakang' => 'Last name',
+			'nama belakang' => 'Last name',
+			'Nama lengkap' => 'Full name',
+			'nama lengkap' => 'Full name',
+			'Perusahaan' => 'Company',
+			'perusahaan' => 'Company',
+			'Alamat' => 'Address',
+			'alamat' => 'Address',
+			'Alamat baris 1' => 'Address line 1',
+			'alamat baris 1' => 'Address line 1',
+			'Alamat baris 2' => 'Address line 2',
+			'alamat baris 2' => 'Address line 2',
+			'Kota' => 'City',
+			'kota' => 'City',
+			'Provinsi' => 'State / County',
+			'provinsi' => 'State / County',
+			'Kode pos' => 'Postcode / ZIP',
+			'kode pos' => 'Postcode / ZIP',
+			'Kode Pos' => 'Postcode / ZIP',
+			'Kode POS' => 'Postcode / ZIP',
+			'Negara' => 'Country / Region',
+			'negara' => 'Country / Region',
+			'Telepon' => 'Phone',
+			'telepon' => 'Phone',
+			'Email' => 'Email address',
+			'email' => 'Email address',
+			'Catatan pesanan' => 'Order notes',
+			'catatan pesanan' => 'Order notes',
+			'Catatan tentang pesanan Anda' => 'Notes about your order, e.g. special notes for delivery.',
+			'catatan tentang pesanan Anda' => 'Notes about your order, e.g. special notes for delivery.',
+			// Additional form field labels
+			'Nama' => 'Name',
+			'nama' => 'Name',
+			'Email address' => 'Email address',
+			'Email address (optional)' => 'Email address (optional)',
+			'Country/Region' => 'Country / Region',
+			'Country/Region (optional)' => 'Country / Region (optional)',
+			'First name (optional)' => 'First name (optional)',
+			'Last name (optional)' => 'Last name (optional)',
+			'Company name' => 'Company name',
+			'Company name (optional)' => 'Company name (optional)',
+			'Address (optional)' => 'Address (optional)',
+			'City (optional)' => 'City (optional)',
+			'State / County (optional)' => 'State / County (optional)',
+			'Postcode / ZIP (optional)' => 'Postcode / ZIP (optional)',
+			'Phone (optional)' => 'Phone (optional)',
 		);
 		
 		if ( isset( $english_texts[ $translated_text ] ) ) {
@@ -329,6 +399,25 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 		// Fallback: return original English text if translation exists
 		if ( $text !== $translated_text && strpos( $translated_text, 'Menampilkan' ) !== false ) {
 			return str_replace( array( 'Menampilkan', 'hasil', 'Pengurutan', 'standar' ), array( 'Showing', 'results', 'Sorting', 'default' ), $translated_text );
+		}
+		
+		// Additional fallback for common Indonesian phrases
+		if ( strpos( $translated_text, 'kupon' ) !== false || strpos( $translated_text, 'Kupon' ) !== false ) {
+			if ( strpos( $translated_text, 'Punya' ) !== false || strpos( $translated_text, 'punya' ) !== false ) {
+				return 'Have a coupon? Click here to enter your code';
+			}
+		}
+		
+		if ( strpos( $translated_text, 'Maaf' ) !== false && strpos( $translated_text, 'metode pembayaran' ) !== false ) {
+			return 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.';
+		}
+		
+		if ( strpos( $translated_text, 'Berlangganan' ) !== false || strpos( $translated_text, 'BERLANGGANAN' ) !== false ) {
+			return 'SUBSCRIBE TO OUR NEWSLETTER';
+		}
+		
+		if ( strpos( $translated_text, 'Buat pesanan' ) !== false || strpos( $translated_text, 'BUAT PESANAN' ) !== false ) {
+			return 'PLACE ORDER';
 		}
 	}
 	return $translated_text;
@@ -347,6 +436,77 @@ function wp_augoose_catalog_orderby_english( $options ) {
 		'price'      => 'Sort by price: low to high',
 		'price-desc' => 'Sort by price: high to low',
 	);
+}
+
+/**
+ * Force checkout form fields to English
+ */
+add_filter( 'woocommerce_checkout_fields', 'wp_augoose_checkout_fields_english', 20 );
+function wp_augoose_checkout_fields_english( $fields ) {
+	// English field labels mapping
+	$english_labels = array(
+		'first_name' => 'First name',
+		'last_name' => 'Last name',
+		'company' => 'Company name',
+		'address_1' => 'Address',
+		'address_2' => 'Apartment, suite, etc. (optional)',
+		'city' => 'City',
+		'state' => 'State / County',
+		'postcode' => 'Postcode / ZIP',
+		'country' => 'Country / Region',
+		'phone' => 'Phone',
+		'email' => 'Email address',
+		'order_comments' => 'Order notes',
+	);
+	
+	// English placeholders mapping
+	$english_placeholders = array(
+		'first_name' => 'First name',
+		'last_name' => 'Last name',
+		'company' => 'Company name',
+		'address_1' => 'House number and street name',
+		'address_2' => 'Apartment, suite, unit, etc. (optional)',
+		'city' => 'City',
+		'state' => 'State / County',
+		'postcode' => 'Postcode / ZIP',
+		'phone' => 'Phone',
+		'email' => 'Email address',
+		'order_comments' => 'Notes about your order, e.g. special notes for delivery.',
+	);
+	
+	// Process billing fields
+	if ( isset( $fields['billing'] ) ) {
+		foreach ( $fields['billing'] as $key => $field ) {
+			$field_key = str_replace( 'billing_', '', $key );
+			if ( isset( $english_labels[ $field_key ] ) ) {
+				$fields['billing'][ $key ]['label'] = $english_labels[ $field_key ];
+			}
+			if ( isset( $english_placeholders[ $field_key ] ) ) {
+				$fields['billing'][ $key ]['placeholder'] = $english_placeholders[ $field_key ];
+			}
+		}
+	}
+	
+	// Process shipping fields
+	if ( isset( $fields['shipping'] ) ) {
+		foreach ( $fields['shipping'] as $key => $field ) {
+			$field_key = str_replace( 'shipping_', '', $key );
+			if ( isset( $english_labels[ $field_key ] ) ) {
+				$fields['shipping'][ $key ]['label'] = $english_labels[ $field_key ];
+			}
+			if ( isset( $english_placeholders[ $field_key ] ) ) {
+				$fields['shipping'][ $key ]['placeholder'] = $english_placeholders[ $field_key ];
+			}
+		}
+	}
+	
+	// Process order fields
+	if ( isset( $fields['order'] ) && isset( $fields['order']['order_comments'] ) ) {
+		$fields['order']['order_comments']['label'] = 'Order notes';
+		$fields['order']['order_comments']['placeholder'] = 'Notes about your order, e.g. special notes for delivery.';
+	}
+	
+	return $fields;
 }
 
 function wp_augoose_render_wishlist_sidebar() {
@@ -694,7 +854,6 @@ function wp_augoose_mini_cart_html() {
                     <span class="cart-sidebar-total-amount"><?php wc_cart_totals_order_total_html(); ?></span>
                 </div>
                 <div class="cart-sidebar-buttons">
-                <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">PROCEED TO CHECKOUT</a>
                     <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">PROCEED TO CHECKOUT</a>
                 </div>
             </div>

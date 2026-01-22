@@ -2385,13 +2385,16 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 }
 
 .product-item-summary .product-title {
-    font-size: 13px;
+    font-size: 15px !important;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #1a1a1a;
+    color: #1a1a1a !important;
     margin-bottom: 8px;
-    font-weight: 600;
+    font-weight: 700 !important;
     line-height: 1.4;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .product-item-summary .product-meta {

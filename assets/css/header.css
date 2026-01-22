@@ -552,12 +552,17 @@ body.mobile-menu-open .mobile-menu {
         width: 32px;
         height: 32px;
         margin-right: 8px;
+        align-items: center;
+        justify-content: center;
     }
     
     .site-branding {
         grid-column: 2;
         justify-self: center;
         order: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .site-branding .custom-logo {
