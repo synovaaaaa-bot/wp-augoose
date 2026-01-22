@@ -125,6 +125,7 @@
 .shop-page:not(.filters-open) .woocommerce-page ul.products,
 .shop-page:not(.filters-open) ul.products {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 30px !important;
 }
 
 .shop-page.filters-open .shop-layout {
@@ -140,9 +141,9 @@
 .shop-view-toggle button {
     width: 32px;
     height: 32px;
-    border: 1px solid #e0e0e0;
-    background: #fff;
-    color: #666;
+    border: 1px solid #1a1a1a;
+    background: #1a1a1a;
+    color: #fff;
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 16px;
@@ -167,12 +168,12 @@
     flex-shrink: 0;
 }
 
-/* Products Grid - 3 Columns (Desktop) */
+/* Products Grid - 4 Columns (Desktop) */
 .woocommerce ul.products,
 .woocommerce-page ul.products,
 ul.products {
     display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 30px !important;
     list-style: none !important;
     margin: 0 !important;

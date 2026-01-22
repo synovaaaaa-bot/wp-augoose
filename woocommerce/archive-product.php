@@ -30,8 +30,8 @@ do_action( 'woocommerce_before_main_content' );
 	</header>
 
 	<div class="shop-layout">
-		<aside class="shop-filters" aria-label="<?php esc_attr_e( 'Shop filters', 'wp-augoose' ); ?>">
-			<button type="button" class="shop-filter-close" aria-label="<?php esc_attr_e( 'Close filters', 'wp-augoose' ); ?>">
+		<aside class="shop-filters" aria-label="Shop filters">
+			<button type="button" class="shop-filter-close" aria-label="Close filters">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<line x1="18" y1="6" x2="6" y2="18"></line>
 					<line x1="6" y1="6" x2="18" y2="18"></line>
@@ -43,13 +43,37 @@ do_action( 'woocommerce_before_main_content' );
 				<?php
 				// Fallback: render common Woo widgets if sidebar isn't configured yet.
 				if ( class_exists( 'WC_Widget_Price_Filter' ) ) {
-					the_widget( 'WC_Widget_Price_Filter', array( 'title' => __( 'Price range', 'wp-augoose' ) ) );
+					the_widget( 'WC_Widget_Price_Filter', array( 'title' => 'Price Range' ) );
 				}
 				if ( class_exists( 'WC_Widget_Layered_Nav' ) ) {
-					// Try common attributes used in your screenshots.
-					the_widget( 'WC_Widget_Layered_Nav', array( 'title' => __( 'Size', 'wp-augoose' ), 'attribute' => 'pa_size' ) );
-					// Add color filter
-					the_widget( 'WC_Widget_Layered_Nav', array( 'title' => __( 'Color', 'wp-augoose' ), 'attribute' => 'pa_color' ) );
+					// Get all product attributes from WooCommerce
+					$attribute_taxonomies = wc_get_attribute_taxonomies();
+					
+					// Find size and color attributes
+					$size_attr = null;
+					$color_attr = null;
+					
+					foreach ( $attribute_taxonomies as $attr ) {
+						$attr_name = strtolower( $attr->attribute_name );
+						if ( $attr_name === 'size' && ! $size_attr ) {
+							$size_attr = 'pa_' . $attr->attribute_name;
+						}
+						if ( ( $attr_name === 'color' || $attr_name === 'colour' ) && ! $color_attr ) {
+							$color_attr = 'pa_' . $attr->attribute_name;
+						}
+					}
+					
+					// Render Size filter if exists
+					if ( $size_attr && taxonomy_exists( $size_attr ) ) {
+						$size_label = wc_attribute_label( $size_attr );
+						the_widget( 'WC_Widget_Layered_Nav', array( 'title' => $size_label ?: 'Size', 'attribute' => $size_attr ) );
+					}
+					
+					// Render Color filter if exists
+					if ( $color_attr && taxonomy_exists( $color_attr ) ) {
+						$color_label = wc_attribute_label( $color_attr );
+						the_widget( 'WC_Widget_Layered_Nav', array( 'title' => $color_label ?: 'Color', 'attribute' => $color_attr ) );
+					}
 				}
 				?>
 			<?php endif; ?>
@@ -63,12 +87,11 @@ do_action( 'woocommerce_before_main_content' );
 				<div class="shop-toolbar">
 					<div class="shop-toolbar-left">
 						<button type="button" class="shop-filter-toggle" aria-expanded="false">
-							<?php esc_html_e( 'Filter', 'wp-augoose' ); ?>
+							Filter
 						</button>
 						<?php woocommerce_result_count(); ?>
-						<div class="shop-view-toggle" role="group" aria-label="<?php esc_attr_e( 'View', 'wp-augoose' ); ?>">
-							<button type="button" data-view="grid" class="is-active" aria-label="<?php esc_attr_e( 'Grid view', 'wp-augoose' ); ?>">▦</button>
-							<button type="button" data-view="list" aria-label="<?php esc_attr_e( 'List view', 'wp-augoose' ); ?>">☰</button>
+						<div class="shop-view-toggle" role="group" aria-label="View">
+							<button type="button" data-view="grid" class="is-active" aria-label="Grid view">▦</button>
 						</div>
 					</div>
 					<div class="shop-toolbar-right">

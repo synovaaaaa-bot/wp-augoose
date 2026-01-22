@@ -275,6 +275,50 @@ function wp_augoose_wishlist_shortcode() {
 }
 add_shortcode( 'wp_augoose_wishlist', 'wp_augoose_wishlist_shortcode' );
 
+/**
+ * Force all WooCommerce text to English (hardcoded)
+ */
+add_filter( 'gettext', 'wp_augoose_force_english_text', 20, 3 );
+function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
+	if ( $domain === 'woocommerce' ) {
+		$english_texts = array(
+			'Menampilkan semua %d hasil' => 'Showing all %d results',
+			'Menampilkan %d-%d dari %d hasil' => 'Showing %d-%d of %d results',
+			'Pengurutan standar' => 'Default sorting',
+			'Urutkan berdasarkan popularitas' => 'Sort by popularity',
+			'Urutkan berdasarkan rating rata-rata' => 'Sort by average rating',
+			'Urutkan berdasarkan terbaru' => 'Sort by latest',
+			'Urutkan berdasarkan harga: rendah ke tinggi' => 'Sort by price: low to high',
+			'Urutkan berdasarkan harga: tinggi ke rendah' => 'Sort by price: high to low',
+		);
+		
+		if ( isset( $english_texts[ $translated_text ] ) ) {
+			return $english_texts[ $translated_text ];
+		}
+		
+		// Fallback: return original English text if translation exists
+		if ( $text !== $translated_text && strpos( $translated_text, 'Menampilkan' ) !== false ) {
+			return str_replace( array( 'Menampilkan', 'hasil', 'Pengurutan', 'standar' ), array( 'Showing', 'results', 'Sorting', 'default' ), $translated_text );
+		}
+	}
+	return $translated_text;
+}
+
+/**
+ * Override WooCommerce catalog orderby options to English
+ */
+add_filter( 'woocommerce_catalog_orderby', 'wp_augoose_catalog_orderby_english', 20 );
+function wp_augoose_catalog_orderby_english( $options ) {
+	return array(
+		'menu_order' => 'Default sorting',
+		'popularity' => 'Sort by popularity',
+		'rating'     => 'Sort by average rating',
+		'date'       => 'Sort by latest',
+		'price'      => 'Sort by price: low to high',
+		'price-desc' => 'Sort by price: high to low',
+	);
+}
+
 function wp_augoose_render_wishlist_sidebar() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		return;

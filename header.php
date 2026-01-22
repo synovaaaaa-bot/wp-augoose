@@ -99,14 +99,7 @@
 
             <div class="header-actions" aria-label="<?php esc_attr_e( 'Header actions', 'wp-augoose' ); ?>">
 
-                    <div class="header-locale-stack" aria-label="<?php esc_attr_e( 'Locale', 'wp-augoose' ); ?>">
-                        <div class="header-locale-item header-locale-item--lang" title="Language">
-                            <?php
-                            if ( function_exists( 'wp_augoose_render_language_switcher' ) ) {
-                                wp_augoose_render_language_switcher();
-                            }
-                            ?>
-                        </div>
+                    <div class="header-locale-stack" aria-label="Currency">
                         <div class="header-locale-item header-locale-item--currency" title="Currency">
                             <?php
                             if ( function_exists( 'wp_augoose_render_currency_switcher' ) ) {
@@ -118,7 +111,7 @@
 
                     <div class="header-icon-row">
                     <div class="header-search">
-                        <button type="button" class="search-toggle" aria-label="<?php esc_attr_e( 'Search', 'wp-augoose' ); ?>">
+                        <button type="button" class="search-toggle" aria-label="Search">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="11" cy="11" r="7"></circle>
                                 <path d="M21 21l-4.3-4.3"></path>
@@ -136,7 +129,7 @@
                     </div>
 
                     <div class="header-wishlist">
-                        <a class="wishlist-icon" href="#" aria-label="<?php esc_attr_e( 'Wishlist', 'wp-augoose' ); ?>">
+                        <a class="wishlist-icon" href="#" aria-label="Wishlist">
                             <?php
                             $wishlist_count = function_exists( 'wp_augoose_wishlist_count' ) ? (int) wp_augoose_wishlist_count() : 0;
                             ?>
@@ -149,7 +142,7 @@
 
                     <?php if ( class_exists( 'WooCommerce' ) ) : ?>
                         <div class="header-cart">
-                            <button type="button" class="cart-icon" data-toggle="cart-sidebar" aria-label="<?php esc_attr_e( 'Cart', 'wp-augoose' ); ?>">
+                            <button type="button" class="cart-icon" data-toggle="cart-sidebar" aria-label="Cart">
                                 <span class="cart-count"><?php echo WC()->cart->get_cart_contents_count(); ?></span>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="9" cy="21" r="1"></circle>
