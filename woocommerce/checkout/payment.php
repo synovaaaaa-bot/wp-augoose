@@ -14,7 +14,7 @@ if ( ! empty( $available_gateways ) ) {
 		wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway ) );
 	}
 } else {
-	echo '<p class="woocommerce-info">' . esc_html__( 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.', 'woocommerce' ) . '</p>';
+	echo '<p class="woocommerce-info">Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.</p>';
 }
 ?>
 

@@ -691,6 +691,97 @@
         $(document.body).on('added_to_cart updated_wc_div', function() {
             setTimeout(preventDuplicateButtons, 100);
         });
+        
+        // Force checkout form fields to English
+        function forceCheckoutFieldsEnglish() {
+            // Force address field labels
+            $('label[for*="address_1"], label:contains("ALAMAT JALAN"), label:contains("Alamat jalan"), label:contains("Street address")').each(function() {
+                if ($(this).text().includes('ALAMAT JALAN') || $(this).text().includes('Alamat jalan') || $(this).text().includes('Street address')) {
+                    $(this).text($(this).text().replace(/ALAMAT JALAN|Alamat jalan|Street address/gi, 'Address'));
+                }
+            });
+            
+            // Force address placeholders
+            $('input[name*="address_1"]').each(function() {
+                var placeholder = $(this).attr('placeholder');
+                if (placeholder && (placeholder.includes('Nomor rumah') || placeholder.includes('nomor rumah'))) {
+                    $(this).attr('placeholder', 'House number and street name');
+                }
+            });
+            
+            $('input[name*="address_2"]').each(function() {
+                var placeholder = $(this).attr('placeholder');
+                if (placeholder && (placeholder.includes('Apartemen') || placeholder.includes('apartemen'))) {
+                    $(this).attr('placeholder', 'Apartment, suite, unit, etc. (optional)');
+                }
+            });
+            
+            // Force newsletter subscription text
+            $('label:contains("BERLANGGANAN BULETIN KAMI"), label:contains("Berlangganan buletin kami"), span:contains("BERLANGGANAN BULETIN KAMI"), span:contains("Berlangganan buletin kami")').each(function() {
+                var text = $(this).text();
+                if (text.includes('BERLANGGANAN BULETIN KAMI') || text.includes('Berlangganan buletin kami')) {
+                    $(this).text('SUBSCRIBE TO OUR NEWSLETTER');
+                }
+            });
+            
+            // Force "Place order" button text
+            $('button[name="woocommerce_checkout_place_order"], #place_order').each(function() {
+                var text = $(this).text();
+                var value = $(this).val();
+                if (text.includes('BUAT PESANAN') || text.includes('Buat pesanan') || value && value.includes('BUAT PESANAN')) {
+                    $(this).text('PLACE ORDER');
+                    $(this).val('PLACE ORDER');
+                    $(this).attr('data-value', 'PLACE ORDER');
+                }
+            });
+            
+            // Force payment method error message
+            $('.woocommerce-info:contains("Maaf"), .woocommerce-info:contains("metode pembayaran")').each(function() {
+                var text = $(this).text();
+                if (text.includes('Maaf') && text.includes('metode pembayaran')) {
+                    $(this).text('Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.');
+                }
+            });
+            
+            // Force coupon message
+            $('.woocommerce-form-coupon-toggle, .showcoupon').each(function() {
+                var text = $(this).text();
+                if (text.includes('Punya kupon') || text.includes('Klik di sini untuk memasukkan kode')) {
+                    $(this).html($(this).html().replace(/Punya kupon\?/gi, 'Have a coupon?').replace(/Klik di sini untuk memasukkan kode Anda/gi, 'Click here to enter your code'));
+                }
+            });
+            
+            // Force country names in dropdowns
+            $('select[name*="country"] option').each(function() {
+                var text = $(this).text();
+                var countryMap = {
+                    'Amerika Serikat': 'United States',
+                    'Singapura': 'Singapore',
+                    'Jepang': 'Japan',
+                    'Korea Selatan': 'South Korea',
+                    'Cina': 'China',
+                    'Filipina': 'Philippines',
+                    'Inggris': 'United Kingdom',
+                    'Inggris Raya': 'United Kingdom'
+                };
+                if (countryMap[text]) {
+                    $(this).text(countryMap[text]);
+                }
+            });
+        }
+        
+        // Run on page load
+        forceCheckoutFieldsEnglish();
+        
+        // Run after country change (WooCommerce updates fields dynamically)
+        $(document.body).on('country_to_state_changing updated_checkout', function() {
+            setTimeout(forceCheckoutFieldsEnglish, 100);
+        });
+        
+        // Also watch for address field updates
+        $(document).on('change', 'select[name*="country"]', function() {
+            setTimeout(forceCheckoutFieldsEnglish, 200);
+        });
     });
 
     // Initialize on Window Load

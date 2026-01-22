@@ -385,6 +385,20 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'State / County (optional)' => 'State / County (optional)',
 			'Postcode / ZIP (optional)' => 'Postcode / ZIP (optional)',
 			'Phone (optional)' => 'Phone (optional)',
+			// Address field labels
+			'ALAMAT JALAN' => 'Address',
+			'Alamat jalan' => 'Address',
+			'alamat jalan' => 'Address',
+			'Street address' => 'Address',
+			// Address placeholders
+			'Nomor rumah dan nama jalan' => 'House number and street name',
+			'nomor rumah dan nama jalan' => 'House number and street name',
+			'Apartemen, suit, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
+			'apartemen, suit, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
+			'Apartemen, suite, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
+			// Country names
+			'Amerika Serikat' => 'United States',
+			'amerika serikat' => 'United States',
 		);
 		
 		if ( isset( $english_texts[ $translated_text ] ) ) {
@@ -408,7 +422,12 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			}
 		}
 		
-		if ( strpos( $translated_text, 'Maaf' ) !== false && strpos( $translated_text, 'metode pembayaran' ) !== false ) {
+		if ( strpos( $translated_text, 'Maaf' ) !== false && ( strpos( $translated_text, 'metode pembayaran' ) !== false || strpos( $translated_text, 'tidak ada metode pembayaran' ) !== false ) ) {
+			return 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.';
+		}
+		
+		// Payment method error variations
+		if ( strpos( $translated_text, 'tidak ada metode pembayaran' ) !== false || strpos( $translated_text, 'Tidak ada metode pembayaran' ) !== false ) {
 			return 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.';
 		}
 		
@@ -484,6 +503,14 @@ function wp_augoose_checkout_fields_english( $fields ) {
 			if ( isset( $english_placeholders[ $field_key ] ) ) {
 				$fields['billing'][ $key ]['placeholder'] = $english_placeholders[ $field_key ];
 			}
+			// Force override for address fields
+			if ( $field_key === 'address_1' ) {
+				$fields['billing'][ $key ]['label'] = 'Address';
+				$fields['billing'][ $key ]['placeholder'] = 'House number and street name';
+			}
+			if ( $field_key === 'address_2' ) {
+				$fields['billing'][ $key ]['placeholder'] = 'Apartment, suite, unit, etc. (optional)';
+			}
 		}
 	}
 	
@@ -497,6 +524,14 @@ function wp_augoose_checkout_fields_english( $fields ) {
 			if ( isset( $english_placeholders[ $field_key ] ) ) {
 				$fields['shipping'][ $key ]['placeholder'] = $english_placeholders[ $field_key ];
 			}
+			// Force override for address fields
+			if ( $field_key === 'address_1' ) {
+				$fields['shipping'][ $key ]['label'] = 'Address';
+				$fields['shipping'][ $key ]['placeholder'] = 'House number and street name';
+			}
+			if ( $field_key === 'address_2' ) {
+				$fields['shipping'][ $key ]['placeholder'] = 'Apartment, suite, unit, etc. (optional)';
+			}
 		}
 	}
 	
@@ -507,6 +542,118 @@ function wp_augoose_checkout_fields_english( $fields ) {
 	}
 	
 	return $fields;
+}
+
+/**
+ * Force country names to English
+ */
+add_filter( 'woocommerce_countries', 'wp_augoose_countries_english', 20 );
+function wp_augoose_countries_english( $countries ) {
+	// Common country name translations from Indonesian to English
+	$country_translations = array(
+		'Amerika Serikat' => 'United States',
+		'Inggris' => 'United Kingdom',
+		'Inggris Raya' => 'United Kingdom',
+		'Singapura' => 'Singapore',
+		'Jepang' => 'Japan',
+		'Korea Selatan' => 'South Korea',
+		'Cina' => 'China',
+		'Filipina' => 'Philippines',
+	);
+	
+	foreach ( $countries as $code => $name ) {
+		if ( isset( $country_translations[ $name ] ) ) {
+			$countries[ $code ] = $country_translations[ $name ];
+		}
+	}
+	
+	return $countries;
+}
+
+/**
+ * Force country locale fields to English (address field labels and placeholders)
+ */
+add_filter( 'woocommerce_get_country_locale_base', 'wp_augoose_country_locale_english', 20 );
+add_filter( 'woocommerce_get_country_locale', 'wp_augoose_country_locale_english', 20 );
+function wp_augoose_country_locale_english( $locale ) {
+	if ( is_array( $locale ) ) {
+		foreach ( $locale as $country => $fields ) {
+			if ( is_array( $fields ) ) {
+				foreach ( $fields as $field_key => $field_data ) {
+					if ( isset( $field_data['label'] ) ) {
+						// Force English labels
+						$indonesian_labels = array(
+							'ALAMAT JALAN' => 'Address',
+							'Alamat jalan' => 'Address',
+							'Street address' => 'Address',
+						);
+						if ( isset( $indonesian_labels[ $field_data['label'] ] ) ) {
+							$locale[ $country ][ $field_key ]['label'] = $indonesian_labels[ $field_data['label'] ];
+						}
+					}
+					if ( isset( $field_data['placeholder'] ) ) {
+						// Force English placeholders
+						$indonesian_placeholders = array(
+							'Nomor rumah dan nama jalan' => 'House number and street name',
+							'nomor rumah dan nama jalan' => 'House number and street name',
+							'Apartemen, suit, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
+							'apartemen, suit, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
+							'Apartemen, suite, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
+						);
+						if ( isset( $indonesian_placeholders[ $field_data['placeholder'] ] ) ) {
+							$locale[ $country ][ $field_key ]['placeholder'] = $indonesian_placeholders[ $field_data['placeholder'] ];
+						}
+					}
+				}
+			}
+		}
+	}
+	return $locale;
+}
+
+/**
+ * Force form field labels and placeholders to English via form_field_args filter
+ */
+add_filter( 'woocommerce_form_field_args', 'wp_augoose_form_field_english', 20, 3 );
+function wp_augoose_form_field_english( $args, $key, $value ) {
+	// Force address field labels
+	if ( strpos( $key, 'address_1' ) !== false ) {
+		if ( isset( $args['label'] ) && ( $args['label'] === 'ALAMAT JALAN' || $args['label'] === 'Alamat jalan' || $args['label'] === 'Street address' ) ) {
+			$args['label'] = 'Address';
+		}
+		if ( isset( $args['placeholder'] ) && ( strpos( $args['placeholder'], 'Nomor rumah' ) !== false || strpos( $args['placeholder'], 'nomor rumah' ) !== false ) ) {
+			$args['placeholder'] = 'House number and street name';
+		}
+	}
+	if ( strpos( $key, 'address_2' ) !== false ) {
+		if ( isset( $args['placeholder'] ) && ( strpos( $args['placeholder'], 'Apartemen' ) !== false || strpos( $args['placeholder'], 'apartemen' ) !== false ) ) {
+			$args['placeholder'] = 'Apartment, suite, unit, etc. (optional)';
+		}
+	}
+	return $args;
+}
+
+/**
+ * Force newsletter subscription text to English
+ */
+add_filter( 'woocommerce_checkout_newsletter_subscription_text', 'wp_augoose_newsletter_text_english', 20 );
+add_filter( 'woocommerce_registration_newsletter_subscription_text', 'wp_augoose_newsletter_text_english', 20 );
+function wp_augoose_newsletter_text_english( $text ) {
+	if ( strpos( $text, 'BERLANGGANAN' ) !== false || strpos( $text, 'Berlangganan' ) !== false || strpos( $text, 'berlangganan' ) !== false ) {
+		return 'SUBSCRIBE TO OUR NEWSLETTER';
+	}
+	return $text;
+}
+
+/**
+ * Force payment method error message to English
+ */
+add_filter( 'woocommerce_no_available_payment_methods_message', 'wp_augoose_payment_method_error_english', 20 );
+function wp_augoose_payment_method_error_english( $message ) {
+	if ( strpos( $message, 'Maaf' ) !== false || strpos( $message, 'metode pembayaran' ) !== false || strpos( $message, 'tidak ada metode pembayaran' ) !== false ) {
+		return 'Sorry, it seems that there are no available payment methods for your location. Please contact us if you require assistance or wish to make alternate arrangements.';
+	}
+	return $message;
 }
 
 function wp_augoose_render_wishlist_sidebar() {
