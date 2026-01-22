@@ -717,10 +717,30 @@
             });
             
             // Force newsletter subscription text
-            $('label:contains("BERLANGGANAN BULETIN KAMI"), label:contains("Berlangganan buletin kami"), span:contains("BERLANGGANAN BULETIN KAMI"), span:contains("Berlangganan buletin kami")').each(function() {
+            $('label:contains("BERLANGGANAN BULETIN KAMI"), label:contains("Berlangganan buletin kami"), span:contains("BERLANGGANAN BULETIN KAMI"), span:contains("Berlangganan buletin kami"), p:contains("BERLANGGANAN BULETIN KAMI"), p:contains("Berlangganan buletin kami")').each(function() {
                 var text = $(this).text();
+                var html = $(this).html();
                 if (text.includes('BERLANGGANAN BULETIN KAMI') || text.includes('Berlangganan buletin kami')) {
-                    $(this).text('SUBSCRIBE TO OUR NEWSLETTER');
+                    // Preserve checkbox if exists
+                    var checkbox = $(this).find('input[type="checkbox"]');
+                    if (checkbox.length) {
+                        $(this).html('<input type="checkbox" ' + checkbox.attr('name') ? 'name="' + checkbox.attr('name') + '" ' : '' + checkbox.attr('id') ? 'id="' + checkbox.attr('id') + '" ' : '' + checkbox.is(':checked') ? 'checked ' : '' + '/> SUBSCRIBE TO OUR NEWSLETTER');
+                    } else {
+                        $(this).text('SUBSCRIBE TO OUR NEWSLETTER');
+                    }
+                }
+            });
+            
+            // Also check for newsletter text in any element
+            $('*').each(function() {
+                var text = $(this).text();
+                if (text.trim() === 'BERLANGGANAN BULETIN KAMI' || text.trim() === 'Berlangganan buletin kami') {
+                    var checkbox = $(this).find('input[type="checkbox"]');
+                    if (checkbox.length) {
+                        $(this).html(checkbox[0].outerHTML + ' SUBSCRIBE TO OUR NEWSLETTER');
+                    } else {
+                        $(this).text('SUBSCRIBE TO OUR NEWSLETTER');
+                    }
                 }
             });
             

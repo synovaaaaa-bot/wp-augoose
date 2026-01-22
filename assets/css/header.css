@@ -540,10 +540,11 @@ body.mobile-menu-open .mobile-menu {
     }
     
     .header-container {
-        padding: 8px 12px;
-        gap: 8px;
+        padding: 10px 12px;
+        gap: 10px;
         grid-template-columns: auto 1fr auto;
         align-items: center;
+        min-height: 50px;
     }
     
     .mobile-menu-toggle {
@@ -555,6 +556,7 @@ body.mobile-menu-open .mobile-menu {
         align-items: center;
         justify-content: center;
         align-self: center;
+        flex-shrink: 0;
     }
     
     .site-branding {
@@ -565,6 +567,7 @@ body.mobile-menu-open .mobile-menu {
         align-items: center;
         justify-content: center;
         align-self: center;
+        flex-shrink: 0;
     }
     
     .site-branding .custom-logo {
