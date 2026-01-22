@@ -1506,19 +1506,33 @@ function wp_augoose_hide_newsletter_checkbox() {
 	if ( is_checkout() ) {
 		?>
 		<style>
-			/* Hide newsletter checkbox */
+			/* Hide newsletter checkbox - all variations */
 			.woocommerce-newsletter-subscription,
 			.woocommerce-form__label-for-checkbox:has(input[name*="newsletter"]),
 			.woocommerce-form__label-for-checkbox:has(input[id*="newsletter"]),
 			label:has(input[name*="newsletter"]),
 			label:has(input[id*="newsletter"]),
 			input[name*="newsletter"],
-			input[id*="newsletter"] {
+			input[id*="newsletter"],
+			/* Hide Hostinger newsletter checkbox */
+			input[name="hostinger_reach_optin"],
+			input[id="hostinger_reach_optin"],
+			label:has(input[name="hostinger_reach_optin"]),
+			label:has(input[id="hostinger_reach_optin"]),
+			.hostinger-reach-optin__checkbox-text,
+			label:has(.hostinger-reach-optin__checkbox-text),
+			label:has(span:contains("Berlangganan")),
+			label:has(span:contains("Buletin")),
+			label:has(span:contains("berlangganan")),
+			label:has(span:contains("buletin")) {
 				display: none !important;
 				visibility: hidden !important;
 				opacity: 0 !important;
 				height: 0 !important;
 				overflow: hidden !important;
+				margin: 0 !important;
+				padding: 0 !important;
+				line-height: 0 !important;
 			}
 		</style>
 		<?php
@@ -1530,14 +1544,33 @@ function wp_augoose_hide_newsletter_checkbox() {
  */
 add_action( 'woocommerce_review_order_before_submit', 'wp_augoose_add_terms_checkbox', 10 );
 function wp_augoose_add_terms_checkbox() {
-	// Get Terms page URL
-	$terms_page_id = wc_get_page_id( 'terms' );
+	// Get Terms page URL - try multiple methods
 	$terms_url = '';
 	
+	// Method 1: WooCommerce Terms page setting
+	$terms_page_id = wc_get_page_id( 'terms' );
 	if ( $terms_page_id ) {
 		$terms_url = get_permalink( $terms_page_id );
-	} else {
-		// Fallback to fixed URL
+	}
+	
+	// Method 2: Try to find page by slug
+	if ( empty( $terms_url ) ) {
+		$terms_page = get_page_by_path( 'terms-of-service' );
+		if ( $terms_page ) {
+			$terms_url = get_permalink( $terms_page->ID );
+		}
+	}
+	
+	// Method 3: Try alternative slug
+	if ( empty( $terms_url ) ) {
+		$terms_page = get_page_by_path( 'terms' );
+		if ( $terms_page ) {
+			$terms_url = get_permalink( $terms_page->ID );
+		}
+	}
+	
+	// Fallback to fixed URL
+	if ( empty( $terms_url ) ) {
 		$terms_url = home_url( '/terms-of-service/' );
 	}
 	

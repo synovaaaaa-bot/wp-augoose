@@ -766,12 +766,20 @@
             $('label:has(input[name*="newsletter"]), label:has(input[id*="newsletter"])').hide();
             $('input[name*="newsletter"], input[id*="newsletter"]').closest('label, p, div').hide();
             
+            // Hide Hostinger newsletter checkbox
+            $('input[name="hostinger_reach_optin"], input[id="hostinger_reach_optin"]').closest('label, p, div').hide();
+            $('label:has(input[name="hostinger_reach_optin"]), label:has(input[id="hostinger_reach_optin"])').hide();
+            $('.hostinger-reach-optin__checkbox-text').closest('label, p, div').hide();
+            
             // Hide any element containing newsletter subscription text
-            $('label:contains("BERLANGGANAN BULETIN KAMI"), label:contains("Berlangganan buletin kami"), span:contains("BERLANGGANAN BULETIN KAMI"), span:contains("Berlangganan buletin kami"), p:contains("BERLANGGANAN BULETIN KAMI"), p:contains("Berlangganan buletin kami")').each(function() {
+            $('label, span, p').filter(function() {
                 var text = $(this).text();
-                if (text.includes('BERLANGGANAN BULETIN KAMI') || text.includes('Berlangganan buletin kami') || text.includes('SUBSCRIBE TO OUR NEWSLETTER')) {
-                    $(this).hide();
-                }
+                return text.includes('BERLANGGANAN BULETIN KAMI') || 
+                       text.includes('Berlangganan buletin kami') || 
+                       text.includes('Berlangganan Buletin') ||
+                       text.includes('SUBSCRIBE TO OUR NEWSLETTER');
+            }).each(function() {
+                $(this).closest('label, p, div').hide();
             });
             
             // Force "Place order" button text
