@@ -158,7 +158,7 @@
 
 
     <!-- Size Guide Modal (Global - accessible from all pages) -->
-    <div class="size-guide-modal" id="size-guide-modal" style="display: none !important; visibility: hidden;">
+    <div class="size-guide-modal" id="size-guide-modal" style="display: none;">
         <div class="size-guide-overlay"></div>
         <div class="size-guide-content-wrapper">
             <button class="size-guide-close" aria-label="Close size guide">&times;</button>

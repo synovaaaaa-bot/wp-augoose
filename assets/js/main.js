@@ -463,21 +463,36 @@
             wrappers.forEach(function(wrapper) {
                 if (wrapper.getAttribute('data-guide') === guide) {
                     wrapper.style.display = 'block';
+                    wrapper.style.visibility = 'visible';
                 } else {
                     wrapper.style.display = 'none';
+                    wrapper.style.visibility = 'hidden';
                 }
             });
             
-            // Show modal
-            modal.style.display = 'flex';
+            // Show modal - use !important to override CSS
+            modal.setAttribute('style', 'display: flex !important; visibility: visible !important;');
             document.body.classList.add('size-guide-open');
+            
+            // Force show content wrapper
+            const contentWrapper = modal.querySelector('.size-guide-content-wrapper');
+            if (contentWrapper) {
+                contentWrapper.style.display = 'block';
+                contentWrapper.style.visibility = 'visible';
+            }
+            
+            const content = modal.querySelector('.size-guide-content');
+            if (content) {
+                content.style.display = 'block';
+                content.style.visibility = 'visible';
+            }
         }
         
         // Close modal
         function closeSizeGuide() {
             const modal = document.getElementById('size-guide-modal');
             if (modal) {
-                modal.style.display = 'none';
+                modal.setAttribute('style', 'display: none !important; visibility: hidden !important;');
                 document.body.classList.remove('size-guide-open');
             }
         }

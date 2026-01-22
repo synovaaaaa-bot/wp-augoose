@@ -777,9 +777,16 @@ body.post-type-archive-product ul.products {
     text-transform: uppercase;
 }
 
-.size-guide-content {
+/* Old size guide accordion - keep for backward compatibility */
+.product-size-guide .size-guide-content {
     margin-top: 10px;
     display: none;
+}
+
+/* Modal size guide content should always be visible when modal is open */
+.size-guide-modal .size-guide-content {
+    display: block !important;
+    margin-top: 0;
 }
 
 .size-chart {
@@ -2889,6 +2896,18 @@ body.woocommerce-cart .site-main .entry-content {
 
 .size-guide-modal[style*="flex"] {
     display: flex !important;
+    visibility: visible !important;
+}
+
+/* Ensure content is visible when modal is open */
+.size-guide-modal[style*="flex"] .size-guide-content-wrapper {
+    display: block !important;
+    visibility: visible !important;
+}
+
+.size-guide-modal[style*="flex"] .size-guide-content {
+    display: block !important;
+    visibility: visible !important;
 }
 
 .size-guide-overlay {
