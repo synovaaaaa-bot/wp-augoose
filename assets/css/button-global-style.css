@@ -28,7 +28,11 @@
 .woocommerce button[class*="choose"],
 .woocommerce a[class*="choose"],
 
-/* Product Card Buttons */
+/* Product Card Buttons - More Specific Selectors */
+ul.products .product-item .product-add-to-cart .add-to-cart-btn,
+ul.products .product .product-add-to-cart .add-to-cart-btn,
+.woocommerce ul.products .product-item .product-add-to-cart .add-to-cart-btn,
+.woocommerce ul.products .product .product-add-to-cart .add-to-cart-btn,
 .product-add-to-cart .add-to-cart-btn,
 .product-add-to-cart .view-product-btn,
 .product-actions-overlay .add-to-cart-btn,
@@ -36,6 +40,8 @@
 .product-actions-overlay button.variable-product-btn,
 .product-item .add-to-cart-btn,
 .product-item .variable-product-btn,
+.product .add-to-cart-btn,
+.product .variable-product-btn,
 
 /* Cart & Checkout Buttons */
 .cart-page-simple .btn-checkout,
@@ -58,10 +64,13 @@ input.button {
     /* Base Style - Same as Latest Collection */
     height: 44px !important;
     min-height: 44px !important;
+    max-height: 44px !important;
     
     background: #000000 !important;
+    background-color: #000000 !important;
     color: #ffffff !important;
     border: none !important;
+    border-width: 0 !important;
     
     margin: 0 !important;
     padding: 0 14px !important;
@@ -84,9 +93,16 @@ input.button {
     
     box-sizing: border-box !important;
     line-height: 1 !important;
+    
+    /* Override any existing background colors */
+    --augoose-primary: #000000 !important;
 }
 
 /* Hover State */
+ul.products .product-item .product-add-to-cart .add-to-cart-btn:hover,
+ul.products .product .product-add-to-cart .add-to-cart-btn:hover,
+.woocommerce ul.products .product-item .product-add-to-cart .add-to-cart-btn:hover,
+.woocommerce ul.products .product .product-add-to-cart .add-to-cart-btn:hover,
 .woocommerce a.button:hover,
 .woocommerce button.button:hover,
 .woocommerce input.button:hover,
@@ -112,8 +128,10 @@ a.button:hover,
 button.button:hover,
 input.button:hover {
     background: #222222 !important;
+    background-color: #222222 !important;
     transform: translateY(-1px) !important;
     color: #ffffff !important;
+    --augoose-primary: #222222 !important;
 }
 
 /* Active State */
@@ -193,6 +211,55 @@ button:disabled[aria-disabled="true"],
     color: #666666 !important;
     cursor: not-allowed !important;
     opacity: 0.7 !important;
+}
+
+/* ===================================
+   AGGRESSIVE OVERRIDE FOR SHOP PAGE
+   =================================== */
+/* Override product-card-fixed.css background colors */
+body.woocommerce-page ul.products .product-item .product-add-to-cart .add-to-cart-btn,
+body.woocommerce-page ul.products .product .product-add-to-cart .add-to-cart-btn,
+body.woocommerce-shop ul.products .product-item .product-add-to-cart .add-to-cart-btn,
+body.woocommerce-shop ul.products .product .product-add-to-cart .add-to-cart-btn,
+body.tax-product_cat ul.products .product-item .product-add-to-cart .add-to-cart-btn,
+body.tax-product_cat ul.products .product .product-add-to-cart .add-to-cart-btn,
+.woocommerce-page ul.products .product-item .product-add-to-cart .add-to-cart-btn,
+.woocommerce-page ul.products .product .product-add-to-cart .add-to-cart-btn,
+.woocommerce-shop ul.products .product-item .product-add-to-cart .add-to-cart-btn,
+.woocommerce-shop ul.products .product .product-add-to-cart .add-to-cart-btn {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: none !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    border-radius: 8px !important;
+    padding: 0 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+body.woocommerce-page ul.products .product-item .product-add-to-cart .add-to-cart-btn:hover,
+body.woocommerce-page ul.products .product .product-add-to-cart .add-to-cart-btn:hover,
+body.woocommerce-shop ul.products .product-item .product-add-to-cart .add-to-cart-btn:hover,
+body.woocommerce-shop ul.products .product .product-add-to-cart .add-to-cart-btn:hover,
+body.tax-product_cat ul.products .product-item .product-add-to-cart .add-to-cart-btn:hover,
+body.tax-product_cat ul.products .product .product-add-to-cart .add-to-cart-btn:hover,
+.woocommerce-page ul.products .product-item .product-add-to-cart .add-to-cart-btn:hover,
+.woocommerce-page ul.products .product .product-add-to-cart .add-to-cart-btn:hover,
+.woocommerce-shop ul.products .product-item .product-add-to-cart .add-to-cart-btn:hover,
+.woocommerce-shop ul.products .product .product-add-to-cart .add-to-cart-btn:hover {
+    background: #222222 !important;
+    background-color: #222222 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
 }
 
 /* Exclude specific buttons that should not use this style */

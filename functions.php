@@ -596,8 +596,9 @@ function wp_augoose_scripts() {
     // Product Cards Fixed - Image Full & Typography Better
     if ( file_exists( $theme_dir . '/assets/css/product-card-fixed.css' ) ) {
         wp_enqueue_style( 'wp-augoose-product-fixed', $theme_dir_uri . '/assets/css/product-card-fixed.css', array(), $asset_ver( 'assets/css/product-card-fixed.css' ), 'all' );
-		wp_enqueue_style( 'wp-augoose-latest-collection-v2', $theme_dir_uri . '/assets/css/latest-collection-v2.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-v2.css' ), 'all' );
-		wp_enqueue_style( 'wp-augoose-button-global-style', $theme_dir_uri . '/assets/css/button-global-style.css', array( 'wp-augoose-woocommerce', 'wp-augoose-product-fixed' ), $asset_ver( 'assets/css/button-global-style.css' ), 'all' );
+        wp_enqueue_style( 'wp-augoose-latest-collection-v2', $theme_dir_uri . '/assets/css/latest-collection-v2.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-v2.css' ), 'all' );
+		wp_enqueue_style( 'wp-augoose-button-global-style', $theme_dir_uri . '/assets/css/button-global-style.css', array( 'wp-augoose-woocommerce', 'wp-augoose-product-fixed', 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/button-global-style.css' ), 'all' );
+		wp_style_add_data( 'wp-augoose-button-global-style', 'priority', 'high' );
         wp_enqueue_style( 'wp-augoose-header-mobile-fix', $theme_dir_uri . '/assets/css/header-mobile-fix.css', array( 'wp-augoose-header' ), $asset_ver( 'assets/css/header-mobile-fix.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-latest-collection-mobile-fix', $theme_dir_uri . '/assets/css/latest-collection-mobile-fix.css', array( 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/latest-collection-mobile-fix.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-hero-fixed', $theme_dir_uri . '/assets/css/hero-fixed.css', array( 'wp-augoose-homepage' ), $asset_ver( 'assets/css/hero-fixed.css' ), 'all' );
