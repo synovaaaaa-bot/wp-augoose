@@ -323,6 +323,9 @@
                         
                         // Trigger WooCommerce event
                         $(document.body).trigger('added_to_cart', [response.fragments, response.cart_hash, button]);
+                        
+                        // Prevent duplicate buttons
+                        $('.single-product-wrapper form.cart .single_add_to_cart_button:not(:first)').remove();
                     } else {
                         button.removeClass('loading').prop('disabled', false);
                         showNotification(response.data.message, 'error');
@@ -652,7 +655,20 @@
         });
     }
 
+    // Prevent duplicate add to cart buttons
+    function preventDuplicateButtons() {
+        $('.single-product-wrapper form.cart').each(function() {
+            const $form = $(this);
+            const $buttons = $form.find('.single_add_to_cart_button');
+            if ($buttons.length > 1) {
+                $buttons.not(':first').remove();
+            }
+        });
+    }
+    
+    // Run on page load and after AJAX
     $(document).ready(function() {
+        preventDuplicateButtons();
         initMobileMenu();
         initSearchToggle();
         initSearchHistory();
@@ -670,6 +686,11 @@
         initLanguageSwitcher();
         initCurrencySwitcher();
         initReadMore(); // Product description read more
+        
+        // Prevent duplicate buttons after AJAX
+        $(document.body).on('added_to_cart updated_wc_div', function() {
+            setTimeout(preventDuplicateButtons, 100);
+        });
     });
 
     // Initialize on Window Load

@@ -565,6 +565,16 @@ body.post-type-archive-product ul.products {
 /* Add to cart button */
 .single-product-wrapper form.cart {
     margin: 20px 0 18px;
+    position: relative;
+}
+
+/* Prevent duplicate buttons */
+.single-product-wrapper form.cart .single_add_to_cart_button {
+    position: relative;
+}
+
+.single-product-wrapper form.cart .single_add_to_cart_button:not(:first-of-type) {
+    display: none !important;
 }
 
 .single-product-wrapper .quantity {

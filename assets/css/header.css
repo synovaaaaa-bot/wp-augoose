@@ -545,8 +545,19 @@ body.mobile-menu-open .mobile-menu {
         grid-template-columns: auto 1fr auto;
     }
     
-    .site-branding {
+    .mobile-menu-toggle {
+        display: flex !important;
         grid-column: 1;
+        order: 1;
+        width: 32px;
+        height: 32px;
+        margin-right: 8px;
+    }
+    
+    .site-branding {
+        grid-column: 2;
+        justify-self: center;
+        order: 2;
     }
     
     .site-branding .custom-logo {
@@ -557,15 +568,6 @@ body.mobile-menu-open .mobile-menu {
     .site-logo a,
     .custom-logo-link {
         font-size: 1.1rem !important;
-    }
-    
-    .mobile-menu-toggle {
-        display: flex !important;
-        grid-column: 1;
-        order: -1;
-        margin-right: 8px;
-        width: 32px;
-        height: 32px;
     }
     
     .header-category-nav {

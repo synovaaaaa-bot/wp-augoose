@@ -294,6 +294,27 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Saring' => 'Filter',
 			'saring' => 'Filter',
 			'Filter' => 'Filter',
+			// Checkout translations
+			'TAMBAH KE KERANJANG' => 'ADD TO CART',
+			'Tambah ke keranjang' => 'Add to cart',
+			'tambah ke keranjang' => 'Add to cart',
+			'Masuk' => 'Login',
+			'masuk' => 'Login',
+			'Alamat penagihan' => 'Billing address',
+			'Alamat pengiriman' => 'Shipping address',
+			'Metode pembayaran' => 'Payment method',
+			'Ringkasan pesanan' => 'Order summary',
+			'Kode kupon' => 'Coupon code',
+			'Terapkan kupon' => 'Apply coupon',
+			'Terapkan' => 'Apply',
+			'Masukkan kode kupon' => 'Enter coupon code',
+			'Tempatkan pesanan' => 'Place order',
+			'Bayar sekarang' => 'Pay now',
+			'Kirim ke alamat yang berbeda?' => 'Ship to a different address?',
+			'Informasi tambahan' => 'Additional information',
+			'Catatan pesanan' => 'Order notes',
+			'Detail penagihan' => 'Billing details',
+			'Detail pengiriman' => 'Shipping details',
 		);
 		
 		if ( isset( $english_texts[ $translated_text ] ) ) {
