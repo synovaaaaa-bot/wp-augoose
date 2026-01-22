@@ -26,40 +26,46 @@
     gap: 24px;
 }
 
-.contact-info-card {
+.contact-info-card,
+.contact-link-wrapper {
     background: #fff;
     border: 1px solid #e0e0e0;
     padding: 32px;
     text-align: center;
     transition: all 0.3s ease;
-    position: relative;
-}
-
-.contact-info-card:hover {
-    border-color: var(--augoose-primary, #30475E);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.contact-info-card.contact-email {
-    grid-column: 1 / -1;
-}
-
-/* Link wrapper for clickable cards */
-.contact-link-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-decoration: none;
     color: inherit;
     cursor: pointer;
     width: 100%;
-    height: 100%;
-    min-height: 100%;
+    min-height: 180px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
 }
 
+.contact-info-card:hover,
 .contact-link-wrapper:hover {
+    border-color: var(--augoose-primary, #30475E);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     text-decoration: none;
     color: inherit;
+    transform: translateY(-2px);
+}
+
+.contact-info-card.contact-email,
+.contact-link-wrapper.contact-email {
+    grid-column: 1 / -1;
+}
+
+/* Ensure all child elements don't block clicks */
+.contact-link-wrapper * {
+    pointer-events: none;
+    position: relative;
+    z-index: 2;
 }
 
 .contact-link {
