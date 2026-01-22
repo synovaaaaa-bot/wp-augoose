@@ -180,17 +180,12 @@
     }
     
     .header-locale-item--currency::before {
-        position: absolute !important;
-        left: 4px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        width: 12px !important;
-        height: 12px !important;
-        z-index: 1 !important;
+        /* currency icon - HIDDEN */
+        display: none !important;
     }
     
     .header-locale-item--currency select {
-        padding-left: 20px !important;
+        padding-left: 10px !important; /* Reduced padding since no icon */
     }
     
     /* Badges */
