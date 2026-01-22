@@ -52,7 +52,7 @@ if ( post_password_required() ) {
                     }
                     ?>
 
-                    <div class="product-gallery-portrait">
+                    <div class="product-gallery-portrait <?php echo ( count( $image_ids ) === 1 ) ? 'is-single' : ''; ?>">
                         <?php
                         if ( ! empty( $image_ids ) ) {
                             foreach ( $image_ids as $iid ) {
