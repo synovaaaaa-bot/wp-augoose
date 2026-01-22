@@ -1,0 +1,259 @@
+/**
+ * Global Button Style - Apply Latest Collection ADD TO CART style to all rectangular/square buttons
+ * Based on latest-collection-v2.css button style
+ * 
+ * @package WP_Augoose
+ */
+
+/* ===================================
+   GLOBAL BUTTON STYLE (PREMIUM)
+   Apply to all rectangular/square buttons
+   =================================== */
+
+/* WooCommerce Buttons */
+.woocommerce a.button,
+.woocommerce button.button,
+.woocommerce input.button,
+.woocommerce .button,
+.woocommerce button[type="submit"],
+.woocommerce input[type="submit"],
+.woocommerce .single_add_to_cart_button,
+.woocommerce .add_to_cart_button,
+.woocommerce .add-to-cart-btn,
+.woocommerce .add_to_cart_button,
+.woocommerce a.add_to_cart_button,
+.woocommerce button.add_to_cart_button,
+.woocommerce .variable-product-btn,
+.woocommerce .choose-options-btn,
+.woocommerce button[class*="choose"],
+.woocommerce a[class*="choose"],
+
+/* Product Card Buttons */
+.product-add-to-cart .add-to-cart-btn,
+.product-add-to-cart .view-product-btn,
+.product-actions-overlay .add-to-cart-btn,
+.product-actions-overlay .variable-product-btn,
+.product-actions-overlay button.variable-product-btn,
+.product-item .add-to-cart-btn,
+.product-item .variable-product-btn,
+
+/* Cart & Checkout Buttons */
+.cart-page-simple .btn-checkout,
+.cart-page-simple .btn-view-cart,
+.woocommerce-cart .button,
+.woocommerce-checkout .button,
+.woocommerce-checkout #place_order,
+.checkout-place-order #place_order,
+.checkout-place-order .button,
+
+/* General Buttons */
+button[type="submit"]:not(.wp-block-search__button),
+input[type="submit"]:not(.wp-block-search__button),
+.button:not(.wp-block-button__link),
+.btn:not(.wp-block-button__link),
+a.button,
+button.button,
+input.button {
+
+    /* Base Style - Same as Latest Collection */
+    height: 44px !important;
+    min-height: 44px !important;
+    
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: none !important;
+    
+    margin: 0 !important;
+    padding: 0 14px !important;
+    
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    
+    box-sizing: border-box !important;
+    line-height: 1 !important;
+}
+
+/* Hover State */
+.woocommerce a.button:hover,
+.woocommerce button.button:hover,
+.woocommerce input.button:hover,
+.woocommerce .button:hover,
+.woocommerce button[type="submit"]:hover,
+.woocommerce input[type="submit"]:hover,
+.woocommerce .single_add_to_cart_button:hover,
+.woocommerce .add_to_cart_button:hover,
+.woocommerce .add-to-cart-btn:hover,
+.woocommerce .variable-product-btn:hover,
+.woocommerce .choose-options-btn:hover,
+.product-add-to-cart .add-to-cart-btn:hover,
+.product-actions-overlay .add-to-cart-btn:hover,
+.product-actions-overlay .variable-product-btn:hover,
+.cart-page-simple .btn-checkout:hover,
+.woocommerce-checkout #place_order:hover,
+.checkout-place-order #place_order:hover,
+button[type="submit"]:not(.wp-block-search__button):hover,
+input[type="submit"]:not(.wp-block-search__button):hover,
+.button:not(.wp-block-button__link):hover,
+.btn:not(.wp-block-button__link):hover,
+a.button:hover,
+button.button:hover,
+input.button:hover {
+    background: #222222 !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
+}
+
+/* Active State */
+.woocommerce a.button:active,
+.woocommerce button.button:active,
+.woocommerce input.button:active,
+.woocommerce .button:active,
+.woocommerce button[type="submit"]:active,
+.woocommerce input[type="submit"]:active,
+.woocommerce .single_add_to_cart_button:active,
+.woocommerce .add_to_cart_button:active,
+.woocommerce .add-to-cart-btn:active,
+.woocommerce .variable-product-btn:active,
+.product-add-to-cart .add-to-cart-btn:active,
+.product-actions-overlay .add-to-cart-btn:active,
+.cart-page-simple .btn-checkout:active,
+.woocommerce-checkout #place_order:active,
+.checkout-place-order #place_order:active,
+button[type="submit"]:not(.wp-block-search__button):active,
+input[type="submit"]:not(.wp-block-search__button):active,
+.button:not(.wp-block-button__link):active,
+.btn:not(.wp-block-button__link):active,
+a.button:active,
+button.button:active,
+input.button:active {
+    background: #111111 !important;
+    transform: translateY(0) !important;
+    color: #ffffff !important;
+}
+
+/* Disabled State */
+.woocommerce a.button:disabled,
+.woocommerce button.button:disabled,
+.woocommerce input.button:disabled,
+.woocommerce .button:disabled,
+.woocommerce button[type="submit"]:disabled,
+.woocommerce input[type="submit"]:disabled,
+.woocommerce .single_add_to_cart_button:disabled,
+.woocommerce .add_to_cart_button:disabled,
+.woocommerce .add-to-cart-btn:disabled,
+button[type="submit"]:not(.wp-block-search__button):disabled,
+input[type="submit"]:not(.wp-block-search__button):disabled,
+.button:not(.wp-block-button__link):disabled,
+.btn:not(.wp-block-button__link):disabled,
+a.button:disabled,
+button.button:disabled,
+input.button:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    background: #999999 !important;
+}
+
+/* Secondary/Outlined Buttons (VIEW PRODUCT, etc.) */
+.product-add-to-cart .view-product-btn,
+.view-product-btn,
+.btn-secondary,
+.button-secondary {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+}
+
+.product-add-to-cart .view-product-btn:hover,
+.view-product-btn:hover,
+.btn-secondary:hover,
+.button-secondary:hover {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+}
+
+/* SOLD OUT Button */
+.view-product-btn.is-disabled,
+button:disabled[aria-disabled="true"],
+.lc-button:disabled {
+    background: #cccccc !important;
+    color: #666666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+}
+
+/* Exclude specific buttons that should not use this style */
+.wp-block-search__button,
+.wp-block-button__link,
+.mobile-menu-toggle,
+.wishlist-toggle,
+.qty-button,
+.qty-plus,
+.qty-minus,
+.remove-item-btn,
+.shop-filter-toggle,
+.shop-filter-close,
+.modal-close,
+.size-guide-close {
+    /* Keep original styles */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .woocommerce a.button,
+    .woocommerce button.button,
+    .woocommerce input.button,
+    .woocommerce .button,
+    .woocommerce button[type="submit"],
+    .woocommerce input[type="submit"],
+    .woocommerce .single_add_to_cart_button,
+    .woocommerce .add_to_cart_button,
+    .product-add-to-cart .add-to-cart-btn,
+    .cart-page-simple .btn-checkout,
+    .woocommerce-checkout #place_order,
+    button[type="submit"]:not(.wp-block-search__button),
+    input[type="submit"]:not(.wp-block-search__button),
+    .button:not(.wp-block-button__link),
+    .btn:not(.wp-block-button__link) {
+        height: 40px !important;
+        min-height: 40px !important;
+        font-size: 10px !important;
+        padding: 0 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .woocommerce a.button,
+    .woocommerce button.button,
+    .woocommerce input.button,
+    .woocommerce .button,
+    .woocommerce button[type="submit"],
+    .woocommerce input[type="submit"],
+    .woocommerce .single_add_to_cart_button,
+    .woocommerce .add_to_cart_button,
+    .product-add-to-cart .add-to-cart-btn,
+    .cart-page-simple .btn-checkout,
+    .woocommerce-checkout #place_order,
+    button[type="submit"]:not(.wp-block-search__button),
+    input[type="submit"]:not(.wp-block-search__button),
+    .button:not(.wp-block-button__link),
+    .btn:not(.wp-block-button__link) {
+        height: 44px !important;
+        min-height: 44px !important;
+        font-size: 11px !important;
+        padding: 0 14px !important;
+    }
+}
