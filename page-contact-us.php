@@ -62,5 +62,51 @@ get_header();
     </div>
 </main>
 
+<script>
+// Ensure contact links are clickable
+(function() {
+    function initContactLinks() {
+        var contactLinks = document.querySelectorAll('a.contact-link-wrapper');
+        contactLinks.forEach(function(link) {
+            // Force enable pointer events and cursor
+            link.style.pointerEvents = 'auto';
+            link.style.cursor = 'pointer';
+            link.style.position = 'relative';
+            link.style.zIndex = '10';
+            
+            // Remove any existing click handlers that might block
+            var newLink = link.cloneNode(true);
+            link.parentNode.replaceChild(newLink, link);
+            
+            // Add click handler
+            newLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var href = this.getAttribute('href');
+                if (href) {
+                    if (href.startsWith('mailto:')) {
+                        window.location.href = href;
+                    } else if (href.startsWith('https://wa.me/')) {
+                        window.open(href, '_blank', 'noopener,noreferrer');
+                    } else {
+                        window.open(href, '_blank', 'noopener,noreferrer');
+                    }
+                }
+                return false;
+            });
+        });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initContactLinks);
+    } else {
+        initContactLinks();
+    }
+    
+    // Also try after a short delay
+    setTimeout(initContactLinks, 100);
+})();
+</script>
+
 <?php
 get_footer();

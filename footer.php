@@ -163,10 +163,11 @@
         <div class="size-guide-content-wrapper">
             <button class="size-guide-close" aria-label="Close size guide">&times;</button>
             <div class="size-guide-content">
-                <h2 class="size-guide-title">AUGOOSE</h2>
+                <h2 class="size-guide-title">SIZE GUIDE</h2>
                 <div class="size-guide-tabs">
                     <button class="size-guide-tab active" data-guide="pants">PANTS SIZE AND FIT GUIDE</button>
                     <button class="size-guide-tab" data-guide="jackets">JACKETS SIZE AND FIT GUIDE</button>
+                    <button class="size-guide-tab" data-guide="international">INTERNATIONAL SIZE GUIDE</button>
                 </div>
                 
                 <!-- Pants Size Guide -->
@@ -254,6 +255,9 @@
                 
                 <!-- Jackets Size Guide -->
                 <div class="size-guide-table-wrapper" data-guide="jackets" style="display: none;">
+                    <div class="size-guide-product-name">
+                        <h3>AUGOOSE active jacket</h3>
+                    </div>
                     <table class="size-guide-table">
                         <thead>
                             <tr>
@@ -266,20 +270,6 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>CHEST</td>
-                                <td>98</td>
-                                <td>104</td>
-                                <td>110</td>
-                                <td>116</td>
-                            </tr>
-                            <tr>
-                                <td>LENGTH</td>
-                                <td>68</td>
-                                <td>70</td>
-                                <td>72</td>
-                                <td>74</td>
-                            </tr>
-                            <tr>
                                 <td>SHOULDER</td>
                                 <td>44</td>
                                 <td>46</td>
@@ -287,15 +277,142 @@
                                 <td>50</td>
                             </tr>
                             <tr>
-                                <td>SLEEVE</td>
-                                <td>62</td>
+                                <td>WIDTH</td>
+                                <td>55</td>
+                                <td>58</td>
+                                <td>61</td>
                                 <td>64</td>
-                                <td>66</td>
-                                <td>68</td>
+                            </tr>
+                            <tr>
+                                <td>HIP</td>
+                                <td>54</td>
+                                <td>57</td>
+                                <td>60</td>
+                                <td>63</td>
+                            </tr>
+                            <tr>
+                                <td>SLEEVE</td>
+                                <td>58</td>
+                                <td>60</td>
+                                <td>62</td>
+                                <td>63</td>
+                            </tr>
+                            <tr>
+                                <td>LENGTH</td>
+                                <td>61</td>
+                                <td>63</td>
+                                <td>65</td>
+                                <td>67</td>
+                            </tr>
+                            <tr>
+                                <td>CUFF</td>
+                                <td>14</td>
+                                <td>15</td>
+                                <td>15.5</td>
+                                <td>16</td>
                             </tr>
                         </tbody>
                     </table>
                     <p class="size-guide-disclaimer">*The garments are cut and sewn by hand, so measurement may vary slightly each pairs</p>
+                </div>
+                
+                <!-- International Size Guide -->
+                <div class="size-guide-table-wrapper" data-guide="international" style="display: none;">
+                    <div class="size-guide-section-header">
+                        <div class="size-guide-section-title">
+                            <h3>Mens XS to 5X</h3>
+                        </div>
+                        <div class="size-guide-section-subtitle">
+                            <h3>International</h3>
+                        </div>
+                    </div>
+                    <p class="size-guide-description">Sizing for mens styles that are available in sizes XS to 5X.</p>
+                    <table class="size-guide-table size-guide-international">
+                        <thead>
+                            <tr>
+                                <th>SIZE</th>
+                                <th>UK/AUS</th>
+                                <th>UK CHEST</th>
+                                <th>UK WAIST</th>
+                                <th>IT/FR</th>
+                                <th>JP TOPS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>XS</td>
+                                <td>XS</td>
+                                <td>34</td>
+                                <td>28</td>
+                                <td>44</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>S</td>
+                                <td>S</td>
+                                <td>36</td>
+                                <td>30</td>
+                                <td>46</td>
+                                <td>2</td>
+                            </tr>
+                            <tr>
+                                <td>M</td>
+                                <td>M</td>
+                                <td>38</td>
+                                <td>32</td>
+                                <td>48</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td>L</td>
+                                <td>L</td>
+                                <td>40</td>
+                                <td>34</td>
+                                <td>50</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>XL</td>
+                                <td>XL</td>
+                                <td>42</td>
+                                <td>36</td>
+                                <td>52</td>
+                                <td>5</td>
+                            </tr>
+                            <tr>
+                                <td>2X</td>
+                                <td>2X</td>
+                                <td>44</td>
+                                <td>38</td>
+                                <td>54</td>
+                                <td>6</td>
+                            </tr>
+                            <tr>
+                                <td>3X</td>
+                                <td>3X</td>
+                                <td>46</td>
+                                <td>40</td>
+                                <td>56</td>
+                                <td>7</td>
+                            </tr>
+                            <tr>
+                                <td>4X</td>
+                                <td>4X</td>
+                                <td>48</td>
+                                <td>42</td>
+                                <td>58</td>
+                                <td>8</td>
+                            </tr>
+                            <tr>
+                                <td>5X</td>
+                                <td>5X</td>
+                                <td>50</td>
+                                <td>44</td>
+                                <td>60</td>
+                                <td>9</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

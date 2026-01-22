@@ -39,12 +39,10 @@
     justify-content: center;
     text-decoration: none;
     color: inherit;
-    cursor: pointer;
     width: 100%;
     min-height: 180px;
     box-sizing: border-box;
     position: relative;
-    z-index: 1;
 }
 
 .contact-info-card:hover,
@@ -61,11 +59,28 @@
     grid-column: 1 / -1;
 }
 
-/* Ensure all child elements don't block clicks */
-.contact-link-wrapper * {
-    pointer-events: none;
+/* Ensure link is clickable - override any blocking styles */
+a.contact-link-wrapper {
+    cursor: pointer !important;
+    pointer-events: auto !important;
     position: relative;
-    z-index: 2;
+    z-index: 10;
+    display: block !important;
+}
+
+a.contact-link-wrapper * {
+    pointer-events: none !important;
+    cursor: inherit;
+}
+
+/* Override any global styles that might disable cursor */
+a.contact-link-wrapper,
+a.contact-link-wrapper:hover,
+a.contact-link-wrapper:active,
+a.contact-link-wrapper:focus {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    text-decoration: none !important;
 }
 
 .contact-link {
