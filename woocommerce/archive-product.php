@@ -55,24 +55,44 @@ do_action( 'woocommerce_before_main_content' );
 					
 					foreach ( $attribute_taxonomies as $attr ) {
 						$attr_name = strtolower( $attr->attribute_name );
+						// Store attribute name without 'pa_' prefix (widget will add it)
 						if ( $attr_name === 'size' && ! $size_attr ) {
-							$size_attr = 'pa_' . $attr->attribute_name;
+							$size_attr = $attr->attribute_name; // Store as 'size', not 'pa_size'
 						}
 						if ( ( $attr_name === 'color' || $attr_name === 'colour' ) && ! $color_attr ) {
-							$color_attr = 'pa_' . $attr->attribute_name;
+							$color_attr = $attr->attribute_name; // Store as 'color', not 'pa_color'
 						}
 					}
 					
 					// Render Size filter if exists
-					if ( $size_attr && taxonomy_exists( $size_attr ) ) {
-						$size_label = wc_attribute_label( $size_attr );
-						the_widget( 'WC_Widget_Layered_Nav', array( 'title' => $size_label ?: 'Size', 'attribute' => $size_attr ) );
+					// WC_Widget_Layered_Nav automatically uses get_filtered_term_product_counts()
+					// which considers current query (category/products being displayed)
+					// - On category page: shows only attributes from products in that category
+					// - On shop page: shows attributes from all displayed products
+					if ( $size_attr ) {
+						$size_taxonomy = wc_attribute_taxonomy_name( $size_attr );
+						if ( taxonomy_exists( $size_taxonomy ) ) {
+							$size_label = wc_attribute_label( $size_taxonomy );
+							the_widget( 'WC_Widget_Layered_Nav', array( 
+								'title' => $size_label ?: 'Size', 
+								'attribute' => $size_attr, // Widget will add 'pa_' prefix
+								'query_type' => 'or' // Allow multiple selections
+							) );
+						}
 					}
 					
 					// Render Color filter if exists
-					if ( $color_attr && taxonomy_exists( $color_attr ) ) {
-						$color_label = wc_attribute_label( $color_attr );
-						the_widget( 'WC_Widget_Layered_Nav', array( 'title' => $color_label ?: 'Color', 'attribute' => $color_attr ) );
+					// Same behavior - automatically filtered by current products
+					if ( $color_attr ) {
+						$color_taxonomy = wc_attribute_taxonomy_name( $color_attr );
+						if ( taxonomy_exists( $color_taxonomy ) ) {
+							$color_label = wc_attribute_label( $color_taxonomy );
+							the_widget( 'WC_Widget_Layered_Nav', array( 
+								'title' => $color_label ?: 'Color', 
+								'attribute' => $color_attr, // Widget will add 'pa_' prefix
+								'query_type' => 'or' // Allow multiple selections
+							) );
+						}
 					}
 				}
 				?>

@@ -359,7 +359,7 @@
     .latest-collection .woocommerce ul.products,
     .shop-content .woocommerce ul.products {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important;
+        gap: 12px !important;
     }
     
     /* Tetap pakai aspect ratio 3:4 di mobile */
@@ -370,39 +370,95 @@
         min-height: 0 !important;
     }
     
+    .woocommerce ul.products li.product-item,
+    .latest-collection .woocommerce ul.products li.product-item {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    
+    .product-inner {
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    
     .wishlist-toggle {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
     }
     
     .wishlist-toggle svg {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
     }
     
     .color-swatch {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
     }
     
     .product-info {
-        padding: 14px 14px 10px;
+        padding: 12px 12px 8px;
+        gap: 6px;
     }
     
     .woocommerce-loop-product__title,
     .product-info h2 {
-        font-size: 13px !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+        min-height: calc(1.3em * 2) !important;
+        margin: 0 0 4px !important;
     }
     
     .product-info .price {
-        font-size: 14px !important;
+        font-size: 12px !important;
+        margin: 0 !important;
+    }
+
+    .product-add-to-cart {
+        padding: 0 12px 12px;
     }
 
     .product-add-to-cart .add-to-cart-btn,
     .product-add-to-cart .view-product-btn {
-        min-height: 44px;
-        font-size: 11px;
-        letter-spacing: 1.6px;
-        padding: 12px 12px;
+        min-height: 40px;
+        height: 40px;
+        font-size: 10px;
+        letter-spacing: 1.2px;
+        padding: 10px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .latest-collection .woocommerce ul.products,
+    .shop-content .woocommerce ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+    }
+    
+    .product-info {
+        padding: 10px 10px 6px;
+    }
+    
+    .woocommerce-loop-product__title,
+    .product-info h2 {
+        font-size: 10px !important;
+        min-height: calc(1.3em * 2) !important;
+    }
+    
+    .product-info .price {
+        font-size: 11px !important;
+    }
+
+    .product-add-to-cart {
+        padding: 0 10px 10px;
+    }
+
+    .product-add-to-cart .add-to-cart-btn,
+    .product-add-to-cart .view-product-btn {
+        min-height: 38px;
+        height: 38px;
+        font-size: 9px;
+        letter-spacing: 1px;
+        padding: 8px 8px;
     }
 }

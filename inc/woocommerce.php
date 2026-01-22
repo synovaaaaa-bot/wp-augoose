@@ -290,10 +290,19 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Urutkan berdasarkan terbaru' => 'Sort by latest',
 			'Urutkan berdasarkan harga: rendah ke tinggi' => 'Sort by price: low to high',
 			'Urutkan berdasarkan harga: tinggi ke rendah' => 'Sort by price: high to low',
+			'SARING' => 'Filter',
+			'Saring' => 'Filter',
+			'saring' => 'Filter',
+			'Filter' => 'Filter',
 		);
 		
 		if ( isset( $english_texts[ $translated_text ] ) ) {
 			return $english_texts[ $translated_text ];
+		}
+		
+		// Force "Filter" for price filter button
+		if ( strpos( $translated_text, 'SARING' ) !== false || strpos( $translated_text, 'Saring' ) !== false ) {
+			return 'Filter';
 		}
 		
 		// Fallback: return original English text if translation exists
