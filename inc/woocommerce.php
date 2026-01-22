@@ -142,11 +142,12 @@ function wp_augoose_wishlist_set_ids( $ids ) {
 	$payload     = wp_json_encode( $ids );
 	$secure      = is_ssl();
 
-	// Cookie for 30 days
+	// Session cookie (expires when browser closes) for better UX
+	// This ensures wishlist resets on new device/session
 	setcookie(
 		$cookie_name,
 		$payload,
-		time() + ( 30 * DAY_IN_SECONDS ),
+		0, // Session cookie - expires when browser closes
 		COOKIEPATH ? COOKIEPATH : '/',
 		COOKIE_DOMAIN,
 		$secure,

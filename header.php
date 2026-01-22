@@ -38,6 +38,14 @@
 
     <header id="masthead" class="site-header">
         <div class="header-container">
+            <button class="mobile-menu-toggle" aria-label="<?php esc_attr_e( 'Menu', 'wp-augoose' ); ?>" aria-expanded="false">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            
             <div class="site-branding">
                     <?php
                     the_custom_logo();
@@ -153,6 +161,45 @@
                     <?php endif; ?>
                     </div><!-- .header-icon-row -->
             </div>
+        </div>
+        
+        <div class="mobile-menu" style="display: none;">
+            <?php
+            wp_nav_menu(
+                array(
+                    'theme_location' => 'primary',
+                    'menu_id'        => 'mobile-menu',
+                    'fallback_cb'    => false,
+                )
+            );
+            ?>
+            <?php if ( class_exists( 'WooCommerce' ) ) : ?>
+                <ul class="header-category-menu">
+                    <?php
+                    $targets = array(
+                        array( 'label' => 'Jackets', 'slugs' => array( 'jackets', 'jacket' ) ),
+                        array( 'label' => 'Pants',   'slugs' => array( 'pants', 'pant' ) ),
+                        array( 'label' => 'Shirts',  'slugs' => array( 'shirts', 'shirt' ) ),
+                    );
+                    foreach ( $targets as $t ) {
+                        $link = '';
+                        foreach ( $t['slugs'] as $slug ) {
+                            $term = get_term_by( 'slug', $slug, 'product_cat' );
+                            if ( $term && ! is_wp_error( $term ) ) {
+                                $term_link = get_term_link( $term, 'product_cat' );
+                                if ( ! is_wp_error( $term_link ) ) {
+                                    $link = $term_link;
+                                    break;
+                                }
+                            }
+                        }
+                        if ( $link ) {
+                            echo '<li><a href="' . esc_url( $link ) . '">' . esc_html( $t['label'] ) . '</a></li>';
+                        }
+                    }
+                    ?>
+                </ul>
+            <?php endif; ?>
         </div>
     </header>
     </div>

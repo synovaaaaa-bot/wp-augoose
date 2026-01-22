@@ -5,7 +5,7 @@
   'use strict';
 
   function applyView(view) {
-    var $grid = $('.woocommerce ul.products');
+    var $grid = $('.woocommerce ul.products, .shop-page ul.products');
     $grid.removeClass('view-grid view-list');
     $grid.addClass(view === 'list' ? 'view-list' : 'view-grid');
     $('.shop-view-toggle button').removeClass('is-active');
@@ -13,12 +13,13 @@
   }
 
   $(function () {
-    var saved = localStorage.getItem('wpaugoose_shop_view') || 'grid';
+    // Use sessionStorage instead of localStorage for better UX
+    var saved = sessionStorage.getItem('wpaugoose_shop_view') || 'grid';
     applyView(saved);
 
     $(document).on('click', '.shop-view-toggle button', function () {
       var view = $(this).data('view') || 'grid';
-      localStorage.setItem('wpaugoose_shop_view', view);
+      sessionStorage.setItem('wpaugoose_shop_view', view);
       applyView(view);
     });
   });
