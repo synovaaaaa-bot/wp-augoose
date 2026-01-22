@@ -298,6 +298,22 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'TAMBAH KE KERANJANG' => 'ADD TO CART',
 			'Tambah ke keranjang' => 'Add to cart',
 			'tambah ke keranjang' => 'Add to cart',
+			// Add to cart messages
+			'%s telah ditambahkan ke keranjang Anda.' => '%s has been added to your cart.',
+			'%s telah ditambahkan' => '%s has been added',
+			'telah ditambahkan ke keranjang' => 'has been added to your cart',
+			'Ditambahkan ke keranjang' => 'Added to cart',
+			'ditambahkan ke keranjang' => 'added to cart',
+			'Berhasil ditambahkan' => 'Successfully added',
+			'Gagal menambahkan produk' => 'Failed to add product',
+			'Produk tidak ditemukan' => 'Product not found',
+			'ID produk tidak valid' => 'Invalid product ID',
+			'Produk tidak dapat dibeli' => 'Product is not purchasable',
+			'Produk habis' => 'Product is out of stock',
+			'Produk kehabisan stok' => 'Product is out of stock',
+			'Silakan pilih opsi produk' => 'Please choose product options',
+			'Keranjang diperbarui' => 'Cart updated',
+			'Item keranjang tidak valid' => 'Invalid cart item',
 			'Masuk' => 'Login',
 			'masuk' => 'Login',
 			'Alamat penagihan' => 'Billing address',
@@ -399,6 +415,11 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			// Country names
 			'Amerika Serikat' => 'United States',
 			'amerika serikat' => 'United States',
+			// Choose option
+			'Pilih opsi' => 'Choose an option',
+			'pilih opsi' => 'Choose an option',
+			'Pilih Opsi' => 'Choose an option',
+			'Choose an option' => 'Choose an option',
 		);
 		
 		if ( isset( $english_texts[ $translated_text ] ) ) {
@@ -438,6 +459,25 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 		if ( strpos( $translated_text, 'Buat pesanan' ) !== false || strpos( $translated_text, 'BUAT PESANAN' ) !== false ) {
 			return 'PLACE ORDER';
 		}
+		
+		// Add to cart messages
+		if ( strpos( $translated_text, 'telah ditambahkan' ) !== false || strpos( $translated_text, 'Telah ditambahkan' ) !== false || strpos( $translated_text, 'Ditambahkan' ) !== false ) {
+			if ( strpos( $translated_text, 'keranjang' ) !== false ) {
+				return str_replace( 
+					array( 'telah ditambahkan ke keranjang', 'Telah ditambahkan ke keranjang', 'Ditambahkan ke keranjang', 'keranjang' ),
+					array( 'has been added to your cart', 'Has been added to your cart', 'Added to your cart', 'cart' ),
+					$translated_text
+				);
+			}
+		}
+		
+		// View cart / Continue shopping
+		if ( strpos( $translated_text, 'Lihat keranjang' ) !== false || strpos( $translated_text, 'Lihat Keranjang' ) !== false ) {
+			return 'View cart';
+		}
+		if ( strpos( $translated_text, 'Lanjutkan belanja' ) !== false || strpos( $translated_text, 'Lanjutkan Belanja' ) !== false ) {
+			return 'Continue shopping';
+		}
 	}
 	return $translated_text;
 }
@@ -455,6 +495,61 @@ function wp_augoose_catalog_orderby_english( $options ) {
 		'price'      => 'Sort by price: low to high',
 		'price-desc' => 'Sort by price: high to low',
 	);
+}
+
+/**
+ * Force WooCommerce add to cart messages to English
+ */
+add_filter( 'wc_add_to_cart_message_html', 'wp_augoose_add_to_cart_message_english', 20, 3 );
+function wp_augoose_add_to_cart_message_english( $message, $products, $show_qty ) {
+	// Replace Indonesian text with English
+	$message = str_replace( 
+		array(
+			'telah ditambahkan ke keranjang',
+			'Telah ditambahkan ke keranjang',
+			'Ditambahkan ke keranjang',
+			'Lihat keranjang',
+			'Lanjutkan belanja',
+			'Lihat Keranjang',
+			'Lanjutkan Belanja',
+		),
+		array(
+			'has been added to your cart',
+			'Has been added to your cart',
+			'Added to your cart',
+			'View cart',
+			'Continue shopping',
+			'View cart',
+			'Continue shopping',
+		),
+		$message
+	);
+	return $message;
+}
+
+/**
+ * Force WooCommerce product add to cart success message to English
+ */
+add_filter( 'woocommerce_product_add_to_cart_success_message', 'wp_augoose_product_add_to_cart_message_english', 20, 2 );
+function wp_augoose_product_add_to_cart_message_english( $text, $product ) {
+	if ( empty( $text ) ) {
+		return $text;
+	}
+	// Replace Indonesian text with English
+	$text = str_replace( 
+		array(
+			'telah ditambahkan ke keranjang',
+			'Telah ditambahkan ke keranjang',
+			'Ditambahkan ke keranjang',
+		),
+		array(
+			'has been added to your cart',
+			'Has been added to your cart',
+			'Added to your cart',
+		),
+		$text
+	);
+	return $text;
 }
 
 /**
@@ -493,10 +588,28 @@ function wp_augoose_checkout_fields_english( $fields ) {
 		'order_comments' => 'Notes about your order, e.g. special notes for delivery.',
 	);
 	
-	// Process billing fields
+	// Process billing fields and add Secondary Name
 	if ( isset( $fields['billing'] ) ) {
+		// Add Secondary Name field after First Name
+		$first_name_priority = isset( $fields['billing']['billing_first_name']['priority'] ) ? $fields['billing']['billing_first_name']['priority'] : 10;
+		
+		$fields['billing']['billing_secondary_name'] = array(
+			'label'       => 'Secondary name',
+			'placeholder' => 'Secondary name (optional)',
+			'required'    => false,
+			'class'       => array( 'form-row-wide' ),
+			'priority'    => $first_name_priority + 1,
+			'type'        => 'text',
+		);
+		
 		foreach ( $fields['billing'] as $key => $field ) {
 			$field_key = str_replace( 'billing_', '', $key );
+			
+			// Skip secondary_name from English mapping (already set above)
+			if ( $field_key === 'secondary_name' ) {
+				continue;
+			}
+			
 			if ( isset( $english_labels[ $field_key ] ) ) {
 				$fields['billing'][ $key ]['label'] = $english_labels[ $field_key ];
 			}
@@ -673,7 +786,7 @@ function wp_augoose_render_wishlist_sidebar() {
 			<!-- filled by AJAX -->
 		</div>
 		<div class="wishlist-sidebar-footer">
-			<a class="wishlist-sidebar-btn wishlist-sidebar-btn-checkout" href="<?php echo esc_url( $checkout_url ); ?>">PEMBAYARAN</a>
+			<a class="wishlist-sidebar-btn wishlist-sidebar-btn-checkout" href="<?php echo esc_url( $checkout_url ); ?>">PAYMENT</a>
 			<a class="wishlist-sidebar-btn wishlist-sidebar-btn-view" href="<?php echo esc_url( home_url( '/wishlist/' ) ); ?>">VIEW WISHLIST</a>
 		</div>
 	</aside>
@@ -1307,23 +1420,47 @@ function wp_augoose_cart_item_name( $product_name, $cart_item, $cart_item_key ) 
 }
 
 add_filter( 'woocommerce_get_item_data', 'wp_augoose_format_cart_item_data', 10, 2 );
+
+/**
+ * Format cart item data: Hide Market attribute and simplify colon format
+ */
 function wp_augoose_format_cart_item_data( $item_data, $cart_item ) {
-	$new_item_data = array();
-	
-	foreach ( $item_data as $data ) {
-		$key = isset( $data['key'] ) ? $data['key'] : '';
-		$value = isset( $data['value'] ) ? $data['value'] : '';
-		
-		// Format: "Color: Black" instead of "ColorBlack"
-		if ( ! empty( $key ) && ! empty( $value ) ) {
-			$new_item_data[] = array(
-				'key'   => $key,
-				'value' => $value,
-			);
-		}
+	if ( ! is_array( $item_data ) ) {
+		return $item_data;
 	}
 	
-	return $new_item_data;
+	$filtered_data = array();
+	
+	foreach ( $item_data as $data ) {
+		// Skip Market attribute
+		$key = isset( $data['key'] ) ? strtolower( $data['key'] ) : '';
+		if ( strpos( $key, 'market' ) !== false ) {
+			continue; // Hide Market
+		}
+		
+		// Simplify format: remove colon from key, use single colon in display
+		if ( isset( $data['key'] ) ) {
+			// Remove colon from key if exists
+			$data['key'] = str_replace( ':', '', trim( $data['key'] ) );
+		}
+		
+		// Format display: "Key: Value" (single colon)
+		if ( isset( $data['display'] ) ) {
+			// If display already has colon, keep it; otherwise add one
+			$display = trim( $data['display'] );
+			if ( strpos( $display, ':' ) === false && isset( $data['key'] ) ) {
+				$data['display'] = $data['key'] . ': ' . $display;
+			}
+		} elseif ( isset( $data['value'] ) ) {
+			// If no display, create from key and value
+			$key_label = isset( $data['key'] ) ? $data['key'] : '';
+			$data['display'] = $key_label . ': ' . $data['value'];
+		}
+		
+		$filtered_data[] = $data;
+	}
+	
+	return $filtered_data;
 }
 
 /**
@@ -1335,6 +1472,96 @@ function wp_augoose_quantity_input_args( $args, $product ) {
 		$args['input_name'] = str_replace( 'qty', 'cart[' . $args['input_name'] . '][qty]', $args['input_name'] );
 	}
 	return $args;
+}
+
+/**
+ * Save Secondary Name to order meta
+ */
+add_action( 'woocommerce_checkout_update_order_meta', 'wp_augoose_save_secondary_name_to_order', 10, 1 );
+function wp_augoose_save_secondary_name_to_order( $order_id ) {
+	if ( ! empty( $_POST['billing_secondary_name'] ) ) {
+		$secondary_name = sanitize_text_field( $_POST['billing_secondary_name'] );
+		update_post_meta( $order_id, '_billing_secondary_name', $secondary_name );
+	}
+}
+
+/**
+ * Display Secondary Name in Admin Order Details
+ */
+add_action( 'woocommerce_admin_order_data_after_billing_address', 'wp_augoose_display_secondary_name_in_admin', 10, 1 );
+function wp_augoose_display_secondary_name_in_admin( $order ) {
+	$secondary_name = get_post_meta( $order->get_id(), '_billing_secondary_name', true );
+	if ( ! empty( $secondary_name ) ) {
+		echo '<p><strong>Secondary name:</strong> ' . esc_html( $secondary_name ) . '</p>';
+	}
+}
+
+/**
+ * Remove/Hide Newsletter Checkbox
+ */
+add_filter( 'woocommerce_checkout_newsletter_subscription_text', '__return_empty_string', 999 );
+add_filter( 'woocommerce_registration_newsletter_subscription_text', '__return_empty_string', 999 );
+add_action( 'wp_footer', 'wp_augoose_hide_newsletter_checkbox' );
+function wp_augoose_hide_newsletter_checkbox() {
+	if ( is_checkout() ) {
+		?>
+		<style>
+			/* Hide newsletter checkbox */
+			.woocommerce-newsletter-subscription,
+			.woocommerce-form__label-for-checkbox:has(input[name*="newsletter"]),
+			.woocommerce-form__label-for-checkbox:has(input[id*="newsletter"]),
+			label:has(input[name*="newsletter"]),
+			label:has(input[id*="newsletter"]),
+			input[name*="newsletter"],
+			input[id*="newsletter"] {
+				display: none !important;
+				visibility: hidden !important;
+				opacity: 0 !important;
+				height: 0 !important;
+				overflow: hidden !important;
+			}
+		</style>
+		<?php
+	}
+}
+
+/**
+ * Add Terms Checkbox (Required) - Replace Newsletter
+ */
+add_action( 'woocommerce_review_order_before_submit', 'wp_augoose_add_terms_checkbox', 10 );
+function wp_augoose_add_terms_checkbox() {
+	// Get Terms page URL
+	$terms_page_id = wc_get_page_id( 'terms' );
+	$terms_url = '';
+	
+	if ( $terms_page_id ) {
+		$terms_url = get_permalink( $terms_page_id );
+	} else {
+		// Fallback to fixed URL
+		$terms_url = home_url( '/terms-of-service/' );
+	}
+	
+	?>
+	<p class="form-row validate-required terms-checkbox-custom" id="terms_checkbox_field">
+		<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+			<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms_custom" id="terms_custom" value="1" <?php checked( isset( $_POST['terms_custom'] ), true ); ?> />
+			<span class="woocommerce-form__label-text">
+				Have you read the <a href="<?php echo esc_url( $terms_url ); ?>" target="_blank">Terms of Service</a>?
+			</span>
+			<span class="required">*</span>
+		</label>
+	</p>
+	<?php
+}
+
+/**
+ * Validate Terms Checkbox
+ */
+add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_terms_checkbox' );
+function wp_augoose_validate_terms_checkbox() {
+	if ( empty( $_POST['terms_custom'] ) ) {
+		wc_add_notice( __( 'Please confirm that you have read the Terms of Service.', 'woocommerce' ), 'error' );
+	}
 }
 
 /**
@@ -1406,30 +1633,30 @@ function wp_augoose_ajax_add_to_cart() {
 	$quantity   = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 1;
 
 	if ( ! $product_id ) {
-		wp_send_json_error( array( 'message' => __( 'Invalid product ID.', 'wp-augoose' ) ) );
+		wp_send_json_error( array( 'message' => 'Invalid product ID.' ) );
 	}
 
 	// Check if product exists
 	$product = wc_get_product( $product_id );
 	if ( ! $product ) {
-		wp_send_json_error( array( 'message' => __( 'Product not found.', 'wp-augoose' ) ) );
+		wp_send_json_error( array( 'message' => 'Product not found.' ) );
 	}
 
 	// Check if product is purchasable
 	if ( ! $product->is_purchasable() ) {
-		wp_send_json_error( array( 'message' => __( 'Product is not purchasable.', 'wp-augoose' ) ) );
+		wp_send_json_error( array( 'message' => 'Product is not purchasable.' ) );
 	}
 
 	// Check if product is in stock
 	if ( ! $product->is_in_stock() ) {
-		wp_send_json_error( array( 'message' => __( 'Product is out of stock.', 'wp-augoose' ) ) );
+		wp_send_json_error( array( 'message' => 'Product is out of stock.' ) );
 	}
 
 	// Variable products need options (variation id)
 	if ( $product->is_type( 'variable' ) ) {
 		wp_send_json_error(
 			array(
-				'message'     => __( 'Please choose product options by visiting the product page.', 'wp-augoose' ),
+				'message'     => 'Please choose product options by visiting the product page.',
 				'product_url' => get_permalink( $product_id ),
 			)
 		);
@@ -1452,7 +1679,7 @@ function wp_augoose_ajax_add_to_cart() {
 		}
 
 		$data = array(
-			'message'    => sprintf( __( '%s has been added to your cart.', 'wp-augoose' ), $product->get_name() ),
+			'message'    => sprintf( '%s has been added to your cart.', $product->get_name() ),
 			'cart_count' => $cart_count,
 			'cart_key'   => $cart_item_key,
 			'cart_hash'  => WC()->cart->get_cart_hash(),
@@ -1463,7 +1690,7 @@ function wp_augoose_ajax_add_to_cart() {
 		if ( function_exists( 'wc_clear_notices' ) ) {
 			wc_clear_notices();
 		}
-		wp_send_json_error( array( 'message' => __( 'Failed to add product to cart.', 'wp-augoose' ) ) );
+		wp_send_json_error( array( 'message' => 'Failed to add product to cart.' ) );
 	}
 }
 
@@ -1479,7 +1706,7 @@ function wp_augoose_update_checkout_quantity() {
 	$quantity = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
 	
 	if ( ! $cart_key ) {
-		wp_send_json_error( array( 'message' => __( 'Invalid cart item.', 'wp-augoose' ) ) );
+		wp_send_json_error( array( 'message' => 'Invalid cart item.' ) );
 	}
 	
 	// Update cart
@@ -1495,7 +1722,7 @@ function wp_augoose_update_checkout_quantity() {
 	WC()->cart->calculate_totals();
 	
 	wp_send_json_success( array(
-		'message' => __( 'Cart updated', 'wp-augoose' ),
+		'message' => 'Cart updated',
 		'cart_hash' => WC()->cart->get_cart_hash(),
 	) );
 }

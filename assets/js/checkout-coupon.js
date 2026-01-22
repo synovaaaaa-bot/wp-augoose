@@ -1,6 +1,6 @@
 /**
  * Checkout Coupon - Apply Coupon via AJAX
- * Terintegrasi dengan WooCommerce
+ * Integrated with WooCommerce
  */
 
 jQuery(document).ready(function($) {

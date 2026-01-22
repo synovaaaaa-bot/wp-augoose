@@ -1,0 +1,197 @@
+/**
+ * Shop Filter Off-Canvas - No Layout Shift
+ * Filter panel slides from left as overlay, product grid never moves
+ */
+
+/* ===================================
+   Backdrop (always hidden by default)
+   =================================== */
+.shop-filter-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+    pointer-events: none;
+}
+
+body.filter-open .shop-filter-backdrop {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* ===================================
+   Filter Sidebar - Off-Canvas (Desktop & Mobile)
+   =================================== */
+.shop-filters {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 320px !important;
+    max-width: 85vw !important;
+    height: 100vh !important;
+    background: #fff !important;
+    z-index: 999 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 60px 24px 24px !important;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1) !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.35s ease !important;
+    /* Remove any grid positioning */
+    grid-column: unset !important;
+    grid-row: unset !important;
+    order: unset !important;
+    /* Remove sticky positioning */
+    position: fixed !important;
+    top: 0 !important;
+}
+
+/* Filter open state */
+body.filter-open .shop-filters {
+    transform: translateX(0) !important;
+}
+
+/* ===================================
+   Close Button (always visible in panel)
+   =================================== */
+.shop-filter-close {
+    display: flex !important;
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border: 1px solid #e0e0e0 !important;
+    background: #fff !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    padding: 0 !important;
+}
+
+.shop-filter-close:hover {
+    background: #1a1a1a !important;
+    border-color: #1a1a1a !important;
+    color: #fff !important;
+}
+
+.shop-filter-close svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor !important;
+    color: #1a1a1a !important;
+}
+
+.shop-filter-close:hover svg {
+    color: #fff !important;
+}
+
+/* ===================================
+   Shop Layout - Remove Grid for Filters
+   =================================== */
+.shop-layout {
+    display: block !important; /* Changed from grid to block */
+    grid-template-columns: unset !important;
+    gap: unset !important;
+    align-items: unset !important;
+    padding: 20px 0 60px !important;
+}
+
+/* Shop content always full width - no grid shift */
+.shop-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Never add margin-left or padding-left */
+}
+
+/* ===================================
+   Product Grid - Never Shifts
+   =================================== */
+.woocommerce ul.products,
+.woocommerce-page ul.products,
+ul.products {
+    /* Grid columns stay consistent regardless of filter state */
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 30px !important;
+    /* Never add margin or padding that would shift */
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ===================================
+   Disable Body Scroll When Filter Open
+   =================================== */
+body.filter-open {
+    overflow: hidden !important;
+    position: fixed !important;
+    width: 100% !important;
+}
+
+/* ===================================
+   Remove Old Filter Toggle States
+   =================================== */
+/* Remove any grid-based filter layouts */
+.shop-page.filters-open .shop-layout,
+.shop-page:not(.filters-open) .shop-layout {
+    grid-template-columns: 1fr !important;
+}
+
+.shop-page.filters-open .shop-filters,
+.shop-page:not(.filters-open) .shop-filters {
+    /* Filter is always off-canvas, not in grid */
+    display: block !important;
+}
+
+/* ===================================
+   Responsive Adjustments
+   =================================== */
+@media (max-width: 1024px) {
+    .shop-filters {
+        width: 300px !important;
+    }
+    
+    .woocommerce ul.products,
+    .woocommerce-page ul.products,
+    ul.products {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-filters {
+        width: 85vw !important;
+        max-width: 320px !important;
+        padding: 60px 20px 20px !important;
+    }
+    
+    .woocommerce ul.products,
+    .woocommerce-page ul.products,
+    ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .shop-filters {
+        width: 90vw !important;
+        padding: 60px 16px 16px !important;
+    }
+    
+    .woocommerce ul.products,
+    .woocommerce-page ul.products,
+    ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+    }
+}

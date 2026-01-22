@@ -156,7 +156,8 @@
    Latest Collection
    =================================== */
 .latest-collection {
-    padding: 36px 0 64px;
+    padding: 36px 0 40px; /* Padding bawah dikurangi dari 64px ke 40px */
+    margin-top: 48px; /* Tambah gap dari hero section (dari 0 ke 48px) */
     background: #fff;
 }
 
@@ -212,7 +213,7 @@
 
 .latest-collection .section-link {
     position: absolute;
-    right: 0;
+    right: 20px; /* Tidak terlalu mepet ke kanan (dari 0 ke 20px) */
     top: 50%;
     transform: translateY(-50%);
     font-size: 11px;
@@ -229,6 +230,19 @@
 .latest-collection .section-link:hover {
     color: #1a1a1a;
     border-bottom-color: #1a1a1a;
+}
+
+/* Responsive: VIEW ALL positioning */
+@media (max-width: 1200px) {
+    .latest-collection .section-link {
+        right: 16px; /* Sedikit lebih dekat di tablet */
+    }
+}
+
+@media (max-width: 768px) {
+    .latest-collection .section-link {
+        right: 12px; /* Lebih dekat di mobile */
+    }
 }
 
 .section-link {
@@ -515,6 +529,7 @@ body .latest-collection ul.products li.product {
     
     .latest-collection {
         padding: 28px 0 40px;
+        margin-top: 32px; /* Gap lebih kecil di mobile (dari 48px ke 32px) */
     }
 
     .latest-collection .container {

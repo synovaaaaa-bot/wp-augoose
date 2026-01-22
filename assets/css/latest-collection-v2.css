@@ -11,7 +11,7 @@
 .latest-collection {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
+    margin: 48px 0 0 !important; /* Tambah gap dari hero section */
     padding: 0 !important;
     overflow-x: hidden !important;
 }
@@ -205,12 +205,12 @@
     position: relative !important;
     width: 100% !important;
     height: 120px !important; /* Fixed height */
-    padding: 14px 14px 16px !important;
+    padding: 10px 14px 16px !important; /* Padding top dikurangi dari 14px ke 10px */
     background: #ffffff !important;
     border-top: 1px solid #e6e6e6 !important; /* Border tipis atas */
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important;
+    justify-content: space-between !important; /* Space between untuk distribusi merata */
     flex-shrink: 0;
     box-sizing: border-box !important;
 }
@@ -226,7 +226,7 @@
     font-weight: 700 !important;
     text-transform: uppercase !important;
     color: #1a1a1a !important;
-    margin: 0 0 6px !important;
+    margin: 0 !important; /* Margin dihapus, akan diatur oleh flexbox */
     letter-spacing: 0.04em !important;
     line-height: 1.2 !important;
     display: -webkit-box !important;
@@ -237,6 +237,7 @@
     max-height: calc(1.2em * 2) !important; /* Max 2 baris */
     text-align: left !important; /* Align kiri */
     text-decoration: none !important;
+    flex-shrink: 0 !important;
 }
 
 .latest-collection .lc-card .lc-info .woocommerce-loop-product__title a:hover {
@@ -252,10 +253,11 @@
     font-size: 13px !important; /* 12-13px untuk kejelasan */
     font-weight: 400 !important;
     color: #111 !important; /* Warna gelap untuk kejelasan (#111 / #333) */
-    margin: 4px 0 0 !important; /* Spacing lebih kecil agar lebih ke atas (8px -> 4px) */
+    margin: auto 0 !important; /* Margin auto untuk push ke tengah antara title dan button */
     line-height: 1.3 !important;
     text-align: left !important;
     display: block !important;
+    flex-shrink: 0 !important;
 }
 
 .latest-collection .lc-card .lc-info .price del {
@@ -284,8 +286,9 @@
    =================================== */
 .latest-collection .lc-card .lc-cta {
     padding: 0 !important;
-    margin: 8px 0 0 !important; /* Spacing lebih kecil agar lebih ke atas (12px -> 8px) */
+    margin: 0 !important; /* Margin dihapus, akan diatur oleh flexbox */
     width: 100% !important;
+    flex-shrink: 0 !important;
 }
 
 .latest-collection .lc-card .lc-button,

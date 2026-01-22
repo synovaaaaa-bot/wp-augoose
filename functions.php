@@ -635,6 +635,11 @@ function wp_augoose_scripts() {
             wp_enqueue_style( 'wp-augoose-shop-fixed', $theme_dir_uri . '/assets/css/shop-page-fixed.css', array(), $asset_ver( 'assets/css/shop-page-fixed.css' ), 'all' );
             wp_style_add_data( 'wp-augoose-shop-fixed', 'priority', 'high' );
         }
+        // Off-canvas filter (no layout shift)
+        if ( file_exists( $theme_dir . '/assets/css/shop-filter-offcanvas.css' ) ) {
+            wp_enqueue_style( 'wp-augoose-shop-filter-offcanvas', $theme_dir_uri . '/assets/css/shop-filter-offcanvas.css', array( 'wp-augoose-shop-fixed' ), $asset_ver( 'assets/css/shop-filter-offcanvas.css' ), 'all' );
+            wp_style_add_data( 'wp-augoose-shop-filter-offcanvas', 'priority', 'high' );
+        }
     }
     
     // Cart Sidebar - Detailed & Compact

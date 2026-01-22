@@ -149,7 +149,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						data-show_option_none="yes"
 						style="display: none !important;"
 					>
-						<option value=""><?php echo esc_html( __( 'Choose an option', 'woocommerce' ) ); ?></option>
+						<option value=""><?php echo esc_html( 'Choose an option' ); ?></option>
 						<?php foreach ( $options as $option ) : ?>
 							<option value="<?php echo esc_attr( $option ); ?>" <?php selected( sanitize_title( $selected_value ), sanitize_title( $option ) ); ?>><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ); ?></option>
 						<?php endforeach; ?>

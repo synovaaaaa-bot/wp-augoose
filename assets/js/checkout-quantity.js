@@ -55,7 +55,7 @@ jQuery(document).ready(function($) {
         var $button = $(this);
         var cartKey = $button.data('cart-key');
         
-        if (confirm('Remove this item from cart?')) {
+        if (confirm('Are you sure you want to remove this item from cart?')) {
             $button.closest('.cart_item').addClass('removing');
             updateCartQuantity(cartKey, 0);
         }

@@ -119,45 +119,81 @@
         });
     }
 
-    // Shop Filters Toggle (Archive pages)
+    // Shop Filters Toggle (Archive pages) - Off-Canvas with No Layout Shift
     function initShopFiltersToggle() {
         const $page = $('[data-shop-page]');
         if (!$page.length) return;
 
         const $toggle = $page.find('.shop-filter-toggle');
+        const $backdrop = $('.shop-filter-backdrop');
+        const $body = $('body');
+        
         if (!$toggle.length) return;
 
-        // Default: collapsed
-        $page.removeClass('filters-open');
+        // Open filter
+        function openFilter() {
+            $body.addClass('filter-open');
+            $toggle.attr('aria-expanded', 'true');
+            // Store scroll position to restore later
+            const scrollY = window.scrollY;
+            $body.data('scroll-pos', scrollY);
+            $body.css('top', `-${scrollY}px`);
+        }
+
+        // Close filter
+        function closeFilter() {
+            $body.removeClass('filter-open');
+            $toggle.attr('aria-expanded', 'false');
+            // Restore scroll position
+            const scrollY = $body.data('scroll-pos') || 0;
+            $body.css('top', '');
+            window.scrollTo(0, scrollY);
+        }
+
+        // Default: closed
+        $body.removeClass('filter-open');
         $toggle.attr('aria-expanded', 'false');
 
-        $toggle.on('click', function() {
-            const isOpen = $page.hasClass('filters-open');
-            $page.toggleClass('filters-open', !isOpen);
-            $toggle.attr('aria-expanded', String(!isOpen));
-
-            if (!isOpen) {
-                const off = $toggle.offset();
-                const top = off ? off.top - 80 : 0;
-                if (top > 0) window.scrollTo({ top, behavior: 'smooth' });
+        // Toggle filter visibility
+        $toggle.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if ($body.hasClass('filter-open')) {
+                closeFilter();
+            } else {
+                openFilter();
             }
         });
-        
-        // Close filter button
+
+        // Close filter when clicking close button
         $page.on('click', '.shop-filter-close', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            $page.removeClass('filters-open');
-            $toggle.attr('aria-expanded', 'false');
+            closeFilter();
         });
-        
-        // Close filter when clicking overlay (using body click outside)
-        $(document).on('click', function(e) {
-            if ($page.hasClass('filters-open')) {
-                const $target = $(e.target);
-                if (!$target.closest('.shop-filters').length && !$target.closest('.shop-filter-toggle').length) {
-                    $page.removeClass('filters-open');
-                    $toggle.attr('aria-expanded', 'false');
+
+        // Close filter when clicking backdrop
+        $backdrop.on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeFilter();
+        });
+
+        // Close filter on ESC key
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                if ($body.hasClass('filter-open')) {
+                    closeFilter();
+                }
+            }
+        });
+
+        // Prevent body scroll when filter is open (additional safeguard)
+        $body.on('touchmove', function(e) {
+            if ($body.hasClass('filter-open')) {
+                // Allow scroll inside filter panel
+                if (!$(e.target).closest('.shop-filters').length) {
+                    e.preventDefault();
                 }
             }
         });
@@ -725,31 +761,16 @@
                 }
             });
             
-            // Force newsletter subscription text
+            // Hide newsletter subscription checkbox completely
+            $('.woocommerce-checkout-newsletter-subscription, .woocommerce-newsletter-subscription, .newsletter-subscription').hide();
+            $('label:has(input[name*="newsletter"]), label:has(input[id*="newsletter"])').hide();
+            $('input[name*="newsletter"], input[id*="newsletter"]').closest('label, p, div').hide();
+            
+            // Hide any element containing newsletter subscription text
             $('label:contains("BERLANGGANAN BULETIN KAMI"), label:contains("Berlangganan buletin kami"), span:contains("BERLANGGANAN BULETIN KAMI"), span:contains("Berlangganan buletin kami"), p:contains("BERLANGGANAN BULETIN KAMI"), p:contains("Berlangganan buletin kami")').each(function() {
                 var text = $(this).text();
-                var html = $(this).html();
-                if (text.includes('BERLANGGANAN BULETIN KAMI') || text.includes('Berlangganan buletin kami')) {
-                    // Preserve checkbox if exists
-                    var checkbox = $(this).find('input[type="checkbox"]');
-                    if (checkbox.length) {
-                        $(this).html('<input type="checkbox" ' + checkbox.attr('name') ? 'name="' + checkbox.attr('name') + '" ' : '' + checkbox.attr('id') ? 'id="' + checkbox.attr('id') + '" ' : '' + checkbox.is(':checked') ? 'checked ' : '' + '/> SUBSCRIBE TO OUR NEWSLETTER');
-                    } else {
-                        $(this).text('SUBSCRIBE TO OUR NEWSLETTER');
-                    }
-                }
-            });
-            
-            // Also check for newsletter text in any element
-            $('*').each(function() {
-                var text = $(this).text();
-                if (text.trim() === 'BERLANGGANAN BULETIN KAMI' || text.trim() === 'Berlangganan buletin kami') {
-                    var checkbox = $(this).find('input[type="checkbox"]');
-                    if (checkbox.length) {
-                        $(this).html(checkbox[0].outerHTML + ' SUBSCRIBE TO OUR NEWSLETTER');
-                    } else {
-                        $(this).text('SUBSCRIBE TO OUR NEWSLETTER');
-                    }
+                if (text.includes('BERLANGGANAN BULETIN KAMI') || text.includes('Berlangganan buletin kami') || text.includes('SUBSCRIBE TO OUR NEWSLETTER')) {
+                    $(this).hide();
                 }
             });
             

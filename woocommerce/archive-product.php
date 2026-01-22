@@ -29,6 +29,9 @@ do_action( 'woocommerce_before_main_content' );
 		?>
 	</header>
 
+	<!-- Backdrop for filter overlay -->
+	<div class="shop-filter-backdrop" aria-hidden="true"></div>
+	
 	<div class="shop-layout">
 		<aside class="shop-filters" aria-label="Shop filters">
 			<button type="button" class="shop-filter-close" aria-label="Close filters">
