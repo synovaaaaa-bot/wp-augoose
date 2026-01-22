@@ -1,0 +1,107 @@
+/**
+ * Contact Us Page Styles
+ */
+
+.contact-us-page {
+    padding: 60px 0 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.contact-us-page .page-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 48px;
+    color: #1a1a1a;
+}
+
+.contact-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.contact-info-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 32px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.contact-info-card:hover {
+    border-color: #1a1a1a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.contact-info-card.contact-email {
+    grid-column: 1 / -1;
+}
+
+.contact-label {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 16px;
+    color: #1a1a1a;
+    font-style: italic;
+}
+
+.contact-value {
+    font-size: 16px;
+    margin: 0 0 12px;
+    color: #1a1a1a;
+    font-style: italic;
+}
+
+.contact-value a {
+    color: #1a1a1a;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.contact-value a:hover {
+    color: #30475E;
+    text-decoration: underline;
+}
+
+.contact-cta {
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 12px 0 0;
+    color: rgba(26, 26, 26, 0.6);
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .contact-us-page {
+        padding: 40px 20px 60px;
+    }
+    
+    .contact-us-page .page-title {
+        font-size: 24px;
+        margin-bottom: 32px;
+    }
+    
+    .contact-info-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .contact-info-card {
+        padding: 24px;
+    }
+    
+    .contact-label {
+        font-size: 16px;
+    }
+    
+    .contact-value {
+        font-size: 14px;
+    }
+}

@@ -2617,13 +2617,24 @@ body.woocommerce-cart .site-main .entry-content {
     }
     
     .single-product-wrapper .product-gallery-portrait.is-single {
-        width: 100%;
-        max-width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
+        grid-template-columns: 1fr !important;
+        display: grid !important;
     }
     
     .single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__item {
-        width: 100%;
-        max-width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
+        aspect-ratio: 3/4 !important;
+        margin: 0 !important;
+    }
+    
+    .single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
     }
     
     .single-product-wrapper .variation-swatches.is-size {

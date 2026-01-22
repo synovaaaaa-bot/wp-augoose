@@ -22,6 +22,7 @@
             $url_about = $page_url( 'about-us' );
             $url_terms = $page_url( 'terms-of-service' );
             $url_faq   = $page_url( 'faq' );
+            $url_contact = $page_url( 'contact-us' );
             ?>
             <div class="footer-columns">
                 <div class="footer-col">
@@ -62,9 +63,9 @@
                         ?>
                     <?php else : ?>
                         <ul class="footer-links">
-                            <li><a href="#"><?php echo esc_html__( 'Contact us', 'wp-augoose' ); ?></a></li>
-                            <li><a href="<?php echo esc_url( $url_faq ); ?>"><?php echo esc_html__( 'FAQ', 'wp-augoose' ); ?></a></li>
-                            <li><a href="<?php echo esc_url( $url_terms . '#return-refund-policy' ); ?>"><?php echo esc_html__( 'Return or refunds policy', 'wp-augoose' ); ?></a></li>
+                            <li><a href="<?php echo esc_url( $url_contact ); ?>">Contact us</a></li>
+                            <li><a href="<?php echo esc_url( $url_faq ); ?>">FAQ</a></li>
+                            <li><a href="<?php echo esc_url( $url_terms . '#return-refund-policy' ); ?>">Return or refunds policy</a></li>
                         </ul>
                     <?php endif; ?>
                 </div>
@@ -125,6 +126,25 @@
                                 <text x="14" y="13" font-size="9" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="0.6">G Pay</text>
                             </svg>
                         </span>
+                    </div>
+                </div>
+
+                <div class="footer-contact-info">
+                    <div class="footer-contact-item">
+                        <span class="footer-contact-label">Email:</span>
+                        <a href="mailto:halo@augoose.co" class="footer-contact-link">halo@augoose.co</a>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-contact-label">WhatsApp:</span>
+                        <a href="https://wa.me/6285128001852" target="_blank" rel="noopener noreferrer" class="footer-contact-link">+62 851-2800-1852</a>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-contact-label">Instagram:</span>
+                        <a href="https://instagram.com/augoose.co" target="_blank" rel="noopener noreferrer" class="footer-contact-link">@augoose.co</a>
+                    </div>
+                    <div class="footer-contact-item">
+                        <span class="footer-contact-label">TikTok:</span>
+                        <a href="https://tiktok.com/@augoose.co" target="_blank" rel="noopener noreferrer" class="footer-contact-link">@augoose.co</a>
                     </div>
                 </div>
 

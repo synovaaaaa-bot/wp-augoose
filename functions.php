@@ -57,6 +57,7 @@ add_action( 'after_setup_theme', 'wp_augoose_setup' );
 
 /**
  * Create core static pages on theme activation (only if missing).
+ * - Contact Us
  * - About Us
  * - FAQ
  * - Terms of Service (includes privacy/cookies/refund/commercial use/contact)
@@ -68,6 +69,12 @@ function wp_augoose_maybe_create_static_pages() {
     }
 
     $pages = array(
+        array(
+            'slug'     => 'contact-us',
+            'title'    => 'Contact Us',
+            'template' => 'page-contact-us.php',
+            'content'  => '',
+        ),
         array(
             'slug'     => 'about-us',
             'title'    => 'About Us',
@@ -537,6 +544,11 @@ function wp_augoose_scripts() {
     }
     if ( file_exists( $theme_dir . '/assets/css/pages-static.css' ) ) {
         wp_enqueue_style( 'wp-augoose-pages-static', $theme_dir_uri . '/assets/css/pages-static.css', array( 'wp-augoose-brand' ), $asset_ver( 'assets/css/pages-static.css' ) );
+        
+        // Contact Us page styles
+        if ( is_page( 'contact-us' ) || is_page_template( 'page-contact-us.php' ) ) {
+            wp_enqueue_style( 'wp-augoose-contact-us', $theme_dir_uri . '/assets/css/contact-us.css', array(), $asset_ver( 'assets/css/contact-us.css' ) );
+        }
     }
     
     // WooCommerce Integrated Styles - Fully integrated with WooCommerce & WordPress
