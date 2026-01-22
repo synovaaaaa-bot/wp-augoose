@@ -32,7 +32,7 @@ if ( post_password_required() ) {
                 <!-- Product Images -->
                 <div class="product-gallery-wrapper">
                     <?php
-                    // Custom 2-image layout (front/back). Uses featured image + first gallery image.
+                    // Custom gallery layout - all images in portrait vertical layout
                     $image_ids = array();
                     $thumb_id  = $product ? (int) $product->get_image_id() : 0;
                     if ( $thumb_id ) {
@@ -44,9 +44,6 @@ if ( post_password_required() ) {
                         if ( $gid && ! in_array( $gid, $image_ids, true ) ) {
                             $image_ids[] = $gid;
                         }
-                        if ( count( $image_ids ) >= 2 ) {
-                            break;
-                        }
                     }
 
                     // Sale flash (keep WooCommerce logic)
@@ -55,7 +52,7 @@ if ( post_password_required() ) {
                     }
                     ?>
 
-                    <div class="product-gallery-two <?php echo ( count( $image_ids ) === 1 ) ? 'is-single' : ''; ?>">
+                    <div class="product-gallery-portrait">
                         <?php
                         if ( ! empty( $image_ids ) ) {
                             foreach ( $image_ids as $iid ) {
