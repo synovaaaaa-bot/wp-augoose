@@ -55,7 +55,7 @@ get_header();
 				) );
 				
 				if ( $products && count( $products ) > 0 ) {
-					echo do_shortcode( '[products limit="8" columns="4" orderby="date" class="latest"]' );
+					echo do_shortcode( '[products limit="12" columns="6" orderby="date" class="latest"]' );
 				} else {
 					// Show dummy products for demo
 					echo '<div class="woocommerce"><ul class="products columns-4 latest">';

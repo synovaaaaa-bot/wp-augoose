@@ -596,7 +596,7 @@ function wp_augoose_scripts() {
     // Product Cards Fixed - Image Full & Typography Better
     if ( file_exists( $theme_dir . '/assets/css/product-card-fixed.css' ) ) {
         wp_enqueue_style( 'wp-augoose-product-fixed', $theme_dir_uri . '/assets/css/product-card-fixed.css', array(), $asset_ver( 'assets/css/product-card-fixed.css' ), 'all' );
-        wp_enqueue_style( 'wp-augoose-latest-collection-fixed', $theme_dir_uri . '/assets/css/latest-collection-fixed.css', array( 'wp-augoose-product-fixed' ), $asset_ver( 'assets/css/latest-collection-fixed.css' ), 'all' );
+        wp_enqueue_style( 'wp-augoose-latest-collection-redesign', $theme_dir_uri . '/assets/css/latest-collection-redesign.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-redesign.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-hero-fixed', $theme_dir_uri . '/assets/css/hero-fixed.css', array( 'wp-augoose-homepage' ), $asset_ver( 'assets/css/hero-fixed.css' ), 'all' );
     }
     

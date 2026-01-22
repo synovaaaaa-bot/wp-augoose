@@ -1,0 +1,431 @@
+/**
+ * Latest Collection - Complete Redesign
+ * 6x2 Tile Layout: 350px Image + 110px Info Box = 460px Total
+ * Following AUGOOSE Brand Guidelines
+ */
+
+/* ===================================
+   Grid Layout - 6 Columns Desktop
+   =================================== */
+.latest-collection .woocommerce ul.products,
+.latest-collection ul.products,
+.latest-collection .woocommerce ul.products.columns-6,
+.latest-collection ul.products.columns-6,
+.latest-collection .woocommerce ul.products.latest,
+.latest-collection ul.products.latest {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 14px !important; /* Gap kecil 12-18px */
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 0 0 20px !important; /* Mentok kiri dengan padding kecil 16-24px */
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* ===================================
+   Tile Container - Fixed Height 460px
+   =================================== */
+.latest-collection .woocommerce ul.products li.product-item,
+.latest-collection ul.products li.product-item,
+.latest-collection .woocommerce ul.products li.product,
+.latest-collection ul.products li.product {
+    position: relative !important;
+    width: 100% !important;
+    height: 460px !important; /* Fixed: 350px image + 110px info */
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+    background: #ffffff !important;
+    border: 1px solid #e6e6e6 !important; /* Border tipis */
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.latest-collection .product-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+}
+
+/* ===================================
+   A. Kotak Gambar - 350px Height
+   =================================== */
+.latest-collection .product-thumbnail {
+    position: relative;
+    width: 100% !important;
+    height: 350px !important; /* Fixed height */
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+    background: #f3f3f3 !important; /* Background netral */
+    border: none !important;
+    flex-shrink: 0;
+}
+
+.latest-collection .product-thumbnail img {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Pilihan A: full-bleed, tidak gepeng */
+    object-position: center center !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+.latest-collection .product-thumbnail a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* ===================================
+   Wishlist Icon - Top Right
+   =================================== */
+.latest-collection .product-wishlist {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+}
+
+.latest-collection .wishlist-toggle {
+    position: relative;
+    z-index: 11;
+    pointer-events: auto;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.latest-collection .wishlist-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.latest-collection .wishlist-toggle svg {
+    color: #666;
+    transition: color 0.2s ease;
+    width: 18px;
+    height: 18px;
+}
+
+.latest-collection .wishlist-toggle:hover svg,
+.latest-collection .wishlist-toggle.active svg {
+    color: #e74c3c;
+    fill: currentColor;
+}
+
+/* ===================================
+   B. Kotak Info - 110px Height
+   =================================== */
+.latest-collection .product-info {
+    position: relative !important;
+    width: 100% !important;
+    height: 110px !important; /* Fixed height */
+    padding: 12px 14px 14px !important;
+    background: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    flex-shrink: 0;
+    box-sizing: border-box !important;
+}
+
+/* ===================================
+   Nama Produk - Brand Guideline Font
+   =================================== */
+.latest-collection .woocommerce-loop-product__title,
+.latest-collection .product-info h2,
+.latest-collection .product-info .woocommerce-loop-product__title {
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: #1a1a1a !important;
+    margin: 0 0 6px !important;
+    letter-spacing: 0.5px !important;
+    line-height: 1.3 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-height: calc(1.3em * 2) !important; /* Max 2 baris */
+}
+
+/* ===================================
+   Harga - Brand Guideline Font
+   =================================== */
+.latest-collection .product-info .price,
+.latest-collection .woocommerce ul.products li.product .price,
+.latest-collection ul.products li.product .price {
+    font-family: var(--font-body, 'Minion Pro', Georgia, 'Times New Roman', serif) !important;
+    font-size: 11px !important;
+    font-weight: 400 !important;
+    color: #1a1a1a !important;
+    margin: 0 0 8px !important;
+    line-height: 1.2 !important;
+}
+
+.latest-collection .product-info .price del {
+    color: #999 !important;
+    font-size: 10px !important;
+    margin-right: 6px !important;
+}
+
+.latest-collection .product-info .price ins {
+    color: #1a1a1a !important;
+    text-decoration: none !important;
+    font-weight: 400 !important;
+}
+
+/* ===================================
+   Button CTA - Custom Style Premium
+   =================================== */
+.latest-collection .product-add-to-cart {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+.latest-collection .product-add-to-cart .view-product-btn,
+.latest-collection .product-add-to-cart .add-to-cart-btn,
+.latest-collection .product-add-to-cart .variable-product-btn {
+    width: 100% !important;
+    height: 36px !important;
+    background: #ffffff !important;
+    color: #1a1a1a !important;
+    border: 1px solid #1a1a1a !important;
+    padding: 0 12px !important;
+    font-family: var(--font-headline, 'Killarney', Georgia, 'Times New Roman', serif) !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.latest-collection .product-add-to-cart .view-product-btn:hover,
+.latest-collection .product-add-to-cart .add-to-cart-btn:hover,
+.latest-collection .product-add-to-cart .variable-product-btn:hover {
+    background: #1a1a1a !important;
+    color: #ffffff !important;
+    border-color: #1a1a1a !important;
+}
+
+.latest-collection .product-add-to-cart .view-product-btn svg,
+.latest-collection .product-add-to-cart .add-to-cart-btn svg,
+.latest-collection .product-add-to-cart .variable-product-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+    stroke-width: 2 !important;
+}
+
+.latest-collection .product-add-to-cart .view-product-btn.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ===================================
+   Hide Elements - Rating, Badge, Default Button
+   =================================== */
+.latest-collection .product-badges,
+.latest-collection .badge,
+.latest-collection .badge-new,
+.latest-collection .onsale,
+.latest-collection .star-rating,
+.latest-collection .woocommerce-product-rating,
+.latest-collection .product-color-options,
+.latest-collection .color-swatches,
+.latest-collection .button.add_to_cart_button,
+.latest-collection .added_to_cart,
+.latest-collection .woocommerce-loop-product__link .button,
+.latest-collection .woocommerce .button,
+.latest-collection .woocommerce a.button {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Ensure product-add-to-cart is visible */
+.latest-collection .product-add-to-cart {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* ===================================
+   Responsive Breakpoints
+   =================================== */
+@media (max-width: 1400px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        padding: 0 0 0 16px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 340px !important;
+    }
+    
+    .latest-collection .product-info {
+        height: 110px !important;
+    }
+    
+    .latest-collection .woocommerce ul.products li.product-item,
+    .latest-collection ul.products li.product-item,
+    .latest-collection .woocommerce ul.products li.product,
+    .latest-collection ul.products li.product {
+        height: 450px !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        padding: 0 0 0 16px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 330px !important;
+    }
+    
+    .latest-collection .product-info {
+        height: 110px !important;
+    }
+    
+    .latest-collection .woocommerce ul.products li.product-item,
+    .latest-collection ul.products li.product-item,
+    .latest-collection .woocommerce ul.products li.product,
+    .latest-collection ul.products li.product {
+        height: 440px !important;
+    }
+}
+
+@media (max-width: 992px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        padding: 0 0 0 12px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 320px !important;
+    }
+    
+    .latest-collection .product-info {
+        height: 110px !important;
+    }
+    
+    .latest-collection .woocommerce ul.products li.product-item,
+    .latest-collection ul.products li.product-item,
+    .latest-collection .woocommerce ul.products li.product,
+    .latest-collection ul.products li.product {
+        height: 430px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        padding: 0 0 0 10px !important; /* Tetap mentok kiri */
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 300px !important;
+    }
+    
+    .latest-collection .product-info {
+        height: 110px !important;
+    }
+    
+    .latest-collection .woocommerce ul.products li.product-item,
+    .latest-collection ul.products li.product-item,
+    .latest-collection .woocommerce ul.products li.product,
+    .latest-collection ul.products li.product {
+        height: 410px !important;
+    }
+    
+    .latest-collection .woocommerce-loop-product__title,
+    .latest-collection .product-info h2 {
+        font-size: 10px !important;
+    }
+    
+    .latest-collection .product-info .price {
+        font-size: 10px !important;
+    }
+    
+    .latest-collection .product-add-to-cart .view-product-btn,
+    .latest-collection .product-add-to-cart .add-to-cart-btn {
+        height: 32px !important;
+        font-size: 9px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .latest-collection .woocommerce ul.products,
+    .latest-collection ul.products {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        padding: 0 12px !important;
+    }
+    
+    .latest-collection .product-thumbnail {
+        height: 350px !important;
+    }
+    
+    .latest-collection .product-info {
+        height: 110px !important;
+    }
+    
+    .latest-collection .woocommerce ul.products li.product-item,
+    .latest-collection ul.products li.product-item,
+    .latest-collection .woocommerce ul.products li.product,
+    .latest-collection ul.products li.product {
+        height: 460px !important;
+    }
+    
+    .latest-collection .woocommerce-loop-product__title,
+    .latest-collection .product-info h2 {
+        font-size: 11px !important;
+    }
+    
+    .latest-collection .product-info .price {
+        font-size: 11px !important;
+    }
+}

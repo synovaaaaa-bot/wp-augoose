@@ -208,8 +208,11 @@
     // Add to Wishlist (Integrated - server cookie/user meta)
     function initWishlist() {
         $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
+            // PART A: Latest Collection - Prevent navigation to product page
+            // Always prevent default and stop propagation for wishlist clicks
             e.preventDefault();
-            e.stopPropagation(); // Prevent parent link navigation
+            e.stopPropagation();
+            
             const button = $(this);
             const productId = button.data('product-id');
             
