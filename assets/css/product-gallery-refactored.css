@@ -1,0 +1,205 @@
+/**
+ * Product Gallery Refactored - Clean Layout
+ * Gallery mentok kiri, 2x2 grid, aspect ratio 3:4
+ * 
+ * @package WP_Augoose
+ */
+
+/* ===================================
+   MAIN CONTAINER - NO LEFT PADDING
+   =================================== */
+.single-product-wrapper .product-main-content {
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+.single-product-wrapper .product-main-content .container {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 0 !important; /* NO PADDING - gallery mentok kiri */
+    padding-right: 20px !important; /* Only right padding for info section */
+    width: 100% !important;
+}
+
+/* ===================================
+   PRODUCT LAYOUT - 2FR 1FR
+   =================================== */
+.single-product-wrapper .product-layout {
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important; /* 65-70% gallery, 30-35% info */
+    gap: 50px !important;
+    align-items: start !important;
+    max-width: 100% !important;
+    margin: 0 !important; /* NO MARGIN - mentok kiri */
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+/* ===================================
+   GALLERY WRAPPER - MENTOK KIRI
+   =================================== */
+.single-product-wrapper .product-gallery-wrapper {
+    position: relative !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* ===================================
+   GALLERY GRID - 2X2, ASPECT RATIO 3:4
+   =================================== */
+.single-product-wrapper .product-gallery-portrait,
+.single-product-wrapper .product-gallery-two {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 columns */
+    gap: 20px !important; /* Gap antar gambar */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Single image - 1 column */
+.single-product-wrapper .product-gallery-portrait.is-single,
+.single-product-wrapper .product-gallery-two.is-single {
+    grid-template-columns: 1fr !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* ===================================
+   GALLERY ITEM - ASPECT RATIO 3:4
+   =================================== */
+.single-product-wrapper .product-gallery-portrait .product-gallery-two__item,
+.single-product-wrapper .product-gallery-two .product-gallery-two__item,
+.single-product-wrapper .product-gallery-two__item {
+    position: relative !important;
+    overflow: hidden !important;
+    background: #f5f5f5 !important;
+    border: 1px solid #e0e0e0 !important;
+    width: 100% !important;
+    aspect-ratio: 3/4 !important; /* WAJIB: 3:4 portrait */
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Single image item */
+.single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__item {
+    aspect-ratio: 3/4 !important; /* Tetap 3:4 untuk single image */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+}
+
+/* ===================================
+   GALLERY IMAGE - FULL, NO STRETCH
+   =================================== */
+.single-product-wrapper .product-gallery-portrait .product-gallery-two__img,
+.single-product-wrapper .product-gallery-two .product-gallery-two__img,
+.single-product-wrapper .product-gallery-two__img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Full gambar, tidak stretch */
+    object-position: center !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ===================================
+   PRODUCT SUMMARY - KANAN
+   =================================== */
+.single-product-wrapper .product-summary-wrapper {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.single-product-wrapper .product-summary-wrapper .summary {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* ===================================
+   RESPONSIVE - MOBILE
+   =================================== */
+@media (max-width: 900px) {
+    /* Restore container padding on mobile for better spacing */
+    .single-product-wrapper .product-main-content .container {
+        padding: 0 20px !important; /* Full padding on mobile */
+    }
+    
+    /* Stack layout */
+    .single-product-wrapper .product-layout {
+        grid-template-columns: 1fr !important; /* Stack vertically */
+        gap: 32px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Gallery on top */
+    .single-product-wrapper .product-gallery-wrapper {
+        order: 1 !important;
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    
+    /* Info below */
+    .single-product-wrapper .product-summary-wrapper {
+        order: 2 !important;
+    }
+    
+    /* Gallery tetap 2 kolom di tablet */
+    .single-product-wrapper .product-gallery-portrait,
+    .single-product-wrapper .product-gallery-two {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    
+    /* Aspect ratio tetap 3:4 */
+    .single-product-wrapper .product-gallery-portrait .product-gallery-two__item,
+    .single-product-wrapper .product-gallery-two .product-gallery-two__item {
+        aspect-ratio: 3/4 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .single-product-wrapper .product-layout {
+        gap: 24px !important;
+    }
+    
+    .single-product-wrapper .product-gallery-portrait,
+    .single-product-wrapper .product-gallery-two {
+        gap: 12px !important;
+    }
+    
+    /* Aspect ratio tetap 3:4 */
+    .single-product-wrapper .product-gallery-portrait .product-gallery-two__item,
+    .single-product-wrapper .product-gallery-two .product-gallery-two__item {
+        aspect-ratio: 3/4 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    /* 1 column on small phone */
+    .single-product-wrapper .product-gallery-portrait,
+    .single-product-wrapper .product-gallery-two {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    /* Aspect ratio tetap 3:4 */
+    .single-product-wrapper .product-gallery-portrait .product-gallery-two__item,
+    .single-product-wrapper .product-gallery-two .product-gallery-two__item {
+        aspect-ratio: 3/4 !important;
+    }
+}

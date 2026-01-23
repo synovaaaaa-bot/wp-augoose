@@ -599,6 +599,7 @@ function wp_augoose_scripts() {
         wp_enqueue_style( 'wp-augoose-latest-collection-v2', $theme_dir_uri . '/assets/css/latest-collection-v2.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-v2.css' ), 'all' );
 		wp_enqueue_style( 'wp-augoose-button-global-style', $theme_dir_uri . '/assets/css/button-global-style.css', array( 'wp-augoose-woocommerce', 'wp-augoose-product-fixed', 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/button-global-style.css' ), 'all' );
 		wp_style_add_data( 'wp-augoose-button-global-style', 'priority', 'high' );
+		
         wp_enqueue_style( 'wp-augoose-header-mobile-fix', $theme_dir_uri . '/assets/css/header-mobile-fix.css', array( 'wp-augoose-header' ), $asset_ver( 'assets/css/header-mobile-fix.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-latest-collection-mobile-fix', $theme_dir_uri . '/assets/css/latest-collection-mobile-fix.css', array( 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/latest-collection-mobile-fix.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-hero-fixed', $theme_dir_uri . '/assets/css/hero-fixed.css', array( 'wp-augoose-homepage' ), $asset_ver( 'assets/css/hero-fixed.css' ), 'all' );
@@ -624,6 +625,18 @@ function wp_augoose_scripts() {
                 'all' 
             );
             wp_style_add_data( 'wp-augoose-product-gallery-fixed', 'priority', 'high' );
+        }
+        // Product Gallery Refactored - Load AFTER gallery-fixed untuk override
+        // Clean layout, mentok kiri, aspect ratio 3:4
+        if ( file_exists( $theme_dir . '/assets/css/product-gallery-refactored.css' ) ) {
+            wp_enqueue_style( 
+                'wp-augoose-product-gallery-refactored', 
+                $theme_dir_uri . '/assets/css/product-gallery-refactored.css', 
+                array( 'wp-augoose-product-gallery-fixed', 'wp-augoose-woocommerce-integrated', 'wp-augoose-woocommerce-custom' ), 
+                $asset_ver( 'assets/css/product-gallery-refactored.css' ), 
+                'all' 
+            );
+            wp_style_add_data( 'wp-augoose-product-gallery-refactored', 'priority', 'high' );
         }
         // Product Gallery Navigation - Auto Slide dengan Arrow
         if ( file_exists( $theme_dir . '/assets/js/product-gallery-nav.js' ) ) {
