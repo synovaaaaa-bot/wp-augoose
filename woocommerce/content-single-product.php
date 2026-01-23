@@ -126,13 +126,8 @@ if ( post_password_required() ) {
                         }
                         ?>
                         
-                        <!-- Shipping & Material Info (Below Add to Cart) -->
+                        <!-- Material Info (Below Add to Cart) -->
                         <div class="product-shipping-material-info">
-                            <div class="shipping-info">
-                                <strong>SHIPPING</strong>
-                                <p>Free shipping on orders over $200</p>
-                            </div>
-                            
                             <?php
                             // Get material attribute from WooCommerce - try multiple methods
                             $material_attr = '';
