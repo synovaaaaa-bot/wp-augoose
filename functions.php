@@ -9,6 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// Load security and performance enhancements
+require_once get_template_directory() . '/inc/security.php';
+require_once get_template_directory() . '/inc/performance.php';
+
 /**
  * Theme Setup
  */

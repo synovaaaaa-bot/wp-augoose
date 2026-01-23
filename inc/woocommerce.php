@@ -218,12 +218,17 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 }
 
 function wp_augoose_ajax_wishlist_toggle() {
-	check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
+	// Security: Verify nonce and sanitize input
+	if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) ) {
+		require_once get_template_directory() . '/inc/security.php';
+	}
+	wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
+	
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		wp_send_json_error( array( 'message' => 'WooCommerce not available' ) );
 	}
 
-	$product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
+	$product_id = wp_augoose_sanitize_product_id( $_POST['product_id'] ?? 0 );
 	if ( ! $product_id || 'product' !== get_post_type( $product_id ) ) {
 		wp_send_json_error( array( 'message' => 'Invalid product' ) );
 	}
@@ -251,7 +256,12 @@ add_action( 'wp_ajax_wp_augoose_wishlist_toggle', 'wp_augoose_ajax_wishlist_togg
 add_action( 'wp_ajax_nopriv_wp_augoose_wishlist_toggle', 'wp_augoose_ajax_wishlist_toggle' );
 
 function wp_augoose_ajax_wishlist_get() {
-	check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
+	// Security: Verify nonce
+	if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) ) {
+		require_once get_template_directory() . '/inc/security.php';
+	}
+	wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
+	
 	$ids  = wp_augoose_wishlist_get_ids();
 	$html = wp_augoose_wishlist_render_items_html( $ids );
 	wp_send_json_success(
@@ -1657,13 +1667,18 @@ function wp_augoose_cart_scripts() {
 add_action( 'wp_ajax_wp_augoose_add_to_cart', 'wp_augoose_ajax_add_to_cart' );
 add_action( 'wp_ajax_nopriv_wp_augoose_add_to_cart', 'wp_augoose_ajax_add_to_cart' );
 function wp_augoose_ajax_add_to_cart() {
-	check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
+	// Security: Verify nonce and sanitize input
+	if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) ) {
+		require_once get_template_directory() . '/inc/security.php';
+	}
+	wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
+	
 	if ( function_exists( 'wc_clear_notices' ) ) {
 		wc_clear_notices();
 	}
 
-	$product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
-	$quantity   = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 1;
+	$product_id = wp_augoose_sanitize_product_id( $_POST['product_id'] ?? 0 );
+	$quantity   = wp_augoose_sanitize_quantity( $_POST['quantity'] ?? 1, 1, 999 );
 
 	if ( ! $product_id ) {
 		wp_send_json_error( array( 'message' => 'Invalid product ID.' ) );
@@ -1733,14 +1748,19 @@ function wp_augoose_ajax_add_to_cart() {
 add_action( 'wp_ajax_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
 add_action( 'wp_ajax_nopriv_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
 function wp_augoose_update_checkout_quantity() {
-	// Verify nonce
-	if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'woocommerce-cart' ) ) {
+	// Security: Verify nonce
+	if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'woocommerce-cart' ) ) {
 		wp_send_json_error( array( 'message' => 'Security check failed.' ) );
 		return;
 	}
 	
-	$cart_key = isset( $_POST['cart_key'] ) ? sanitize_text_field( $_POST['cart_key'] ) : '';
-	$quantity = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
+	// Security: Sanitize input
+	if ( ! function_exists( 'wp_augoose_sanitize_cart_key' ) ) {
+		require_once get_template_directory() . '/inc/security.php';
+	}
+	
+	$cart_key = wp_augoose_sanitize_cart_key( $_POST['cart_key'] ?? '' );
+	$quantity = wp_augoose_sanitize_quantity( $_POST['quantity'] ?? 0, 0, 999 );
 	
 	if ( ! $cart_key ) {
 		wp_send_json_error( array( 'message' => 'Invalid cart item.' ) );
