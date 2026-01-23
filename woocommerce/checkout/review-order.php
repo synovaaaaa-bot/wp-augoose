@@ -53,16 +53,20 @@ defined( 'ABSPATH' ) || exit;
 									<div class="product-quantity-wrapper">
 										<label class="quantity-label">Quantity:</label>
 										<div class="quantity-input-group">
-											<button type="button" class="qty-btn qty-minus" data-cart-key="<?php echo esc_attr( $cart_item_key ); ?>">−</button>
+											<button type="button" class="qty-btn qty-minus" data-cart-key="<?php echo esc_attr( $cart_item_key ); ?>" aria-label="Decrease quantity">
+												<span class="qty-icon">−</span>
+											</button>
 											<input type="number" 
 												   class="qty-input" 
 												   name="cart[<?php echo esc_attr( $cart_item_key ); ?>][qty]" 
 												   value="<?php echo esc_attr( $cart_item['quantity'] ); ?>" 
-												   min="0" 
+												   min="1" 
 												   max="<?php echo esc_attr( $_product->get_max_purchase_quantity() ); ?>" 
 												   step="1"
 												   data-cart-key="<?php echo esc_attr( $cart_item_key ); ?>" />
-											<button type="button" class="qty-btn qty-plus" data-cart-key="<?php echo esc_attr( $cart_item_key ); ?>">+</button>
+											<button type="button" class="qty-btn qty-plus" data-cart-key="<?php echo esc_attr( $cart_item_key ); ?>" aria-label="Increase quantity">
+												<span class="qty-icon">+</span>
+											</button>
 										</div>
 										<button type="button" class="remove-item-btn" data-cart-key="<?php echo esc_attr( $cart_item_key ); ?>" title="Remove item">
 											<svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">

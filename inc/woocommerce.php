@@ -1579,7 +1579,7 @@ function wp_augoose_add_terms_checkbox() {
 		<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
 			<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms_custom" id="terms_custom" value="1" <?php checked( isset( $_POST['terms_custom'] ), true ); ?> />
 			<span class="woocommerce-form__label-text">
-				Have you read the <a href="<?php echo esc_url( $terms_url ); ?>" target="_blank">Terms of Service</a>?
+				Agree for <a href="<?php echo esc_url( $terms_url ); ?>" target="_blank">Terms & Conditions</a>
 			</span>
 			<span class="required">*</span>
 		</label>

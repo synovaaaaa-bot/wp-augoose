@@ -2498,26 +2498,51 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     align-items: center;
     border: 1px solid #e0e0e0;
     background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .product-item-summary .qty-btn {
     width: 32px;
     height: 32px;
     border: none;
-    background: transparent;
+    background: #f5f5f5;
     color: #1a1a1a;
-    font-size: 18px;
-    font-weight: 400;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
     cursor: pointer;
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     padding: 0;
-    transition: background 0.2s ease;
+    margin: 0;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .product-item-summary .qty-btn:hover {
-    background: #f5f5f5;
+    background: #e0e0e0;
+    color: #000;
+}
+
+.product-item-summary .qty-btn:active {
+    background: #d0d0d0;
+    transform: scale(0.95);
+}
+
+.product-item-summary .qty-btn .qty-icon {
+    display: block;
+    font-size: 20px;
+    line-height: 1;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.product-item-summary .qty-btn:hover .qty-icon {
+    color: #000;
 }
 
 .product-item-summary .qty-input {
@@ -2694,28 +2719,26 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 }
 
 /* Custom Terms Checkbox - Above Place Order Button */
-/* Terms checkbox - Above Place Order button */
+/* Terms checkbox - Below Place Order button */
 .checkout-place-order {
     display: flex !important;
     flex-direction: column !important;
     gap: 16px !important;
 }
 
-.checkout-place-order .terms-checkbox-custom {
-    order: 1 !important; /* Terms checkbox first */
-    margin: 0 0 0 0 !important;
+.checkout-place-order #place_order {
+    order: 1 !important; /* Place Order button first */
 }
 
-.checkout-place-order #place_order {
-    order: 2 !important; /* Place Order button second */
+.checkout-place-order .terms-checkbox-custom {
+    order: 2 !important; /* Terms checkbox second (below button) */
+    margin: 0 0 0 0 !important;
+    text-align: center !important;
 }
 
 .checkout-place-order .checkout-security-note {
     order: 3 !important; /* Security note last */
 }
-
-.checkout-place-order .terms-checkbox-custom {
-    margin: 0 0 0 0 !important;
     padding: 0 !important;
 }
 

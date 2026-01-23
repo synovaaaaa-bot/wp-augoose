@@ -42,12 +42,6 @@ if ( ! empty( $available_gateways ) ) {
 	?>
 
 	<?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
-	
-	<?php
-	// Custom Terms checkbox - MUST be above Place Order button
-	// This ensures it appears right before the Place Order button
-	do_action( 'woocommerce_review_order_before_submit' );
-	?>
 
 	<?php
 	$order_button_text = apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) );
@@ -56,6 +50,11 @@ if ( ! empty( $available_gateways ) ) {
 	<button type="submit" class="button alt<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="woocommerce_checkout_place_order" id="place_order" value="<?php echo esc_attr( $order_button_text ); ?>" data-value="<?php echo esc_attr( $order_button_text ); ?>">
 		<?php echo esc_html( $order_button_text ); ?>
 	</button>
+	
+	<?php
+	// Custom Terms checkbox - BELOW Place Order button
+	do_action( 'woocommerce_review_order_before_submit' );
+	?>
 
 	<p class="checkout-security-note">
 		<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
