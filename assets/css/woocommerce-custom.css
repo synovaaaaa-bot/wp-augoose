@@ -248,7 +248,7 @@ body.post-type-archive-product ul.products {
 /* Our template uses these wrappers: .single-product-wrapper .product-layout */
 .single-product-wrapper .product-main-content .container,
 .single-product-wrapper .product-additional-info .container {
-    max-width: 1200px;
+    max-width: 1400px; /* Match product-layout max-width */
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -264,10 +264,13 @@ body.post-type-archive-product ul.products {
 
 .single-product-wrapper .product-layout {
     display: grid;
-    grid-template-columns: 540px 1fr;
+    grid-template-columns: 2fr 1fr; /* 65-70% gallery, 30-35% info */
     gap: 50px;
     align-items: start;
     padding: 10px 0 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .single-product-wrapper .woocommerce-product-gallery {
@@ -2799,8 +2802,23 @@ body.woocommerce-cart .site-main .entry-content {
    =================================== */
 @media (max-width: 1024px) {
     .single-product-wrapper .product-layout {
-        grid-template-columns: 480px 1fr;
+        grid-template-columns: 2fr 1fr; /* Maintain ratio on tablet */
         gap: 40px;
+    }
+}
+
+@media (max-width: 900px) {
+    .single-product-wrapper .product-layout {
+        grid-template-columns: 1fr !important; /* Stack vertically */
+        gap: 32px;
+    }
+    
+    .single-product-wrapper .product-gallery-wrapper {
+        order: 1; /* Gallery on top */
+    }
+    
+    .single-product-wrapper .product-summary-wrapper {
+        order: 2; /* Info below */
     }
 }
 
