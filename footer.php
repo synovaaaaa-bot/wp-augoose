@@ -100,30 +100,23 @@
                 <div class="footer-payments" aria-label="<?php esc_attr_e( 'Payment methods', 'wp-augoose' ); ?>">
                     <div class="footer-payments-title"><?php echo esc_html__( 'Payment Methods', 'wp-augoose' ); ?></div>
                     <div class="footer-payment-icons" aria-hidden="true">
-                        <span class="pay-icon pay-visa" title="Visa">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
-                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
-                                <text x="11" y="14" font-size="11" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="1">VISA</text>
+                        <!-- PayPal Official Logo - White text on dark background -->
+                        <span class="pay-icon pay-paypal" title="PayPal" aria-label="PayPal">
+                            <svg viewBox="0 0 120 32" width="120" height="32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                                <text x="60" y="22" font-size="20" font-weight="700" fill="#ffffff" font-family="Arial, sans-serif" text-anchor="middle" letter-spacing="0.5">PayPal</text>
                             </svg>
                         </span>
-                        <span class="pay-icon pay-mc" title="Mastercard">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
-                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
-                                <circle cx="28" cy="10" r="6" fill="#EB001B"/>
-                                <circle cx="36" cy="10" r="6" fill="#F79E1B" fill-opacity="0.95"/>
-                                <text x="44" y="13" font-size="7" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="0.5">MC</text>
+                        <!-- Visa Official Logo - White text on dark background -->
+                        <span class="pay-icon pay-visa" title="Visa" aria-label="Visa">
+                            <svg viewBox="0 0 120 32" width="120" height="32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                                <text x="60" y="22" font-size="22" font-weight="900" fill="#ffffff" font-family="Arial, sans-serif" text-anchor="middle" letter-spacing="2">VISA</text>
                             </svg>
                         </span>
-                        <span class="pay-icon pay-applepay" title="Apple Pay">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
-                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
-                                <text x="10" y="13" font-size="9" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="0.3">Apple Pay</text>
-                            </svg>
-                        </span>
-                        <span class="pay-icon pay-gpay" title="Google Pay">
-                            <svg viewBox="0 0 64 20" width="64" height="20" aria-hidden="true">
-                                <rect x="0.75" y="0.75" width="62.5" height="18.5" rx="3" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>
-                                <text x="14" y="13" font-size="9" font-weight="800" fill="#ffffff" font-family="Arial, sans-serif" letter-spacing="0.6">G Pay</text>
+                        <!-- Mastercard Official Logo - Two overlapping circles -->
+                        <span class="pay-icon pay-mastercard" title="Mastercard" aria-label="Mastercard">
+                            <svg viewBox="0 0 120 32" width="120" height="32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="38" cy="16" r="10" fill="#EB001B"/>
+                                <circle cx="48" cy="16" r="10" fill="#F79E1B"/>
                             </svg>
                         </span>
                     </div>

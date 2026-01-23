@@ -11,6 +11,10 @@
 .single-product-wrapper .product-main-content {
     padding-top: 20px;
     padding-bottom: 40px;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 .single-product-wrapper .product-main-content .container {
@@ -19,6 +23,7 @@
     padding: 0 !important; /* NO PADDING - gallery mentok kiri */
     padding-right: 20px !important; /* Only right padding for info section */
     width: 100% !important;
+    margin-left: 0 !important;
 }
 
 /* ===================================
@@ -36,15 +41,43 @@
 }
 
 /* ===================================
-   GALLERY WRAPPER - MENTOK KIRI
+   GALLERY WRAPPER - MENTOK KIRI VIEWPORT
+   Keluar dari container padding dengan negative margin
    =================================== */
 .single-product-wrapper .product-gallery-wrapper {
     position: relative !important;
-    width: 100% !important;
+    width: calc(100% + 40px) !important; /* Lebih lebar dari container untuk keluar */
     margin: 0 !important;
+    margin-left: -40px !important; /* Negative margin untuk keluar dari container padding default (40px) */
     padding: 0 !important;
+    padding-left: 0 !important;
+    max-width: none !important; /* Tidak terbatasi max-width container */
+    left: 0 !important; /* Pastikan mentok kiri */
+}
+
+/* Pastikan parent container tidak membatasi */
+.single-product-wrapper .product-layout {
+    overflow: visible !important; /* Biarkan gallery keluar dari container */
     margin-left: 0 !important;
     padding-left: 0 !important;
+}
+
+/* Override container padding - NO LEFT PADDING */
+.single-product-wrapper .product-main-content .container {
+    padding-left: 0 !important;
+    overflow-x: visible !important; /* Biarkan gallery keluar */
+}
+
+/* Pastikan parent tidak membatasi */
+.single-product-wrapper .product-main-content {
+    overflow-x: visible !important; /* Biarkan gallery keluar */
+}
+
+/* Gallery wrapper negative margin berdasarkan container padding */
+.single-product-wrapper .product-layout {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    overflow: visible !important; /* Biarkan gallery keluar dari container */
 }
 
 /* ===================================
@@ -142,12 +175,14 @@
         gap: 32px !important;
         margin: 0 !important;
         padding: 0 !important;
+        overflow: visible !important;
     }
     
-    /* Gallery on top */
+    /* Gallery on top - reset negative margin di mobile */
     .single-product-wrapper .product-gallery-wrapper {
         order: 1 !important;
-        margin-left: 0 !important;
+        width: calc(100% + 20px) !important; /* Sesuai dengan container padding mobile (20px) */
+        margin-left: -20px !important; /* Negative margin untuk keluar dari container padding mobile */
         padding-left: 0 !important;
     }
     
@@ -202,4 +237,17 @@
     .single-product-wrapper .product-gallery-two .product-gallery-two__item {
         aspect-ratio: 3/4 !important;
     }
+}
+
+/* ===================================
+   HIDE SHIPPING INFO - SINGLE PRODUCT
+   =================================== */
+.single-product-wrapper .product-shipping-info,
+.single-product-wrapper .product-shipping-material-info .shipping-info,
+.single-product-wrapper .shipping-info,
+.single-product-wrapper [class*="shipping"]:not(.product-shipping-material-info),
+.single-product-wrapper .woocommerce-shipping-fields,
+.single-product-wrapper .shipping-tab-content {
+    display: none !important;
+    visibility: hidden !important;
 }

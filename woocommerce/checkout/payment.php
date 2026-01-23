@@ -44,7 +44,7 @@ if ( ! empty( $available_gateways ) ) {
 	<?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
 	
 	<?php
-	// Custom Terms checkbox will be added via woocommerce_review_order_before_submit hook
+	// Custom Terms checkbox - MUST be above Place Order button
 	// This ensures it appears right before the Place Order button
 	do_action( 'woocommerce_review_order_before_submit' );
 	?>

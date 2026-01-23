@@ -6,36 +6,54 @@
 jQuery(document).ready(function($) {
     'use strict';
 
-    // Quantity increase
+    // Quantity increase - Fixed selector
     $(document).on('click', '.qty-plus', function(e) {
         e.preventDefault();
-        var $input = $(this).siblings('.qty-input');
+        e.stopPropagation();
+        var $button = $(this);
+        var $input = $button.siblings('.qty-input');
+        if ($input.length === 0) {
+            $input = $button.closest('.quantity-input-group').find('.qty-input');
+        }
         var currentVal = parseInt($input.val()) || 0;
         var max = parseInt($input.attr('max')) || 999;
         
         if (currentVal < max) {
             $input.val(currentVal + 1).trigger('change');
+            updateCartQuantity($input.data('cart-key'), currentVal + 1);
         }
     });
 
-    // Quantity decrease
+    // Quantity decrease - Fixed selector
     $(document).on('click', '.qty-minus', function(e) {
         e.preventDefault();
-        var $input = $(this).siblings('.qty-input');
+        e.stopPropagation();
+        var $button = $(this);
+        var $input = $button.siblings('.qty-input');
+        if ($input.length === 0) {
+            $input = $button.closest('.quantity-input-group').find('.qty-input');
+        }
         var currentVal = parseInt($input.val()) || 0;
-        var min = parseInt($input.attr('min')) || 0;
+        var min = parseInt($input.attr('min')) || 1;
         
         if (currentVal > min) {
             $input.val(currentVal - 1).trigger('change');
+            updateCartQuantity($input.data('cart-key'), currentVal - 1);
         }
     });
 
     // Quantity input change - update cart via AJAX
     var updateTimeout;
-    $(document).on('change', '.qty-input', function() {
+    $(document).on('change blur', '.qty-input', function() {
         var $input = $(this);
         var cartKey = $input.data('cart-key');
-        var quantity = parseInt($input.val()) || 0;
+        var quantity = parseInt($input.val()) || 1;
+        
+        // Ensure minimum quantity
+        if (quantity < 1) {
+            quantity = 1;
+            $input.val(1);
+        }
         
         // Clear previous timeout
         clearTimeout(updateTimeout);
