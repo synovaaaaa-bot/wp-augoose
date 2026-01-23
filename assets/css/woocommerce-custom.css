@@ -250,7 +250,7 @@ body.post-type-archive-product ul.products {
 .single-product-wrapper .product-additional-info .container {
     max-width: 1400px; /* Match product-layout max-width */
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 20px 0 0; /* No left padding - gallery mentok kiri */
 }
 
 .single-product-wrapper .product-main-content {
@@ -269,8 +269,9 @@ body.post-type-archive-product ul.products {
     align-items: start;
     padding: 10px 0 30px;
     max-width: 1400px;
-    margin: 0 auto;
+    margin: 0;
     width: 100%;
+    margin-right: auto; /* Only right margin for centering info */
 }
 
 .single-product-wrapper .woocommerce-product-gallery {
@@ -2808,13 +2809,20 @@ body.woocommerce-cart .site-main .entry-content {
 }
 
 @media (max-width: 900px) {
+    .single-product-wrapper .product-main-content .container {
+        padding: 0 20px; /* Restore padding on mobile for better spacing */
+    }
+    
     .single-product-wrapper .product-layout {
         grid-template-columns: 1fr !important; /* Stack vertically */
         gap: 32px;
+        margin: 0; /* Reset margin on mobile */
     }
     
     .single-product-wrapper .product-gallery-wrapper {
         order: 1; /* Gallery on top */
+        margin-left: 0 !important;
+        padding-left: 0 !important;
     }
     
     .single-product-wrapper .product-summary-wrapper {

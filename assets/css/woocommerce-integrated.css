@@ -36,6 +36,12 @@
     padding: 0 40px;
 }
 
+/* Override container padding for single product - gallery mentok kiri */
+.single-product-wrapper .product-main-content .container {
+    padding-left: 0 !important; /* No left padding - gallery mentok kiri */
+    padding-right: 20px; /* Keep right padding for info section */
+}
+
 @media (max-width: 768px) {
     .woocommerce .container,
     .woocommerce-page .container {
@@ -155,7 +161,8 @@
     gap: 20px; /* Gap antar gambar */
     width: 100%;
     max-width: 100%;
-    padding-left: 20px; /* Gap dari kiri */
+    padding-left: 0; /* No padding - mentok kiri */
+    margin-left: 0; /* No margin - mentok kiri */
 }
 
 .single-product-wrapper .product-gallery-portrait.is-single {
@@ -163,11 +170,8 @@
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
+    padding-left: 0 !important; /* No padding - mentok kiri */
     display: grid !important;
-}
-
-.single-product-wrapper .product-gallery-portrait.is-single {
-    padding-left: 20px; /* Gap dari kiri untuk single image */
 }
 
 .single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__item {
@@ -215,7 +219,8 @@
     gap: 20px; /* Gap antar gambar */
     width: 100%;
     max-width: 100%;
-    padding-left: 20px; /* Gap dari kiri */
+    padding-left: 0; /* No padding - mentok kiri */
+    margin-left: 0; /* No margin - mentok kiri */
 }
 
 .single-product-wrapper .product-gallery-two.is-single {
@@ -938,7 +943,8 @@ body.single-product .quantity.buttons_added .qty::-webkit-inner-spin-button {
     .single-product-wrapper .product-gallery-portrait {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 16px !important;
-        padding-left: 16px !important; /* Gap dari kiri untuk tablet */
+        padding-left: 0 !important; /* No padding - mentok kiri */
+        margin-left: 0 !important;
         width: 100%;
         max-width: 100%;
     }
@@ -953,7 +959,8 @@ body.single-product .quantity.buttons_added .qty::-webkit-inner-spin-button {
     .single-product-wrapper .product-gallery-portrait {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 12px !important;
-        padding-left: 12px !important; /* Gap dari kiri untuk mobile */
+        padding-left: 0 !important; /* No padding - mentok kiri */
+        margin-left: 0 !important;
         width: 100%;
         max-width: 100%;
     }
@@ -967,7 +974,8 @@ body.single-product .quantity.buttons_added .qty::-webkit-inner-spin-button {
     }
     
     .single-product-wrapper .product-gallery-portrait.is-single {
-        padding-left: 12px !important; /* Gap dari kiri untuk mobile */
+        padding-left: 0 !important; /* No padding - mentok kiri */
+        margin-left: 0 !important;
     }
     
     .single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__item {

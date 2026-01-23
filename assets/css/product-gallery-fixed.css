@@ -40,6 +40,9 @@
 .single-product-wrapper .product-gallery-wrapper,
 .product-gallery-wrapper {
     position: relative;
+    margin-left: 0 !important; /* Mentok kiri */
+    padding-left: 0 !important; /* No padding kiri */
+    width: 100%;
 }
 
 /* Main Image */
