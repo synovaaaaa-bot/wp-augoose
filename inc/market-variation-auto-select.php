@@ -84,16 +84,19 @@ function wp_augoose_enqueue_market_variation_script() {
         return;
     }
     
-    global $product;
-    
-    // Ensure $product is a WC_Product object
-    if ( ! $product || ! is_object( $product ) || ! is_a( $product, 'WC_Product' ) ) {
-        // Try to get product from global post
+    // Get product ID from query
+    $product_id = get_the_ID();
+    if ( ! $product_id ) {
         global $post;
-        if ( $post && isset( $post->ID ) ) {
-            $product = wc_get_product( $post->ID );
-        }
+        $product_id = isset( $post->ID ) ? $post->ID : 0;
     }
+    
+    if ( ! $product_id ) {
+        return;
+    }
+    
+    // Always use wc_get_product() to ensure we get a valid product object
+    $product = wc_get_product( $product_id );
     
     // Final check: ensure we have a valid product object
     if ( ! $product || ! is_object( $product ) || ! is_a( $product, 'WC_Product' ) ) {
