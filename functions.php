@@ -1462,3 +1462,19 @@ function wp_augoose_use_latest_collection_template( $template, $slug, $name ) {
 if ( class_exists( 'WooCommerce' ) && file_exists( get_template_directory() . '/inc/market-variation-auto-select.php' ) ) {
     require get_template_directory() . '/inc/market-variation-auto-select.php';
 }
+
+/**
+ * Disable Multicurrency Plugin Hooks
+ * Prevents plugin from modifying WooCommerce prices (causes fatal errors)
+ * Load via plugins_loaded hook to ensure it runs after plugin registers hooks
+ */
+add_action( 'plugins_loaded', 'wp_augoose_load_disable_multicurrency_plugin', 999 );
+function wp_augoose_load_disable_multicurrency_plugin() {
+	if ( file_exists( get_template_directory() . '/inc/disable-multicurrency-plugin.php' ) ) {
+		require_once get_template_directory() . '/inc/disable-multicurrency-plugin.php';
+		// Call the function to remove hooks
+		if ( function_exists( 'wp_augoose_disable_multicurrency_plugin_hooks' ) ) {
+			wp_augoose_disable_multicurrency_plugin_hooks();
+		}
+	}
+}

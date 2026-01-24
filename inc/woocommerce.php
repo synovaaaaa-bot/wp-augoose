@@ -1710,8 +1710,16 @@ function wp_augoose_ajax_add_to_cart() {
 		);
 	}
 
-	// Add to cart
-	$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity );
+	// Add to cart with error handling
+	try {
+		$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity );
+	} catch ( \Exception $e ) {
+		// Log error but don't break the site
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'Add to cart error: ' . $e->getMessage() );
+		}
+		wp_send_json_error( array( 'message' => 'Error adding product to cart. Please try again.' ) );
+	}
 
 	if ( $cart_item_key ) {
 		// Get cart count
