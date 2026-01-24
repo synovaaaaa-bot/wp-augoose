@@ -653,19 +653,6 @@
         });
     }
 
-    // Currency Switcher (cookie-based + price conversion)
-    function initCurrencySwitcher() {
-        $('.augoose-currency-switcher').on('change', function() {
-            const currency = $(this).val();
-            const rate = parseFloat($(this).find('option:selected').data('rate')) || 1.0;
-            const symbol = $(this).find('option:selected').data('symbol') || '$';
-            document.cookie = 'wp_augoose_currency=' + currency + '; path=/; max-age=31536000';
-            document.cookie = 'wp_augoose_currency_rate=' + rate + '; path=/; max-age=31536000';
-            document.cookie = 'wp_augoose_currency_symbol=' + symbol + '; path=/; max-age=31536000';
-            // Reload to apply currency conversion
-            location.reload();
-        });
-    }
 
     // Product Description Read More Toggle
     function initReadMore() {
@@ -729,7 +716,6 @@
         initProductImageSlider(); // Auto-slide product images
         initSizeGuideToggle(); // Size guide toggle
         initLanguageSwitcher();
-        initCurrencySwitcher();
         initReadMore(); // Product description read more
         
         // Prevent duplicate buttons after AJAX
