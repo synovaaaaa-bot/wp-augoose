@@ -1,0 +1,40 @@
+Fix: Transaction Errors & Remove Custom Currency Code
+
+## Summary
+- Fix fatal errors ketika klik product dan add to cart
+- Remove semua custom currency code dari theme
+- Disable price hooks di plugin multicurrency
+- Theme sekarang support plugin currency switcher (FOX, WPML, etc.)
+
+## Changes
+
+### Plugin Changes
+- Disabled ALL price conversion hooks in multicurrency-autoconvert plugin
+- Prevents fatal errors when loading product pages
+
+### Theme Changes
+- Removed custom currency switcher code
+- Removed currency conversion filters
+- Removed currency detection from IP
+- Simplified currency switcher to support plugins only
+- Added error handling for add to cart
+- Added backup hook removal for multicurrency plugin
+
+### Files Deleted
+- inc/currency-ui-only.php
+- inc/currency-idr-multi.php
+- assets/js/currency-ui-only.js
+- assets/js/currency-switcher.js
+- All currency-related documentation
+
+### Files Added
+- inc/disable-multicurrency-plugin.php (backup safety)
+
+## Testing
+- ✅ Product detail page bisa dibuka
+- ✅ Add to cart berfungsi
+- ✅ No fatal errors
+- ✅ No JavaScript errors
+
+## Breaking Changes
+⚠️ Custom currency conversion removed - use plugin currency switcher instead
