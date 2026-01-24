@@ -224,7 +224,14 @@ function wp_augoose_render_language_switcher() {
             foreach ( $langs as $l ) {
                 $selected = ! empty( $l['active'] ) ? ' selected' : '';
                 $url      = isset( $l['url'] ) ? $l['url'] : '';
-                $name     = isset( $l['native_name'] ) ? $l['native_name'] : ( isset( $l['translated_name'] ) ? $l['translated_name'] : ( isset( $l['language_code'] ) ? $l['language_code'] : '' ) );
+                $name     = '';
+                if ( isset( $l['native_name'] ) ) {
+                    $name = $l['native_name'];
+                } elseif ( isset( $l['translated_name'] ) ) {
+                    $name = $l['translated_name'];
+                } elseif ( isset( $l['language_code'] ) ) {
+                    $name = $l['language_code'];
+                }
                 printf( '<option value="%s"%s>%s</option>', esc_url( $url ), $selected, esc_html( $name ) );
             }
             echo '</select></div></div>';

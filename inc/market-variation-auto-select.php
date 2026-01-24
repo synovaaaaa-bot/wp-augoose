@@ -86,7 +86,21 @@ function wp_augoose_enqueue_market_variation_script() {
     
     global $product;
     
-    if ( ! $product || ! $product->is_type( 'variable' ) ) {
+    // Ensure $product is a WC_Product object
+    if ( ! $product || ! is_object( $product ) || ! is_a( $product, 'WC_Product' ) ) {
+        // Try to get product from global post
+        global $post;
+        if ( $post && isset( $post->ID ) ) {
+            $product = wc_get_product( $post->ID );
+        }
+    }
+    
+    // Final check: ensure we have a valid product object
+    if ( ! $product || ! is_object( $product ) || ! is_a( $product, 'WC_Product' ) ) {
+        return;
+    }
+    
+    if ( ! $product->is_type( 'variable' ) ) {
         return;
     }
     
