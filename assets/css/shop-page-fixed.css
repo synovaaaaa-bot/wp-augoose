@@ -103,6 +103,9 @@ html body.filter-open aside.shop-filters {
     padding-bottom: 20px;
     border-bottom: 1px solid #e0e0e0;
     gap: 20px;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
 }
 
 .shop-toolbar-left {
@@ -110,6 +113,8 @@ html body.filter-open aside.shop-filters {
     align-items: center;
     gap: 16px;
     flex: 1;
+    position: relative;
+    z-index: 2;
 }
 
 .shop-filter-toggle {
@@ -122,13 +127,20 @@ html body.filter-open aside.shop-filters {
     letter-spacing: 2px;
     text-transform: uppercase;
     font-weight: 700;
-    cursor: pointer;
+    cursor: pointer !important;
     transition: all 0.2s ease;
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
     line-height: 1;
     vertical-align: middle;
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .shop-filter-toggle:hover {

@@ -179,5 +179,25 @@
     // Also try to initialize after a short delay (in case DOM is still loading)
     setTimeout(init, 100);
     setTimeout(init, 500); // Extra delay for slow loading
+    setTimeout(init, 1000); // Extra delay for very slow loading
+    
+    // Debug: Check if button exists after page load
+    window.addEventListener('load', function() {
+        console.log('=== PAGE LOADED - CHECKING FILTER BUTTON ===');
+        const btn = document.querySelector('.shop-filter-toggle');
+        if (btn) {
+            console.log('✓ Filter button found:', btn);
+            console.log('Button styles:', window.getComputedStyle(btn));
+            console.log('Button z-index:', window.getComputedStyle(btn).zIndex);
+            console.log('Button pointer-events:', window.getComputedStyle(btn).pointerEvents);
+            
+            // Test click programmatically
+            btn.addEventListener('click', function(e) {
+                console.log('=== DIRECT CLICK EVENT FIRED ===', e);
+            });
+        } else {
+            console.error('✗ Filter button NOT found!');
+        }
+    });
     
 })();

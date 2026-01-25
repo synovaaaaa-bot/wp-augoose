@@ -56,6 +56,23 @@ function wp_augoose_woocommerce_setup() {
 add_action( 'after_setup_theme', 'wp_augoose_woocommerce_setup' );
 
 /**
+ * Ensure archive-product.php template is used (disable block templates for shop)
+ * This ensures our custom PHP template is always used instead of block templates
+ */
+add_filter( 'woocommerce_has_block_template', function( $has_template, $template_name ) {
+	// Force use PHP template for archive-product
+	if ( $template_name === 'archive-product' ) {
+		return false;
+	}
+	return $has_template;
+}, 10, 2 );
+
+/**
+ * Disable WooCommerce compatibility layer to ensure our template is used
+ */
+add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+
+/**
  * Cart page redirect removed.
  * Users expect "View cart" to go to the cart page.
  */
