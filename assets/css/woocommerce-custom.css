@@ -18,14 +18,24 @@
     margin: 0 0 10px;
 }
 
-/* General WooCommerce products grid - only for shop pages */
+/* General WooCommerce products grid - shop pages & category pages (Jacket, Pants, Shirts) */
 body.woocommerce-shop .woocommerce ul.products,
 body.post-type-archive-product .woocommerce ul.products,
 body.woocommerce-shop ul.products,
-body.post-type-archive-product ul.products {
+body.post-type-archive-product ul.products,
+body.tax-product_cat .woocommerce ul.products,
+body.tax-product_cat ul.products,
+body.tax-product_tag .woocommerce ul.products,
+body.tax-product_tag ul.products,
+body.term-jackets .woocommerce ul.products,
+body.term-jackets ul.products,
+body.term-pants .woocommerce ul.products,
+body.term-pants ul.products,
+body.term-shirts .woocommerce ul.products,
+body.term-shirts ul.products {
     display: grid !important;
-    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
-    gap: 20px !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important; /* Kurangi dari 6 ke 4 untuk gambar lebih besar */
+    gap: 30px !important; /* Perbesar gap */
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -142,6 +152,76 @@ body.post-type-archive-product ul.products {
         grid-template-columns: 220px 1fr;
         gap: 24px;
     }
+    
+    body.woocommerce-shop .woocommerce ul.products,
+    body.post-type-archive-product .woocommerce ul.products,
+    body.woocommerce-shop ul.products,
+    body.post-type-archive-product ul.products,
+    body.tax-product_cat .woocommerce ul.products,
+    body.tax-product_cat ul.products,
+    body.tax-product_tag .woocommerce ul.products,
+    body.tax-product_tag ul.products,
+    body.term-jackets .woocommerce ul.products,
+    body.term-jackets ul.products,
+    body.term-pants .woocommerce ul.products,
+    body.term-pants ul.products,
+    body.term-shirts .woocommerce ul.products,
+    body.term-shirts ul.products {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 24px !important;
+    }
+    
+    .product-thumbnail {
+        min-height: 280px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    body.woocommerce-shop .woocommerce ul.products,
+    body.post-type-archive-product .woocommerce ul.products,
+    body.woocommerce-shop ul.products,
+    body.post-type-archive-product ul.products,
+    body.tax-product_cat .woocommerce ul.products,
+    body.tax-product_cat ul.products,
+    body.tax-product_tag .woocommerce ul.products,
+    body.tax-product_tag ul.products,
+    body.term-jackets .woocommerce ul.products,
+    body.term-jackets ul.products,
+    body.term-pants .woocommerce ul.products,
+    body.term-pants ul.products,
+    body.term-shirts .woocommerce ul.products,
+    body.term-shirts ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+    
+    .product-thumbnail {
+        min-height: 260px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    body.woocommerce-shop .woocommerce ul.products,
+    body.post-type-archive-product .woocommerce ul.products,
+    body.woocommerce-shop ul.products,
+    body.post-type-archive-product ul.products,
+    body.tax-product_cat .woocommerce ul.products,
+    body.tax-product_cat ul.products,
+    body.tax-product_tag .woocommerce ul.products,
+    body.tax-product_tag ul.products,
+    body.term-jackets .woocommerce ul.products,
+    body.term-jackets ul.products,
+    body.term-pants .woocommerce ul.products,
+    body.term-pants ul.products,
+    body.term-shirts .woocommerce ul.products,
+    body.term-shirts ul.products {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px !important;
+    }
+    
+    .product-thumbnail {
+        min-height: 240px !important;
+    }
 }
 
 .woocommerce ul.products li.product,
@@ -155,11 +235,14 @@ body.post-type-archive-product ul.products {
     background: #fff;
 }
 
+/* Product thumbnail - berlaku untuk semua halaman (shop, category, tag) */
 .product-thumbnail {
     position: relative;
     overflow: hidden;
     aspect-ratio: 3 / 4; /* Konsisten 3:4 untuk semua produk */
     background: #f5f5f5;
+    min-height: 300px; /* Minimum height untuk gambar lebih besar */
+    width: 100%;
 }
 
 .product-thumbnail img {

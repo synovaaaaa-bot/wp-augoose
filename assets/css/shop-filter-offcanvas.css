@@ -128,7 +128,11 @@ html body.filter-open aside.shop-filters {
    =================================== */
 .woocommerce ul.products,
 .woocommerce-page ul.products,
-ul.products {
+ul.products,
+body.tax-product_cat .woocommerce ul.products,
+body.tax-product_cat ul.products,
+body.tax-product_tag .woocommerce ul.products,
+body.tax-product_tag ul.products {
     /* Grid columns stay consistent regardless of filter state */
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 30px !important;
@@ -171,9 +175,19 @@ body.filter-open {
     
     .woocommerce ul.products,
     .woocommerce-page ul.products,
-    ul.products {
+    ul.products,
+    body.tax-product_cat .woocommerce ul.products,
+    body.tax-product_cat ul.products,
+    body.tax-product_tag .woocommerce ul.products,
+    body.tax-product_tag ul.products {
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        gap: 20px !important;
+        gap: 24px !important; /* Perbesar gap */
+    }
+    
+    .product-thumbnail,
+    body.tax-product_cat .product-thumbnail,
+    body.tax-product_tag .product-thumbnail {
+        min-height: 280px !important; /* Gambar lebih besar di tablet */
     }
 }
 
@@ -186,9 +200,19 @@ body.filter-open {
     
     .woocommerce ul.products,
     .woocommerce-page ul.products,
-    ul.products {
+    ul.products,
+    body.tax-product_cat .woocommerce ul.products,
+    body.tax-product_cat ul.products,
+    body.tax-product_tag .woocommerce ul.products,
+    body.tax-product_tag ul.products {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 12px !important;
+        gap: 16px !important; /* Perbesar gap */
+    }
+    
+    .product-thumbnail,
+    body.tax-product_cat .product-thumbnail,
+    body.tax-product_tag .product-thumbnail {
+        min-height: 260px !important; /* Gambar lebih besar di mobile */
     }
 }
 
@@ -200,8 +224,18 @@ body.filter-open {
     
     .woocommerce ul.products,
     .woocommerce-page ul.products,
-    ul.products {
+    ul.products,
+    body.tax-product_cat .woocommerce ul.products,
+    body.tax-product_cat ul.products,
+    body.tax-product_tag .woocommerce ul.products,
+    body.tax-product_tag ul.products {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 12px !important;
+        gap: 16px !important; /* Perbesar gap */
+    }
+    
+    .product-thumbnail,
+    body.tax-product_cat .product-thumbnail,
+    body.tax-product_tag .product-thumbnail {
+        min-height: 240px !important; /* Gambar lebih besar di mobile kecil */
     }
 }
