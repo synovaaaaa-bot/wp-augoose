@@ -217,17 +217,24 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			$img   = $product->get_image( 'woocommerce_thumbnail' );
 			
 			// IMPORTANT: Ensure currency conversion works (WCML and other currency plugins support)
-			// Set global product so WooCommerce hooks/filters can access it
-			// This is critical for currency plugins like WCML
+			// Use the same method as cart to ensure prices match exactly
+			// Cart uses WC()->cart->get_product_price() which automatically converts currency
 			
-			// Get price HTML - WooCommerce will automatically use current currency
-			// This works with WCML, WOOCS, Aelia, and other currency plugins
-			// The global $product ensures currency plugins can access the product object
-			$price = $product->get_price_html();
-			
-			// Apply WooCommerce price filter - currency plugins hook into this
-			// This ensures WCML and other plugins can convert/modify the price
-			$price = apply_filters( 'woocommerce_get_price_html', $price, $product );
+			// Get price using cart method (same as cart.php) - this ensures currency conversion
+			if ( class_exists( 'WooCommerce' ) && WC()->cart ) {
+				// Use cart's get_product_price method which handles currency conversion
+				// This is the EXACT same method used in cart.php line 67
+				// It automatically uses current currency from WCML or other plugins
+				$price = WC()->cart->get_product_price( $product );
+				
+				// Apply the same filter that cart uses
+				// This ensures all currency plugin hooks are applied
+				$price = apply_filters( 'woocommerce_cart_item_price', $price, array( 'data' => $product ), '' );
+			} else {
+				// Fallback: use get_price_html() with filters
+				$price = $product->get_price_html();
+				$price = apply_filters( 'woocommerce_get_price_html', $price, $product );
+			}
 			
 			$is_variable = $product->is_type( 'variable' );
 			$is_simple   = $product->is_type( 'simple' );
