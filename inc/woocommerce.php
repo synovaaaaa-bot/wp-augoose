@@ -73,6 +73,63 @@ add_filter( 'woocommerce_has_block_template', function( $has_template, $template
 add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 
 /**
+ * CRITICAL: Force Classic Checkout (disable Checkout Block)
+ * 
+ * Many payment gateways (including DOKU) have compatibility issues with Checkout Block.
+ * This ensures we always use Classic Checkout with our custom templates.
+ */
+add_filter( 'woocommerce_blocks_is_feature_enabled', 'wp_augoose_disable_checkout_block', 10, 2 );
+function wp_augoose_disable_checkout_block( $is_enabled, $feature ) {
+	// Disable Checkout Block feature
+	if ( 'checkout' === $feature || 'cart' === $feature ) {
+		return false;
+	}
+	return $is_enabled;
+}
+
+/**
+ * Ensure checkout page uses Classic checkout shortcode, not Block
+ */
+add_action( 'template_redirect', 'wp_augoose_ensure_classic_checkout', 1 );
+function wp_augoose_ensure_classic_checkout() {
+	// Only on checkout page
+	if ( ! is_checkout() ) {
+		return;
+	}
+	
+	// Force disable Checkout Block if somehow enabled
+	if ( function_exists( 'wc_blocks_is_feature_enabled' ) ) {
+		// Disable checkout block feature
+		add_filter( 'woocommerce_blocks_is_feature_enabled', function( $enabled, $feature ) {
+			if ( 'checkout' === $feature || 'cart' === $feature ) {
+				return false;
+			}
+			return $enabled;
+		}, 999, 2 );
+	}
+	
+	// Ensure we're using classic checkout template
+	if ( function_exists( 'wc_get_template' ) ) {
+		// This ensures our custom checkout template is used
+		add_filter( 'woocommerce_locate_template', 'wp_augoose_force_classic_checkout_template', 10, 3 );
+	}
+}
+
+/**
+ * Force classic checkout template location
+ */
+function wp_augoose_force_classic_checkout_template( $template, $template_name, $template_path ) {
+	// Force use our custom checkout templates
+	if ( strpos( $template_name, 'checkout/' ) === 0 ) {
+		$custom_template = get_template_directory() . '/woocommerce/' . $template_name;
+		if ( file_exists( $custom_template ) ) {
+			return $custom_template;
+		}
+	}
+	return $template;
+}
+
+/**
  * Price placeholder untuk konsistensi tinggi produk
  * Menambahkan placeholder jika produk tidak punya harga
  */
@@ -275,9 +332,11 @@ function wp_augoose_suppress_harmless_warnings() {
 			}
 			
 			// Suppress array offset warnings from DOKU Payment plugin
+			// DOKU plugin has known issues accessing array offsets without validation
 			if ( $errno === E_WARNING && 
 			     ( strpos( $errstr, 'Trying to access array offset' ) !== false ||
-			       strpos( $errstr, 'Array to string conversion' ) !== false ) &&
+			       strpos( $errstr, 'Array to string conversion' ) !== false ||
+			       strpos( $errstr, 'Undefined array key' ) !== false ) &&
 			     strpos( $errfile, 'doku-payment' ) !== false ) {
 				return true; // Suppress this warning
 			}
@@ -2432,6 +2491,31 @@ function wp_augoose_clean_output_for_woocommerce_ajax() {
 	}
 }
 
+/**
+ * CRITICAL: Fix DOKU Payment plugin array access errors during checkout
+ * DOKU plugin has known issues accessing array offsets without validation
+ * This prevents "Trying to access array offset on false" errors from breaking checkout
+ */
+add_action( 'woocommerce_checkout_process', 'wp_augoose_fix_doku_checkout_errors', 1 );
+function wp_augoose_fix_doku_checkout_errors() {
+	// Only if DOKU plugin is active
+	if ( ! class_exists( 'WC_Gateway_Doku' ) && ! function_exists( 'doku_payment_init' ) ) {
+		return;
+	}
+	
+	// Ensure DOKU payment method data is properly set
+	// DOKU plugin sometimes tries to access $_POST data that doesn't exist
+	if ( isset( $_POST['payment_method'] ) && strpos( $_POST['payment_method'], 'doku' ) !== false ) {
+		// Ensure required DOKU fields exist to prevent array access errors
+		$required_fields = array( 'doku_payment_method', 'doku_channel', 'doku_amount' );
+		foreach ( $required_fields as $field ) {
+			if ( ! isset( $_POST[ $field ] ) ) {
+				$_POST[ $field ] = '';
+			}
+		}
+	}
+}
+
 add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_terms_checkbox' );
 function wp_augoose_validate_terms_checkbox() {
 	if ( empty( $_POST['terms_custom'] ) ) {
@@ -2686,6 +2770,12 @@ function wp_augoose_update_checkout_quantity() {
 	// Calculate totals once (faster than multiple calculations)
 	WC()->cart->calculate_totals();
 	
+	// CRITICAL: Clear output buffer before generating fragments
+	// This prevents any HTML output before JSON response
+	while ( ob_get_level() ) {
+		ob_end_clean();
+	}
+	
 	// Get order review fragment to preserve product images
 	ob_start();
 	woocommerce_order_review();
@@ -2696,58 +2786,68 @@ function wp_augoose_update_checkout_quantity() {
 	woocommerce_checkout_payment();
 	$payment_html = ob_get_clean();
 	
-	// Get messages if any
+	// Get messages if any (must be after fragments to avoid output issues)
 	$messages = '';
 	if ( function_exists( 'wc_print_notices' ) ) {
-		$messages = wc_print_notices( true );
+		ob_start();
+		wc_print_notices();
+		$messages = ob_get_clean();
 	}
 	
 	// Return success with cart data and fragments for immediate UI update
-	// CRITICAL: Follow WooCommerce's exact response format to prevent checkout.min.js errors
-	// WooCommerce expects: result, messages, reload, fragments, cart_hash
-	$response = array(
-		'result'    => empty( $messages ) ? 'success' : 'failure',
-		'messages'  => $messages ? $messages : '',
-		'reload'    => false,
-		'fragments' => apply_filters(
-			'woocommerce_update_order_review_fragments',
-			array(
-				'.woocommerce-checkout-review-order-table' => $order_review_html,
-				'.woocommerce-checkout-payment' => $payment_html,
-			)
-		),
-		'cart_hash' => WC()->cart->get_cart_hash() ? WC()->cart->get_cart_hash() : '',
+	// CRITICAL: Follow WooCommerce's EXACT response format to prevent checkout.min.js errors
+	// WooCommerce update_order_review expects: result (string), messages (string), reload (boolean), fragments (object)
+	// Reference: woocommerce/includes/class-wc-ajax.php line 459-472
+	
+	// Prepare fragments - ensure they are strings
+	$fragments_array = array(
+		'.woocommerce-checkout-review-order-table' => is_string( $order_review_html ) ? $order_review_html : '',
+		'.woocommerce-checkout-payment' => is_string( $payment_html ) ? $payment_html : '',
 	);
 	
-	// Ensure all values are proper types (not null/undefined)
-	// This prevents "Cannot read properties of undefined (reading 'toString')" errors
-	if ( ! isset( $response['result'] ) || is_null( $response['result'] ) ) {
-		$response['result'] = 'success';
-	}
-	if ( ! isset( $response['messages'] ) || is_null( $response['messages'] ) ) {
-		$response['messages'] = '';
-	}
-	if ( ! isset( $response['reload'] ) || is_null( $response['reload'] ) ) {
-		$response['reload'] = false;
-	}
-	if ( ! isset( $response['cart_hash'] ) || is_null( $response['cart_hash'] ) ) {
-		$response['cart_hash'] = '';
-	}
+	// Apply filter (same as WooCommerce does)
+	$fragments = apply_filters( 'woocommerce_update_order_review_fragments', $fragments_array );
 	
-	// Ensure fragments are strings (HTML) and not null
-	if ( isset( $response['fragments'] ) && is_array( $response['fragments'] ) ) {
-		foreach ( $response['fragments'] as $key => $fragment ) {
-			if ( ! is_string( $fragment ) || is_null( $fragment ) ) {
-				$response['fragments'][ $key ] = is_string( $fragment ) ? $fragment : '';
-			}
+	// Ensure fragments is always an array with string values
+	if ( ! is_array( $fragments ) ) {
+		$fragments = array();
+	}
+	foreach ( $fragments as $key => $fragment ) {
+		if ( ! is_string( $fragment ) ) {
+			$fragments[ $key ] = '';
 		}
-	} else {
-		$response['fragments'] = array();
 	}
 	
-	// Send JSON response with proper headers
-	// Use helper function to ensure clean output
-	wp_augoose_send_json_clean( $response, true );
+	// Build response - EXACT format as WooCommerce update_order_review
+	$response = array(
+		'result'    => empty( $messages ) ? 'success' : 'failure',  // String: 'success' or 'failure'
+		'messages'  => is_string( $messages ) ? $messages : '',     // String: HTML messages or empty
+		'reload'    => false,                                        // Boolean: false (never reload for quantity update)
+		'fragments' => $fragments,                                   // Object: key-value pairs of selectors and HTML
+	);
+	
+	// CRITICAL: Ensure all values are proper types and never null/undefined
+	// This prevents "Cannot read properties of undefined (reading 'toString')" errors
+	$response['result'] = is_string( $response['result'] ) ? $response['result'] : 'success';
+	$response['messages'] = is_string( $response['messages'] ) ? $response['messages'] : '';
+	$response['reload'] = is_bool( $response['reload'] ) ? $response['reload'] : false;
+	$response['fragments'] = is_array( $response['fragments'] ) ? $response['fragments'] : array();
+	
+	// Send JSON response - use wp_send_json directly (same as WooCommerce)
+	// This ensures 100% compatibility with checkout.min.js
+	// Clear output buffer first to prevent any HTML before JSON
+	while ( ob_get_level() ) {
+		ob_end_clean();
+	}
+	
+	// Set proper headers
+	if ( ! headers_sent() ) {
+		header( 'Content-Type: application/json; charset=utf-8' );
+	}
+	
+	// Send JSON response exactly as WooCommerce does
+	wp_send_json( $response );
+	exit; // Ensure no output after JSON
 }
 
 /**
