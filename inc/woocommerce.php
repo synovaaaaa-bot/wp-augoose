@@ -2696,14 +2696,19 @@ function wp_augoose_update_checkout_quantity() {
 	woocommerce_checkout_payment();
 	$payment_html = ob_get_clean();
 	
+	// Get messages if any
+	$messages = '';
+	if ( function_exists( 'wc_print_notices' ) ) {
+		$messages = wc_print_notices( true );
+	}
+	
 	// Return success with cart data and fragments for immediate UI update
-	// IMPORTANT: Return format that WooCommerce expects to prevent checkout.min.js errors
+	// CRITICAL: Follow WooCommerce's exact response format to prevent checkout.min.js errors
+	// WooCommerce expects: result, messages, reload, fragments, cart_hash
 	$response = array(
-		'message' => 'Cart updated',
-		'cart_hash' => WC()->cart->get_cart_hash() ? WC()->cart->get_cart_hash() : '',
-		'cart_total' => WC()->cart->get_total() ? WC()->cart->get_total() : '0',
-		'cart_subtotal' => WC()->cart->get_subtotal() ? (string) WC()->cart->get_subtotal() : '0',
-		'item_count' => WC()->cart->get_cart_contents_count() ? WC()->cart->get_cart_contents_count() : 0,
+		'result'    => empty( $messages ) ? 'success' : 'failure',
+		'messages'  => $messages ? $messages : '',
+		'reload'    => false,
 		'fragments' => apply_filters(
 			'woocommerce_update_order_review_fragments',
 			array(
@@ -2711,38 +2716,33 @@ function wp_augoose_update_checkout_quantity() {
 				'.woocommerce-checkout-payment' => $payment_html,
 			)
 		),
-		'cart' => array(
-			'cart_hash' => WC()->cart->get_cart_hash() ? WC()->cart->get_cart_hash() : '',
-			'cart_contents_count' => WC()->cart->get_cart_contents_count() ? WC()->cart->get_cart_contents_count() : 0,
-		),
+		'cart_hash' => WC()->cart->get_cart_hash() ? WC()->cart->get_cart_hash() : '',
 	);
 	
-	// Ensure all values are strings/numbers, not null/undefined
-	foreach ( $response as $key => $value ) {
-		if ( is_null( $value ) ) {
-			$response[ $key ] = ( $key === 'item_count' || $key === 'cart_contents_count' ) ? 0 : '';
-		} elseif ( is_array( $value ) ) {
-			$response[ $key ] = array_map( function( $v ) {
-				if ( is_null( $v ) ) {
-					return '';
-				}
-				if ( is_numeric( $v ) ) {
-					return (string) $v;
-				}
-				return $v;
-			}, $value );
-		} elseif ( is_numeric( $value ) ) {
-			$response[ $key ] = (string) $value;
-		}
+	// Ensure all values are proper types (not null/undefined)
+	// This prevents "Cannot read properties of undefined (reading 'toString')" errors
+	if ( ! isset( $response['result'] ) || is_null( $response['result'] ) ) {
+		$response['result'] = 'success';
+	}
+	if ( ! isset( $response['messages'] ) || is_null( $response['messages'] ) ) {
+		$response['messages'] = '';
+	}
+	if ( ! isset( $response['reload'] ) || is_null( $response['reload'] ) ) {
+		$response['reload'] = false;
+	}
+	if ( ! isset( $response['cart_hash'] ) || is_null( $response['cart_hash'] ) ) {
+		$response['cart_hash'] = '';
 	}
 	
-	// Ensure fragments are strings (HTML)
+	// Ensure fragments are strings (HTML) and not null
 	if ( isset( $response['fragments'] ) && is_array( $response['fragments'] ) ) {
 		foreach ( $response['fragments'] as $key => $fragment ) {
-			if ( ! is_string( $fragment ) ) {
-				$response['fragments'][ $key ] = (string) $fragment;
+			if ( ! is_string( $fragment ) || is_null( $fragment ) ) {
+				$response['fragments'][ $key ] = is_string( $fragment ) ? $fragment : '';
 			}
 		}
+	} else {
+		$response['fragments'] = array();
 	}
 	
 	// Send JSON response with proper headers
