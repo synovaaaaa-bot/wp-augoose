@@ -678,6 +678,20 @@ function wp_augoose_scripts() {
     // Checkout styling now handled by woocommerce-integrated.css
     // No separate checkout CSS file needed
     
+    // Shop Filter Toggle - Simple & Direct (No jQuery dependency)
+    // Load on shop pages and product category pages
+    if ( class_exists( 'WooCommerce' ) && ( is_shop() || is_product_category() || is_product_tag() || is_tax( 'product_cat' ) || is_tax( 'product_tag' ) ) ) {
+        if ( file_exists( $theme_dir . '/assets/js/shop-filter-toggle.js' ) ) {
+            wp_enqueue_script(
+                'wp-augoose-shop-filter-toggle',
+                $theme_dir_uri . '/assets/js/shop-filter-toggle.js',
+                array(), // No dependencies - pure vanilla JS
+                $asset_ver( 'assets/js/shop-filter-toggle.js' ),
+                true
+            );
+        }
+    }
+    
     // Main JavaScript
     if ( file_exists( $theme_dir . '/assets/js/main.js' ) ) {
         wp_enqueue_script( 'wp-augoose-main', $theme_dir_uri . '/assets/js/main.js', array( 'jquery' ), $asset_ver( 'assets/js/main.js' ), true );
