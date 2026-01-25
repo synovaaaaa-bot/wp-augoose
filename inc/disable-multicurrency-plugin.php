@@ -68,5 +68,10 @@ function wp_augoose_disable_multicurrency_plugin_hooks() {
 	
 	// Price format and currency symbol filters (priority 10)
 	remove_filter( 'woocommerce_price_format', array( $instance, 'price_format' ), 10 );
+	// Remove currency symbol filter (if still active)
 	remove_filter( 'woocommerce_currency_symbol', array( $instance, 'get_currency_symbol' ), 10 );
+	
+	// Ensure WCML can override currency - don't force IDR
+	// Remove any filters that might force currency to IDR
+	remove_filter( 'woocommerce_currency', array( $instance, 'get_currency' ), 10 );
 }
