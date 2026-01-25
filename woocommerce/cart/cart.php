@@ -12,7 +12,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 <div class="cart-page-simple">
     <div class="container">
         
-        <h1 class="cart-page-title">KERANJANG ANDA</h1>
+        <h1 class="cart-page-title">YOUR CART</h1>
         
         <?php if ( WC()->cart->is_empty() ) : ?>
             
@@ -129,7 +129,7 @@ do_action( 'woocommerce_before_cart' ); ?>
                 
                 <div class="cart-buttons">
                     <a href="<?php echo esc_url( wc_get_cart_url() ); ?>" class="btn-view-cart">View Cart</a>
-                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="btn-checkout">Pembayaran</a>
+                    <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="btn-checkout">Checkout</a>
                 </div>
             </div>
 

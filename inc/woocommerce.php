@@ -801,6 +801,13 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'BUAT PESANAN' => 'PLACE ORDER',
 			'Buat pesanan' => 'Place order',
 			'buat pesanan' => 'place order',
+			// Payment gateway button texts
+			'Bayar Pesanan Dengan DOKU Checkout' => 'Pay Order With DOKU Checkout',
+			'Bayar pesanan dengan DOKU Checkout' => 'Pay Order With DOKU Checkout',
+			'Bayar sekarang' => 'Pay now',
+			'Bayar Sekarang' => 'Pay Now',
+			'Bayar di tempat' => 'Cash on Delivery',
+			'Bayar di Tempat' => 'Cash on Delivery',
 			// Form field labels
 			'Nama depan' => 'First name',
 			'nama depan' => 'First name',
@@ -1279,6 +1286,129 @@ function wp_augoose_payment_method_error_english( $message ) {
 	return $message;
 }
 
+/**
+ * Force payment gateway titles and descriptions to English
+ */
+add_filter( 'woocommerce_gateway_title', 'wp_augoose_payment_gateway_title_english', 20, 2 );
+function wp_augoose_payment_gateway_title_english( $title, $gateway_id ) {
+	// Common Indonesian payment gateway titles
+	$indonesian_titles = array(
+		'Bayar di tempat' => 'Cash on Delivery',
+		'Bayar di Tempat' => 'Cash on Delivery',
+		'bayar di tempat' => 'Cash on Delivery',
+		'Bayar Pesanan Dengan DOKU Checkout' => 'Pay Order With DOKU Checkout',
+		'Bayar pesanan dengan DOKU Checkout' => 'Pay Order With DOKU Checkout',
+		'DOKU Checkout' => 'DOKU Checkout', // Keep as is if already English
+	);
+	
+	if ( isset( $indonesian_titles[ $title ] ) ) {
+		return $indonesian_titles[ $title ];
+	}
+	
+	// Check for common Indonesian phrases
+	if ( strpos( $title, 'Bayar' ) !== false || strpos( $title, 'bayar' ) !== false ) {
+		if ( strpos( $title, 'tempat' ) !== false || strpos( $title, 'Tempat' ) !== false ) {
+			return 'Cash on Delivery';
+		}
+		if ( strpos( $title, 'DOKU' ) !== false ) {
+			return str_replace( array( 'Bayar Pesanan Dengan', 'Bayar pesanan dengan' ), 'Pay Order With', $title );
+		}
+	}
+	
+	return $title;
+}
+
+/**
+ * Force payment gateway descriptions to English
+ */
+add_filter( 'woocommerce_gateway_description', 'wp_augoose_payment_gateway_description_english', 20, 2 );
+function wp_augoose_payment_gateway_description_english( $description, $gateway_id ) {
+	if ( empty( $description ) ) {
+		return $description;
+	}
+	
+	// Common Indonesian payment descriptions
+	$indonesian_descriptions = array(
+		'Bayar di tempat saat penyerahan produk.' => 'Pay on the spot upon product delivery.',
+		'Bayar di Tempat saat penyerahan produk.' => 'Pay on the spot upon product delivery.',
+		'bayar di tempat saat penyerahan produk' => 'Pay on the spot upon product delivery',
+		'penyerahan produk' => 'product delivery',
+		'Penyerahan produk' => 'Product delivery',
+	);
+	
+	foreach ( $indonesian_descriptions as $indonesian => $english ) {
+		if ( strpos( $description, $indonesian ) !== false ) {
+			$description = str_replace( $indonesian, $english, $description );
+		}
+	}
+	
+	return $description;
+}
+
+/**
+ * Force payment gateway order button text to English
+ */
+add_filter( 'woocommerce_gateway_order_button_text', 'wp_augoose_payment_gateway_order_button_text_english', 20, 2 );
+function wp_augoose_payment_gateway_order_button_text_english( $button_text, $gateway_id ) {
+	if ( empty( $button_text ) ) {
+		return $button_text;
+	}
+	
+	// Common Indonesian order button texts
+	$indonesian_buttons = array(
+		'Bayar Pesanan Dengan DOKU Checkout' => 'Pay Order With DOKU Checkout',
+		'Bayar pesanan dengan DOKU Checkout' => 'Pay Order With DOKU Checkout',
+		'Bayar sekarang' => 'Pay now',
+		'Bayar Sekarang' => 'Pay Now',
+		'Bayar' => 'Pay',
+		'bayar' => 'Pay',
+	);
+	
+	if ( isset( $indonesian_buttons[ $button_text ] ) ) {
+		return $indonesian_buttons[ $button_text ];
+	}
+	
+	// Check for common Indonesian phrases
+	if ( strpos( $button_text, 'Bayar' ) !== false || strpos( $button_text, 'bayar' ) !== false ) {
+		if ( strpos( $button_text, 'DOKU' ) !== false ) {
+			return str_replace( array( 'Bayar Pesanan Dengan', 'Bayar pesanan dengan' ), 'Pay Order With', $button_text );
+		}
+		if ( strpos( $button_text, 'sekarang' ) !== false || strpos( $button_text, 'Sekarang' ) !== false ) {
+			return 'Pay Now';
+		}
+		return 'Pay';
+	}
+	
+	return $button_text;
+}
+
+/**
+ * Force payment gateway payment fields output to English
+ * This handles any Indonesian text in payment gateway fields
+ */
+add_filter( 'woocommerce_gateway_payment_fields', 'wp_augoose_payment_gateway_fields_english', 20, 2 );
+function wp_augoose_payment_gateway_fields_english( $fields, $gateway_id ) {
+	if ( empty( $fields ) ) {
+		return $fields;
+	}
+	
+	// If fields is HTML string, replace Indonesian text
+	if ( is_string( $fields ) ) {
+		$replacements = array(
+			'Bayar di tempat saat penyerahan produk.' => 'Pay on the spot upon product delivery.',
+			'Bayar di Tempat saat penyerahan produk.' => 'Pay on the spot upon product delivery.',
+			'penyerahan produk' => 'product delivery',
+			'Penyerahan produk' => 'Product delivery',
+		);
+		
+		foreach ( $replacements as $indonesian => $english ) {
+			$fields = str_replace( $indonesian, $english, $fields );
+		}
+	}
+	
+	return $fields;
+}
+
 function wp_augoose_render_wishlist_sidebar() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		return;
@@ -1504,7 +1634,7 @@ function wp_augoose_mini_cart_fragments( $fragments ) {
                 <span class="cart-sidebar-total-amount"><?php wc_cart_totals_order_total_html(); ?></span>
             </div>
             <div class="cart-sidebar-buttons">
-                <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">PEMBAYARAN</a>
+                <a href="<?php echo esc_url( wc_get_checkout_url() ); ?>" class="cart-sidebar-btn cart-sidebar-btn-checkout">CHECKOUT</a>
             </div>
         </div>
         <?php

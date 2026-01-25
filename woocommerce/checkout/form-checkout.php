@@ -144,7 +144,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
                             <?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
                             
-                            <!-- Coupon Code - Di Bawah Order Summary -->
+                            <!-- Coupon Code - Below Order Summary -->
                             <?php if ( wc_coupons_enabled() ) : ?>
                                 <div class="checkout-coupon-section">
                                     <h2 class="section-title">COUPON CODE</h2>
