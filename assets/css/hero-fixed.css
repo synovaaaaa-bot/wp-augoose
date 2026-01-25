@@ -8,6 +8,11 @@
     padding-top: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    position: relative !important;
 }
 
 /* Ensure no gap from site-main - only on homepage */
@@ -62,4 +67,72 @@ body.page-template-front-page .site-main {
 /* Alternative: Keep container but hide content */
 .hero-section .container .hero-inner {
     display: none !important;
+}
+
+/* ============================================
+   Mobile Responsive
+   ============================================ */
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: clamp(300px, 50vh, 500px) !important;
+        max-height: 60vh !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        background-attachment: scroll !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    /* Ensure hero image scales properly on mobile */
+    .hero-section[style*="--hero-image"] {
+        background-size: cover !important;
+        background-position: center center !important;
+        background-repeat: no-repeat !important;
+    }
+    
+    /* Ensure container doesn't cause overflow */
+    .hero-section .container {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        min-height: clamp(250px, 45vh, 400px) !important;
+        max-height: 55vh !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    /* Ensure no overflow on very small screens */
+    .hero-section .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* Ensure hero section doesn't break on landscape mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .hero-section {
+        min-height: clamp(250px, 60vh, 400px) !important;
+    }
 }

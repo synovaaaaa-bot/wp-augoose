@@ -746,3 +746,150 @@ body.mobile-menu-open .mobile-menu {
         min-width: 16px;
     }
 }
+
+/* ============================================
+   FOX Currency Switcher Custom Styling
+   ============================================ */
+.fox-currency-wrapper,
+.header-locale-item--currency {
+    position: relative;
+}
+
+/* Style untuk semua elemen currency switcher dari plugin FOX */
+.fox-currency-wrapper select,
+.fox-currency-wrapper .fox-currency-select,
+.header-locale-item--currency select,
+.header-currency select,
+.header-currency .fox-currency-select,
+.header-currency .woocs-select,
+.header-currency .aelia-currency-selector,
+.header-currency .wcml-currency-selector {
+    height: 34px !important;
+    padding: 0 28px 0 10px !important;
+    border: 1px solid #D1D5DB !important;
+    background: #fff !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    color: #30475E !important;
+    max-width: 90px !important;
+    min-width: 70px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    border-radius: 0 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    font-family: inherit !important;
+    line-height: 1.2 !important;
+}
+
+.fox-currency-wrapper select:focus,
+.fox-currency-wrapper .fox-currency-select:focus,
+.header-locale-item--currency select:focus,
+.header-currency select:focus {
+    outline: none !important;
+    border-color: #30475E !important;
+    box-shadow: 0 0 0 2px rgba(48, 71, 94, 0.1) !important;
+}
+
+.fox-currency-wrapper select:hover,
+.header-locale-item--currency select:hover,
+.header-currency select:hover {
+    border-color: #30475E !important;
+    background: #F9FAFB !important;
+}
+
+/* Custom dropdown arrow */
+.fox-currency-wrapper::after,
+.header-locale-item--currency::after {
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #30475E;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Hide default dropdown arrow */
+.fox-currency-wrapper select::-ms-expand,
+.header-locale-item--currency select::-ms-expand,
+.header-currency select::-ms-expand {
+    display: none !important;
+}
+
+/* Hide placeholder text yang jelek */
+.fox-currency-wrapper option[value=""],
+.fox-currency-wrapper option:disabled,
+.header-currency select option[value=""],
+.header-currency select option:disabled {
+    display: none !important;
+}
+
+/* Style untuk option yang terpilih */
+.fox-currency-wrapper select option,
+.header-currency select option {
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    color: #30475E !important;
+    background: #fff !important;
+}
+
+/* Hide description/placeholder text yang muncul di bawah select */
+.fox-currency-wrapper .description,
+.fox-currency-wrapper .fox-currency-description,
+.header-currency .description {
+    display: none !important;
+}
+
+/* Style untuk wrapper/container plugin FOX */
+.fox-currency-wrapper .fox-currency-switcher,
+.fox-currency-wrapper .foxcs-wrapper {
+    display: inline-block;
+    position: relative;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .fox-currency-wrapper select,
+    .header-locale-item--currency select,
+    .header-currency select {
+        height: 28px !important;
+        padding: 0 24px 0 10px !important;
+        font-size: 8px !important;
+        max-width: 60px !important;
+        min-width: 50px !important;
+    }
+    
+    .fox-currency-wrapper::after,
+    .header-locale-item--currency::after {
+        right: 6px;
+        border-top-width: 4px;
+        border-left-width: 3px;
+        border-right-width: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fox-currency-wrapper select,
+    .header-locale-item--currency select,
+    .header-currency select {
+        height: 28px !important;
+        padding: 0 20px 0 8px !important;
+        font-size: 7px !important;
+        max-width: 50px !important;
+        min-width: 45px !important;
+    }
+}
