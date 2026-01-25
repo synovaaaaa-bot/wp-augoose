@@ -262,12 +262,27 @@
         let wishlistProcessing = false;
         
         // Use event delegation - attach to document to catch dynamically added buttons
-        // Use capture phase to ensure it runs before other handlers
-        $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
+        // Handle clicks on button OR any child element (SVG, path, etc.)
+        $(document).on('click', '.add-to-wishlist, .wishlist-toggle, .add-to-wishlist *, .wishlist-toggle *', function(e) {
             console.log('=== WISHLIST BUTTON CLICKED ===');
             console.log('Event target:', e.target);
             console.log('Current target:', e.currentTarget);
-            console.log('Button element:', this);
+            console.log('Clicked element:', this);
+            
+            // Find the actual button (might be clicked on SVG or path inside)
+            let button = $(this);
+            if (!button.hasClass('add-to-wishlist') && !button.hasClass('wishlist-toggle')) {
+                // Clicked on child element, find parent button
+                button = button.closest('.add-to-wishlist, .wishlist-toggle');
+            }
+            
+            if (button.length === 0) {
+                console.error('Button not found!');
+                return false;
+            }
+            
+            console.log('Button found:', button[0]);
+            console.log('Button classes:', button.attr('class'));
             
             // CRITICAL: Stop event immediately to prevent product link navigation
             e.preventDefault();
@@ -833,12 +848,107 @@
         });
     }
 
-    // Test wishlist handler attachment immediately (before document ready)
-    // This ensures handler is attached as early as possible
-    $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
-        console.log('=== DIRECT WISHLIST HANDLER TRIGGERED ===');
-        console.log('This handler should NOT fire if initWishlist handler works');
-    });
+    // CRITICAL: Attach wishlist handler IMMEDIATELY - don't wait for document ready
+    // This ensures handler is attached as early as possible, even before DOM is ready
+    console.log('=== WISHLIST HANDLER SETUP STARTING ===');
+    
+    // Use immediate function to attach handler right away
+    (function() {
+        // Check if jQuery is available
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery is not loaded! Wishlist will not work.');
+            return;
+        }
+        
+        console.log('jQuery is available, attaching wishlist handler...');
+        
+        // Attach handler immediately using jQuery (works even before DOM ready)
+        jQuery(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
+            console.log('=== WISHLIST BUTTON CLICKED (IMMEDIATE HANDLER) ===');
+            console.log('Event:', e);
+            console.log('Button:', this);
+            console.log('jQuery object:', jQuery(this));
+            
+            // Stop event immediately
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
+            const button = jQuery(this);
+            const productId = parseInt(button.data('product-id'), 10) || parseInt(button.closest('[data-product-id]').data('product-id'), 10);
+            
+            console.log('Product ID:', productId);
+            
+            if (!productId) {
+                console.error('No product ID found!');
+                alert('Error: Product ID not found');
+                return false;
+            }
+            
+            // Check wpAugoose
+            if (typeof wpAugoose === 'undefined' || !wpAugoose || !wpAugoose.ajaxUrl) {
+                console.error('wpAugoose not available:', typeof wpAugoose);
+                alert('Error: Wishlist system not initialized');
+                return false;
+            }
+            
+            console.log('wpAugoose available:', wpAugoose);
+            console.log('Sending AJAX request...');
+            
+            // Prevent multiple clicks
+            if (button.hasClass('loading')) {
+                console.log('Already processing...');
+                return false;
+            }
+            
+            button.addClass('loading').prop('disabled', true);
+            
+            jQuery.ajax({
+                url: wpAugoose.ajaxUrl,
+                type: 'POST',
+                timeout: 10000,
+                data: {
+                    action: 'wp_augoose_wishlist_toggle',
+                    product_id: productId,
+                    nonce: wpAugoose.nonce || ''
+                },
+                success: function(res) {
+                    console.log('AJAX Success:', res);
+                    if (res && res.success && res.data) {
+                        if (res.data.action === 'added') {
+                            button.addClass('active');
+                            alert('Product added to wishlist');
+                        } else {
+                            button.removeClass('active');
+                            alert('Product removed from wishlist');
+                        }
+                        
+                        // Update badge
+                        const count = res.data.count || 0;
+                        const $badge = jQuery('.wishlist-count');
+                        if ($badge.length) {
+                            if (count > 0) {
+                                $badge.text(count).show();
+                            } else {
+                                $badge.hide();
+                            }
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error, xhr.responseText);
+                    alert('Error: ' + (xhr.responseText || error));
+                },
+                complete: function() {
+                    button.removeClass('loading').prop('disabled', false);
+                }
+            });
+            
+            return false;
+        });
+        
+        console.log('Wishlist handler attached successfully!');
+    })();
     
     // Initialize on Document Ready
     // Language Switcher (cookie-based)

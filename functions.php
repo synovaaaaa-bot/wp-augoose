@@ -559,6 +559,10 @@ function wp_augoose_scripts() {
     if ( file_exists( $theme_dir . '/assets/css/product-card-fixed.css' ) ) {
         wp_enqueue_style( 'wp-augoose-product-fixed', $theme_dir_uri . '/assets/css/product-card-fixed.css', array(), $asset_ver( 'assets/css/product-card-fixed.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-latest-collection-v2', $theme_dir_uri . '/assets/css/latest-collection-v2.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-v2.css' ), 'all' );
+		// Latest Collection - NO SLIDER (override all slider styles, max 6 products)
+		if ( is_front_page() && file_exists( $theme_dir . '/assets/css/latest-collection-no-slider.css' ) ) {
+			wp_enqueue_style( 'wp-augoose-latest-collection-no-slider', $theme_dir_uri . '/assets/css/latest-collection-no-slider.css', array( 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/latest-collection-no-slider.css' ), 'all' );
+		}
 		wp_enqueue_style( 'wp-augoose-button-global-style', $theme_dir_uri . '/assets/css/button-global-style.css', array( 'wp-augoose-woocommerce', 'wp-augoose-product-fixed', 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/button-global-style.css' ), 'all' );
 		wp_style_add_data( 'wp-augoose-button-global-style', 'priority', 'high' );
 		
@@ -660,9 +664,17 @@ function wp_augoose_scripts() {
         // Checkout Quantity Selector
         if ( file_exists( $theme_dir . '/assets/js/checkout-quantity.js' ) ) {
             wp_enqueue_script( 'wp-augoose-checkout-quantity', $theme_dir_uri . '/assets/js/checkout-quantity.js', array( 'jquery', 'wc-checkout' ), $asset_ver( 'assets/js/checkout-quantity.js' ), true );
+            
+            // Get cart hash to prevent checkout.min.js errors
+            $cart_hash = '';
+            if ( class_exists( 'WooCommerce' ) && WC()->cart ) {
+                $cart_hash = WC()->cart->get_cart_hash();
+            }
+            
             wp_localize_script( 'wp-augoose-checkout-quantity', 'wc_checkout_params', array(
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'update_cart_nonce' => wp_create_nonce( 'woocommerce-cart' ),
+                'cart_hash' => $cart_hash ? $cart_hash : '',
             ) );
         }
     }
@@ -674,10 +686,10 @@ function wp_augoose_scripts() {
     if ( file_exists( $theme_dir . '/assets/js/main.js' ) ) {
         wp_enqueue_script( 'wp-augoose-main', $theme_dir_uri . '/assets/js/main.js', array( 'jquery' ), $asset_ver( 'assets/js/main.js' ), true );
         
-        // Latest Collection slider (only on homepage)
-        if ( is_front_page() ) {
-            wp_enqueue_script( 'wp-augoose-latest-collection-slider', $theme_dir_uri . '/assets/js/latest-collection-slider.js', array( 'jquery' ), $asset_ver( 'assets/js/latest-collection-slider.js' ), true );
-        }
+        // Latest Collection slider DISABLED - showing only 6 products, no slider animation
+        // if ( is_front_page() ) {
+        //     wp_enqueue_script( 'wp-augoose-latest-collection-slider', $theme_dir_uri . '/assets/js/latest-collection-slider.js', array( 'jquery' ), $asset_ver( 'assets/js/latest-collection-slider.js' ), true );
+        // }
         wp_localize_script(
             'wp-augoose-main',
             'wpAugoose',
@@ -686,6 +698,27 @@ function wp_augoose_scripts() {
                 'nonce'   => wp_create_nonce( 'wp_augoose_nonce' ),
             )
         );
+        
+        // CRITICAL: Add inline script to ensure wishlist handler works even if main.js fails
+        $inline_script = "
+        console.log('=== INLINE WISHLIST SCRIPT LOADED ===');
+        console.log('wpAugoose:', typeof wpAugoose !== 'undefined' ? wpAugoose : 'NOT DEFINED');
+        
+        // Attach handler immediately when jQuery is ready
+        if (typeof jQuery !== 'undefined') {
+            jQuery(document).ready(function($) {
+                console.log('=== DOCUMENT READY - ATTACHING WISHLIST HANDLER ===');
+                console.log('Wishlist buttons found:', $('.add-to-wishlist, .wishlist-toggle').length);
+                
+                $('.add-to-wishlist, .wishlist-toggle').each(function() {
+                    console.log('Button found:', this, 'Product ID:', $(this).data('product-id'));
+                });
+            });
+        } else {
+            console.error('jQuery not available in inline script!');
+        }
+        ";
+        wp_add_inline_script( 'wp-augoose-main', $inline_script );
     }
 
     // Variation swatches (single product)
@@ -1205,6 +1238,142 @@ function wp_augoose_add_critical_css() {
     }
 }
 add_action( 'wp_head', 'wp_augoose_add_critical_css', 999 );
+
+/**
+ * Add critical wishlist handler inline script
+ * This ensures wishlist works even if main.js fails to load
+ */
+function wp_augoose_add_wishlist_handler_inline() {
+    if ( ! class_exists( 'WooCommerce' ) ) {
+        return;
+    }
+    ?>
+    <script type="text/javascript">
+    console.log('=== CRITICAL WISHLIST HANDLER LOADING ===');
+    
+    // Wait for jQuery to be available
+    (function() {
+        function attachWishlistHandler() {
+            if (typeof jQuery === 'undefined') {
+                console.log('jQuery not ready, retrying...');
+                setTimeout(attachWishlistHandler, 100);
+                return;
+            }
+            
+            console.log('jQuery ready, attaching wishlist handler...');
+            
+            // Handle clicks on button OR any child element (SVG, path, etc.)
+            jQuery(document).on('click', '.add-to-wishlist, .wishlist-toggle, .add-to-wishlist *, .wishlist-toggle *', function(e) {
+                console.log('=== WISHLIST CLICKED (CRITICAL HANDLER) ===');
+                console.log('Clicked element:', this);
+                console.log('Event target:', e.target);
+                
+                // Find the actual button (might be clicked on SVG or path inside)
+                let $btn = jQuery(this);
+                if (!$btn.hasClass('add-to-wishlist') && !$btn.hasClass('wishlist-toggle')) {
+                    // Clicked on child element, find parent button
+                    $btn = $btn.closest('.add-to-wishlist, .wishlist-toggle');
+                }
+                
+                if ($btn.length === 0) {
+                    console.error('Button not found!');
+                    return false;
+                }
+                
+                console.log('Button found:', $btn[0]);
+                console.log('Button classes:', $btn.attr('class'));
+                
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                const productId = parseInt($btn.data('product-id'), 10) || parseInt($btn.closest('[data-product-id]').data('product-id'), 10);
+                
+                console.log('Product ID:', productId);
+                
+                if (!productId) {
+                    console.error('No product ID!');
+                    alert('Error: Product ID not found');
+                    return false;
+                }
+                
+                if (typeof wpAugoose === 'undefined' || !wpAugoose || !wpAugoose.ajaxUrl) {
+                    console.error('wpAugoose not available!');
+                    alert('Error: Wishlist system not initialized. Please refresh the page.');
+                    return false;
+                }
+                
+                console.log('wpAugoose:', wpAugoose);
+                console.log('Sending AJAX...');
+                
+                if ($btn.hasClass('loading')) {
+                    return false;
+                }
+                
+                $btn.addClass('loading').prop('disabled', true);
+                
+                jQuery.ajax({
+                    url: wpAugoose.ajaxUrl,
+                    type: 'POST',
+                    timeout: 10000,
+                    data: {
+                        action: 'wp_augoose_wishlist_toggle',
+                        product_id: productId,
+                        nonce: wpAugoose.nonce || ''
+                    },
+                    success: function(res) {
+                        console.log('AJAX Success:', res);
+                        if (res && res.success && res.data) {
+                            if (res.data.action === 'added') {
+                                $btn.addClass('active');
+                                alert('Product added to wishlist');
+                            } else {
+                                $btn.removeClass('active');
+                                alert('Product removed from wishlist');
+                            }
+                            
+                            const count = res.data.count || 0;
+                            const $badge = jQuery('.wishlist-count');
+                            if ($badge.length) {
+                                if (count > 0) {
+                                    $badge.text(count).show();
+                                } else {
+                                    $badge.hide();
+                                }
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', status, error, xhr.responseText);
+                        alert('Error: ' + (xhr.responseText || error));
+                    },
+                    complete: function() {
+                        $btn.removeClass('loading').prop('disabled', false);
+                    }
+                });
+                
+                return false;
+            });
+            
+            console.log('Critical wishlist handler attached!');
+            console.log('Buttons found:', jQuery('.add-to-wishlist, .wishlist-toggle').length);
+        }
+        
+        // Try immediately, then on DOM ready, then on window load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachWishlistHandler);
+        } else {
+            attachWishlistHandler();
+        }
+        
+        window.addEventListener('load', function() {
+            console.log('Window loaded, buttons:', jQuery('.add-to-wishlist, .wishlist-toggle').length);
+        });
+    })();
+    </script>
+    <?php
+}
+add_action( 'wp_head', 'wp_augoose_add_wishlist_handler_inline', 5 );
 
 /**
  * Add JavaScript to force grid layout

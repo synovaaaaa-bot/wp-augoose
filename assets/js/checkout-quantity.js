@@ -182,6 +182,8 @@ jQuery(document).ready(function($) {
             type: 'POST',
             url: wc_checkout_params.ajax_url,
             timeout: 10000, // 10 second timeout
+            dataType: 'json', // Explicitly expect JSON response
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
             data: {
                 action: 'update_checkout_quantity',
                 cart_key: cartKey,
@@ -189,34 +191,72 @@ jQuery(document).ready(function($) {
                 security: wc_checkout_params.update_cart_nonce
             },
             success: function(response) {
-                // Check if response is valid JSON
+                // Response should already be parsed JSON due to dataType: 'json'
+                // But check just in case
                 if (typeof response === 'string') {
                     try {
                         response = JSON.parse(response);
                     } catch (e) {
                         console.error('Invalid JSON response:', response);
+                        console.error('Parse error:', e);
                         isUpdating = false;
-                        alert('Error updating cart. Page will reload.');
+                        alert('Error updating cart. Invalid response from server. Page will reload.');
                         location.reload();
                         return;
                     }
                 }
                 
+                // Validate response structure
+                if (!response || typeof response !== 'object') {
+                    console.error('Invalid response structure:', response);
+                    isUpdating = false;
+                    alert('Error updating cart. Invalid response structure. Page will reload.');
+                    location.reload();
+                    return;
+                }
+                
                 if (response && response.success) {
                     console.log('Cart quantity updated successfully:', response);
                     
+                    // Update cart hash if provided (prevents checkout.min.js errors)
+                    if (response.data && response.data.cart_hash && typeof wc_checkout_params !== 'undefined') {
+                        wc_checkout_params.cart_hash = response.data.cart_hash;
+                    }
+                    
+                    // Update fragments FIRST to preserve product images
+                    if (response.data && response.data.fragments && typeof response.data.fragments === 'object') {
+                        $.each(response.data.fragments, function(key, value) {
+                            if (key && value) {
+                                const $target = $(key);
+                                if ($target.length) {
+                                    $target.replaceWith(value);
+                                    console.log('Fragment updated:', key);
+                                }
+                            }
+                        });
+                    }
+                    
                     // Force checkout update - use multiple methods to ensure it works
-                    $('body').trigger('update_checkout');
-                    $(document.body).trigger('update_checkout');
+                    // But only if we're on checkout page
+                    if ($('body').hasClass('woocommerce-checkout')) {
+                        // Use WooCommerce's built-in update method
+                        if (typeof $('body').trigger === 'function') {
+                            $('body').trigger('update_checkout');
+                        }
+                    }
                     
                     // Also trigger cart fragments update for mini cart
                     $(document.body).trigger('wc_fragment_refresh');
                     $(document.body).trigger('added_to_cart');
                     
-                    // Force a small delay then trigger again to ensure update
-                    setTimeout(function() {
-                        $('body').trigger('update_checkout');
-                    }, 100);
+                    // Force a small delay then trigger again to ensure update (only on checkout)
+                    if ($('body').hasClass('woocommerce-checkout')) {
+                        setTimeout(function() {
+                            if (typeof $('body').trigger === 'function') {
+                                $('body').trigger('update_checkout');
+                            }
+                        }, 100);
+                    }
                 } else {
                     // Show error
                     const errorMsg = response && response.data && response.data.message 

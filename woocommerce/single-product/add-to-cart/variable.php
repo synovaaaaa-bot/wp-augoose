@@ -62,6 +62,24 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				// Check if this is a color attribute
 				$is_color = ( strpos( strtolower( $attribute_name ), 'color' ) !== false || strpos( strtolower( $attribute_name ), 'colour' ) !== false );
 				$is_size  = ( strpos( strtolower( $attribute_name ), 'size' ) !== false );
+				
+				// IMPORTANT: Get ALL attribute terms (including out of stock) to show all colors
+				// This ensures all colors are displayed, not just available ones
+				$all_attribute_terms = array();
+				if ( taxonomy_exists( $attribute_id ) ) {
+					$terms = get_terms( array(
+						'taxonomy'   => $attribute_id,
+						'hide_empty' => false, // Include all terms, even if no variations
+					) );
+					if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+						foreach ( $terms as $term ) {
+							$all_attribute_terms[] = $term->name;
+						}
+					}
+				}
+				
+				// Use all terms if available, otherwise fallback to options from variations
+				$display_options = ! empty( $all_attribute_terms ) ? $all_attribute_terms : $options;
 				?>
 				
 				<div class="variation-group variation-<?php echo esc_attr( $attribute_slug ); ?>">
@@ -78,7 +96,8 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						<?php
 						$selected_value = isset( $_REQUEST[ 'attribute_' . $attribute_slug ] ) ? wc_clean( stripslashes( urldecode( $_REQUEST[ 'attribute_' . $attribute_slug ] ) ) ) : $product->get_variation_default_attribute( $attribute_name );
 						
-						foreach ( $options as $option ) {
+						// Display ALL options (including out of stock)
+						foreach ( $display_options as $option ) {
 							$is_selected = sanitize_title( $selected_value ) === sanitize_title( $option );
 							$option_slug = sanitize_title( $option );
 							$attr_key = 'attribute_' . $attribute_slug;
@@ -96,13 +115,14 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 									$color_hex = get_term_meta( $term->term_id, 'color', true );
 								}
 								
-								// Fallback to common color mapping
+								// Fallback to comprehensive color mapping - support ALL colors
 								if ( empty( $color_hex ) ) {
 									$color_map = array(
+										// Basic colors
 										'black'  => '#000000',
 										'white'  => '#ffffff',
-										'gray'   => '#cccccc',
-										'grey'   => '#cccccc',
+										'gray'   => '#808080',
+										'grey'   => '#808080',
 										'red'    => '#ff0000',
 										'blue'   => '#0000ff',
 										'green'  => '#00ff00',
@@ -113,8 +133,111 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 										'brown'  => '#a52a2a',
 										'beige'  => '#f5f5dc',
 										'navy'   => '#000080',
+										'chocolate' => '#7b3f00',
+										'dark-chocolate' => '#3d1f00',
+										'dark chocolate' => '#3d1f00',
+										'off-white' => '#fafafa',
+										'off white' => '#fafafa',
+										'offwhite' => '#fafafa',
+										'terracotta' => '#e2725b',
+										'terracota' => '#e2725b',
+										// Extended colors
+										'cobalt' => '#0047ab',
+										'cobalt-blue' => '#0047ab',
+										'olive'  => '#808000',
+										'olive-green' => '#808000',
+										'obsidian' => '#000000',
+										'camo'   => '#78866b',
+										'camo-green' => '#78866b',
+										'camel'  => '#c19a6b',
+										'khaki'  => '#c3b091',
+										'tan'    => '#d2b48c',
+										'burgundy' => '#800020',
+										'maroon' => '#800000',
+										'teal'   => '#008080',
+										'turquoise' => '#40e0d0',
+										'turqoise' => '#40e0d0',
+										'cyan'   => '#00ffff',
+										'magenta' => '#ff00ff',
+										'coral'  => '#ff7f50',
+										'salmon' => '#fa8072',
+										'peach'  => '#ffcba4',
+										'cream'  => '#fffdd0',
+										'ivory'  => '#fffff0',
+										'charcoal' => '#36454f',
+										'slate'  => '#708090',
+										'silver' => '#c0c0c0',
+										'gold'   => '#ffd700',
+										'bronze' => '#cd7f32',
+										'copper' => '#b87333',
+										// Additional common colors
+										'light-blue' => '#add8e6',
+										'dark-blue' => '#00008b',
+										'light-green' => '#90ee90',
+										'dark-green' => '#006400',
+										'light-gray' => '#d3d3d3',
+										'light-grey' => '#d3d3d3',
+										'dark-gray' => '#a9a9a9',
+										'dark-grey' => '#a9a9a9',
+										'light-pink' => '#ffb6c1',
+										'dark-pink' => '#ff1493',
+										'lavender' => '#e6e6fa',
+										'lilac'   => '#c8a2c8',
+										'mint'    => '#98ff98',
+										'emerald' => '#50c878',
+										'ruby'    => '#e0115f',
+										'sapphire' => '#0f52ba',
+										'amber'   => '#ffbf00',
+										'crimson' => '#dc143c',
+										'indigo'  => '#4b0082',
+										'violet'  => '#8f00ff',
 									);
-									$color_hex = isset( $color_map[ strtolower( $option ) ] ) ? $color_map[ strtolower( $option ) ] : '';
+									
+									// Try exact match first
+									$option_lower = strtolower( trim( $option ) );
+									$color_hex = isset( $color_map[ $option_lower ] ) ? $color_map[ $option_lower ] : '';
+									
+									// If no exact match, try partial match (e.g., "cobalt blue" -> "cobalt-blue")
+									if ( empty( $color_hex ) ) {
+										$option_normalized = str_replace( array( ' ', '_' ), '-', $option_lower );
+										$color_hex = isset( $color_map[ $option_normalized ] ) ? $color_map[ $option_normalized ] : '';
+									}
+									
+									// If still no match, handle multi-color combinations (e.g., "Navy Black", "Terracota Black", "White Black", "Olive Khaki")
+									// Extract first color from combination
+									if ( empty( $color_hex ) ) {
+										// Split by common separators (space, slash, comma, dash)
+										$color_parts = preg_split( '/[\s\/,\-]+/', $option_lower );
+										if ( ! empty( $color_parts ) ) {
+											// Try first color part
+											$first_color = trim( $color_parts[0] );
+											if ( isset( $color_map[ $first_color ] ) ) {
+												$color_hex = $color_map[ $first_color ];
+											} else {
+												// Try normalized first color
+												$first_color_normalized = str_replace( array( ' ', '_' ), '-', $first_color );
+												if ( isset( $color_map[ $first_color_normalized ] ) ) {
+													$color_hex = $color_map[ $first_color_normalized ];
+												}
+											}
+										}
+									}
+									
+									// If still no match, try to extract color name from option (e.g., "Cobalt Blue Active Jacket" -> "cobalt-blue")
+									if ( empty( $color_hex ) ) {
+										// Sort by length (longest first) to match "dark-chocolate" before "chocolate"
+										$sorted_colors = $color_map;
+										uksort( $sorted_colors, function( $a, $b ) {
+											return strlen( $b ) - strlen( $a );
+										} );
+										
+										foreach ( $sorted_colors as $color_name => $hex ) {
+											if ( strpos( $option_lower, $color_name ) !== false ) {
+												$color_hex = $hex;
+												break;
+											}
+										}
+									}
 								}
 							}
 							?>
@@ -129,9 +252,15 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 									style="--swatch-color: <?php echo esc_attr( $color_hex ); ?>"
 								<?php endif; ?>
 								aria-label="<?php echo esc_attr( $option ); ?>"
+								title="<?php echo esc_attr( $option ); ?>"
 							>
-								<?php if ( $is_color && $color_hex ) : ?>
-									<span class="swatch-color-dot" style="background-color: <?php echo esc_attr( $color_hex ); ?>"></span>
+								<?php if ( $is_color ) : ?>
+									<?php if ( $color_hex ) : ?>
+										<span class="swatch-color-dot" style="background-color: <?php echo esc_attr( $color_hex ); ?>"></span>
+									<?php else : ?>
+										<!-- Fallback: show text label if color hex not found -->
+										<span class="swatch-label"><?php echo esc_html( strtoupper( $option ) ); ?></span>
+									<?php endif; ?>
 								<?php else : ?>
 									<span class="swatch-label"><?php echo esc_html( strtoupper( $option ) ); ?></span>
 								<?php endif; ?>
@@ -140,7 +269,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						<?php } ?>
 					</div>
 					
-					<!-- Hidden select for WooCommerce -->
+					<!-- Hidden select for WooCommerce - must include ALL options -->
 					<select 
 						name="attribute_<?php echo esc_attr( $attribute_slug ); ?>" 
 						id="<?php echo esc_attr( $attribute_slug ); ?>"
@@ -150,7 +279,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						style="display: none !important;"
 					>
 						<option value=""><?php echo esc_html( 'Choose an option' ); ?></option>
-						<?php foreach ( $options as $option ) : ?>
+						<?php foreach ( $display_options as $option ) : ?>
 							<option value="<?php echo esc_attr( $option ); ?>" <?php selected( sanitize_title( $selected_value ), sanitize_title( $option ) ); ?>><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ); ?></option>
 						<?php endforeach; ?>
 					</select>

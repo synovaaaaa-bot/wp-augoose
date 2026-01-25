@@ -48,16 +48,37 @@ get_header();
 					<a class="section-link" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">VIEW ALL</a>
 				</div>
 				<?php
-				// Check if we have products first
+				// Get latest 12 products (6 atas + 6 bawah = 2 rows x 6 columns)
 				$products = wc_get_products( array( 
-					'limit' => 8,
-					'status' => 'publish'
+					'limit' => 12,
+					'status' => 'publish',
+					'orderby' => 'date',
+					'order' => 'DESC'
 				) );
 				
 				if ( $products && count( $products ) > 0 ) {
-					// Use custom template for Latest Collection
-					echo '<div class="latest-collection-products">';
-					echo do_shortcode( '[products limit="12" columns="6" orderby="date" class="latest"]' );
+					// Use custom template for Latest Collection - 12 products (2 rows x 6 columns), NO slider
+					// Loop manually to ensure exactly 12 products
+					echo '<div class="latest-collection-products no-slider">';
+					echo '<ul class="products columns-6 latest">';
+					
+					// Set WooCommerce loop properties
+					wc_set_loop_prop( 'columns', 6 );
+					wc_set_loop_prop( 'is_shortcode', false );
+					
+					// Loop through products and render using custom template
+					// IMPORTANT: Limit to exactly 12 products (6 atas + 6 bawah)
+					$products_to_show = array_slice( $products, 0, 12 );
+					
+					global $product; // Declare global before loop
+					foreach ( $products_to_show as $product ) {
+						wc_get_template_part( 'content', 'product-latest' );
+					}
+					
+					// Reset loop
+					wc_reset_loop();
+					
+					echo '</ul>';
 					echo '</div>';
 				} else {
 					// Show dummy products for demo

@@ -1981,14 +1981,97 @@ function wp_augoose_update_checkout_quantity() {
 	// Calculate totals once (faster than multiple calculations)
 	WC()->cart->calculate_totals();
 	
-	// Return success with cart data for immediate UI update
-	wp_send_json_success( array(
+	// Get order review fragment to preserve product images
+	ob_start();
+	woocommerce_order_review();
+	$order_review_html = ob_get_clean();
+	
+	// Get checkout payment fragment
+	ob_start();
+	woocommerce_checkout_payment();
+	$payment_html = ob_get_clean();
+	
+	// Return success with cart data and fragments for immediate UI update
+	// IMPORTANT: Return format that WooCommerce expects to prevent checkout.min.js errors
+	$response = array(
 		'message' => 'Cart updated',
-		'cart_hash' => WC()->cart->get_cart_hash(),
-		'cart_total' => WC()->cart->get_total(),
-		'cart_subtotal' => WC()->cart->get_subtotal(),
-		'item_count' => WC()->cart->get_cart_contents_count(),
-	) );
+		'cart_hash' => WC()->cart->get_cart_hash() ? WC()->cart->get_cart_hash() : '',
+		'cart_total' => WC()->cart->get_total() ? WC()->cart->get_total() : '0',
+		'cart_subtotal' => WC()->cart->get_subtotal() ? (string) WC()->cart->get_subtotal() : '0',
+		'item_count' => WC()->cart->get_cart_contents_count() ? WC()->cart->get_cart_contents_count() : 0,
+		'fragments' => apply_filters(
+			'woocommerce_update_order_review_fragments',
+			array(
+				'.woocommerce-checkout-review-order-table' => $order_review_html,
+				'.woocommerce-checkout-payment' => $payment_html,
+			)
+		),
+		'cart' => array(
+			'cart_hash' => WC()->cart->get_cart_hash() ? WC()->cart->get_cart_hash() : '',
+			'cart_contents_count' => WC()->cart->get_cart_contents_count() ? WC()->cart->get_cart_contents_count() : 0,
+		),
+	);
+	
+	// Ensure all values are strings/numbers, not null/undefined
+	foreach ( $response as $key => $value ) {
+		if ( is_null( $value ) ) {
+			$response[ $key ] = ( $key === 'item_count' || $key === 'cart_contents_count' ) ? 0 : '';
+		} elseif ( is_array( $value ) ) {
+			$response[ $key ] = array_map( function( $v ) {
+				if ( is_null( $v ) ) {
+					return '';
+				}
+				if ( is_numeric( $v ) ) {
+					return (string) $v;
+				}
+				return $v;
+			}, $value );
+		} elseif ( is_numeric( $value ) ) {
+			$response[ $key ] = (string) $value;
+		}
+	}
+	
+	// Ensure fragments are strings (HTML)
+	if ( isset( $response['fragments'] ) && is_array( $response['fragments'] ) ) {
+		foreach ( $response['fragments'] as $key => $fragment ) {
+			if ( ! is_string( $fragment ) ) {
+				$response['fragments'][ $key ] = (string) $fragment;
+			}
+		}
+	}
+	
+	// Send JSON response with proper headers
+	// Clear any previous output to prevent "Unexpected token '<'" error
+	// This is critical - any HTML output before JSON will cause the error
+	while ( ob_get_level() ) {
+		ob_end_clean();
+	}
+	
+	// Set proper headers BEFORE any output
+	if ( ! headers_sent() ) {
+		header( 'Content-Type: application/json; charset=utf-8' );
+		header( 'X-Content-Type-Options: nosniff' );
+	}
+	
+	// Send JSON response
+	wp_send_json_success( $response );
+	exit; // Ensure no output after JSON
+}
+
+/**
+ * Ensure product images are preserved in checkout fragments when country changes
+ * This prevents images from disappearing when country is updated
+ */
+add_filter( 'woocommerce_update_order_review_fragments', 'wp_augoose_preserve_checkout_product_images', 10, 1 );
+function wp_augoose_preserve_checkout_product_images( $fragments ) {
+	// Ensure order review fragment includes product images
+	if ( ! isset( $fragments['.woocommerce-checkout-review-order-table'] ) ) {
+		ob_start();
+		woocommerce_order_review();
+		$fragments['.woocommerce-checkout-review-order-table'] = ob_get_clean();
+	}
+	
+	return $fragments;
 }
 
 // Checkout field layout is controlled by the theme templates + `functions.php`.
