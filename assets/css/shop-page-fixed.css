@@ -21,7 +21,11 @@
 }
 
 /* Override for offcanvas filter - when body has filter-open class */
-body.filter-open .shop-filters {
+/* Use more specific selector to ensure it overrides everything */
+body.filter-open .shop-filters,
+body.filter-open aside.shop-filters,
+html body.filter-open .shop-filters,
+html body.filter-open aside.shop-filters {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -30,6 +34,10 @@ body.filter-open .shop-filters {
     height: 100vh !important;
     z-index: 999 !important;
     transform: translateX(0) !important;
+    -webkit-transform: translateX(0) !important;
+    -moz-transform: translateX(0) !important;
+    -ms-transform: translateX(0) !important;
+    -o-transform: translateX(0) !important;
 }
 
 .shop-filter-close {

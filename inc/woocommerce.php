@@ -201,49 +201,43 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 		)
 	);
 
+	// CRITICAL: Set WCML currency context BEFORE any product queries
+	// This must be done BEFORE WP_Query to ensure all products use correct currency
+	if ( class_exists( 'WCML_Multi_Currency' ) ) {
+		global $woocommerce_wpml;
+		if ( isset( $woocommerce_wpml->multi_currency ) ) {
+			// Get current currency from cookie/session
+			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
+			if ( $currency ) {
+				// Force set currency for this request - MUST be before any product queries
+				$woocommerce_wpml->multi_currency->set_client_currency( $currency );
+			}
+		}
+	}
+
 	ob_start();
 	echo '<div class="wishlist-items">';
 	if ( $q->have_posts() ) {
 		global $product; // Set global for WooCommerce hooks/filters
 		
-		// CRITICAL: Ensure WCML currency context is set for AJAX requests
-		// WCML needs to know which currency to use in AJAX context
-		if ( class_exists( 'WCML_Multi_Currency' ) ) {
-			global $woocommerce_wpml;
-			if ( isset( $woocommerce_wpml->multi_currency ) ) {
-				// Get current currency from cookie/session
-				$currency = $woocommerce_wpml->multi_currency->get_client_currency();
-				if ( $currency ) {
-					// Force set currency for this request
-					$woocommerce_wpml->multi_currency->set_client_currency( $currency );
-					// Also update WooCommerce currency
-					add_filter( 'woocommerce_currency', function() use ( $currency ) {
-						return $currency;
-					}, 999 );
-				}
-			}
-		}
-		
 		while ( $q->have_posts() ) {
 			$q->the_post();
-			$product = wc_get_product( get_the_ID() );
+			$pid = get_the_ID();
+			
+			// Get product object - currency context is already set above
+			$product = wc_get_product( $pid );
 			if ( ! $product ) {
 				continue;
 			}
-			$pid   = $product->get_id();
-			$link  = get_permalink( $pid );
-			$img   = $product->get_image( 'woocommerce_thumbnail' );
 			
-			// IMPORTANT: Ensure currency conversion works (WCML and other currency plugins support)
-			// Force refresh product object to ensure currency context is applied
-			$product = wc_get_product( $pid );
+			$link = get_permalink( $pid );
+			$img  = $product->get_image( 'woocommerce_thumbnail' );
 			
-			// Get price HTML - WCML hooks into woocommerce_get_price_html filter
-			// This is the same method used in single product pages
+			// IMPORTANT: Get price HTML EXACTLY like single product page
+			// This is the EXACT same method used in content-single-product.php line 80
+			// WCML automatically hooks into woocommerce_get_price_html filter
+			// The currency context was set BEFORE the query, so prices will be converted
 			$price = $product->get_price_html();
-			
-			// Apply filter to ensure WCML conversion is applied
-			$price = apply_filters( 'woocommerce_get_price_html', $price, $product );
 			
 			$is_variable = $product->is_type( 'variable' );
 			$is_simple   = $product->is_type( 'simple' );

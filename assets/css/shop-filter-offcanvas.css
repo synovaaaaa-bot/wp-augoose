@@ -49,8 +49,16 @@ body.filter-open .shop-filter-backdrop {
 }
 
 /* Filter open state - slide in */
-body.filter-open .shop-filters {
+/* Use more specific selector to ensure it overrides everything */
+body.filter-open .shop-filters,
+body.filter-open aside.shop-filters,
+html body.filter-open .shop-filters,
+html body.filter-open aside.shop-filters {
     transform: translateX(0) !important;
+    -webkit-transform: translateX(0) !important;
+    -moz-transform: translateX(0) !important;
+    -ms-transform: translateX(0) !important;
+    -o-transform: translateX(0) !important;
 }
 
 /* ===================================

@@ -37,10 +37,20 @@
             body.style.top = `-${scrollY}px`;
             body.dataset.scrollPos = scrollY;
             
+            // Force set transform directly via JavaScript to ensure it works
+            const filterElement = document.querySelector('.shop-filters');
+            if (filterElement) {
+                filterElement.style.transform = 'translateX(0)';
+                filterElement.style.webkitTransform = 'translateX(0)';
+                filterElement.style.mozTransform = 'translateX(0)';
+                filterElement.style.msTransform = 'translateX(0)';
+                filterElement.style.oTransform = 'translateX(0)';
+            }
+            
             // Debug: Check if class was added
             console.log('Body classes:', body.className);
-            console.log('Filter element:', document.querySelector('.shop-filters'));
-            console.log('Filter computed style:', window.getComputedStyle(document.querySelector('.shop-filters')).transform);
+            console.log('Filter element:', filterElement);
+            console.log('Filter computed style:', window.getComputedStyle(filterElement).transform);
         }
         
         // Close filter
@@ -48,6 +58,16 @@
             console.log('Closing filter...');
             body.classList.remove('filter-open');
             toggleButton.setAttribute('aria-expanded', 'false');
+            
+            // Force set transform directly via JavaScript to ensure it works
+            const filterElement = document.querySelector('.shop-filters');
+            if (filterElement) {
+                filterElement.style.transform = 'translateX(-100%)';
+                filterElement.style.webkitTransform = 'translateX(-100%)';
+                filterElement.style.mozTransform = 'translateX(-100%)';
+                filterElement.style.msTransform = 'translateX(-100%)';
+                filterElement.style.oTransform = 'translateX(-100%)';
+            }
             
             // Restore scroll position
             const scrollY = body.dataset.scrollPos || 0;
