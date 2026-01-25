@@ -217,24 +217,12 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			$img   = $product->get_image( 'woocommerce_thumbnail' );
 			
 			// IMPORTANT: Ensure currency conversion works (WCML and other currency plugins support)
-			// Use the same method as cart to ensure prices match exactly
-			// Cart uses WC()->cart->get_product_price() which automatically converts currency
+			// Use get_price_html() directly - same method as single product page (content-single-product.php line 80)
+			// WCML hooks into woocommerce_get_price_html filter automatically
 			
-			// Get price using cart method (same as cart.php) - this ensures currency conversion
-			if ( class_exists( 'WooCommerce' ) && WC()->cart ) {
-				// Use cart's get_product_price method which handles currency conversion
-				// This is the EXACT same method used in cart.php line 67
-				// It automatically uses current currency from WCML or other plugins
-				$price = WC()->cart->get_product_price( $product );
-				
-				// Apply the same filter that cart uses
-				// This ensures all currency plugin hooks are applied
-				$price = apply_filters( 'woocommerce_cart_item_price', $price, array( 'data' => $product ), '' );
-			} else {
-				// Fallback: use get_price_html() with filters
-				$price = $product->get_price_html();
-				$price = apply_filters( 'woocommerce_get_price_html', $price, $product );
-			}
+			// This is the EXACT same method used in single product pages
+			// WCML automatically converts the price via woocommerce_get_price_html filter
+			$price = $product->get_price_html();
 			
 			$is_variable = $product->is_type( 'variable' );
 			$is_simple   = $product->is_type( 'simple' );
