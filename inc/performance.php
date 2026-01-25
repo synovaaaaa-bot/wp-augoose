@@ -50,7 +50,6 @@ function wp_augoose_defer_scripts( $tag, $handle ) {
     
     // Scripts that should be async
     $async_scripts = array(
-        'market-autoselect-js',
     );
     
     if ( in_array( $handle, $async_scripts, true ) ) {

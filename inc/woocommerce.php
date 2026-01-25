@@ -1432,7 +1432,7 @@ function wp_augoose_cart_item_name( $product_name, $cart_item, $cart_item_key ) 
 add_filter( 'woocommerce_get_item_data', 'wp_augoose_format_cart_item_data', 10, 2 );
 
 /**
- * Format cart item data: Hide Market attribute and simplify colon format
+ * Format cart item data: Simplify colon format
  */
 function wp_augoose_format_cart_item_data( $item_data, $cart_item ) {
 	if ( ! is_array( $item_data ) ) {
@@ -1442,12 +1442,6 @@ function wp_augoose_format_cart_item_data( $item_data, $cart_item ) {
 	$filtered_data = array();
 	
 	foreach ( $item_data as $data ) {
-		// Skip Market attribute
-		$key = isset( $data['key'] ) ? strtolower( $data['key'] ) : '';
-		if ( strpos( $key, 'market' ) !== false ) {
-			continue; // Hide Market
-		}
-		
 		// Simplify format: remove colon from key, use single colon in display
 		if ( isset( $data['key'] ) ) {
 			// Remove colon from key if exists

@@ -292,37 +292,6 @@ function wp_augoose_render_currency_switcher() {
         return;
     }
 
-    // FOX Currency Switcher Professional - check for common shortcodes/actions
-    // Try multiple possible shortcode names
-    $fox_shortcodes = array( 'fox_currency_switcher', 'foxcs', 'fox-currency-switcher', 'fox_currency' );
-    foreach ( $fox_shortcodes as $shortcode ) {
-        if ( shortcode_exists( $shortcode ) ) {
-            echo '<div class="header-locale header-currency fox-currency-wrapper">';
-            echo do_shortcode( '[' . $shortcode . ']' );
-            echo '</div>';
-            return;
-        }
-    }
-    
-    // FOX Currency Switcher - widget action hook
-    if ( has_action( 'fox_currency_switcher' ) ) {
-        echo '<div class="header-locale header-currency fox-currency-wrapper">';
-        do_action( 'fox_currency_switcher' );
-        echo '</div>';
-        return;
-    }
-    
-    // FOX Currency Switcher - check if class exists (plugin is active)
-    if ( class_exists( 'FOX_Currency_Switcher' ) || class_exists( 'Fox_Currency_Switcher' ) || function_exists( 'fox_currency_switcher' ) ) {
-        // Try to render widget or use default output
-        echo '<div class="header-locale header-currency fox-currency-wrapper">';
-        // Most currency switcher plugins output via widget or shortcode
-        // If plugin is active but no shortcode found, it might use widget area
-        // We'll let the plugin handle its own output
-        echo '</div>';
-        // Don't return here, let it fall through to other plugins
-    }
-
     // WPML WooCommerce Multilingual (WCML)
     if ( has_action( 'wcml_currency_switcher' ) ) {
         echo '<div class="header-locale header-currency">';
@@ -1496,10 +1465,6 @@ function wp_augoose_use_latest_collection_template( $template, $slug, $name ) {
     return $template;
 }
 
-// Market Variation Auto-Select (auto-select Market variation based on user country)
-if ( class_exists( 'WooCommerce' ) && file_exists( get_template_directory() . '/inc/market-variation-auto-select.php' ) ) {
-    require get_template_directory() . '/inc/market-variation-auto-select.php';
-}
 
 /**
  * Disable Multicurrency Plugin Hooks

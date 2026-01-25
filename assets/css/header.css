@@ -748,19 +748,15 @@ body.mobile-menu-open .mobile-menu {
 }
 
 /* ============================================
-   FOX Currency Switcher Custom Styling
+   WCML Currency Switcher Custom Styling
    ============================================ */
-.fox-currency-wrapper,
 .header-locale-item--currency {
     position: relative;
 }
 
-/* Style untuk semua elemen currency switcher dari plugin FOX */
-.fox-currency-wrapper select,
-.fox-currency-wrapper .fox-currency-select,
+/* Style untuk WCML currency switcher */
 .header-locale-item--currency select,
 .header-currency select,
-.header-currency .fox-currency-select,
 .header-currency .woocs-select,
 .header-currency .aelia-currency-selector,
 .header-currency .wcml-currency-selector {
@@ -788,8 +784,6 @@ body.mobile-menu-open .mobile-menu {
     line-height: 1.2 !important;
 }
 
-.fox-currency-wrapper select:focus,
-.fox-currency-wrapper .fox-currency-select:focus,
 .header-locale-item--currency select:focus,
 .header-currency select:focus {
     outline: none !important;
@@ -797,7 +791,6 @@ body.mobile-menu-open .mobile-menu {
     box-shadow: 0 0 0 2px rgba(48, 71, 94, 0.1) !important;
 }
 
-.fox-currency-wrapper select:hover,
 .header-locale-item--currency select:hover,
 .header-currency select:hover {
     border-color: #30475E !important;
@@ -805,7 +798,6 @@ body.mobile-menu-open .mobile-menu {
 }
 
 /* Custom dropdown arrow */
-.fox-currency-wrapper::after,
 .header-locale-item--currency::after {
     content: "";
     position: absolute;
@@ -822,114 +814,18 @@ body.mobile-menu-open .mobile-menu {
 }
 
 /* Hide default dropdown arrow */
-.fox-currency-wrapper select::-ms-expand,
 .header-locale-item--currency select::-ms-expand,
 .header-currency select::-ms-expand {
     display: none !important;
 }
 
 /* Hide placeholder text yang jelek */
-.fox-currency-wrapper option[value=""],
-.fox-currency-wrapper option:disabled,
 .header-currency select option[value=""],
 .header-currency select option:disabled {
     display: none !important;
 }
 
 /* Style untuk option yang terpilih */
-.fox-currency-wrapper select option,
-.header-currency select option {
-    padding: 8px 12px !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    color: #30475E !important;
-    background: #fff !important;
-}
-
-/* Hide description/placeholder text yang muncul di bawah select */
-.fox-currency-wrapper .description,
-.fox-currency-wrapper .fox-currency-description,
-.header-currency .description,
-.fox-currency-wrapper .fox-currency-item .description,
-.fox-currency-wrapper .fox-currency-item .fox-currency-description,
-.fox-currency-wrapper .fox-currency-item p,
-.fox-currency-wrapper .fox-currency-item span:not(.fox-currency-code):not(.fox-currency-symbol),
-.header-currency .fox-currency-item .description,
-.header-currency .fox-currency-item p {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-}
-
-/* Hide placeholder text "CHANGE THE RATE AND THIS DESCRIPTION" */
-.fox-currency-wrapper *:contains("CHANGE THE RATE"),
-.fox-currency-wrapper *:contains("change the rate"),
-.header-currency *:contains("CHANGE THE RATE"),
-.header-currency *:contains("change the rate") {
-    display: none !important;
-    visibility: hidden !important;
-}
-
-/* Hide question mark icons */
-.fox-currency-wrapper img[src*="question"],
-.fox-currency-wrapper img[alt*="question"],
-.fox-currency-wrapper .question-mark,
-.fox-currency-wrapper [class*="question"],
-.fox-currency-wrapper [class*="placeholder"],
-.header-currency img[src*="question"],
-.header-currency img[alt*="question"],
-.header-currency .question-mark,
-.header-currency [class*="question"],
-.header-currency [class*="placeholder"],
-.fox-currency-wrapper svg[class*="question"],
-.header-currency svg[class*="question"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
-}
-
-/* Hide ONLY question mark icons, not all icons */
-.fox-currency-wrapper img[src*="question"],
-.fox-currency-wrapper img[alt*="question"],
-.fox-currency-wrapper img[src*="placeholder"],
-.fox-currency-wrapper img[alt*="placeholder"],
-.header-currency img[src*="question"],
-.header-currency img[alt*="question"],
-.header-currency img[src*="placeholder"],
-.header-currency img[alt*="placeholder"] {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* Ensure select and options are visible */
-.fox-currency-wrapper select,
-.fox-currency-wrapper select option,
-.header-currency select,
-.header-currency select option {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-/* Ensure dropdown is visible when open */
-.fox-currency-wrapper select:focus,
-.header-currency select:focus {
-    display: block !important;
-}
-
-/* Clean up currency switcher - ensure all options are visible */
-.fox-currency-wrapper select option,
 .header-currency select option {
     padding: 8px 12px !important;
     font-size: 11px !important;
@@ -946,7 +842,6 @@ body.mobile-menu-open .mobile-menu {
 }
 
 /* Ensure select dropdown shows all options */
-.fox-currency-wrapper select,
 .header-currency select {
     text-overflow: ellipsis !important;
     white-space: nowrap !important;
@@ -957,7 +852,6 @@ body.mobile-menu-open .mobile-menu {
 }
 
 /* Ensure all currency options are visible */
-.fox-currency-wrapper,
 .header-currency {
     display: block !important;
     visibility: visible !important;
@@ -966,24 +860,14 @@ body.mobile-menu-open .mobile-menu {
 }
 
 /* Ensure dropdown menu is visible when opened */
-.fox-currency-wrapper select:focus,
 .header-currency select:focus,
-.fox-currency-wrapper select:active,
 .header-currency select:active {
     overflow: visible !important;
     z-index: 1000 !important;
 }
 
-/* Style untuk wrapper/container plugin FOX */
-.fox-currency-wrapper .fox-currency-switcher,
-.fox-currency-wrapper .foxcs-wrapper {
-    display: inline-block;
-    position: relative;
-}
-
 /* Mobile responsive */
 @media (max-width: 768px) {
-    .fox-currency-wrapper select,
     .header-locale-item--currency select,
     .header-currency select {
         height: 28px !important;
@@ -993,7 +877,6 @@ body.mobile-menu-open .mobile-menu {
         min-width: 50px !important;
     }
     
-    .fox-currency-wrapper::after,
     .header-locale-item--currency::after {
         right: 6px;
         border-top-width: 4px;
@@ -1003,7 +886,6 @@ body.mobile-menu-open .mobile-menu {
 }
 
 @media (max-width: 480px) {
-    .fox-currency-wrapper select,
     .header-locale-item--currency select,
     .header-currency select {
         height: 28px !important;

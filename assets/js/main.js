@@ -699,69 +699,6 @@
     }
     
     // Run on page load and after AJAX
-    // Hide currency switcher placeholder text and question mark icons
-    function hideCurrencySwitcherPlaceholders() {
-        // Hide ONLY question mark icons (not all images)
-        $('.fox-currency-wrapper img, .header-currency img').each(function() {
-            var $img = $(this);
-            var src = ($img.attr('src') || '').toLowerCase();
-            var alt = ($img.attr('alt') || '').toLowerCase();
-            // Only hide if it's clearly a placeholder/question mark icon
-            if (src.includes('question') || alt.includes('question') || 
-                src.includes('placeholder') || alt.includes('placeholder') ||
-                src.includes('default') || alt.includes('default')) {
-                $img.hide().css({ display: 'none', visibility: 'hidden', opacity: 0 });
-            }
-        });
-        
-        // Hide description/placeholder text - but NOT select options
-        $('.fox-currency-wrapper, .header-currency').find('*').not('select, option').each(function() {
-            var $el = $(this);
-            var text = ($el.text() || '').trim();
-            // Only hide if it contains placeholder text
-            if (text.includes('CHANGE THE RATE') || text.includes('change the rate') || 
-                text.includes('RIGHT VALUES') || text.includes('right values') ||
-                text.includes('TO THE RIGHT')) {
-                $el.hide().css({ display: 'none', visibility: 'hidden', opacity: 0, height: 0, overflow: 'hidden' });
-            }
-        });
-        
-        // Hide any element with question mark class or placeholder class - but NOT select/option
-        $('.fox-currency-wrapper [class*="question"]:not(select):not(option), .fox-currency-wrapper [class*="placeholder"]:not(select):not(option), .header-currency [class*="question"]:not(select):not(option), .header-currency [class*="placeholder"]:not(select):not(option)').hide();
-        
-        // Ensure select and options are visible
-        $('.fox-currency-wrapper select, .header-currency select').css({
-            display: 'block',
-            visibility: 'visible',
-            opacity: 1
-        });
-        
-        $('.fox-currency-wrapper select option, .header-currency select option').css({
-            display: 'block',
-            visibility: 'visible',
-            opacity: 1
-        });
-    }
-    
-    $(document).ready(function() {
-        // Hide currency switcher placeholders on load
-        hideCurrencySwitcherPlaceholders();
-        
-        // Hide again after a short delay (in case plugin loads dynamically)
-        setTimeout(hideCurrencySwitcherPlaceholders, 500);
-        setTimeout(hideCurrencySwitcherPlaceholders, 1000);
-        
-        // Watch for dynamically added currency switcher elements
-        var currencyObserver = new MutationObserver(function(mutations) {
-            hideCurrencySwitcherPlaceholders();
-        });
-        
-        // Observe currency switcher containers
-        $('.fox-currency-wrapper, .header-currency').each(function() {
-            if (this) {
-                currencyObserver.observe(this, { childList: true, subtree: true });
-            }
-        });
         preventDuplicateButtons();
         initMobileMenu();
         initSearchToggle();
