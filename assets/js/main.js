@@ -243,8 +243,7 @@
 
     // Add to Wishlist (Integrated - server cookie/user meta)
     function initWishlist() {
-        // Debounce to prevent multiple rapid clicks
-        let wishlistProcessing = false;
+        console.log('initWishlist() called');
         
         // Ensure wpAugoose is available (fallback)
         if (typeof wpAugoose === 'undefined') {
@@ -256,24 +255,34 @@
             };
         }
         
-        // Use more specific selector and ensure it works - bind directly to buttons
-        // Use higher priority to ensure it runs before other handlers
+        console.log('wpAugoose object:', wpAugoose);
+        console.log('Wishlist buttons on page:', $('.add-to-wishlist, .wishlist-toggle').length);
+        
+        // Debounce to prevent multiple rapid clicks
+        let wishlistProcessing = false;
+        
+        // Use event delegation - attach to document to catch dynamically added buttons
+        // Use capture phase to ensure it runs before other handlers
         $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
-            // CRITICAL: Prevent navigation to product page FIRST
+            console.log('=== WISHLIST BUTTON CLICKED ===');
+            console.log('Event target:', e.target);
+            console.log('Current target:', e.currentTarget);
+            console.log('Button element:', this);
+            
+            // CRITICAL: Stop event immediately to prevent product link navigation
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation(); // Prevent other handlers
             
-            console.log('Wishlist button click detected!');
-            
             const button = $(this);
-            
-            console.log('Wishlist button clicked:', button);
+            console.log('Button jQuery object:', button);
             console.log('Button classes:', button.attr('class'));
-            console.log('Button data:', button.data());
+            console.log('Button data attributes:', button.data());
             
             // Try multiple ways to get product ID
             let productId = parseInt(button.data('product-id'), 10);
+            console.log('Product ID from data attribute:', productId);
+            
             if (!productId || isNaN(productId)) {
                 // Try from parent element
                 const parent = button.closest('[data-product-id]');
@@ -286,8 +295,8 @@
             // Validate product ID
             if (!productId || isNaN(productId)) {
                 console.error('Invalid product ID - Button:', button);
-                console.error('Button data:', button.data());
-                console.error('Parent data:', button.closest('[data-product-id]').data());
+                console.error('Button HTML:', button[0] ? button[0].outerHTML : 'No element');
+                console.error('Parent HTML:', button.parent().html());
                 alert('Error: Product ID not found. Please refresh the page.');
                 return false;
             }
@@ -303,9 +312,9 @@
             
             // Debug logging
             console.log('Wishlist toggle - Product ID:', productId);
-            console.log('Wishlist toggle - wpAugoose:', typeof wpAugoose !== 'undefined' ? wpAugoose : 'undefined');
-            console.log('Wishlist toggle - AJAX URL:', typeof wpAugoose !== 'undefined' && wpAugoose ? wpAugoose.ajaxUrl : 'undefined');
-            console.log('Wishlist toggle - Nonce:', typeof wpAugoose !== 'undefined' && wpAugoose ? wpAugoose.nonce : 'undefined');
+            console.log('Wishlist toggle - wpAugoose:', wpAugoose);
+            console.log('Wishlist toggle - AJAX URL:', wpAugoose ? wpAugoose.ajaxUrl : 'undefined');
+            console.log('Wishlist toggle - Nonce:', wpAugoose ? wpAugoose.nonce : 'undefined');
             
             // Validate wpAugoose object
             if (typeof wpAugoose === 'undefined' || !wpAugoose || !wpAugoose.ajaxUrl) {
@@ -316,15 +325,8 @@
                 return false;
             }
             
-            // Get nonce - use wpAugoose.nonce or try to get from meta tag
-            let nonce = wpAugoose.nonce || '';
-            if (!nonce) {
-                const nonceMeta = $('meta[name="wp-augoose-nonce"]');
-                if (nonceMeta.length) {
-                    nonce = nonceMeta.attr('content');
-                }
-            }
-            
+            // Get nonce
+            const nonce = wpAugoose.nonce || '';
             if (!nonce) {
                 console.error('Nonce not found');
                 button.removeClass('loading').prop('disabled', false);
@@ -333,7 +335,12 @@
                 return false;
             }
             
-            console.log('Sending AJAX request...');
+            console.log('Sending AJAX request to:', wpAugoose.ajaxUrl);
+            console.log('AJAX data:', {
+                action: 'wp_augoose_wishlist_toggle',
+                product_id: productId,
+                nonce: nonce
+            });
             
             $.ajax({
                 url: wpAugoose.ajaxUrl,
@@ -356,12 +363,16 @@
                             console.log('Product added to wishlist');
                             if (typeof showNotification === 'function') {
                                 showNotification('Product added to wishlist');
+                            } else {
+                                alert('Product added to wishlist');
                             }
                         } else {
                             button.removeClass('active');
                             console.log('Product removed from wishlist');
                             if (typeof showNotification === 'function') {
                                 showNotification('Product removed from wishlist');
+                            } else {
+                                alert('Product removed from wishlist');
                             }
                         }
                         
@@ -391,7 +402,8 @@
                         status: status,
                         error: error,
                         responseText: xhr.responseText,
-                        statusCode: xhr.status
+                        statusCode: xhr.status,
+                        readyState: xhr.readyState
                     });
                     
                     // Try to parse error response
@@ -403,7 +415,7 @@
                                 errorMsg = errorResponse.data.message;
                             }
                         } catch (e) {
-                            // Not JSON, use default message
+                            console.error('Failed to parse error response:', e);
                         }
                     }
                     
@@ -414,6 +426,7 @@
                     }
                 },
                 complete: function() {
+                    console.log('AJAX request completed');
                     button.removeClass('loading').prop('disabled', false);
                     wishlistProcessing = false;
                 }
@@ -492,87 +505,18 @@
 
         // Initialize on page load (with small delay to reduce initial lag)
         setTimeout(updateWishlistButtons, 100);
+        
+        // Test handler attachment
+        console.log('Wishlist handler attached. Buttons found:', $('.add-to-wishlist, .wishlist-toggle').length);
+        
+        // Test click on existing buttons to verify handler works
+        $('.add-to-wishlist, .wishlist-toggle').each(function() {
+            const $btn = $(this);
+            const productId = $btn.data('product-id');
+            console.log('Wishlist button found - Product ID:', productId, 'Element:', this);
+        });
     }
     
-    // Test if wishlist buttons exist and handler is attached
-    console.log('Wishlist initialized. Buttons found:', $('.add-to-wishlist, .wishlist-toggle').length);
-    
-    // Ensure wishlist buttons are clickable - prevent product link from interfering
-    // This handler runs with highest priority to catch clicks before product link
-    $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
-        // CRITICAL: Stop event immediately to prevent product link navigation
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        
-        const button = $(this);
-        const productId = parseInt(button.data('product-id'), 10) || parseInt(button.closest('[data-product-id]').data('product-id'), 10);
-        
-        console.log('Wishlist button clicked - Product ID:', productId);
-        
-        if (!productId || !wpAugoose || !wpAugoose.ajaxUrl) {
-            console.error('Wishlist: Missing product ID or wpAugoose object');
-            return false;
-        }
-        
-        // Prevent multiple clicks
-        if (button.hasClass('loading')) {
-            return false;
-        }
-        
-        button.addClass('loading').prop('disabled', true);
-        
-        $.ajax({
-            url: wpAugoose.ajaxUrl,
-            type: 'POST',
-            timeout: 10000,
-            data: {
-                action: 'wp_augoose_wishlist_toggle',
-                product_id: productId,
-                nonce: wpAugoose.nonce || ''
-            },
-            success: function(res) {
-                console.log('Wishlist AJAX success:', res);
-                if (res && res.success && res.data) {
-                    if (res.data.action === 'added') {
-                        button.addClass('active');
-                        if (typeof showNotification === 'function') {
-                            showNotification('Product added to wishlist');
-                        } else {
-                            alert('Product added to wishlist');
-                        }
-                    } else {
-                        button.removeClass('active');
-                        if (typeof showNotification === 'function') {
-                            showNotification('Product removed from wishlist');
-                        } else {
-                            alert('Product removed from wishlist');
-                        }
-                    }
-                    
-                    // Update badge
-                    const count = res.data.count || 0;
-                    const $badge = $('.wishlist-count');
-                    if ($badge.length) {
-                        if (count > 0) {
-                            $badge.text(count).show();
-                        } else {
-                            $badge.hide();
-                        }
-                    }
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Wishlist AJAX error:', status, error, xhr.responseText);
-                alert('Error updating wishlist. Please try again.');
-            },
-            complete: function() {
-                button.removeClass('loading').prop('disabled', false);
-            }
-        });
-        
-        return false;
-    });
 
     // AJAX Add to Cart
     function initAjaxAddToCart() {
@@ -889,6 +833,13 @@
         });
     }
 
+    // Test wishlist handler attachment immediately (before document ready)
+    // This ensures handler is attached as early as possible
+    $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
+        console.log('=== DIRECT WISHLIST HANDLER TRIGGERED ===');
+        console.log('This handler should NOT fire if initWishlist handler works');
+    });
+    
     // Initialize on Document Ready
     // Language Switcher (cookie-based)
     function initLanguageSwitcher() {
