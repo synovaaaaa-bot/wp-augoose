@@ -201,6 +201,7 @@ if ( post_password_required() ) {
                 <?php
                 // Get related products
                 $related_ids = wc_get_related_products( $product->get_id(), 4 );
+                $has_products = false;
                 
                 if ( ! empty( $related_ids ) ) {
                     $args = array(
@@ -208,11 +209,13 @@ if ( post_password_required() ) {
                         'posts_per_page' => 4,
                         'post__in'        => $related_ids,
                         'orderby'         => 'post__in',
+                        'post_status'     => 'publish',
                     );
                     
                     $related_products = new WP_Query( $args );
                     
                     if ( $related_products->have_posts() ) {
+                        $has_products = true;
                         echo '<ul class="products related-products-grid">';
                         while ( $related_products->have_posts() ) {
                             $related_products->the_post();
@@ -221,14 +224,17 @@ if ( post_password_required() ) {
                         echo '</ul>';
                         wp_reset_postdata();
                     }
-                } else {
-                    // Fallback: show recent products if no related products
+                }
+                
+                // Fallback: show recent products if no related products
+                if ( ! $has_products ) {
                     $args = array(
                         'post_type'      => 'product',
                         'posts_per_page' => 4,
                         'orderby'        => 'date',
                         'order'          => 'DESC',
                         'post__not_in'   => array( $product->get_id() ),
+                        'post_status'    => 'publish',
                     );
                     
                     $recent_products = new WP_Query( $args );

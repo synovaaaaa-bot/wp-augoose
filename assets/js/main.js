@@ -7,69 +7,103 @@
 (function($) {
     'use strict';
 
-    // Mobile Menu Toggle
+    // Mobile Menu Toggle - Fixed with event delegation
     function initMobileMenu() {
-        const mobileMenuToggle = $('.mobile-menu-toggle');
-        const mobileMenu = $('.mobile-menu');
-
-        mobileMenuToggle.on('click', function() {
-            const isExpanded = $(this).attr('aria-expanded') === 'true';
-            $(this).attr('aria-expanded', !isExpanded);
-            mobileMenu.slideToggle(300);
-            $('body').toggleClass('mobile-menu-open');
+        console.log('=== INIT MOBILE MENU ===');
+        
+        // Use event delegation for mobile menu toggle
+        $(document).on('click', '.mobile-menu-toggle', function(e) {
+            console.log('=== MOBILE MENU TOGGLE CLICKED ===');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const $toggle = $(this);
+            const $menu = $('.mobile-menu');
+            const isExpanded = $toggle.attr('aria-expanded') === 'true';
+            
+            if (isExpanded) {
+                $menu.slideUp(300);
+                $toggle.attr('aria-expanded', 'false');
+                $('body').removeClass('mobile-menu-open');
+            } else {
+                $menu.slideDown(300);
+                $toggle.attr('aria-expanded', 'true');
+                $('body').addClass('mobile-menu-open');
+            }
         });
 
         // Close mobile menu when clicking outside
         $(document).on('click', function(e) {
-            if (!$(e.target).closest('.site-header').length && mobileMenu.is(':visible')) {
-                mobileMenu.slideUp(300);
-                mobileMenuToggle.attr('aria-expanded', 'false');
-                $('body').removeClass('mobile-menu-open');
+            const $menu = $('.mobile-menu');
+            const $header = $('.site-header');
+            if (!$header.length) {
+                $header = $('header');
+            }
+            
+            if (!$header.length || (!$header.is(e.target) && $header.has(e.target).length === 0)) {
+                if ($menu.is(':visible')) {
+                    $menu.slideUp(300);
+                    $('.mobile-menu-toggle').attr('aria-expanded', 'false');
+                    $('body').removeClass('mobile-menu-open');
+                }
             }
         });
 
         // Close mobile menu on window resize
         $(window).on('resize', function() {
             if ($(window).width() > 968) {
-                mobileMenu.hide();
-                mobileMenuToggle.attr('aria-expanded', 'false');
+                $('.mobile-menu').hide();
+                $('.mobile-menu-toggle').attr('aria-expanded', 'false');
                 $('body').removeClass('mobile-menu-open');
             }
         });
+        
+        console.log('Mobile menu initialized');
     }
 
     // Search Toggle - Fixed for mobile with event delegation
     function initSearchToggle() {
         console.log('=== INIT SEARCH TOGGLE ===');
         
-        // Use event delegation to catch clicks on search toggle button
-        $(document).on('click', '.search-toggle', function(e) {
-            console.log('=== SEARCH TOGGLE CLICKED ===');
+        // Use event delegation to catch clicks on search toggle button (including SVG inside)
+        $(document).on('click', '.search-toggle, .search-toggle *', function(e) {
+            console.log('=== SEARCH TOGGLE CLICKED ===', e.target);
             e.preventDefault();
             e.stopPropagation();
             
-            const searchFormContainer = $(this).closest('.header-search').find('.search-form-container');
-            if (searchFormContainer.length === 0) {
-                // Fallback: find by class
-                searchFormContainer = $('.search-form-container');
+            // Find the actual button (might be clicked on SVG or path inside)
+            let $button = $(this);
+            if (!$button.hasClass('search-toggle')) {
+                $button = $button.closest('.search-toggle');
             }
             
-            console.log('Search container found:', searchFormContainer.length);
+            if ($button.length === 0) {
+                console.error('Search toggle button not found!');
+                return;
+            }
+            
+            let $searchFormContainer = $button.closest('.header-search').find('.search-form-container');
+            if ($searchFormContainer.length === 0) {
+                // Fallback: find by class
+                $searchFormContainer = $('.search-form-container');
+            }
+            
+            console.log('Search container found:', $searchFormContainer.length);
             
             // Toggle search form
-            if (searchFormContainer.is(':visible')) {
-                searchFormContainer.slideUp(300, function() {
+            if ($searchFormContainer.is(':visible')) {
+                $searchFormContainer.slideUp(300, function() {
                     $(this).attr('aria-hidden', 'true');
                 });
-                $(this).attr('aria-expanded', 'false');
+                $button.attr('aria-expanded', 'false');
             } else {
-                searchFormContainer.attr('aria-hidden', 'false');
-                searchFormContainer.slideDown(300);
-                $(this).attr('aria-expanded', 'true');
+                $searchFormContainer.attr('aria-hidden', 'false');
+                $searchFormContainer.slideDown(300);
+                $button.attr('aria-expanded', 'true');
                 
                 // Focus input after animation
                 setTimeout(function() {
-                    const searchInput = searchFormContainer.find('input[type="search"], input[type="text"], .search-field');
+                    const searchInput = $searchFormContainer.find('input[type="search"], input[type="text"], .search-field');
                     if (searchInput.length) {
                         searchInput.focus();
                         // For mobile, sometimes need to trigger click to show keyboard
@@ -274,7 +308,6 @@
             e.stopPropagation();
             e.stopImmediatePropagation(); // Prevent other handlers
             
-            const button = $(this);
             console.log('Button jQuery object:', button);
             console.log('Button classes:', button.attr('class'));
             console.log('Button data attributes:', button.data());

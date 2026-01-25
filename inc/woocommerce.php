@@ -73,6 +73,23 @@ add_filter( 'woocommerce_has_block_template', function( $has_template, $template
 add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 
 /**
+ * Price placeholder untuk konsistensi tinggi produk
+ * Menambahkan placeholder jika produk tidak punya harga
+ */
+add_action('woocommerce_after_shop_loop_item_title', function () {
+    global $product;
+
+    if (!$product) return;
+
+    // Kalau sudah ada harga, WooCommerce sudah render <span class="price">...</span>
+    // Kalau tidak ada harga, kita render placeholder <span class="price"> supaya tinggi konsisten
+    $price = $product->get_price();
+    if (empty($price) || $price === '') {
+        echo '<span class="price price--placeholder">&nbsp;</span>';
+    }
+}, 25); // Priority 25 untuk memastikan dijalankan setelah price (10)
+
+/**
  * Cart page redirect removed.
  * Users expect "View cart" to go to the cart page.
  */
