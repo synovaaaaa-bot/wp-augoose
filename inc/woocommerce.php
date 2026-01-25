@@ -2373,6 +2373,65 @@ function wp_augoose_add_terms_checkbox() {
 /**
  * Validate Terms Checkbox
  */
+/**
+ * CRITICAL: Ensure clean output buffer for ALL WooCommerce AJAX requests
+ * This prevents "SyntaxError: Unexpected token '<'" errors
+ * 
+ * WooCommerce checkout uses AJAX and expects JSON responses.
+ * Any HTML output before JSON will cause this error.
+ * 
+ * We hook early to clear output buffers before WooCommerce processes the request.
+ * Following WooCommerce's pattern: clean output before any processing.
+ */
+add_action( 'init', 'wp_augoose_clean_output_for_woocommerce_ajax', 1 );
+add_action( 'wp_loaded', 'wp_augoose_clean_output_for_woocommerce_ajax', 1 );
+function wp_augoose_clean_output_for_woocommerce_ajax() {
+	// Only for AJAX requests
+	if ( ! wp_doing_ajax() ) {
+		return;
+	}
+	
+	// Check if this is a WooCommerce AJAX request
+	$is_wc_ajax = false;
+	
+	// Check wc-ajax endpoint (WooCommerce's standard AJAX endpoint)
+	if ( isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
+		$is_wc_ajax = true;
+	}
+	
+	// Check action parameter for WooCommerce-related actions
+	if ( isset( $_REQUEST['action'] ) ) {
+		$action = sanitize_text_field( $_REQUEST['action'] );
+		// WooCommerce checkout and cart actions
+		if ( strpos( $action, 'woocommerce' ) !== false || 
+		     strpos( $action, 'checkout' ) !== false ||
+		     strpos( $action, 'update_order_review' ) !== false ||
+		     strpos( $action, 'update_checkout' ) !== false ||
+		     strpos( $action, 'get_cart' ) !== false ||
+		     strpos( $action, 'add_to_cart' ) !== false ) {
+			$is_wc_ajax = true;
+		}
+	}
+	
+	// Check if WooCommerce is active and this might be a WC request
+	if ( class_exists( 'WooCommerce' ) ) {
+		// If we're on checkout page or cart page via AJAX, assume it's WC
+		if ( isset( $_REQUEST['wc_checkout'] ) || isset( $_REQUEST['wc_cart'] ) ) {
+			$is_wc_ajax = true;
+		}
+	}
+	
+	// Clear output buffers for WooCommerce AJAX requests
+	// This follows WooCommerce's pattern: clean output before JSON response
+	if ( $is_wc_ajax ) {
+		// Clear all output buffers to prevent HTML before JSON
+		// This is critical - any HTML output will cause "SyntaxError: Unexpected token '<'"
+		while ( ob_get_level() ) {
+			ob_end_clean();
+		}
+	}
+}
+
 add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_terms_checkbox' );
 function wp_augoose_validate_terms_checkbox() {
 	if ( empty( $_POST['terms_custom'] ) ) {
@@ -2585,10 +2644,16 @@ function wp_augoose_ajax_add_to_cart() {
 add_action( 'wp_ajax_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
 add_action( 'wp_ajax_nopriv_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
 function wp_augoose_update_checkout_quantity() {
+	// CRITICAL: Clear output buffer FIRST before any processing
+	// This prevents "SyntaxError: Unexpected token '<'" errors
+	// Follow WooCommerce pattern: clean output before JSON response
+	while ( ob_get_level() ) {
+		ob_end_clean();
+	}
+	
 	// Security: Verify nonce
 	if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'woocommerce-cart' ) ) {
-		wp_send_json_error( array( 'message' => 'Security check failed.' ) );
-		return;
+		wp_augoose_send_json_clean( array( 'message' => 'Security check failed.' ), false );
 	}
 	
 	// Security: Sanitize input
@@ -2600,15 +2665,13 @@ function wp_augoose_update_checkout_quantity() {
 	$quantity = wp_augoose_sanitize_quantity( $_POST['quantity'] ?? 0, 0, 999 );
 	
 	if ( ! $cart_key ) {
-		wp_send_json_error( array( 'message' => 'Invalid cart item.' ) );
-		return;
+		wp_augoose_send_json_clean( array( 'message' => 'Invalid cart item.' ), false );
 	}
 	
 	// Validate cart item exists
 	$cart_item = WC()->cart->get_cart_item( $cart_key );
 	if ( ! $cart_item ) {
-		wp_send_json_error( array( 'message' => 'Cart item not found.' ) );
-		return;
+		wp_augoose_send_json_clean( array( 'message' => 'Cart item not found.' ), false );
 	}
 	
 	// Update cart (optimized - calculate totals only once)
