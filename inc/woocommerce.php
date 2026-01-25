@@ -534,18 +534,46 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			$q->the_post();
 			$pid = get_the_ID();
 			
-			// Get product object - currency context is already set above
+			// Get product object - force fresh load untuk mencegah cache issue
+			// CRITICAL: Untuk variable product, perlu clear cache agar harga benar per product
 			$product = wc_get_product( $pid );
 			if ( ! $product ) {
 				continue;
+			}
+			
+			// CRITICAL FIX: Clear variable product price cache untuk memastikan harga fresh
+			// Variable product cache bisa bikin semua produk tampil harga sama
+			if ( $product->is_type( 'variable' ) ) {
+				// Clear WooCommerce variable product price cache
+				delete_transient( 'wc_var_prices_' . $pid );
+				// Force refresh price calculation
+				$product->get_price(); // Trigger price calculation
 			}
 			
 			$link = get_permalink( $pid );
 			$img  = $product->get_image( 'woocommerce_thumbnail' );
 			
 			// Get price HTML - currency sudah di-set di awal request
-			// Cukup panggil get_price_html() via helper function
+			// Pastikan setiap product di-load dengan currency context yang benar
 			$price = wp_augoose_get_product_price_html( $product );
+			
+			// Debug logging untuk wishlist (guarded by WP_DEBUG)
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				$current_currency = class_exists( 'WCML_Multi_Currency' ) && isset( $GLOBALS['woocommerce_wpml']->multi_currency ) 
+					? $GLOBALS['woocommerce_wpml']->multi_currency->get_client_currency() 
+					: get_woocommerce_currency();
+				$price_raw = $product->get_price();
+				$is_variable = $product->is_type( 'variable' );
+				
+				error_log( sprintf(
+					'[WP_AUGOOSE_WISHLIST] Product %d: currency=%s, raw_price=%s, is_variable=%s, html=%s',
+					$pid,
+					$current_currency,
+					$price_raw,
+					$is_variable ? 'yes' : 'no',
+					substr( strip_tags( $price ), 0, 50 )
+				) );
+			}
 			
 			$is_variable = $product->is_type( 'variable' );
 			$is_simple   = $product->is_type( 'simple' );
