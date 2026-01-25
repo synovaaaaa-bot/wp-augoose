@@ -205,14 +205,14 @@ body.filter-open {
     body.tax-product_cat ul.products,
     body.tax-product_tag .woocommerce ul.products,
     body.tax-product_tag ul.products {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important; /* Perbesar gap */
+        grid-template-columns: 1fr !important; /* 1 kolom di mobile */
+        gap: 20px !important; /* Perbesar gap */
     }
     
     .product-thumbnail,
     body.tax-product_cat .product-thumbnail,
     body.tax-product_tag .product-thumbnail {
-        min-height: 260px !important; /* Gambar lebih besar di mobile */
+        min-height: 300px !important; /* Gambar lebih besar karena 1 kolom */
     }
 }
 
@@ -229,13 +229,13 @@ body.filter-open {
     body.tax-product_cat ul.products,
     body.tax-product_tag .woocommerce ul.products,
     body.tax-product_tag ul.products {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important; /* Perbesar gap */
+        grid-template-columns: 1fr !important; /* 1 kolom di mobile kecil */
+        gap: 20px !important; /* Perbesar gap */
     }
     
     .product-thumbnail,
     body.tax-product_cat .product-thumbnail,
     body.tax-product_tag .product-thumbnail {
-        min-height: 240px !important; /* Gambar lebih besar di mobile kecil */
+        min-height: 280px !important; /* Gambar lebih besar karena 1 kolom */
     }
 }

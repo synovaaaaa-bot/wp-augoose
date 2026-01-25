@@ -226,6 +226,29 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 		return '<p class="wishlist-empty">Your wishlist is empty.</p>';
 	}
 
+	// CRITICAL: Set WCML currency context BEFORE any product queries
+	// This must be done BEFORE WP_Query to ensure all products use correct currency
+	if ( class_exists( 'WCML_Multi_Currency' ) ) {
+		global $woocommerce_wpml;
+		if ( isset( $woocommerce_wpml->multi_currency ) ) {
+			// Try to get currency from cookie/session first
+			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
+			
+			// If no currency from cookie, use base currency from WooCommerce settings
+			if ( ! $currency ) {
+				$currency = get_woocommerce_currency(); // Base currency (e.g., USD, IDR)
+			}
+			
+			if ( $currency ) {
+				// Force set currency for this request - MUST be before any product queries
+				$woocommerce_wpml->multi_currency->set_client_currency( $currency );
+			}
+		}
+	} else {
+		// If WCML is not active, WooCommerce will use base currency automatically
+		// No action needed - get_price_html() will use base currency
+	}
+
 	$q = new WP_Query(
 		array(
 			'post_type'      => 'product',
@@ -234,20 +257,6 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			'posts_per_page' => 50,
 		)
 	);
-
-	// CRITICAL: Set WCML currency context BEFORE any product queries
-	// This must be done BEFORE WP_Query to ensure all products use correct currency
-	if ( class_exists( 'WCML_Multi_Currency' ) ) {
-		global $woocommerce_wpml;
-		if ( isset( $woocommerce_wpml->multi_currency ) ) {
-			// Get current currency from cookie/session
-			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
-			if ( $currency ) {
-				// Force set currency for this request - MUST be before any product queries
-				$woocommerce_wpml->multi_currency->set_client_currency( $currency );
-			}
-		}
-	}
 
 	ob_start();
 	echo '<div class="wishlist-items">';
@@ -271,6 +280,11 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			// This is the EXACT same method used in content-single-product.php line 80
 			// WCML automatically hooks into woocommerce_get_price_html filter
 			// The currency context was set BEFORE the query, so prices will be converted
+			// Force refresh product price cache to ensure currency conversion works
+			if ( method_exists( $product, 'get_price' ) ) {
+				// Clear any cached price to force recalculation with current currency
+				$product->get_price(); // This triggers WCML currency conversion
+			}
 			$price = $product->get_price_html();
 			
 			$is_variable = $product->is_type( 'variable' );
@@ -385,6 +399,29 @@ function wp_augoose_ajax_wishlist_get() {
 		wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
 	} else {
 		check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
+	}
+	
+	// CRITICAL: Set WCML currency context BEFORE rendering wishlist items
+	// This ensures prices are displayed in the correct currency
+	if ( class_exists( 'WCML_Multi_Currency' ) ) {
+		global $woocommerce_wpml;
+		if ( isset( $woocommerce_wpml->multi_currency ) ) {
+			// Try to get currency from cookie/session first
+			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
+			
+			// If no currency from cookie, use base currency from WooCommerce settings
+			if ( ! $currency ) {
+				$currency = get_woocommerce_currency(); // Base currency (e.g., USD, IDR)
+			}
+			
+			if ( $currency ) {
+				// Force set currency for this AJAX request
+				$woocommerce_wpml->multi_currency->set_client_currency( $currency );
+			}
+		}
+	} else {
+		// If WCML is not active, WooCommerce will use base currency automatically
+		// No action needed - get_price_html() will use base currency
 	}
 	
 	$ids  = wp_augoose_wishlist_get_ids();

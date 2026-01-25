@@ -191,12 +191,12 @@ body.term-shirts ul.products {
     body.term-pants ul.products,
     body.term-shirts .woocommerce ul.products,
     body.term-shirts ul.products {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important;
+        grid-template-columns: 1fr !important; /* 1 kolom di mobile */
+        gap: 20px !important;
     }
     
     .product-thumbnail {
-        min-height: 260px !important;
+        min-height: 300px !important; /* Gambar lebih besar karena 1 kolom */
     }
 }
 
@@ -215,12 +215,12 @@ body.term-shirts ul.products {
     body.term-pants ul.products,
     body.term-shirts .woocommerce ul.products,
     body.term-shirts ul.products {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 16px !important;
+        grid-template-columns: 1fr !important; /* 1 kolom di mobile kecil */
+        gap: 20px !important;
     }
     
     .product-thumbnail {
-        min-height: 240px !important;
+        min-height: 280px !important; /* Gambar lebih besar karena 1 kolom */
     }
 }
 
@@ -2645,6 +2645,7 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     color: #1a1a1a;
     padding: 0;
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .product-item-summary .qty-input::-webkit-outer-spin-button,
@@ -2826,7 +2827,6 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 
 .checkout-place-order .checkout-security-note {
     order: 3 !important; /* Security note last */
-}
     padding: 0 !important;
 }
 
@@ -3331,9 +3331,17 @@ body.woocommerce-cart .site-main .entry-content {
     body.woocommerce-shop .woocommerce ul.products,
     body.post-type-archive-product .woocommerce ul.products,
     body.woocommerce-shop ul.products,
-    body.post-type-archive-product ul.products {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 12px !important;
+    body.post-type-archive-product ul.products,
+    body.tax-product_cat .woocommerce ul.products,
+    body.tax-product_cat ul.products,
+    body.tax-product_tag .woocommerce ul.products,
+    body.tax-product_tag ul.products {
+        grid-template-columns: 1fr !important; /* 1 kolom di mobile kecil */
+        gap: 20px !important;
+    }
+    
+    .product-thumbnail {
+        min-height: 280px !important;
     }
     
     .single-product-wrapper .variation-swatches.is-size {
