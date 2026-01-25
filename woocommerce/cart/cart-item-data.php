@@ -1,7 +1,7 @@
 <?php
 /**
  * Cart item data (when outputting non-flat)
- * Custom template: Hide Market, single colon format
+ * Custom template: Single colon format
  *
  * @package WP_Augoose
  * @version 2.4.0
@@ -13,12 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <dl class="variation">
 	<?php foreach ( $item_data as $data ) : ?>
 		<?php
-		// Skip Market attribute
-		$key = isset( $data['key'] ) ? strtolower( trim( $data['key'] ) ) : '';
-		if ( strpos( $key, 'market' ) !== false ) {
-			continue; // Hide Market
-		}
-		
 		// Format: single colon "Key: Value"
 		$key_label = isset( $data['key'] ) ? trim( str_replace( ':', '', $data['key'] ) ) : '';
 		$value_raw = isset( $data['value'] ) ? trim( $data['value'] ) : '';

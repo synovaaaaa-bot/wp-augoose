@@ -5,6 +5,11 @@
  * @package WP_Augoose
  */
 
+// Load security functions once
+if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) && file_exists( get_template_directory() . '/inc/security.php' ) ) {
+	require_once get_template_directory() . '/inc/security.php';
+}
+
 /**
  * WooCommerce setup function.
  */
@@ -218,32 +223,73 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 }
 
 function wp_augoose_ajax_wishlist_toggle() {
-	// Security: Verify nonce and sanitize input
-	if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) ) {
-		require_once get_template_directory() . '/inc/security.php';
+	// Security: Verify nonce (simplified - use standard WordPress check)
+	if ( ! isset( $_POST['nonce'] ) ) {
+		wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
+		return;
 	}
-	wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
+	
+	// Use standard WordPress nonce check (more reliable)
+	$nonce_check = check_ajax_referer( 'wp_augoose_nonce', 'nonce', false );
+	if ( ! $nonce_check ) {
+		wp_send_json_error( array( 
+			'message' => 'Security check failed. Please refresh the page and try again.',
+			'debug' => array(
+				'nonce_received' => isset( $_POST['nonce'] ) ? 'yes' : 'no',
+				'nonce_valid' => false
+			)
+		) );
+		return;
+	}
 	
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		wp_send_json_error( array( 'message' => 'WooCommerce not available' ) );
+		return;
 	}
 
-	$product_id = wp_augoose_sanitize_product_id( $_POST['product_id'] ?? 0 );
-	if ( ! $product_id || 'product' !== get_post_type( $product_id ) ) {
-		wp_send_json_error( array( 'message' => 'Invalid product' ) );
+	// Get and validate product_id
+	if ( ! isset( $_POST['product_id'] ) ) {
+		wp_send_json_error( array( 'message' => 'Product ID is missing' ) );
+		return;
+	}
+	
+	if ( function_exists( 'wp_augoose_sanitize_product_id' ) ) {
+		$product_id = wp_augoose_sanitize_product_id( $_POST['product_id'] );
+	} else {
+		$product_id = absint( $_POST['product_id'] );
+	}
+	
+	if ( ! $product_id || $product_id <= 0 ) {
+		wp_send_json_error( array( 'message' => 'Invalid product ID' ) );
+		return;
 	}
 
+	// Validate product exists and is a product
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		wp_send_json_error( array( 'message' => 'Product not found' ) );
+		return;
+	}
+
+	// Get current wishlist
 	$ids = wp_augoose_wishlist_get_ids();
+	
+	// Toggle product in wishlist
 	if ( in_array( $product_id, $ids, true ) ) {
+		// Remove from wishlist
 		$ids = array_values( array_diff( $ids, array( $product_id ) ) );
 		$action = 'removed';
 	} else {
+		// Add to wishlist
 		array_unshift( $ids, $product_id );
 		$ids    = array_values( array_unique( $ids ) );
 		$action = 'added';
 	}
+	
+	// Save wishlist
 	wp_augoose_wishlist_set_ids( $ids );
 
+	// Return success response
 	wp_send_json_success(
 		array(
 			'action' => $action,
@@ -257,13 +303,15 @@ add_action( 'wp_ajax_nopriv_wp_augoose_wishlist_toggle', 'wp_augoose_ajax_wishli
 
 function wp_augoose_ajax_wishlist_get() {
 	// Security: Verify nonce
-	if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) ) {
-		require_once get_template_directory() . '/inc/security.php';
+	if ( function_exists( 'wp_augoose_verify_ajax_nonce' ) ) {
+		wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
+	} else {
+		check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
 	}
-	wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
 	
 	$ids  = wp_augoose_wishlist_get_ids();
 	$html = wp_augoose_wishlist_render_items_html( $ids );
+	
 	wp_send_json_success(
 		array(
 			'count' => count( $ids ),
@@ -324,6 +372,13 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Silakan pilih opsi produk' => 'Please choose product options',
 			'Keranjang diperbarui' => 'Cart updated',
 			'Item keranjang tidak valid' => 'Invalid cart item',
+			// Cart removal messages
+			'%s telah dihapus dari keranjang karena tidak bisa dibeli lagi. Hubungi kami jika Anda butuh bantuan.' => '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.',
+			'%s telah dihapus dari keranjang' => '%s has been removed from your cart',
+			'telah dihapus dari keranjang' => 'has been removed from your cart',
+			'tidak bisa dibeli lagi' => 'can no longer be purchased',
+			'Hubungi kami jika Anda butuh bantuan' => 'Please contact us if you need assistance',
+			'Hubungi kami jika Anda memerlukan bantuan' => 'Please contact us if you need assistance',
 			'Masuk' => 'Login',
 			'masuk' => 'Login',
 			'Alamat penagihan' => 'Billing address',
@@ -508,6 +563,33 @@ function wp_augoose_catalog_orderby_english( $options ) {
 }
 
 /**
+ * Force WooCommerce cart item removed message to English
+ */
+add_filter( 'woocommerce_cart_item_removed_message', 'wp_augoose_cart_item_removed_message_english', 20, 2 );
+function wp_augoose_cart_item_removed_message_english( $message, $product ) {
+	// Force English message regardless of locale
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$product_name = $product->get_name();
+		return sprintf( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', $product_name );
+	}
+	return $message;
+}
+
+/**
+ * Force WooCommerce cart item removed because modified message to English
+ */
+add_filter( 'woocommerce_cart_item_removed_because_modified_message', 'wp_augoose_cart_item_modified_message_english', 20, 2 );
+function wp_augoose_cart_item_modified_message_english( $message, $product ) {
+	// Force English message regardless of locale
+	if ( $product && is_a( $product, 'WC_Product' ) ) {
+		$product_name = $product->get_name();
+		$product_url = $product->get_permalink();
+		return sprintf( '%s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%s">here</a>.', $product_name, $product_url );
+	}
+	return $message;
+}
+
+/**
  * Force WooCommerce add to cart messages to English
  */
 add_filter( 'wc_add_to_cart_message_html', 'wp_augoose_add_to_cart_message_english', 20, 3 );
@@ -560,6 +642,40 @@ function wp_augoose_product_add_to_cart_message_english( $text, $product ) {
 		$text
 	);
 	return $text;
+}
+
+/**
+ * Force all WooCommerce notices to English
+ */
+add_filter( 'woocommerce_add_error', 'wp_augoose_force_notice_english', 20, 1 );
+add_filter( 'woocommerce_add_success', 'wp_augoose_force_notice_english', 20, 1 );
+add_filter( 'woocommerce_add_notice', 'wp_augoose_force_notice_english', 20, 1 );
+function wp_augoose_force_notice_english( $message ) {
+	if ( empty( $message ) ) {
+		return $message;
+	}
+	
+	// Common Indonesian to English translations for notices
+	$replacements = array(
+		// Cart removal
+		'telah dihapus dari keranjang' => 'has been removed from your cart',
+		'Telah dihapus dari keranjang' => 'Has been removed from your cart',
+		'tidak bisa dibeli lagi' => 'can no longer be purchased',
+		'Hubungi kami jika Anda butuh bantuan' => 'Please contact us if you need assistance',
+		'Hubungi kami jika Anda memerlukan bantuan' => 'Please contact us if you need assistance',
+		// Add to cart
+		'telah ditambahkan ke keranjang' => 'has been added to your cart',
+		'Telah ditambahkan ke keranjang' => 'Has been added to your cart',
+		// General
+		'keranjang' => 'cart',
+		'Keranjang' => 'Cart',
+		'produk' => 'product',
+		'Produk' => 'Product',
+	);
+	
+	$message = str_replace( array_keys( $replacements ), array_values( $replacements ), $message );
+	
+	return $message;
 }
 
 /**
@@ -1432,7 +1548,7 @@ function wp_augoose_cart_item_name( $product_name, $cart_item, $cart_item_key ) 
 add_filter( 'woocommerce_get_item_data', 'wp_augoose_format_cart_item_data', 10, 2 );
 
 /**
- * Format cart item data: Hide Market attribute and simplify colon format
+ * Format cart item data: Simplify colon format
  */
 function wp_augoose_format_cart_item_data( $item_data, $cart_item ) {
 	if ( ! is_array( $item_data ) ) {
@@ -1442,12 +1558,6 @@ function wp_augoose_format_cart_item_data( $item_data, $cart_item ) {
 	$filtered_data = array();
 	
 	foreach ( $item_data as $data ) {
-		// Skip Market attribute
-		$key = isset( $data['key'] ) ? strtolower( $data['key'] ) : '';
-		if ( strpos( $key, 'market' ) !== false ) {
-			continue; // Hide Market
-		}
-		
 		// Simplify format: remove colon from key, use single colon in display
 		if ( isset( $data['key'] ) ) {
 			// Remove colon from key if exists
@@ -1647,14 +1757,69 @@ function wp_augoose_cart_scripts() {
 					}
 				});
 				
-				// Auto update cart on quantity change
+				// Auto update cart on quantity change (optimized - AJAX instead of form submit)
+				var cartUpdateTimeout;
+				var isCartUpdating = false;
+				
 				$(".cart .quantity input[type=number]").on("change", function() {
-					var $form = $(this).closest("form.woocommerce-cart-form");
-					if ($form.length) {
-						setTimeout(function() {
-							$form.find("button[name=update_cart]").trigger("click");
-						}, 500);
+					var $input = $(this);
+					var $form = $input.closest("form.woocommerce-cart-form");
+					
+					if (!$form.length || isCartUpdating) {
+						return;
 					}
+					
+					// Get cart item key from input name
+					var inputName = $input.attr("name");
+					var cartKey = inputName ? inputName.replace("cart[", "").replace("][qty]", "") : "";
+					var quantity = parseInt($input.val()) || 1;
+					
+					if (!cartKey) {
+						return;
+					}
+					
+					// Clear previous timeout
+					clearTimeout(cartUpdateTimeout);
+					
+					// Show loading state
+					$input.closest("tr, .cart_item").addClass("updating");
+					
+					// Faster debounce (100ms instead of 500ms)
+					cartUpdateTimeout = setTimeout(function() {
+						if (isCartUpdating) return;
+						
+						isCartUpdating = true;
+						
+						$.ajax({
+							url: wc_add_to_cart_params.ajax_url || "/wp-admin/admin-ajax.php",
+							type: "POST",
+							timeout: 10000,
+							data: {
+								action: "update_checkout_quantity",
+								cart_key: cartKey,
+								quantity: quantity,
+								security: wc_add_to_cart_params.update_cart_nonce || ""
+							},
+							success: function(response) {
+								if (response && response.success) {
+									// Update cart fragments (faster than form submit)
+									$(document.body).trigger("wc_fragment_refresh");
+									$(document.body).trigger("updated_wc_div");
+								} else {
+									// Fallback to form submit on error
+									$form.find("button[name=update_cart]").trigger("click");
+								}
+							},
+							error: function() {
+								// Fallback to form submit on error
+								$form.find("button[name=update_cart]").trigger("click");
+							},
+							complete: function() {
+								isCartUpdating = false;
+								$(".updating").removeClass("updating");
+							}
+						});
+					}, 100);
 				});
 			});
 		' );
@@ -1775,21 +1940,32 @@ function wp_augoose_update_checkout_quantity() {
 		return;
 	}
 	
-	// Update cart
+	// Validate cart item exists
+	$cart_item = WC()->cart->get_cart_item( $cart_key );
+	if ( ! $cart_item ) {
+		wp_send_json_error( array( 'message' => 'Cart item not found.' ) );
+		return;
+	}
+	
+	// Update cart (optimized - calculate totals only once)
 	if ( $quantity === 0 ) {
 		// Remove item
 		WC()->cart->remove_cart_item( $cart_key );
 	} else {
-		// Update quantity
-		WC()->cart->set_quantity( $cart_key, $quantity, true );
+		// Update quantity (set refresh_totals to false, we'll calculate manually)
+		WC()->cart->set_quantity( $cart_key, $quantity, false );
 	}
 	
-	// Calculate totals
+	// Calculate totals once (faster than multiple calculations)
 	WC()->cart->calculate_totals();
 	
+	// Return success with cart data for immediate UI update
 	wp_send_json_success( array(
 		'message' => 'Cart updated',
 		'cart_hash' => WC()->cart->get_cart_hash(),
+		'cart_total' => WC()->cart->get_total(),
+		'cart_subtotal' => WC()->cart->get_subtotal(),
+		'item_count' => WC()->cart->get_cart_contents_count(),
 	) );
 }
 

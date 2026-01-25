@@ -30,17 +30,88 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Auto-update cart on quantity change
+// Auto-update cart on quantity change (optimized - AJAX instead of form submit)
 jQuery(document).ready(function($) {
+    var cartUpdateTimeout;
+    var isCartUpdating = false;
+    
     $('.quantity-simple input[type="number"]').on('change', function() {
-        const $form = $(this).closest('form.woocommerce-cart-form');
-        if ($form.length) {
-            // Auto submit form to update cart
-            setTimeout(function() {
-                $form.submit();
-            }, 300);
+        const $input = $(this);
+        const $form = $input.closest('form.woocommerce-cart-form');
+        
+        if (!$form.length) {
+            return;
         }
+        
+        // Get cart item key from input name
+        const inputName = $input.attr('name');
+        const cartKey = inputName ? inputName.replace('cart[', '').replace('][qty]', '') : '';
+        const quantity = parseInt($input.val()) || 1;
+        
+        if (!cartKey || isCartUpdating) {
+            return;
+        }
+        
+        // Clear previous timeout
+        clearTimeout(cartUpdateTimeout);
+        
+        // Show loading state
+        $input.closest('tr, .cart_item').addClass('updating');
+        
+        // Faster debounce (100ms)
+        cartUpdateTimeout = setTimeout(function() {
+            updateCartQuantityAjax(cartKey, quantity);
+        }, 100);
     });
+    
+    // Optimized AJAX cart update
+    function updateCartQuantityAjax(cartKey, quantity) {
+        if (isCartUpdating) {
+            return;
+        }
+        
+        isCartUpdating = true;
+        
+        $.ajax({
+            url: wc_add_to_cart_params.ajax_url || '/wp-admin/admin-ajax.php',
+            type: 'POST',
+            timeout: 10000,
+            data: {
+                action: 'update_checkout_quantity',
+                cart_key: cartKey,
+                quantity: quantity,
+                security: wc_add_to_cart_params.update_cart_nonce || ''
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    // Update cart fragments (faster than form submit)
+                    $(document.body).trigger('wc_fragment_refresh');
+                    $(document.body).trigger('updated_wc_div');
+                    
+                    // Update cart totals via fragments
+                    if (typeof wc_add_to_cart_params !== 'undefined' && wc_add_to_cart_params.cart_url) {
+                        $.post(wc_add_to_cart_params.cart_url, {
+                            'update_cart': 'Update cart',
+                            'woocommerce-cart-nonce': wc_add_to_cart_params.update_cart_nonce
+                        }, function() {
+                            $(document.body).trigger('wc_fragment_refresh');
+                        });
+                    }
+                } else {
+                    // Fallback to form submit on error
+                    $('.quantity-simple input[type="number"]').closest('form.woocommerce-cart-form').submit();
+                }
+            },
+            error: function() {
+                // Fallback to form submit on error
+                $('.quantity-simple input[type="number"]').closest('form.woocommerce-cart-form').submit();
+            },
+            complete: function() {
+                isCartUpdating = false;
+                $('.updating').removeClass('updating');
+            }
+        });
+    }
     
     // Quantity buttons
     $('.quantity-simple').each(function() {

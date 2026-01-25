@@ -1,0 +1,63 @@
+# Git Commit Commands
+
+## Untuk commit perubahan:
+
+```bash
+cd wp-augoose
+
+# Add semua perubahan
+git add .
+
+# Commit dengan message
+git commit -F COMMIT-MESSAGE.txt
+
+# Atau commit langsung:
+git commit -m "Fix: Transaction Errors & Remove Custom Currency Code
+
+- Fix fatal errors ketika klik product dan add to cart
+- Remove semua custom currency code dari theme
+- Disable price hooks di plugin multicurrency
+- Theme sekarang support plugin currency switcher (FOX, WPML, etc.)
+
+Changes:
+- Disabled ALL price conversion hooks in multicurrency plugin
+- Removed custom currency switcher code
+- Removed currency conversion filters
+- Added error handling for add to cart
+- Simplified currency switcher to support plugins only
+
+Files Deleted:
+- inc/currency-ui-only.php
+- inc/currency-idr-multi.php
+- assets/js/currency-ui-only.js
+- assets/js/currency-switcher.js
+
+Files Added:
+- inc/disable-multicurrency-plugin.php
+
+Breaking Changes:
+⚠️ Custom currency conversion removed - use plugin currency switcher instead"
+```
+
+## Untuk membuat PR:
+
+```bash
+# Push ke branch baru
+git checkout -b fix/transaction-errors-remove-currency
+git push origin fix/transaction-errors-remove-currency
+
+# Atau push ke branch existing
+git push origin main
+```
+
+## Files yang diubah:
+
+### Plugin:
+- wp-content/plugins/multicurrency-autoconvert/multicurrency-autoconvert.php
+
+### Theme:
+- wp-augoose/functions.php
+- wp-augoose/inc/woocommerce.php
+- wp-augoose/inc/performance.php
+- wp-augoose/assets/js/main.js
+- wp-augoose/inc/disable-multicurrency-plugin.php (new)

@@ -587,7 +587,8 @@ body.post-type-archive-product ul.products {
 }
 
 .single-product-wrapper .quantity {
-    display: none;
+    display: inline-flex !important;
+    margin-bottom: 20px;
 }
 
 .single-product-wrapper .single_add_to_cart_button {
@@ -963,16 +964,6 @@ body.post-type-archive-product ul.products {
     font-weight: 600;
 }
 
-/* Hide Market variation in cart */
-.cart-item-variation .variation-market,
-.cart-item-variation dt.variation-market,
-.cart-item-variation dd.variation-market,
-.cart-item-variation .variation-Market,
-.cart-item-variation dt.variation-Market,
-.cart-item-variation dd.variation-Market {
-    display: none !important;
-    visibility: hidden !important;
-}
 
 .cart-page-simple .cart-item-variation {
     font-size: 12px;

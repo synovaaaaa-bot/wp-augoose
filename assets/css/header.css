@@ -746,3 +746,152 @@ body.mobile-menu-open .mobile-menu {
         min-width: 16px;
     }
 }
+
+/* ============================================
+   WCML Currency Switcher Custom Styling
+   ============================================ */
+.header-locale-item--currency {
+    position: relative;
+}
+
+/* Style untuk WCML currency switcher */
+.header-locale-item--currency select,
+.header-currency select,
+.header-currency .woocs-select,
+.header-currency .aelia-currency-selector,
+.header-currency .wcml-currency-selector {
+    height: 34px !important;
+    padding: 0 28px 0 10px !important;
+    border: 1px solid #D1D5DB !important;
+    background: #fff !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    color: #30475E !important;
+    max-width: 90px !important;
+    min-width: 70px !important;
+    overflow: visible !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    border-radius: 0 !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    font-family: inherit !important;
+    line-height: 1.2 !important;
+}
+
+.header-locale-item--currency select:focus,
+.header-currency select:focus {
+    outline: none !important;
+    border-color: #30475E !important;
+    box-shadow: 0 0 0 2px rgba(48, 71, 94, 0.1) !important;
+}
+
+.header-locale-item--currency select:hover,
+.header-currency select:hover {
+    border-color: #30475E !important;
+    background: #F9FAFB !important;
+}
+
+/* Custom dropdown arrow */
+.header-locale-item--currency::after {
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #30475E;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Hide default dropdown arrow */
+.header-locale-item--currency select::-ms-expand,
+.header-currency select::-ms-expand {
+    display: none !important;
+}
+
+/* Hide placeholder text yang jelek */
+.header-currency select option[value=""],
+.header-currency select option:disabled {
+    display: none !important;
+}
+
+/* Style untuk option yang terpilih */
+.header-currency select option {
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    color: #30475E !important;
+    background: #fff !important;
+    line-height: 1.4 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Ensure select dropdown shows all options */
+.header-currency select {
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure all currency options are visible */
+.header-currency {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+    opacity: 1 !important;
+}
+
+/* Ensure dropdown menu is visible when opened */
+.header-currency select:focus,
+.header-currency select:active {
+    overflow: visible !important;
+    z-index: 1000 !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .header-locale-item--currency select,
+    .header-currency select {
+        height: 28px !important;
+        padding: 0 24px 0 10px !important;
+        font-size: 8px !important;
+        max-width: 60px !important;
+        min-width: 50px !important;
+    }
+    
+    .header-locale-item--currency::after {
+        right: 6px;
+        border-top-width: 4px;
+        border-left-width: 3px;
+        border-right-width: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-locale-item--currency select,
+    .header-currency select {
+        height: 28px !important;
+        padding: 0 20px 0 8px !important;
+        font-size: 7px !important;
+        max-width: 50px !important;
+        min-width: 45px !important;
+    }
+}

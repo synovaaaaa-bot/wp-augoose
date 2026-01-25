@@ -48,33 +48,69 @@ jQuery(document).ready(function($) {
         setTimeout(initCartSidebarQuantity, 100);
     });
     
-    // Auto update cart on quantity change
+    // Auto update cart on quantity change (optimized - no page reload)
+    var cartUpdateTimeout;
+    var isCartUpdating = false;
+    
     $(document).on('change', '.cart-sidebar-quantity input[type="number"]', function() {
         const $input = $(this);
-        const $form = $('<form>').attr('method', 'post').attr('action', wc_add_to_cart_params.cart_url || '/cart/');
+        const cartKey = $input.attr('name') ? $input.attr('name').replace('cart[', '').replace('][qty]', '') : '';
+        const quantity = parseInt($input.val()) || 1;
         
-        // Get all cart items
-        $('.cart-sidebar-quantity input[type="number"]').each(function() {
-            const name = $(this).attr('name');
-            const value = $(this).val();
-            $form.append($('<input>').attr('type', 'hidden').attr('name', name).val(value));
-        });
+        if (!cartKey || isCartUpdating) {
+            return;
+        }
         
-        // Add nonce
-        $form.append($('<input>').attr('type', 'hidden').attr('name', 'woocommerce-cart-nonce').val(wc_add_to_cart_params.update_cart_nonce));
-        $form.append($('<input>').attr('type', 'hidden').attr('name', 'update_cart').val('Update cart'));
+        // Clear previous timeout
+        clearTimeout(cartUpdateTimeout);
         
-        // Submit form
+        // Show loading state
+        $input.closest('.cart-sidebar-item').addClass('updating');
+        
+        // Debounce update (100ms for faster response)
+        cartUpdateTimeout = setTimeout(function() {
+            updateCartSidebarQuantity(cartKey, quantity);
+        }, 100);
+    });
+    
+    // Optimized AJAX cart update function
+    function updateCartSidebarQuantity(cartKey, quantity) {
+        if (isCartUpdating) {
+            return;
+        }
+        
+        isCartUpdating = true;
+        
         $.ajax({
-            url: wc_add_to_cart_params.cart_url || '/cart/',
+            url: wc_add_to_cart_params.ajax_url || '/wp-admin/admin-ajax.php',
             type: 'POST',
-            data: $form.serialize(),
-            success: function() {
-                // Reload page to update cart
+            timeout: 10000,
+            data: {
+                action: 'update_checkout_quantity',
+                cart_key: cartKey,
+                quantity: quantity,
+                security: wc_add_to_cart_params.update_cart_nonce || ''
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    // Update cart fragments (faster than page reload)
+                    $(document.body).trigger('wc_fragment_refresh');
+                    $(document.body).trigger('updated_wc_div');
+                } else {
+                    // Fallback to page reload on error
+                    location.reload();
+                }
+            },
+            error: function() {
+                // Fallback to page reload on error
                 location.reload();
+            },
+            complete: function() {
+                isCartUpdating = false;
+                $('.cart-sidebar-item').removeClass('updating');
             }
         });
-    });
+    }
     
     // Remove item with confirmation
     $(document).on('click', '.cart-sidebar-remove', function(e) {

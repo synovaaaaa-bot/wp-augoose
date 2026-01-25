@@ -243,40 +243,91 @@
 
     // Add to Wishlist (Integrated - server cookie/user meta)
     function initWishlist() {
+        // Debounce to prevent multiple rapid clicks
+        let wishlistProcessing = false;
+        
+        // Use more specific selector and ensure it works
         $(document).on('click', '.add-to-wishlist, .wishlist-toggle', function(e) {
-            // PART A: Latest Collection - Prevent navigation to product page
-            // Always prevent default and stop propagation for wishlist clicks
+            // Prevent navigation to product page
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation(); // Prevent other handlers
             
             const button = $(this);
-            const productId = button.data('product-id');
             
-            // Prevent navigation to product page
-            if (!productId) {
+            // Try multiple ways to get product ID
+            let productId = parseInt(button.data('product-id'), 10);
+            if (!productId || isNaN(productId)) {
+                // Try from parent element
+                const parent = button.closest('[data-product-id]');
+                if (parent.length) {
+                    productId = parseInt(parent.data('product-id'), 10);
+                }
+            }
+            
+            // Validate product ID
+            if (!productId || isNaN(productId)) {
+                console.error('Invalid product ID - Button:', button);
+                console.error('Button data:', button.data());
+                console.error('Parent data:', button.closest('[data-product-id]').data());
                 return false;
             }
 
-            button.addClass('loading');
+            // Prevent multiple simultaneous requests
+            if (wishlistProcessing || button.hasClass('loading')) {
+                console.log('Wishlist already processing, skipping...');
+                return false;
+            }
+
+            wishlistProcessing = true;
+            button.addClass('loading').prop('disabled', true);
+            
+            // Debug logging
+            console.log('Wishlist toggle - Product ID:', productId);
+            console.log('Wishlist toggle - AJAX URL:', wpAugoose ? wpAugoose.ajaxUrl : 'undefined');
+            console.log('Wishlist toggle - Nonce:', wpAugoose ? wpAugoose.nonce : 'undefined');
+            
+            // Validate wpAugoose object
+            if (!wpAugoose || !wpAugoose.ajaxUrl || !wpAugoose.nonce) {
+                console.error('wpAugoose object is not properly initialized');
+                button.removeClass('loading').prop('disabled', false);
+                wishlistProcessing = false;
+                if (typeof showNotification === 'function') {
+                    showNotification('Wishlist system not initialized. Please refresh the page.', 'error');
+                }
+                return false;
+            }
             
             $.ajax({
                 url: wpAugoose.ajaxUrl,
                 type: 'POST',
+                timeout: 10000, // 10 second timeout
                 data: {
                     action: 'wp_augoose_wishlist_toggle',
                     product_id: productId,
                     nonce: wpAugoose.nonce
                 },
                 success: function(res) {
-                    if (res && res.success) {
+                    console.log('Wishlist AJAX response:', res);
+                    
+                    if (res && res.success && res.data) {
                         if (res.data.action === 'added') {
                             button.addClass('active');
-                            showNotification('Product added to wishlist');
+                            console.log('Product added to wishlist');
+                            if (typeof showNotification === 'function') {
+                                showNotification('Product added to wishlist');
+                            }
                         } else {
                             button.removeClass('active');
-                            showNotification('Product removed from wishlist');
+                            console.log('Product removed from wishlist');
+                            if (typeof showNotification === 'function') {
+                                showNotification('Product removed from wishlist');
+                            }
                         }
+                        
+                        // Update badge count
                         const count = res.data.count || 0;
+                        console.log('Wishlist count:', count);
                         const $badge = $('.wishlist-count');
                         if ($badge.length) {
                             if (count > 0) {
@@ -286,45 +337,121 @@
                             }
                         }
                     } else {
-                        showNotification('Error updating wishlist', 'error');
-                    }
-                },
-                error: function() {
-                    showNotification('Error updating wishlist', 'error');
-                },
-                complete: function() {
-                    button.removeClass('loading');
-                }
-            });
-        });
-
-        // Initialize wishlist buttons from server
-        function updateWishlistButtons() {
-            $.post(wpAugoose.ajaxUrl, { action: 'wp_augoose_wishlist_get', nonce: wpAugoose.nonce })
-                .done(function(res) {
-                    if (res && res.success) {
-                        const count = res.data.count || 0;
-                        const html = res.data.html || '';
-                        // derive ids by parsing data-product-id in HTML (lightweight)
-                        const ids = [];
-                        const $tmp = $('<div>').html(html);
-                        $tmp.find('.wishlist-item').each(function() {
-                            ids.push(parseInt($(this).data('product-id'), 10));
-                        });
-                        $('.add-to-wishlist').each(function() {
-                            const pid = parseInt($(this).data('product-id'), 10);
-                            if (ids.includes(pid)) $(this).addClass('active');
-                        });
-                        const $badge = $('.wishlist-count');
-                        if ($badge.length) {
-                            if (count > 0) $badge.text(count).show();
-                            else $badge.hide();
+                        const errorMsg = (res && res.data && res.data.message) ? res.data.message : 'Error updating wishlist';
+                        console.error('Wishlist error:', errorMsg, res);
+                        if (typeof showNotification === 'function') {
+                            showNotification(errorMsg, 'error');
+                        } else {
+                            alert(errorMsg);
                         }
                     }
-                });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Wishlist AJAX error:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText,
+                        statusCode: xhr.status
+                    });
+                    
+                    // Try to parse error response
+                    let errorMsg = 'Error updating wishlist. Please try again.';
+                    if (xhr.responseText) {
+                        try {
+                            const errorResponse = JSON.parse(xhr.responseText);
+                            if (errorResponse.data && errorResponse.data.message) {
+                                errorMsg = errorResponse.data.message;
+                            }
+                        } catch (e) {
+                            // Not JSON, use default message
+                        }
+                    }
+                    
+                    if (typeof showNotification === 'function') {
+                        showNotification(errorMsg, 'error');
+                    } else {
+                        alert(errorMsg);
+                    }
+                },
+                complete: function() {
+                    button.removeClass('loading').prop('disabled', false);
+                    wishlistProcessing = false;
+                }
+            });
+            
+            return false;
+        });
+
+        // Initialize wishlist buttons from server (optimized)
+        let wishlistInitialized = false;
+        function updateWishlistButtons() {
+            // Only initialize once per page load to reduce lag
+            if (wishlistInitialized) {
+                return;
+            }
+            
+            // Skip if no wishlist buttons on page
+            if ($('.add-to-wishlist').length === 0) {
+                return;
+            }
+            
+            wishlistInitialized = true;
+            
+            $.ajax({
+                url: wpAugoose.ajaxUrl,
+                type: 'POST',
+                timeout: 5000, // 5 second timeout
+                data: {
+                    action: 'wp_augoose_wishlist_get',
+                    nonce: wpAugoose.nonce
+                },
+                success: function(res) {
+                    if (res && res.success && res.data) {
+                        const count = res.data.count || 0;
+                        const html = res.data.html || '';
+                        
+                        // Derive ids by parsing data-product-id in HTML (lightweight)
+                        const ids = [];
+                        if (html) {
+                            const $tmp = $('<div>').html(html);
+                            $tmp.find('.wishlist-item').each(function() {
+                                const pid = parseInt($(this).data('product-id'), 10);
+                                if (pid && !isNaN(pid)) {
+                                    ids.push(pid);
+                                }
+                            });
+                        }
+                        
+                        // Update button states
+                        $('.add-to-wishlist').each(function() {
+                            const pid = parseInt($(this).data('product-id'), 10);
+                            if (pid && !isNaN(pid) && ids.includes(pid)) {
+                                $(this).addClass('active');
+                            } else {
+                                $(this).removeClass('active');
+                            }
+                        });
+                        
+                        // Update badge count
+                        const $badge = $('.wishlist-count');
+                        if ($badge.length) {
+                            if (count > 0) {
+                                $badge.text(count).show();
+                            } else {
+                                $badge.hide();
+                            }
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to load wishlist:', status, error);
+                    wishlistInitialized = false; // Allow retry on error
+                }
+            });
         }
 
-        updateWishlistButtons();
+        // Initialize on page load (with small delay to reduce initial lag)
+        setTimeout(updateWishlistButtons, 100);
     }
 
     // AJAX Add to Cart
@@ -699,7 +826,6 @@
     }
     
     // Run on page load and after AJAX
-    $(document).ready(function() {
         preventDuplicateButtons();
         initMobileMenu();
         initSearchToggle();
