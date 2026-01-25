@@ -192,12 +192,21 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 // Response should already be parsed JSON due to dataType: 'json'
-                // But check just in case
+                // But check just in case - handle both string and object responses
                 if (typeof response === 'string') {
+                    // Check if it's HTML (error page)
+                    if (response.trim().startsWith('<')) {
+                        console.error('Server returned HTML instead of JSON:', response.substring(0, 200));
+                        isUpdating = false;
+                        alert('Error updating cart. Server error detected. Page will reload.');
+                        location.reload();
+                        return;
+                    }
+                    // Try to parse as JSON
                     try {
                         response = JSON.parse(response);
                     } catch (e) {
-                        console.error('Invalid JSON response:', response);
+                        console.error('Invalid JSON response:', response.substring(0, 200));
                         console.error('Parse error:', e);
                         isUpdating = false;
                         alert('Error updating cart. Invalid response from server. Page will reload.');

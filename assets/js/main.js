@@ -442,13 +442,23 @@
                     // Try to parse error response
                     let errorMsg = 'Error updating wishlist. Please try again.';
                     if (xhr.responseText) {
-                        try {
-                            const errorResponse = JSON.parse(xhr.responseText);
-                            if (errorResponse.data && errorResponse.data.message) {
-                                errorMsg = errorResponse.data.message;
+                        // Check if response is HTML (error page) instead of JSON
+                        if (xhr.responseText.trim().startsWith('<')) {
+                            console.error('Server returned HTML instead of JSON. This may indicate a PHP error.');
+                            errorMsg = 'Server error. Please refresh the page and try again.';
+                        } else {
+                            try {
+                                const errorResponse = JSON.parse(xhr.responseText);
+                                if (errorResponse.data && errorResponse.data.message) {
+                                    errorMsg = errorResponse.data.message;
+                                }
+                            } catch (e) {
+                                console.error('Failed to parse error response:', e);
+                                // If it's not valid JSON, it might be HTML or plain text
+                                if (xhr.responseText.length < 500) {
+                                    errorMsg = xhr.responseText.substring(0, 200);
+                                }
                             }
-                        } catch (e) {
-                            console.error('Failed to parse error response:', e);
                         }
                     }
                     

@@ -2360,32 +2360,33 @@ function wp_augoose_ajax_add_to_cart() {
 	$quantity   = wp_augoose_sanitize_quantity( $_POST['quantity'] ?? 1, 1, 999 );
 
 	if ( ! $product_id ) {
-		wp_send_json_error( array( 'message' => 'Invalid product ID.' ) );
+		wp_augoose_send_json_clean( array( 'message' => 'Invalid product ID.' ), false );
 	}
 
 	// Check if product exists
 	$product = wc_get_product( $product_id );
 	if ( ! $product ) {
-		wp_send_json_error( array( 'message' => 'Product not found.' ) );
+		wp_augoose_send_json_clean( array( 'message' => 'Product not found.' ), false );
 	}
 
 	// Check if product is purchasable
 	if ( ! $product->is_purchasable() ) {
-		wp_send_json_error( array( 'message' => 'Product is not purchasable.' ) );
+		wp_augoose_send_json_clean( array( 'message' => 'Product is not purchasable.' ), false );
 	}
 
 	// Check if product is in stock
 	if ( ! $product->is_in_stock() ) {
-		wp_send_json_error( array( 'message' => 'Product is out of stock.' ) );
+		wp_augoose_send_json_clean( array( 'message' => 'Product is out of stock.' ), false );
 	}
 
 	// Variable products need options (variation id)
 	if ( $product->is_type( 'variable' ) ) {
-		wp_send_json_error(
+		wp_augoose_send_json_clean(
 			array(
 				'message'     => 'Please choose product options by visiting the product page.',
 				'product_url' => get_permalink( $product_id ),
-			)
+			),
+			false
 		);
 	}
 
@@ -2397,7 +2398,7 @@ function wp_augoose_ajax_add_to_cart() {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log( 'Add to cart error: ' . $e->getMessage() );
 		}
-		wp_send_json_error( array( 'message' => 'Error adding product to cart. Please try again.' ) );
+		wp_augoose_send_json_clean( array( 'message' => 'Error adding product to cart. Please try again.' ), false );
 	}
 
 	if ( $cart_item_key ) {
@@ -2420,12 +2421,12 @@ function wp_augoose_ajax_add_to_cart() {
 			'cart_hash'  => WC()->cart->get_cart_hash(),
 		);
 
-		wp_send_json_success( $data );
+		wp_augoose_send_json_clean( $data, true );
 	} else {
 		if ( function_exists( 'wc_clear_notices' ) ) {
 			wc_clear_notices();
 		}
-		wp_send_json_error( array( 'message' => 'Failed to add product to cart.' ) );
+		wp_augoose_send_json_clean( array( 'message' => 'Failed to add product to cart.' ), false );
 	}
 }
 
@@ -2533,21 +2534,8 @@ function wp_augoose_update_checkout_quantity() {
 	}
 	
 	// Send JSON response with proper headers
-	// Clear any previous output to prevent "Unexpected token '<'" error
-	// This is critical - any HTML output before JSON will cause the error
-	while ( ob_get_level() ) {
-		ob_end_clean();
-	}
-	
-	// Set proper headers BEFORE any output
-	if ( ! headers_sent() ) {
-		header( 'Content-Type: application/json; charset=utf-8' );
-		header( 'X-Content-Type-Options: nosniff' );
-	}
-	
-	// Send JSON response
-	wp_send_json_success( $response );
-	exit; // Ensure no output after JSON
+	// Use helper function to ensure clean output
+	wp_augoose_send_json_clean( $response, true );
 }
 
 /**
