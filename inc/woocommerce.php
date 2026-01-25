@@ -223,11 +223,30 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 }
 
 function wp_augoose_ajax_wishlist_toggle() {
-	// Security: Verify nonce
+	// Security: Verify nonce (with better error handling)
+	$nonce_verified = false;
+	
+	if ( ! isset( $_POST['nonce'] ) ) {
+		wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
+		return;
+	}
+	
 	if ( function_exists( 'wp_augoose_verify_ajax_nonce' ) ) {
-		wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
-	} else {
-		check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
+		try {
+			wp_augoose_verify_ajax_nonce( 'wp_augoose_nonce', 'nonce' );
+			$nonce_verified = true;
+		} catch ( Exception $e ) {
+			// Log error but continue with standard check
+			error_log( 'Wishlist nonce verification error: ' . $e->getMessage() );
+		}
+	}
+	
+	if ( ! $nonce_verified ) {
+		$nonce_check = check_ajax_referer( 'wp_augoose_nonce', 'nonce', false );
+		if ( ! $nonce_check ) {
+			wp_send_json_error( array( 'message' => 'Security check failed. Please refresh the page and try again.' ) );
+			return;
+		}
 	}
 	
 	if ( ! class_exists( 'WooCommerce' ) ) {
@@ -236,21 +255,26 @@ function wp_augoose_ajax_wishlist_toggle() {
 	}
 
 	// Get and validate product_id
-	if ( function_exists( 'wp_augoose_sanitize_product_id' ) ) {
-		$product_id = wp_augoose_sanitize_product_id( $_POST['product_id'] ?? 0 );
-	} else {
-		$product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
+	if ( ! isset( $_POST['product_id'] ) ) {
+		wp_send_json_error( array( 'message' => 'Product ID is missing' ) );
+		return;
 	}
 	
-	if ( ! $product_id ) {
-		wp_send_json_error( array( 'message' => 'Product ID is required' ) );
+	if ( function_exists( 'wp_augoose_sanitize_product_id' ) ) {
+		$product_id = wp_augoose_sanitize_product_id( $_POST['product_id'] );
+	} else {
+		$product_id = absint( $_POST['product_id'] );
+	}
+	
+	if ( ! $product_id || $product_id <= 0 ) {
+		wp_send_json_error( array( 'message' => 'Invalid product ID' ) );
 		return;
 	}
 
 	// Validate product exists and is a product
 	$product = wc_get_product( $product_id );
 	if ( ! $product ) {
-		wp_send_json_error( array( 'message' => 'Invalid product' ) );
+		wp_send_json_error( array( 'message' => 'Product not found' ) );
 		return;
 	}
 
