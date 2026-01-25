@@ -559,10 +559,6 @@ function wp_augoose_scripts() {
     if ( file_exists( $theme_dir . '/assets/css/product-card-fixed.css' ) ) {
         wp_enqueue_style( 'wp-augoose-product-fixed', $theme_dir_uri . '/assets/css/product-card-fixed.css', array(), $asset_ver( 'assets/css/product-card-fixed.css' ), 'all' );
         wp_enqueue_style( 'wp-augoose-latest-collection-v2', $theme_dir_uri . '/assets/css/latest-collection-v2.css', array( 'wp-augoose-product-fixed', 'wp-augoose-brand' ), $asset_ver( 'assets/css/latest-collection-v2.css' ), 'all' );
-		// Latest Collection - NO SLIDER (override all slider styles, max 6 products)
-		if ( is_front_page() && file_exists( $theme_dir . '/assets/css/latest-collection-no-slider.css' ) ) {
-			wp_enqueue_style( 'wp-augoose-latest-collection-no-slider', $theme_dir_uri . '/assets/css/latest-collection-no-slider.css', array( 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/latest-collection-no-slider.css' ), 'all' );
-		}
 		wp_enqueue_style( 'wp-augoose-button-global-style', $theme_dir_uri . '/assets/css/button-global-style.css', array( 'wp-augoose-woocommerce', 'wp-augoose-product-fixed', 'wp-augoose-latest-collection-v2' ), $asset_ver( 'assets/css/button-global-style.css' ), 'all' );
 		wp_style_add_data( 'wp-augoose-button-global-style', 'priority', 'high' );
 		
@@ -686,10 +682,10 @@ function wp_augoose_scripts() {
     if ( file_exists( $theme_dir . '/assets/js/main.js' ) ) {
         wp_enqueue_script( 'wp-augoose-main', $theme_dir_uri . '/assets/js/main.js', array( 'jquery' ), $asset_ver( 'assets/js/main.js' ), true );
         
-        // Latest Collection slider DISABLED - showing only 6 products, no slider animation
-        // if ( is_front_page() ) {
-        //     wp_enqueue_script( 'wp-augoose-latest-collection-slider', $theme_dir_uri . '/assets/js/latest-collection-slider.js', array( 'jquery' ), $asset_ver( 'assets/js/latest-collection-slider.js' ), true );
-        // }
+        // Latest Collection slider (only on homepage)
+        if ( is_front_page() ) {
+            wp_enqueue_script( 'wp-augoose-latest-collection-slider', $theme_dir_uri . '/assets/js/latest-collection-slider.js', array( 'jquery' ), $asset_ver( 'assets/js/latest-collection-slider.js' ), true );
+        }
         wp_localize_script(
             'wp-augoose-main',
             'wpAugoose',
@@ -698,6 +694,22 @@ function wp_augoose_scripts() {
                 'nonce'   => wp_create_nonce( 'wp_augoose_nonce' ),
             )
         );
+        
+        // Simple Wishlist Script - No dependencies, works immediately
+        if ( file_exists( $theme_dir . '/assets/js/wishlist-simple.js' ) ) {
+            wp_enqueue_script( 
+                'wp-augoose-wishlist-simple', 
+                $theme_dir_uri . '/assets/js/wishlist-simple.js', 
+                array(), // No dependencies
+                $asset_ver( 'assets/js/wishlist-simple.js' ), 
+                true 
+            );
+        }
+        
+        // Add nonce to meta tag for wishlist-simple.js
+        add_action( 'wp_head', function() {
+            echo '<meta name="wp-augoose-nonce" content="' . esc_attr( wp_create_nonce( 'wp_augoose_nonce' ) ) . '">' . "\n";
+        }, 1 );
         
         // CRITICAL: Add inline script to ensure wishlist handler works even if main.js fails
         $inline_script = "

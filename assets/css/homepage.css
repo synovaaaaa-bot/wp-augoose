@@ -4,9 +4,6 @@
  */
 
 /* CRITICAL OVERRIDE - HIGHEST PRIORITY */
-/* Latest Collection: 6 products max, NO slider, grid layout only */
-.latest-collection .latest-collection-products.no-slider .woocommerce ul.products,
-.latest-collection .latest-collection-products.no-slider ul.products,
 .latest-collection .woocommerce ul.products,
 .latest-collection .woocommerce ul.products.columns-4,
 .latest-collection .woocommerce ul.products.latest,
@@ -14,7 +11,7 @@
 .latest-collection ul.products.columns-4,
 .latest-collection ul.products.latest {
     display: grid !important;
-    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 30px !important;
     width: 100% !important;
     margin: 0 !important;
@@ -23,42 +20,6 @@
     flex-direction: unset !important;
     flex-wrap: unset !important;
     align-items: unset !important;
-    /* DISABLE SLIDER - No scroll, no animation */
-    overflow: visible !important;
-    overflow-x: visible !important;
-    overflow-y: visible !important;
-    scroll-snap-type: none !important;
-    scroll-behavior: auto !important;
-    -webkit-overflow-scrolling: auto !important;
-    transform: none !important;
-}
-
-/* Ensure container doesn't have overflow */
-.latest-collection .latest-collection-products.no-slider {
-    overflow: visible !important;
-    position: static !important;
-}
-
-/* Responsive: 6 columns desktop, 3 tablet, 2 mobile */
-@media (max-width: 1200px) {
-    .latest-collection .woocommerce ul.products,
-    .latest-collection ul.products {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    }
-}
-
-@media (max-width: 768px) {
-    .latest-collection .woocommerce ul.products,
-    .latest-collection ul.products {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .latest-collection .woocommerce ul.products,
-    .latest-collection ul.products {
-        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-    }
 }
 
 .latest-collection .woocommerce ul.products li.product,

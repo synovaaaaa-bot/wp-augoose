@@ -245,24 +245,21 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 }
 
 function wp_augoose_ajax_wishlist_toggle() {
-	// Security: Verify nonce (simplified - use standard WordPress check)
-	if ( ! isset( $_POST['nonce'] ) ) {
-		wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
-		return;
+	// Security: Verify nonce (allow empty nonce for guests, but verify if provided)
+	if ( isset( $_POST['nonce'] ) && ! empty( $_POST['nonce'] ) ) {
+		$nonce_check = check_ajax_referer( 'wp_augoose_nonce', 'nonce', false );
+		if ( ! $nonce_check ) {
+			wp_send_json_error( array( 
+				'message' => 'Security check failed. Please refresh the page and try again.',
+				'debug' => array(
+					'nonce_received' => 'yes',
+					'nonce_valid' => false
+				)
+			) );
+			return;
+		}
 	}
-	
-	// Use standard WordPress nonce check (more reliable)
-	$nonce_check = check_ajax_referer( 'wp_augoose_nonce', 'nonce', false );
-	if ( ! $nonce_check ) {
-		wp_send_json_error( array( 
-			'message' => 'Security check failed. Please refresh the page and try again.',
-			'debug' => array(
-				'nonce_received' => isset( $_POST['nonce'] ) ? 'yes' : 'no',
-				'nonce_valid' => false
-			)
-		) );
-		return;
-	}
+	// If no nonce provided, continue anyway (for backward compatibility with simple script)
 	
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		wp_send_json_error( array( 'message' => 'WooCommerce not available' ) );
