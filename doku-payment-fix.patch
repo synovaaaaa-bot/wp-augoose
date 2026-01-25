@@ -1,0 +1,43 @@
+--- a/wp-content/plugins/doku-payment/Module/JokulCheckoutModule.php
++++ b/wp-content/plugins/doku-payment/Module/JokulCheckoutModule.php
+@@ -X,Y +X,Y @@
+ 
+-    $mainSettings = get_option('woocommerce_doku_gateway_settings');
++    $mainSettings = get_option('woocommerce_doku_gateway_settings', []);
++    if (!is_array($mainSettings)) {
++        $mainSettings = [];
++    }
+ 
+-    $environment = $mainSettings['environment_payment_jokul'];
+-    $sandboxClientId = $mainSettings['sandbox_client_id'];
+-    $sandboxSharedKey = $mainSettings['sandbox_shared_key'];
+-    $prodClientId = $mainSettings['prod_client_id'];
+-    $prodSharedKey = $mainSettings['prod_shared_key'];
+-    $expiredTime = $mainSettings['expired_time'];
+-    $emailNotifications = $mainSettings['email_notifications'];
+-    $abandonedCart = $mainSettings['abandoned_cart'];
+-    $timeRangeAbandonedCart = $mainSettings['time_range_abandoned_cart'];
+-    $customTimeRangeAbandonedCart = $mainSettings['custom_time_range_abandoned_cart'];
+-    $sacCheck = $mainSettings['sac_check'];
+-    $sacTextbox = $mainSettings['sac_textbox'];
++    $environment = $mainSettings['environment_payment_jokul'] ?? 'sandbox';
++    $sandboxClientId = $mainSettings['sandbox_client_id'] ?? '';
++    $sandboxSharedKey = $mainSettings['sandbox_shared_key'] ?? '';
++    $prodClientId = $mainSettings['prod_client_id'] ?? '';
++    $prodSharedKey = $mainSettings['prod_shared_key'] ?? '';
++    $expiredTime = $mainSettings['expired_time'] ?? '';
++    $emailNotifications = $mainSettings['email_notifications'] ?? 'no';
++    $abandonedCart = $mainSettings['abandoned_cart'] ?? 'no';
++    $timeRangeAbandonedCart = $mainSettings['time_range_abandoned_cart'] ?? '';
++    $customTimeRangeAbandonedCart = $mainSettings['custom_time_range_abandoned_cart'] ?? '';
++    $sacCheck = $mainSettings['sac_check'] ?? 'no';
++    $sacTextbox = $mainSettings['sac_textbox'] ?? '';
+ 
+-    $queryString = $_SERVER['QUERY_STRING'];
++    $queryString = $_SERVER['QUERY_STRING'] ?? '';
++    $queryString = is_string($queryString) ? $queryString : '';
+ 
+-    if (WC()->session) {
++    if (function_exists('WC') && WC() && WC()->session) {
+         // session-dependent code
+     }
