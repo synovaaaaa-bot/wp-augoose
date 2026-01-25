@@ -42,8 +42,9 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Quantity input change - update cart via AJAX
+    // Quantity input change - update cart via AJAX (optimized for speed)
     var updateTimeout;
+    var isUpdating = false;
     $(document).on('change blur', '.qty-input', function() {
         var $input = $(this);
         var cartKey = $input.data('cart-key');
@@ -55,16 +56,21 @@ jQuery(document).ready(function($) {
             $input.val(1);
         }
         
+        // Prevent multiple simultaneous updates
+        if (isUpdating) {
+            return;
+        }
+        
         // Clear previous timeout
         clearTimeout(updateTimeout);
         
         // Show loading indicator
         $input.closest('.product-item-summary').addClass('updating');
         
-        // Debounce update
+        // Faster debounce (150ms instead of 500ms)
         updateTimeout = setTimeout(function() {
             updateCartQuantity(cartKey, quantity);
-        }, 500);
+        }, 150);
     });
 
     // Remove item
@@ -79,11 +85,18 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // AJAX update cart quantity
+    // AJAX update cart quantity (optimized for speed and accuracy)
     function updateCartQuantity(cartKey, quantity) {
+        if (isUpdating) {
+            return;
+        }
+        
+        isUpdating = true;
+        
         $.ajax({
             type: 'POST',
             url: wc_checkout_params.ajax_url,
+            timeout: 10000, // 10 second timeout
             data: {
                 action: 'update_checkout_quantity',
                 cart_key: cartKey,
@@ -97,6 +110,7 @@ jQuery(document).ready(function($) {
                         response = JSON.parse(response);
                     } catch (e) {
                         console.error('Invalid JSON response:', response);
+                        isUpdating = false;
                         alert('Error updating cart. Page will reload.');
                         location.reload();
                         return;
@@ -104,20 +118,25 @@ jQuery(document).ready(function($) {
                 }
                 
                 if (response && response.success) {
-                    // Reload checkout fragments
+                    // Trigger WooCommerce checkout update (faster than full reload)
                     $('body').trigger('update_checkout');
                     
-                    // Show success message (optional)
-                    console.log('Cart updated successfully');
+                    // Also trigger cart fragments update for mini cart
+                    $(document.body).trigger('wc_fragment_refresh');
                 } else {
                     // Show error
-                    alert(response && response.data && response.data.message ? response.data.message : 'Failed to update cart');
+                    const errorMsg = response && response.data && response.data.message 
+                        ? response.data.message 
+                        : 'Failed to update cart';
+                    console.error('Cart update error:', errorMsg);
                     
                     // Reload page as fallback
                     location.reload();
                 }
             },
             error: function(xhr, status, error) {
+                console.error('Cart update AJAX error:', status, error);
+                
                 // Check if response is HTML (error page)
                 if (xhr.responseText && xhr.responseText.trim().startsWith('<')) {
                     console.error('Server returned HTML instead of JSON. This may indicate a PHP error.');
@@ -131,6 +150,7 @@ jQuery(document).ready(function($) {
                 location.reload();
             },
             complete: function() {
+                isUpdating = false;
                 $('.updating, .removing').removeClass('updating removing');
             }
         });
