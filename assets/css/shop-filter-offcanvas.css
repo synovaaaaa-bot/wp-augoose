@@ -42,6 +42,8 @@ body.filter-open .shop-filter-backdrop {
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1) !important;
     transform: translateX(-100%) !important;
     transition: transform 0.35s ease !important;
+    display: block !important;
+    visibility: visible !important;
     /* Remove any grid positioning */
     grid-column: unset !important;
     grid-row: unset !important;
@@ -59,6 +61,8 @@ html body.filter-open aside.shop-filters {
     -moz-transform: translateX(0) !important;
     -ms-transform: translateX(0) !important;
     -o-transform: translateX(0) !important;
+    display: block !important;
+    visibility: visible !important;
 }
 
 /* ===================================

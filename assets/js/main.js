@@ -38,25 +38,80 @@
         });
     }
 
-    // Search Toggle
+    // Search Toggle - Fixed for mobile with event delegation
     function initSearchToggle() {
-        const searchToggle = $('.search-toggle');
-        const searchFormContainer = $('.search-form-container');
-
-        searchToggle.on('click', function(e) {
+        console.log('=== INIT SEARCH TOGGLE ===');
+        
+        // Use event delegation to catch clicks on search toggle button
+        $(document).on('click', '.search-toggle', function(e) {
+            console.log('=== SEARCH TOGGLE CLICKED ===');
             e.preventDefault();
-            searchFormContainer.slideToggle(300);
-            setTimeout(function() {
-                searchFormContainer.find('input[type="search"]').focus();
-            }, 300);
-        });
-
-        // Close search when clicking outside
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('.header-search').length && searchFormContainer.is(':visible')) {
-                searchFormContainer.slideUp(300);
+            e.stopPropagation();
+            
+            const searchFormContainer = $(this).closest('.header-search').find('.search-form-container');
+            if (searchFormContainer.length === 0) {
+                // Fallback: find by class
+                searchFormContainer = $('.search-form-container');
+            }
+            
+            console.log('Search container found:', searchFormContainer.length);
+            
+            // Toggle search form
+            if (searchFormContainer.is(':visible')) {
+                searchFormContainer.slideUp(300, function() {
+                    $(this).attr('aria-hidden', 'true');
+                });
+                $(this).attr('aria-expanded', 'false');
+            } else {
+                searchFormContainer.attr('aria-hidden', 'false');
+                searchFormContainer.slideDown(300);
+                $(this).attr('aria-expanded', 'true');
+                
+                // Focus input after animation
+                setTimeout(function() {
+                    const searchInput = searchFormContainer.find('input[type="search"], input[type="text"], .search-field');
+                    if (searchInput.length) {
+                        searchInput.focus();
+                        // For mobile, sometimes need to trigger click to show keyboard
+                        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                            searchInput[0].click();
+                        }
+                    }
+                }, 350);
             }
         });
+
+        // Close search when clicking outside - improved for mobile
+        $(document).on('click touchstart', function(e) {
+            const searchFormContainer = $('.search-form-container');
+            const headerSearch = $('.header-search');
+            
+            // Check if click is outside search area
+            if (!$(e.target).closest('.header-search').length && 
+                !$(e.target).closest('.search-form-container').length &&
+                searchFormContainer.is(':visible')) {
+                console.log('Closing search - clicked outside');
+                searchFormContainer.slideUp(300, function() {
+                    $(this).attr('aria-hidden', 'true');
+                });
+                $('.search-toggle').attr('aria-expanded', 'false');
+            }
+        });
+        
+        // Close search on ESC key
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                const searchFormContainer = $('.search-form-container');
+                if (searchFormContainer.is(':visible')) {
+                    searchFormContainer.slideUp(300, function() {
+                        $(this).attr('aria-hidden', 'true');
+                    });
+                    $('.search-toggle').attr('aria-expanded', 'false');
+                }
+            }
+        });
+        
+        console.log('Search toggle initialized');
     }
 
     // Site-only search history (localStorage) for product search
@@ -120,91 +175,13 @@
     }
 
     // Shop Filters Toggle (Archive pages) - Off-Canvas with No Layout Shift
+    // NOTE: This function is disabled because shop-filter-toggle.js handles it
+    // Keeping this function stub to avoid breaking other code that might call it
     function initShopFiltersToggle() {
-        console.log('=== INIT SHOP FILTERS TOGGLE ===');
-        
-        const $body = $('body');
-        const $backdrop = $('.shop-filter-backdrop');
-        
-        console.log('Backdrop found:', $backdrop.length);
-        
-        // Open filter
-        function openFilter() {
-            console.log('Opening filter...');
-            $body.addClass('filter-open');
-            $('.shop-filter-toggle').attr('aria-expanded', 'true');
-            // Store scroll position to restore later
-            const scrollY = window.scrollY;
-            $body.data('scroll-pos', scrollY);
-            $body.css('top', `-${scrollY}px`);
-        }
-
-        // Close filter
-        function closeFilter() {
-            console.log('Closing filter...');
-            $body.removeClass('filter-open');
-            $('.shop-filter-toggle').attr('aria-expanded', 'false');
-            // Restore scroll position
-            const scrollY = $body.data('scroll-pos') || 0;
-            $body.css('top', '');
-            window.scrollTo(0, scrollY);
-        }
-
-        // Default: closed
-        $body.removeClass('filter-open');
-        $('.shop-filter-toggle').attr('aria-expanded', 'false');
-
-        // Toggle filter visibility - use event delegation to catch all buttons
-        $(document).on('click', '.shop-filter-toggle', function(e) {
-            console.log('=== FILTER TOGGLE CLICKED ===');
-            e.preventDefault();
-            e.stopPropagation();
-            if ($body.hasClass('filter-open')) {
-                closeFilter();
-            } else {
-                openFilter();
-            }
-        });
-
-        // Close filter when clicking close button - use event delegation
-        $(document).on('click', '.shop-filter-close', function(e) {
-            console.log('=== FILTER CLOSE CLICKED ===');
-            e.preventDefault();
-            e.stopPropagation();
-            closeFilter();
-        });
-
-        // Close filter when clicking backdrop - use event delegation
-        $(document).on('click', '.shop-filter-backdrop', function(e) {
-            console.log('=== BACKDROP CLICKED ===');
-            e.preventDefault();
-            e.stopPropagation();
-            closeFilter();
-        });
-
-        // Close filter on ESC key
-        $(document).on('keydown', function(e) {
-            if (e.key === 'Escape' || e.keyCode === 27) {
-                if ($body.hasClass('filter-open')) {
-                    console.log('ESC pressed - closing filter');
-                    closeFilter();
-                }
-            }
-        });
-
-        // Prevent body scroll when filter is open (additional safeguard)
-        $body.on('touchmove', function(e) {
-            if ($body.hasClass('filter-open')) {
-                // Allow scroll inside filter panel
-                if (!$(e.target).closest('.shop-filters').length) {
-                    e.preventDefault();
-                }
-            }
-        });
-        
-        console.log('Shop filters toggle initialized');
-        
-        console.log('Shop filters toggle initialized');
+        console.log('=== INIT SHOP FILTERS TOGGLE (DISABLED - using shop-filter-toggle.js instead) ===');
+        // Filter toggle is now handled by shop-filter-toggle.js (vanilla JS)
+        // This prevents conflicts between jQuery and vanilla JS handlers
+        return;
     }
 
     // Product Quick View

@@ -114,7 +114,7 @@
                                 <path d="M21 21l-4.3-4.3"></path>
                             </svg>
                         </button>
-                        <div class="search-form-container" style="display:none;">
+                        <div class="search-form-container" style="display:none;" aria-hidden="true">
                             <?php
                             if ( class_exists( 'WooCommerce' ) && function_exists( 'get_product_search_form' ) ) {
                                 echo get_product_search_form( false );
