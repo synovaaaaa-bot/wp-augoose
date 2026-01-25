@@ -20,6 +20,18 @@
     top: 20px;
 }
 
+/* Override for offcanvas filter - when body has filter-open class */
+body.filter-open .shop-filters {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 320px !important;
+    max-width: 85vw !important;
+    height: 100vh !important;
+    z-index: 999 !important;
+    transform: translateX(0) !important;
+}
+
 .shop-filter-close {
     display: none;
     position: absolute;

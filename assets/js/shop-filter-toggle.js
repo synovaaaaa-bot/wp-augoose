@@ -36,6 +36,11 @@
             const scrollY = window.scrollY;
             body.style.top = `-${scrollY}px`;
             body.dataset.scrollPos = scrollY;
+            
+            // Debug: Check if class was added
+            console.log('Body classes:', body.className);
+            console.log('Filter element:', document.querySelector('.shop-filters'));
+            console.log('Filter computed style:', window.getComputedStyle(document.querySelector('.shop-filters')).transform);
         }
         
         // Close filter

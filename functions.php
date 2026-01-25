@@ -615,7 +615,7 @@ function wp_augoose_scripts() {
         // Off-canvas filter (no layout shift)
         if ( file_exists( $theme_dir . '/assets/css/shop-filter-offcanvas.css' ) ) {
             wp_enqueue_style( 'wp-augoose-shop-filter-offcanvas', $theme_dir_uri . '/assets/css/shop-filter-offcanvas.css', array( 'wp-augoose-shop-fixed' ), $asset_ver( 'assets/css/shop-filter-offcanvas.css' ), 'all' );
-            wp_style_add_data( 'wp-augoose-shop-filter-offcanvas', 'priority', 'high' );
+            wp_style_add_data( 'wp-augoose-shop-filter-offcanvas', 'priority', 999 ); // Highest priority
         }
     }
     

@@ -26,6 +26,7 @@ body.filter-open .shop-filter-backdrop {
 /* ===================================
    Filter Sidebar - Off-Canvas (Desktop & Mobile)
    =================================== */
+/* Default: hidden off-screen */
 .shop-filters {
     position: fixed !important;
     top: 0 !important;
@@ -45,12 +46,9 @@ body.filter-open .shop-filter-backdrop {
     grid-column: unset !important;
     grid-row: unset !important;
     order: unset !important;
-    /* Remove sticky positioning */
-    position: fixed !important;
-    top: 0 !important;
 }
 
-/* Filter open state */
+/* Filter open state - slide in */
 body.filter-open .shop-filters {
     transform: translateX(0) !important;
 }
