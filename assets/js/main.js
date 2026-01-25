@@ -121,19 +121,18 @@
 
     // Shop Filters Toggle (Archive pages) - Off-Canvas with No Layout Shift
     function initShopFiltersToggle() {
-        const $page = $('[data-shop-page]');
-        if (!$page.length) return;
-
-        const $toggle = $page.find('.shop-filter-toggle');
-        const $backdrop = $('.shop-filter-backdrop');
-        const $body = $('body');
+        console.log('=== INIT SHOP FILTERS TOGGLE ===');
         
-        if (!$toggle.length) return;
-
+        const $body = $('body');
+        const $backdrop = $('.shop-filter-backdrop');
+        
+        console.log('Backdrop found:', $backdrop.length);
+        
         // Open filter
         function openFilter() {
+            console.log('Opening filter...');
             $body.addClass('filter-open');
-            $toggle.attr('aria-expanded', 'true');
+            $('.shop-filter-toggle').attr('aria-expanded', 'true');
             // Store scroll position to restore later
             const scrollY = window.scrollY;
             $body.data('scroll-pos', scrollY);
@@ -142,8 +141,9 @@
 
         // Close filter
         function closeFilter() {
+            console.log('Closing filter...');
             $body.removeClass('filter-open');
-            $toggle.attr('aria-expanded', 'false');
+            $('.shop-filter-toggle').attr('aria-expanded', 'false');
             // Restore scroll position
             const scrollY = $body.data('scroll-pos') || 0;
             $body.css('top', '');
@@ -152,10 +152,11 @@
 
         // Default: closed
         $body.removeClass('filter-open');
-        $toggle.attr('aria-expanded', 'false');
+        $('.shop-filter-toggle').attr('aria-expanded', 'false');
 
-        // Toggle filter visibility
-        $toggle.on('click', function(e) {
+        // Toggle filter visibility - use event delegation to catch all buttons
+        $(document).on('click', '.shop-filter-toggle', function(e) {
+            console.log('=== FILTER TOGGLE CLICKED ===');
             e.preventDefault();
             e.stopPropagation();
             if ($body.hasClass('filter-open')) {
@@ -165,15 +166,17 @@
             }
         });
 
-        // Close filter when clicking close button
-        $page.on('click', '.shop-filter-close', function(e) {
+        // Close filter when clicking close button - use event delegation
+        $(document).on('click', '.shop-filter-close', function(e) {
+            console.log('=== FILTER CLOSE CLICKED ===');
             e.preventDefault();
             e.stopPropagation();
             closeFilter();
         });
 
-        // Close filter when clicking backdrop
-        $backdrop.on('click', function(e) {
+        // Close filter when clicking backdrop - use event delegation
+        $(document).on('click', '.shop-filter-backdrop', function(e) {
+            console.log('=== BACKDROP CLICKED ===');
             e.preventDefault();
             e.stopPropagation();
             closeFilter();
@@ -183,6 +186,7 @@
         $(document).on('keydown', function(e) {
             if (e.key === 'Escape' || e.keyCode === 27) {
                 if ($body.hasClass('filter-open')) {
+                    console.log('ESC pressed - closing filter');
                     closeFilter();
                 }
             }
@@ -197,6 +201,10 @@
                 }
             }
         });
+        
+        console.log('Shop filters toggle initialized');
+        
+        console.log('Shop filters toggle initialized');
     }
 
     // Product Quick View
@@ -1007,23 +1015,128 @@
     }
     
     // Run on page load and after AJAX
-        preventDuplicateButtons();
-        initMobileMenu();
-        initSearchToggle();
-        initSearchHistory();
-        initStickyHeader();
-        initShopFiltersToggle();
-        initQuickView();
-        initWishlist();
-        initAjaxAddToCart();
-        initQuantityInput();
-        initSmoothScroll();
-        initProductZoom();
-        initNewsletterForm();
-        initProductImageSlider(); // Auto-slide product images
-        initSizeGuideToggle(); // Size guide toggle
-        initLanguageSwitcher();
-        initReadMore(); // Product description read more
+    // CRITICAL: Wrap everything in document.ready to ensure DOM is loaded
+    $(document).ready(function() {
+        console.log('=== MAIN.JS LOADED - INITIALIZING ALL FUNCTIONS ===');
+        
+        try {
+            preventDuplicateButtons();
+            console.log('✓ preventDuplicateButtons initialized');
+        } catch(e) {
+            console.error('✗ preventDuplicateButtons error:', e);
+        }
+        
+        try {
+            initMobileMenu();
+            console.log('✓ initMobileMenu initialized');
+        } catch(e) {
+            console.error('✗ initMobileMenu error:', e);
+        }
+        
+        try {
+            initSearchToggle();
+            console.log('✓ initSearchToggle initialized');
+        } catch(e) {
+            console.error('✗ initSearchToggle error:', e);
+        }
+        
+        try {
+            initSearchHistory();
+            console.log('✓ initSearchHistory initialized');
+        } catch(e) {
+            console.error('✗ initSearchHistory error:', e);
+        }
+        
+        try {
+            initStickyHeader();
+            console.log('✓ initStickyHeader initialized');
+        } catch(e) {
+            console.error('✗ initStickyHeader error:', e);
+        }
+        
+        try {
+            initShopFiltersToggle();
+            console.log('✓ initShopFiltersToggle initialized');
+        } catch(e) {
+            console.error('✗ initShopFiltersToggle error:', e);
+        }
+        
+        try {
+            initQuickView();
+            console.log('✓ initQuickView initialized');
+        } catch(e) {
+            console.error('✗ initQuickView error:', e);
+        }
+        
+        try {
+            initWishlist();
+            console.log('✓ initWishlist initialized');
+        } catch(e) {
+            console.error('✗ initWishlist error:', e);
+        }
+        
+        try {
+            initAjaxAddToCart();
+            console.log('✓ initAjaxAddToCart initialized');
+        } catch(e) {
+            console.error('✗ initAjaxAddToCart error:', e);
+        }
+        
+        try {
+            initQuantityInput();
+            console.log('✓ initQuantityInput initialized');
+        } catch(e) {
+            console.error('✗ initQuantityInput error:', e);
+        }
+        
+        try {
+            initSmoothScroll();
+            console.log('✓ initSmoothScroll initialized');
+        } catch(e) {
+            console.error('✗ initSmoothScroll error:', e);
+        }
+        
+        try {
+            initProductZoom();
+            console.log('✓ initProductZoom initialized');
+        } catch(e) {
+            console.error('✗ initProductZoom error:', e);
+        }
+        
+        try {
+            initNewsletterForm();
+            console.log('✓ initNewsletterForm initialized');
+        } catch(e) {
+            console.error('✗ initNewsletterForm error:', e);
+        }
+        
+        try {
+            initProductImageSlider();
+            console.log('✓ initProductImageSlider initialized');
+        } catch(e) {
+            console.error('✗ initProductImageSlider error:', e);
+        }
+        
+        try {
+            initSizeGuideToggle();
+            console.log('✓ initSizeGuideToggle initialized');
+        } catch(e) {
+            console.error('✗ initSizeGuideToggle error:', e);
+        }
+        
+        try {
+            initLanguageSwitcher();
+            console.log('✓ initLanguageSwitcher initialized');
+        } catch(e) {
+            console.error('✗ initLanguageSwitcher error:', e);
+        }
+        
+        try {
+            initReadMore();
+            console.log('✓ initReadMore initialized');
+        } catch(e) {
+            console.error('✗ initReadMore error:', e);
+        }
         
         // Prevent duplicate buttons after AJAX
         $(document.body).on('added_to_cart updated_wc_div', function() {
@@ -1142,6 +1255,8 @@
                 window.location.href = productUrl;
             }
         });
+        
+        console.log('=== ALL FUNCTIONS INITIALIZED ===');
     });
 
     // Initialize on Window Load
