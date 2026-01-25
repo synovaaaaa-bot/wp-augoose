@@ -286,41 +286,31 @@ function wp_augoose_render_currency_switcher() {
 
     // Allow plugins/custom code to override completely.
     if ( has_action( 'wp_augoose_currency_switcher' ) ) {
-        echo '<div class="header-locale header-currency">';
         do_action( 'wp_augoose_currency_switcher' );
-        echo '</div>';
         return;
     }
 
-    // WPML WooCommerce Multilingual (WCML)
+    // WPML WooCommerce Multilingual (WCML) - Let plugin handle its own HTML
     if ( has_action( 'wcml_currency_switcher' ) ) {
-        echo '<div class="header-locale header-currency">';
         do_action( 'wcml_currency_switcher', array( 'switcher_style' => 'wcml-dropdown' ) );
-        echo '</div>';
         return;
     }
 
     // WOOCS (WooCommerce Currency Switcher) common shortcode
     if ( shortcode_exists( 'woocs' ) ) {
-        echo '<div class="header-locale header-currency">';
         echo do_shortcode( '[woocs]' );
-        echo '</div>';
         return;
     }
 
     // Aelia Currency Switcher shortcode (if installed)
     if ( shortcode_exists( 'aelia_currency_selector_widget' ) ) {
-        echo '<div class="header-locale header-currency">';
         echo do_shortcode( '[aelia_currency_selector_widget]' );
-        echo '</div>';
         return;
     }
 
     // CURCY / Woo Multi Currency (varies by plugin; try common shortcode)
     if ( shortcode_exists( 'woo_multi_currency' ) ) {
-        echo '<div class="header-locale header-currency">';
         echo do_shortcode( '[woo_multi_currency]' );
-        echo '</div>';
         return;
     }
 }
