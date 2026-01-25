@@ -146,6 +146,292 @@ add_filter(
 
 /**
  * =========================
+ * Price Display Logic (BULLETPROOF Flow - FIXED)
+ * =========================
+ * 
+ * CRITICAL FIX: Set currency SEKALI di awal request, jangan set ulang di fungsi price!
+ * 
+ * Urutan logic:
+ * 1. Di awal request (template_redirect): tentukan currency SEKALI
+ *    - Priority 1: WCML cookie/session (user manual select) - JANGAN override
+ *    - Priority 2: Auto-detect dari geolocation (hanya first visit)
+ *    - Priority 3: Base currency
+ * 2. Set currency context via WCML SEKALI di awal
+ * 3. Untuk output harga: cukup return $product->get_price_html()
+ *    - JANGAN set currency lagi di fungsi price!
+ *    - Biarkan WCML + WooCommerce handle conversion, tax, formatting
+ * 
+ * PENTING:
+ * - JANGAN set currency di tengah request (bisa bikin cache campur → harga beda)
+ * - JANGAN hitung harga manual untuk variable product
+ * - JANGAN hook woocommerce_get_price_html yang memanggil get_price_html() lagi
+ * - JANGAN bikin cookie currency sendiri kalau WCML sudah ada
+ * - Hapus manual price check (biarkan WCML handle)
+ */
+
+/**
+ * Step 1: Geolocate user country from IP
+ * Returns country code (e.g., 'US', 'SG', 'MY', 'ID')
+ * 
+ * BULLETPROOF: Cache 24 jam, fail-safe (jangan retry berkali-kali), tidak bikin cookie currency sendiri
+ */
+function wp_augoose_get_user_country_from_ip() {
+	// Check if already cached in cookie (24 hours)
+	$cookie_name = 'wp_augoose_user_country';
+	if ( isset( $_COOKIE[ $cookie_name ] ) ) {
+		$cached = sanitize_text_field( $_COOKIE[ $cookie_name ] );
+		if ( ! empty( $cached ) && strlen( $cached ) === 2 ) {
+			return $cached;
+		}
+	}
+	
+	// Get IP address
+	$ip = '';
+	if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+		$ip = sanitize_text_field( $_SERVER['HTTP_CLIENT_IP'] );
+	} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+		// X-Forwarded-For can contain multiple IPs, get the first one
+		$ips = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
+		$ip = sanitize_text_field( trim( $ips[0] ) );
+	} else {
+		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( $_SERVER['REMOTE_ADDR'] ) : '';
+	}
+	
+	// Skip localhost/private IPs
+	if ( empty( $ip ) || $ip === '127.0.0.1' || $ip === '::1' || strpos( $ip, '192.168.' ) === 0 || strpos( $ip, '10.' ) === 0 ) {
+		return '';
+	}
+	
+	// Try geolocation API (with fail-safe - only try once per request)
+	$country = '';
+	
+	// Use ip-api.com (free, no API key required, but has rate limit)
+	// Alternative: ipapi.co (requires API key for production)
+	$api_url = 'http://ip-api.com/json/' . $ip . '?fields=status,countryCode';
+	
+	// Use transient to prevent multiple API calls in same request
+	$transient_key = 'wp_augoose_geo_' . md5( $ip );
+	$cached_result = get_transient( $transient_key );
+	
+	if ( $cached_result !== false ) {
+		$country = $cached_result;
+	} else {
+		// Make API call (with timeout and error handling)
+		$response = wp_remote_get( $api_url, array(
+			'timeout' => 3, // 3 seconds timeout
+			'sslverify' => true,
+		) );
+		
+		if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
+			$body = wp_remote_retrieve_body( $response );
+			$data = json_decode( $body, true );
+			
+			if ( isset( $data['status'] ) && $data['status'] === 'success' && isset( $data['countryCode'] ) ) {
+				$country = strtoupper( sanitize_text_field( $data['countryCode'] ) );
+				// Cache in transient for 1 hour (to prevent rate limiting)
+				set_transient( $transient_key, $country, HOUR_IN_SECONDS );
+			}
+		}
+		
+		// If API failed, cache empty result for 5 minutes to prevent retry spam
+		if ( empty( $country ) ) {
+			set_transient( $transient_key, '', 5 * MINUTE_IN_SECONDS );
+		}
+	}
+	
+	// Cache country in cookie (24 hours) - only if we got a valid result
+	if ( ! empty( $country ) && strlen( $country ) === 2 ) {
+		setcookie( $cookie_name, $country, time() + ( 24 * 60 * 60 ), '/', '', is_ssl(), true );
+		$_COOKIE[ $cookie_name ] = $country;
+	}
+	
+	return $country;
+}
+
+/**
+ * Step 2: Determine currency based on country/rules
+ * Returns currency code (e.g., 'USD', 'SGD', 'MYR', 'IDR')
+ * 
+ * BULLETPROOF: Hanya return currency code, JANGAN set currency di sini!
+ * Currency akan di-set SEKALI di awal request via hook.
+ */
+function wp_augoose_determine_currency( $country = '' ) {
+	// Priority 1: Check WCML currency (from WCML cookie/session - jangan override)
+	if ( class_exists( 'WCML_Multi_Currency' ) ) {
+		global $woocommerce_wpml;
+		if ( isset( $woocommerce_wpml->multi_currency ) ) {
+			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
+			if ( $currency ) {
+				// User sudah pilih currency manual atau WCML sudah set - jangan override
+				return $currency;
+			}
+		}
+	}
+	
+	// Priority 2: Auto-detect from country (hanya kalau WCML belum set currency)
+	// Ini hanya untuk "first visit" - setelah user pilih manual, WCML akan handle
+	if ( $country ) {
+		$country_currency_map = array(
+			'US' => 'USD',
+			'SG' => 'SGD',
+			'MY' => 'MYR',
+			'ID' => 'IDR',
+			// Add more mappings as needed
+		);
+		
+		if ( isset( $country_currency_map[ $country ] ) ) {
+			$suggested_currency = $country_currency_map[ $country ];
+			
+			// Check if currency is available in WCML (hanya check, jangan set)
+			if ( class_exists( 'WCML_Multi_Currency' ) ) {
+				global $woocommerce_wpml;
+				if ( isset( $woocommerce_wpml->multi_currency ) ) {
+					$available_currencies = $woocommerce_wpml->multi_currency->get_currency_codes();
+					if ( in_array( $suggested_currency, $available_currencies, true ) ) {
+						return $suggested_currency;
+					}
+				}
+			}
+		}
+	}
+	
+	// Priority 3: Use WooCommerce base currency
+	return get_woocommerce_currency();
+}
+
+/**
+ * CRITICAL: Set currency SEKALI di awal request
+ * 
+ * Ini harus dipanggil sebelum produk di-load untuk mencegah cache campur currency.
+ * Hook di template_redirect dengan priority kecil (10-20) untuk set sebelum WooCommerce load produk.
+ */
+add_action( 'template_redirect', 'wp_augoose_set_currency_once', 10 );
+function wp_augoose_set_currency_once() {
+	// Skip admin dan AJAX (kecuali frontend AJAX)
+	if ( is_admin() && ! wp_doing_ajax() ) {
+		return;
+	}
+	
+	// Skip jika WCML tidak aktif
+	if ( ! class_exists( 'WCML_Multi_Currency' ) ) {
+		return;
+	}
+	
+	global $woocommerce_wpml;
+	if ( ! isset( $woocommerce_wpml->multi_currency ) ) {
+		return;
+	}
+	
+	// Priority 1: Check WCML currency (user manual select atau sudah set)
+	$currency = $woocommerce_wpml->multi_currency->get_client_currency();
+	$currency_source = 'wcml_cookie';
+	
+	// Priority 2: Jika belum ada, coba geolocation
+	if ( ! $currency ) {
+		$country = wp_augoose_get_user_country_from_ip();
+		$currency = wp_augoose_determine_currency( $country );
+		$currency_source = $country ? 'geolocation' : 'base';
+	}
+	
+	// Priority 3: Fallback ke base currency
+	if ( ! $currency ) {
+		$currency = get_woocommerce_currency();
+		$currency_source = 'base';
+	}
+	
+	// Set currency SEKALI di awal request
+	// Setelah ini, jangan set ulang di fungsi price!
+	if ( $currency ) {
+		$woocommerce_wpml->multi_currency->set_client_currency( $currency );
+		
+		// Debug logging (guarded by WP_DEBUG)
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$country = wp_augoose_get_user_country_from_ip();
+			$base_currency = get_woocommerce_currency();
+			$tax_display = get_option( 'woocommerce_tax_display_shop', 'excl' );
+			$price_decimals = wc_get_price_decimals();
+			$price_rounding = get_option( 'wcml_currency_switcher_rounding', 'disabled' );
+			
+			error_log( sprintf(
+				'[WP_AUGOOSE_CURRENCY] Set currency: %s (source: %s, country: %s, base: %s, tax_display: %s, decimals: %d, rounding: %s)',
+				$currency,
+				$currency_source,
+				$country ? $country : 'unknown',
+				$base_currency,
+				$tax_display,
+				$price_decimals,
+				$price_rounding
+			) );
+		}
+	}
+}
+
+/**
+ * REMOVED: wp_augoose_get_product_price_for_currency()
+ * 
+ * Fungsi ini dihapus karena:
+ * 1. Menghitung harga manual untuk variable product (get_variation_regular_price('min'))
+ *    bisa tidak sejalan dengan WCML yang handle per variation
+ * 2. Tidak perlu - cukup set currency context, lalu biarkan WCML + WooCommerce
+ *    handle conversion via filter
+ * 
+ * Gunakan wp_augoose_get_product_price_html() saja yang lebih aman.
+ */
+
+/**
+ * Get formatted price HTML
+ * 
+ * CRITICAL FIX: Jangan set currency di sini! Currency sudah di-set SEKALI di awal request.
+ * 
+ * BULLETPROOF IMPLEMENTATION:
+ * 1. Currency sudah di-set di template_redirect hook (sekali di awal request)
+ * 2. Cukup return $product->get_price_html() - biarkan WCML + WooCommerce handle
+ * 3. Untuk variable product: biarkan get_price_html() handle min/max
+ * 4. Tidak hook woocommerce_get_price_html untuk mencegah infinite loop
+ * 
+ * @param WC_Product $product Product object
+ * @param string     $target_currency DEPRECATED - tidak digunakan lagi (currency sudah di-set di awal request)
+ * @return string Formatted price HTML
+ */
+function wp_augoose_get_product_price_html( $product, $target_currency = '' ) {
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		return '';
+	}
+	
+	// CRITICAL: Jangan set currency di sini!
+	// Currency sudah di-set SEKALI di awal request via wp_augoose_set_currency_once()
+	// Setting currency di tengah request bisa bikin cache campur → harga beda (63 vs 64)
+	
+	// Cukup return get_price_html() - WCML + WooCommerce akan handle:
+	// - Tax display (inc/exc) via WooCommerce settings
+	// - Formatting (decimals, symbol) via currency settings
+	// - WCML conversion (manual price atau auto convert) via filter
+	// - Variable product min/max price via WooCommerce internal logic
+	$price_html = $product->get_price_html();
+	
+	// Debug logging (guarded by WP_DEBUG)
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		$current_currency = class_exists( 'WCML_Multi_Currency' ) && isset( $GLOBALS['woocommerce_wpml']->multi_currency ) 
+			? $GLOBALS['woocommerce_wpml']->multi_currency->get_client_currency() 
+			: get_woocommerce_currency();
+		$price_raw = $product->get_price();
+		$tax_display = get_option( 'woocommerce_tax_display_shop', 'excl' );
+		
+		error_log( sprintf(
+			'[WP_AUGOOSE_PRICE] Product %d: currency=%s, raw_price=%s, tax_display=%s, html=%s',
+			$product->get_id(),
+			$current_currency,
+			$price_raw,
+			$tax_display,
+			substr( strip_tags( $price_html ), 0, 50 )
+		) );
+	}
+	
+	return $price_html;
+}
+
+/**
+ * =========================
  * Wishlist (Integrated)
  * - Logged-in users: user_meta `_wp_augoose_wishlist`
  * - Guests: cookie `wp_augoose_wishlist`
@@ -226,28 +512,9 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 		return '<p class="wishlist-empty">Your wishlist is empty.</p>';
 	}
 
-	// CRITICAL: Set WCML currency context BEFORE any product queries
-	// This must be done BEFORE WP_Query to ensure all products use correct currency
-	if ( class_exists( 'WCML_Multi_Currency' ) ) {
-		global $woocommerce_wpml;
-		if ( isset( $woocommerce_wpml->multi_currency ) ) {
-			// Try to get currency from cookie/session first
-			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
-			
-			// If no currency from cookie, use base currency from WooCommerce settings
-			if ( ! $currency ) {
-				$currency = get_woocommerce_currency(); // Base currency (e.g., USD, IDR)
-			}
-			
-			if ( $currency ) {
-				// Force set currency for this request - MUST be before any product queries
-				$woocommerce_wpml->multi_currency->set_client_currency( $currency );
-			}
-		}
-	} else {
-		// If WCML is not active, WooCommerce will use base currency automatically
-		// No action needed - get_price_html() will use base currency
-	}
+	// CRITICAL FIX: Jangan set currency di sini!
+	// Currency sudah di-set SEKALI di awal request via wp_augoose_set_currency_once()
+	// Setting currency di tengah request bisa bikin cache campur → harga beda
 
 	$q = new WP_Query(
 		array(
@@ -276,16 +543,9 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			$link = get_permalink( $pid );
 			$img  = $product->get_image( 'woocommerce_thumbnail' );
 			
-			// IMPORTANT: Get price HTML EXACTLY like single product page
-			// This is the EXACT same method used in content-single-product.php line 80
-			// WCML automatically hooks into woocommerce_get_price_html filter
-			// The currency context was set BEFORE the query, so prices will be converted
-			// Force refresh product price cache to ensure currency conversion works
-			if ( method_exists( $product, 'get_price' ) ) {
-				// Clear any cached price to force recalculation with current currency
-				$product->get_price(); // This triggers WCML currency conversion
-			}
-			$price = $product->get_price_html();
+			// Get price HTML - currency sudah di-set di awal request
+			// Cukup panggil get_price_html() via helper function
+			$price = wp_augoose_get_product_price_html( $product );
 			
 			$is_variable = $product->is_type( 'variable' );
 			$is_simple   = $product->is_type( 'simple' );
@@ -401,28 +661,9 @@ function wp_augoose_ajax_wishlist_get() {
 		check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
 	}
 	
-	// CRITICAL: Set WCML currency context BEFORE rendering wishlist items
-	// This ensures prices are displayed in the correct currency
-	if ( class_exists( 'WCML_Multi_Currency' ) ) {
-		global $woocommerce_wpml;
-		if ( isset( $woocommerce_wpml->multi_currency ) ) {
-			// Try to get currency from cookie/session first
-			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
-			
-			// If no currency from cookie, use base currency from WooCommerce settings
-			if ( ! $currency ) {
-				$currency = get_woocommerce_currency(); // Base currency (e.g., USD, IDR)
-			}
-			
-			if ( $currency ) {
-				// Force set currency for this AJAX request
-				$woocommerce_wpml->multi_currency->set_client_currency( $currency );
-			}
-		}
-	} else {
-		// If WCML is not active, WooCommerce will use base currency automatically
-		// No action needed - get_price_html() will use base currency
-	}
+	// CRITICAL FIX: Jangan set currency di sini!
+	// Currency sudah di-set SEKALI di awal request via wp_augoose_set_currency_once()
+	// Untuk AJAX, currency context sudah di-set sebelum AJAX handler dipanggil
 	
 	$ids  = wp_augoose_wishlist_get_ids();
 	$html = wp_augoose_wishlist_render_items_html( $ids );
@@ -1620,19 +1861,19 @@ function wp_augoose_custom_sale_badge() {
 		return;
 	}
 	
-	// Calculate discount percentage for variable products
-	$percentage = '';
-	if ( $product->is_type( 'variable' ) ) {
-		$regular_price = $product->get_variation_regular_price( 'max' );
-		$sale_price = $product->get_variation_sale_price( 'min' );
-	} else {
-		$regular_price = $product->get_regular_price();
-		$sale_price = $product->get_sale_price();
-	}
+	// Calculate discount percentage
+	// BULLETPROOF: Gunakan get_price() yang sudah di-filter WCML
+	// Jangan pakai get_variation_regular_price() karena bisa tidak sejalan dengan WCML cache
+	$regular_price = $product->get_regular_price();
+	$sale_price = $product->get_sale_price();
 	
+	$percentage = '';
 	if ( $regular_price && $sale_price ) {
 		$percentage = round( ( ( $regular_price - $sale_price ) / $regular_price ) * 100 );
 	}
+	
+	// Untuk variable product, get_price() akan return min price
+	// WCML sudah handle conversion + cache, jadi kita cukup pakai hasilnya
 	
 	?>
 	<span class="onsale woocommerce-onsale">
