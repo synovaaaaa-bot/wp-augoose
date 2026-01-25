@@ -102,8 +102,10 @@
                     <div class="header-locale-stack" aria-label="Currency">
                         <div class="header-locale-item header-locale-item--currency" title="Currency">
                             <?php
-                            if ( function_exists( 'wp_augoose_render_currency_switcher' ) ) {
-                                wp_augoose_render_currency_switcher();
+                            // Let plugin handle currency switcher - no theme interference
+                            // WCML will render via its own hooks/widgets
+                            if ( has_action( 'wp_augoose_currency_switcher' ) ) {
+                                do_action( 'wp_augoose_currency_switcher' );
                             }
                             ?>
                         </div>

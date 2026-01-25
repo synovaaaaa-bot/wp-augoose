@@ -290,29 +290,12 @@ function wp_augoose_render_currency_switcher() {
         return;
     }
 
-    // WPML WooCommerce Multilingual (WCML) - Let plugin handle its own HTML
-    if ( has_action( 'wcml_currency_switcher' ) ) {
-        do_action( 'wcml_currency_switcher', array( 'switcher_style' => 'wcml-dropdown' ) );
-        return;
-    }
-
-    // WOOCS (WooCommerce Currency Switcher) common shortcode
-    if ( shortcode_exists( 'woocs' ) ) {
-        echo do_shortcode( '[woocs]' );
-        return;
-    }
-
-    // Aelia Currency Switcher shortcode (if installed)
-    if ( shortcode_exists( 'aelia_currency_selector_widget' ) ) {
-        echo do_shortcode( '[aelia_currency_selector_widget]' );
-        return;
-    }
-
-    // CURCY / Woo Multi Currency (varies by plugin; try common shortcode)
-    if ( shortcode_exists( 'woo_multi_currency' ) ) {
-        echo do_shortcode( '[woo_multi_currency]' );
-        return;
-    }
+    // Let plugins handle their own currency switcher rendering
+    // WCML will render via its own hooks/widgets
+    // Theme just provides the container, plugin handles the content
+    
+    // If no custom override, do nothing - let plugin handle it
+    return;
 }
 
 /**
