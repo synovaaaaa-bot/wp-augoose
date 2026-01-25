@@ -204,6 +204,8 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 	ob_start();
 	echo '<div class="wishlist-items">';
 	if ( $q->have_posts() ) {
+		global $product; // Set global for WooCommerce hooks/filters
+		
 		while ( $q->have_posts() ) {
 			$q->the_post();
 			$product = wc_get_product( get_the_ID() );
@@ -213,7 +215,20 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			$pid   = $product->get_id();
 			$link  = get_permalink( $pid );
 			$img   = $product->get_image( 'woocommerce_thumbnail' );
+			
+			// IMPORTANT: Ensure currency conversion works (WCML and other currency plugins support)
+			// Set global product so WooCommerce hooks/filters can access it
+			// This is critical for currency plugins like WCML
+			
+			// Get price HTML - WooCommerce will automatically use current currency
+			// This works with WCML, WOOCS, Aelia, and other currency plugins
+			// The global $product ensures currency plugins can access the product object
 			$price = $product->get_price_html();
+			
+			// Apply WooCommerce price filter - currency plugins hook into this
+			// This ensures WCML and other plugins can convert/modify the price
+			$price = apply_filters( 'woocommerce_get_price_html', $price, $product );
+			
 			$is_variable = $product->is_type( 'variable' );
 			$is_simple   = $product->is_type( 'simple' );
 			?>
