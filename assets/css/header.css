@@ -850,8 +850,129 @@ body.mobile-menu-open .mobile-menu {
 /* Hide description/placeholder text yang muncul di bawah select */
 .fox-currency-wrapper .description,
 .fox-currency-wrapper .fox-currency-description,
-.header-currency .description {
+.header-currency .description,
+.fox-currency-wrapper .fox-currency-item .description,
+.fox-currency-wrapper .fox-currency-item .fox-currency-description,
+.fox-currency-wrapper .fox-currency-item p,
+.fox-currency-wrapper .fox-currency-item span:not(.fox-currency-code):not(.fox-currency-symbol),
+.header-currency .fox-currency-item .description,
+.header-currency .fox-currency-item p {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Hide placeholder text "CHANGE THE RATE AND THIS DESCRIPTION" */
+.fox-currency-wrapper *:contains("CHANGE THE RATE"),
+.fox-currency-wrapper *:contains("change the rate"),
+.header-currency *:contains("CHANGE THE RATE"),
+.header-currency *:contains("change the rate") {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Hide question mark icons */
+.fox-currency-wrapper img[src*="question"],
+.fox-currency-wrapper img[alt*="question"],
+.fox-currency-wrapper .question-mark,
+.fox-currency-wrapper [class*="question"],
+.fox-currency-wrapper [class*="placeholder"],
+.header-currency img[src*="question"],
+.header-currency img[alt*="question"],
+.header-currency .question-mark,
+.header-currency [class*="question"],
+.header-currency [class*="placeholder"],
+.fox-currency-wrapper svg[class*="question"],
+.header-currency svg[class*="question"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Hide any icon/image that appears before currency text */
+.fox-currency-wrapper .fox-currency-item img,
+.fox-currency-wrapper .fox-currency-item svg,
+.fox-currency-wrapper .fox-currency-item .icon,
+.fox-currency-wrapper .fox-currency-item [class*="icon"],
+.header-currency .fox-currency-item img,
+.header-currency .fox-currency-item svg,
+.header-currency .fox-currency-item .icon,
+.header-currency .fox-currency-item [class*="icon"],
+.fox-currency-wrapper img,
+.fox-currency-wrapper svg,
+.header-currency img,
+.header-currency svg,
+.fox-currency-wrapper [class*="icon"],
+.header-currency [class*="icon"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Hide all text that contains "CHANGE THE RATE" or similar placeholder text */
+.fox-currency-wrapper *,
+.header-currency * {
+    position: relative;
+}
+
+/* More aggressive hiding for description text in dropdown items */
+.fox-currency-wrapper .fox-currency-item,
+.fox-currency-wrapper .fox-currency-option,
+.fox-currency-wrapper .fox-currency-dropdown-item,
+.header-currency .fox-currency-item,
+.header-currency .fox-currency-option,
+.header-currency .fox-currency-dropdown-item {
+    position: relative;
+}
+
+.fox-currency-wrapper .fox-currency-item > *:not(.fox-currency-code):not(.fox-currency-symbol):not(.fox-currency-name),
+.fox-currency-wrapper .fox-currency-option > *:not(.fox-currency-code):not(.fox-currency-symbol):not(.fox-currency-name),
+.header-currency .fox-currency-item > *:not(.fox-currency-code):not(.fox-currency-symbol):not(.fox-currency-name),
+.header-currency .fox-currency-option > *:not(.fox-currency-code):not(.fox-currency-symbol):not(.fox-currency-name) {
+    font-size: 0 !important;
+    line-height: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Clean up currency switcher - only show currency code and symbol */
+.fox-currency-wrapper select option,
+.header-currency select option {
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    color: #30475E !important;
+    background: #fff !important;
+    line-height: 1.4 !important;
+}
+
+/* Ensure select only shows currency code, not description */
+.fox-currency-wrapper select,
+.header-currency select {
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+}
+
+/* Remove any extra spacing or padding that might show description */
+.fox-currency-wrapper,
+.header-currency {
+    line-height: 1 !important;
+}
+
+.fox-currency-wrapper *,
+.header-currency * {
+    line-height: inherit !important;
 }
 
 /* Style untuk wrapper/container plugin FOX */

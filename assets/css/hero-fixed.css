@@ -69,13 +69,37 @@ body.page-template-front-page .site-main {
     display: none !important;
 }
 
+/* Hero section base styling */
+.hero-section {
+    display: block !important;
+    position: relative !important;
+    background-attachment: scroll !important;
+    min-height: clamp(520px, 70vh, 760px) !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+
+.hero-section[style*="--hero-image"] {
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+}
+
 /* ============================================
    Mobile Responsive
    ============================================ */
+@media (max-width: 1024px) {
+    .hero-section {
+        min-height: clamp(400px, 60vh, 600px) !important;
+        max-height: 70vh !important;
+    }
+}
+
 @media (max-width: 768px) {
     .hero-section {
-        min-height: clamp(300px, 50vh, 500px) !important;
-        max-height: 60vh !important;
+        min-height: clamp(300px, 50vh, 450px) !important;
+        max-height: 55vh !important;
         background-size: cover !important;
         background-position: center center !important;
         background-attachment: scroll !important;

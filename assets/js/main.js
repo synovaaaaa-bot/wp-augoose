@@ -699,7 +699,50 @@
     }
     
     // Run on page load and after AJAX
+    // Hide currency switcher placeholder text and question mark icons
+    function hideCurrencySwitcherPlaceholders() {
+        // Hide question mark icons
+        $('.fox-currency-wrapper img, .header-currency img').each(function() {
+            var $img = $(this);
+            var src = $img.attr('src') || '';
+            var alt = $img.attr('alt') || '';
+            if (src.includes('question') || alt.includes('question') || src.includes('placeholder') || alt.includes('placeholder')) {
+                $img.hide().css({ display: 'none', visibility: 'hidden', opacity: 0 });
+            }
+        });
+        
+        // Hide description/placeholder text
+        $('.fox-currency-wrapper, .header-currency').find('*').each(function() {
+            var $el = $(this);
+            var text = $el.text() || '';
+            if (text.includes('CHANGE THE RATE') || text.includes('change the rate') || text.includes('RIGHT VALUES')) {
+                $el.hide().css({ display: 'none', visibility: 'hidden', opacity: 0, height: 0, overflow: 'hidden' });
+            }
+        });
+        
+        // Hide any element with question mark class or placeholder class
+        $('.fox-currency-wrapper [class*="question"], .fox-currency-wrapper [class*="placeholder"], .header-currency [class*="question"], .header-currency [class*="placeholder"]').hide();
+    }
+    
     $(document).ready(function() {
+        // Hide currency switcher placeholders on load
+        hideCurrencySwitcherPlaceholders();
+        
+        // Hide again after a short delay (in case plugin loads dynamically)
+        setTimeout(hideCurrencySwitcherPlaceholders, 500);
+        setTimeout(hideCurrencySwitcherPlaceholders, 1000);
+        
+        // Watch for dynamically added currency switcher elements
+        var currencyObserver = new MutationObserver(function(mutations) {
+            hideCurrencySwitcherPlaceholders();
+        });
+        
+        // Observe currency switcher containers
+        $('.fox-currency-wrapper, .header-currency').each(function() {
+            if (this) {
+                currencyObserver.observe(this, { childList: true, subtree: true });
+            }
+        });
         preventDuplicateButtons();
         initMobileMenu();
         initSearchToggle();
