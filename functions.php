@@ -290,12 +290,11 @@ function wp_augoose_render_currency_switcher() {
         return;
     }
 
-    // Let plugins handle their own currency switcher rendering
-    // WCML will render via its own hooks/widgets
-    // Theme just provides the container, plugin handles the content
-    
-    // If no custom override, do nothing - let plugin handle it
-    return;
+    // WPML WooCommerce Multilingual (WCML) - Let plugin render directly, no wrapper
+    if ( has_action( 'wcml_currency_switcher' ) ) {
+        do_action( 'wcml_currency_switcher', array( 'switcher_style' => 'wcml-dropdown' ) );
+        return;
+    }
 }
 
 /**

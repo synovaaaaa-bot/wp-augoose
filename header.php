@@ -99,17 +99,12 @@
 
             <div class="header-actions" aria-label="<?php esc_attr_e( 'Header actions', 'wp-augoose' ); ?>">
 
-                    <div class="header-locale-stack" aria-label="Currency">
-                        <div class="header-locale-item header-locale-item--currency" title="Currency">
-                            <?php
-                            // Let plugin handle currency switcher - no theme interference
-                            // WCML will render via its own hooks/widgets
-                            if ( has_action( 'wp_augoose_currency_switcher' ) ) {
-                                do_action( 'wp_augoose_currency_switcher' );
-                            }
-                            ?>
-                        </div>
-                    </div>
+                    <?php
+                    // WCML Currency Switcher - no wrapper, let plugin handle it
+                    if ( function_exists( 'wp_augoose_render_currency_switcher' ) ) {
+                        wp_augoose_render_currency_switcher();
+                    }
+                    ?>
 
                     <div class="header-icon-row">
                     <div class="header-search">
