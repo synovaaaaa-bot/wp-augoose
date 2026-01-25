@@ -74,7 +74,8 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    z-index: 10;
+    z-index: 100; /* Higher z-index to ensure it's clickable */
+    pointer-events: auto; /* Ensure clicks work */
 }
 
 .wishlist-toggle {
@@ -89,6 +90,9 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 101; /* Higher z-index than parent */
+    pointer-events: auto !important; /* Force clicks to work */
 }
 
 .wishlist-toggle:hover {

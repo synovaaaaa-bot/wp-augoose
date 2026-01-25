@@ -1439,17 +1439,72 @@ function wp_augoose_use_latest_collection_template( $template, $slug, $name ) {
 
 
 /**
- * Disable Multicurrency Plugin Hooks
- * Prevents plugin from modifying WooCommerce prices (causes fatal errors)
- * Load via plugins_loaded hook to ensure it runs after plugin registers hooks
+ * Disable Multicurrency Plugin if WCML is active
+ * Since we're using WCML for currency conversion, multicurrency plugin is not needed
+ * and can cause conflicts. This will disable it automatically.
  */
-add_action( 'plugins_loaded', 'wp_augoose_load_disable_multicurrency_plugin', 999 );
-function wp_augoose_load_disable_multicurrency_plugin() {
-	if ( file_exists( get_template_directory() . '/inc/disable-multicurrency-plugin.php' ) ) {
-		require_once get_template_directory() . '/inc/disable-multicurrency-plugin.php';
-		// Call the function to remove hooks
-		if ( function_exists( 'wp_augoose_disable_multicurrency_plugin_hooks' ) ) {
-			wp_augoose_disable_multicurrency_plugin_hooks();
+add_action( 'plugins_loaded', 'wp_augoose_disable_multicurrency_if_wcml_active', 999 );
+function wp_augoose_disable_multicurrency_if_wcml_active() {
+	// Check if WCML is active
+	$wcml_active = class_exists( 'woocommerce_wpml' ) || function_exists( 'wcml_get_woocommerce_currency_option' );
+	
+	if ( ! $wcml_active ) {
+		// WCML not active, keep the disable hooks function as backup
+		if ( file_exists( get_template_directory() . '/inc/disable-multicurrency-plugin.php' ) ) {
+			require_once get_template_directory() . '/inc/disable-multicurrency-plugin.php';
+			if ( function_exists( 'wp_augoose_disable_multicurrency_plugin_hooks' ) ) {
+				wp_augoose_disable_multicurrency_plugin_hooks();
+			}
+		}
+		return;
+	}
+	
+	// WCML is active - disable multicurrency plugin completely
+	if ( class_exists( 'MultiCurrency_AutoConvert' ) ) {
+		// Remove all hooks from multicurrency plugin
+		$instance = MultiCurrency_AutoConvert::get_instance();
+		if ( $instance ) {
+			// Remove all possible filters with all priorities
+			$priorities = array( 1, 5, 10, 15, 20, 25, 30, 50, 99, 100, 999 );
+			foreach ( $priorities as $priority ) {
+				remove_filter( 'woocommerce_currency', array( $instance, 'get_currency' ), $priority );
+				remove_filter( 'woocommerce_currency', array( $instance, 'get_current_currency' ), $priority );
+				remove_filter( 'woocommerce_currency_symbol', array( $instance, 'get_currency_symbol' ), $priority );
+				remove_filter( 'woocommerce_price_format', array( $instance, 'price_format' ), $priority );
+				remove_filter( 'woocommerce_product_get_price', array( $instance, 'convert_price_display' ), $priority );
+				remove_filter( 'woocommerce_product_get_sale_price', array( $instance, 'convert_price_display' ), $priority );
+				remove_filter( 'woocommerce_product_get_regular_price', array( $instance, 'convert_price_display' ), $priority );
+			}
+			
+			// Remove from global filter array
+			global $wp_filter;
+			$filters_to_remove = array(
+				'woocommerce_currency',
+				'woocommerce_currency_symbol',
+				'woocommerce_price_format',
+				'woocommerce_product_get_price',
+				'woocommerce_product_get_sale_price',
+				'woocommerce_product_get_regular_price',
+			);
+			
+			foreach ( $filters_to_remove as $filter_name ) {
+				if ( isset( $wp_filter[ $filter_name ] ) ) {
+					foreach ( $wp_filter[ $filter_name ]->callbacks as $priority => $callbacks ) {
+						foreach ( $callbacks as $callback ) {
+							if ( is_array( $callback['function'] ) && 
+								 is_object( $callback['function'][0] ) && 
+								 $callback['function'][0] === $instance ) {
+								remove_filter( $filter_name, $callback['function'], $priority );
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		// Log for debugging
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'WCML is active. Multicurrency plugin hooks removed to prevent conflicts.' );
 		}
 	}
 }

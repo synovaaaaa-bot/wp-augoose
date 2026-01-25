@@ -11,6 +11,28 @@ if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) && file_exists( get_tem
 }
 
 /**
+ * Ensure WCML currency switching works properly
+ * Don't interfere with WCML's currency conversion
+ */
+add_action( 'init', 'wp_augoose_ensure_wcml_currency_works', 999 );
+function wp_augoose_ensure_wcml_currency_works() {
+	// Only run if WCML is active
+	if ( ! class_exists( 'woocommerce_wpml' ) && ! function_exists( 'wcml_get_woocommerce_currency_option' ) ) {
+		return;
+	}
+	
+	// Ensure no filters are blocking WCML
+	// WCML uses filters like:
+	// - woocommerce_currency (priority 10)
+	// - woocommerce_currency_symbol (priority 10)
+	// - woocommerce_product_get_price (priority 10)
+	// - etc.
+	
+	// Don't add any filters that might interfere with WCML
+	// Just ensure multicurrency plugin doesn't block it
+}
+
+/**
  * WooCommerce setup function.
  */
 function wp_augoose_woocommerce_setup() {

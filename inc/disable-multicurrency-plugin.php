@@ -74,4 +74,35 @@ function wp_augoose_disable_multicurrency_plugin_hooks() {
 	// Ensure WCML can override currency - don't force IDR
 	// Remove any filters that might force currency to IDR
 	remove_filter( 'woocommerce_currency', array( $instance, 'get_currency' ), 10 );
+	remove_filter( 'woocommerce_currency', array( $instance, 'get_current_currency' ), 10 );
+	
+	// Remove all possible currency-related filters from multicurrency plugin
+	// Try different priorities (10, 20, 999, etc.)
+	$priorities = array( 1, 5, 10, 15, 20, 25, 30, 50, 99, 100, 999 );
+	foreach ( $priorities as $priority ) {
+		remove_filter( 'woocommerce_currency', array( $instance, 'get_currency' ), $priority );
+		remove_filter( 'woocommerce_currency', array( $instance, 'get_current_currency' ), $priority );
+		remove_filter( 'woocommerce_currency_symbol', array( $instance, 'get_currency_symbol' ), $priority );
+		remove_filter( 'woocommerce_price_format', array( $instance, 'price_format' ), $priority );
+	}
+	
+	// Also check if get_currency_symbol is still registered (it might be registered elsewhere)
+	global $wp_filter;
+	if ( isset( $wp_filter['woocommerce_currency_symbol'] ) ) {
+		foreach ( $wp_filter['woocommerce_currency_symbol']->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( is_array( $callback['function'] ) && 
+					 is_object( $callback['function'][0] ) && 
+					 $callback['function'][0] === $instance &&
+					 $callback['function'][1] === 'get_currency_symbol' ) {
+					remove_filter( 'woocommerce_currency_symbol', $callback['function'], $priority );
+				}
+			}
+		}
+	}
+	
+	// Log for debugging
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log( 'Multicurrency plugin hooks removed. WCML should now work properly.' );
+	}
 }

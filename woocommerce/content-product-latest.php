@@ -52,9 +52,9 @@ if ( $is_on_sale ) {
 				<span class="lc-badge <?php echo esc_attr( $badge_class ); ?>"><?php echo esc_html( $badge_text ); ?></span>
 			<?php endif; ?>
 			
-			<!-- Wishlist Heart Icon (Top Right) -->
+			<!-- Wishlist Heart Icon (Top Right) - OUTSIDE product link -->
 			<div class="product-wishlist">
-				<button class="wishlist-toggle add-to-wishlist" data-product-id="<?php echo esc_attr( $product->get_id() ); ?>" aria-label="Add to wishlist">
+				<button type="button" class="wishlist-toggle add-to-wishlist" data-product-id="<?php echo esc_attr( $product->get_id() ); ?>" aria-label="Add to wishlist">
 					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 						<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
 					</svg>
@@ -62,7 +62,7 @@ if ( $is_on_sale ) {
 			</div>
 			
 			<?php
-			// Product link wrapper for image
+			// Product link wrapper for image - AFTER wishlist button (so wishlist is outside link)
 			if ( function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
 				woocommerce_template_loop_product_link_open();
 			}
