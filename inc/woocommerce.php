@@ -586,7 +586,7 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 					<div class="wishlist-item-title">
 						<a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $product->get_name() ); ?></a>
 					</div>
-					<div class="wishlist-item-price"><?php echo wp_kses_post( $price ); ?></div>
+					<div class="wishlist-item-price"><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
 					<div class="wishlist-item-actions">
 						<?php if ( $is_simple && $product->is_in_stock() ) : ?>
 							<button type="button" class="wishlist-add-to-cart" data-product-id="<?php echo esc_attr( $pid ); ?>">Add to cart</button>
