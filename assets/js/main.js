@@ -447,13 +447,13 @@
                             console.error('Server returned HTML instead of JSON. This may indicate a PHP error.');
                             errorMsg = 'Server error. Please refresh the page and try again.';
                         } else {
-                            try {
-                                const errorResponse = JSON.parse(xhr.responseText);
-                                if (errorResponse.data && errorResponse.data.message) {
-                                    errorMsg = errorResponse.data.message;
-                                }
-                            } catch (e) {
-                                console.error('Failed to parse error response:', e);
+                        try {
+                            const errorResponse = JSON.parse(xhr.responseText);
+                            if (errorResponse.data && errorResponse.data.message) {
+                                errorMsg = errorResponse.data.message;
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse error response:', e);
                                 // If it's not valid JSON, it might be HTML or plain text
                                 if (xhr.responseText.length < 500) {
                                     errorMsg = xhr.responseText.substring(0, 200);

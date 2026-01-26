@@ -191,12 +191,12 @@ function wp_augoose_preload_resources() {
     // Preload critical fonts (only if files exist)
     $killarney_font = get_template_directory() . '/assets/fonts/killarney.woff2';
     if ( file_exists( $killarney_font ) ) {
-        echo '<link rel="preload" href="' . get_template_directory_uri() . '/assets/fonts/killarney.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
+    echo '<link rel="preload" href="' . get_template_directory_uri() . '/assets/fonts/killarney.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
     }
     
     $minion_font = get_template_directory() . '/assets/fonts/minion-pro.woff2';
     if ( file_exists( $minion_font ) ) {
-        echo '<link rel="preload" href="' . get_template_directory_uri() . '/assets/fonts/minion-pro.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
+    echo '<link rel="preload" href="' . get_template_directory_uri() . '/assets/fonts/minion-pro.woff2" as="font" type="font/woff2" crossorigin>' . "\n";
     }
     
     // Preload critical CSS

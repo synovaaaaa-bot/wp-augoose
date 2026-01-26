@@ -51,7 +51,7 @@ function wp_augoose_payment_failed_template_redirect() {
 function wp_augoose_setup() {
     // Load textdomain - moved to init hook to prevent "too early" warning
     // Textdomain will be loaded on init hook instead
-    
+
     add_theme_support( 'automatic-feed-links' );
     add_theme_support( 'title-tag' );
     add_theme_support( 'post-thumbnails' );
