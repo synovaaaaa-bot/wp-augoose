@@ -567,13 +567,6 @@ function wp_augoose_determine_currency( $country = '' ) {
  */
 add_action( 'template_redirect', 'wp_augoose_set_currency_once', 10 );
 function wp_augoose_set_currency_once() {
-	// CRITICAL: Skip during wc-ajax requests - WooCommerce handles these at priority 0
-	// We run at priority 10, so WooCommerce's do_wc_ajax() (priority 0) runs first
-	// But we still need to skip to avoid any potential output
-	if ( augoose_is_wc_ajax_request() ) {
-		return;
-	}
-	
 	// Skip admin dan AJAX (kecuali frontend AJAX)
 	if ( is_admin() && ! wp_doing_ajax() ) {
 		return;
@@ -1719,11 +1712,6 @@ add_action( 'woocommerce_before_main_content', 'wp_augoose_wrapper_start', 10 );
 add_action( 'woocommerce_after_main_content', 'wp_augoose_wrapper_end', 10 );
 
 function wp_augoose_wrapper_start() {
-	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
-	if ( augoose_is_wc_ajax_request() ) {
-		return;
-	}
-	
 	// Don't add wrapper for checkout and cart pages (they have their own wrapper in templates)
 	if ( is_checkout() || is_cart() ) {
 		// Just add main tag without container, templates will handle their own containers
@@ -1734,11 +1722,6 @@ function wp_augoose_wrapper_start() {
 }
 
 function wp_augoose_wrapper_end() {
-	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
-	if ( augoose_is_wc_ajax_request() ) {
-		return;
-	}
-	
 	// Don't add wrapper for checkout and cart pages (they have their own wrapper in templates)
 	if ( is_checkout() || is_cart() ) {
 		echo '</main>';
