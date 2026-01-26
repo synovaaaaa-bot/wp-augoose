@@ -17,19 +17,20 @@ require_once get_template_directory() . '/inc/performance.php';
  * Theme Setup
  */
 function wp_augoose_setup() {
-    load_theme_textdomain( 'wp-augoose', get_template_directory() . '/languages' );
-
+    // Load textdomain - moved to init hook to prevent "too early" warning
+    // Textdomain will be loaded on init hook instead
+    
     add_theme_support( 'automatic-feed-links' );
     add_theme_support( 'title-tag' );
     add_theme_support( 'post-thumbnails' );
     
     register_nav_menus( array(
-        'primary' => __( 'Primary Menu', 'wp-augoose' ),
-        'footer'  => __( 'Footer Menu', 'wp-augoose' ),
-        'language' => __( 'Language Switcher Menu', 'wp-augoose' ),
-        'footer_about' => __( 'Footer: About', 'wp-augoose' ),
-        'footer_help'  => __( 'Footer: Help', 'wp-augoose' ),
-        'footer_shop'  => __( 'Footer: Shop', 'wp-augoose' ),
+        'primary' => 'Primary Menu',
+        'footer'  => 'Footer Menu',
+        'language' => 'Language Switcher Menu',
+        'footer_about' => 'Footer: About',
+        'footer_help'  => 'Footer: Help',
+        'footer_shop'  => 'Footer: Shop',
     ) );
     
     add_theme_support( 'html5', array(
@@ -58,6 +59,15 @@ function wp_augoose_setup() {
     add_theme_support( 'wc-product-gallery-slider' );
 }
 add_action( 'after_setup_theme', 'wp_augoose_setup' );
+
+/**
+ * Load theme textdomain on init hook (not too early)
+ * This prevents WordPress 6.7+ warning about textdomain loaded too early
+ */
+add_action( 'init', 'wp_augoose_load_textdomain', 1 );
+function wp_augoose_load_textdomain() {
+    load_theme_textdomain( 'wp-augoose', get_template_directory() . '/languages' );
+}
 
 /**
  * Create core static pages on theme activation (only if missing).
@@ -221,16 +231,16 @@ function wp_augoose_render_language_switcher() {
         $langs = icl_get_languages( 'skip_missing=0&orderby=code' );
         if ( is_array( $langs ) && ! empty( $langs ) ) {
             echo '<div class="header-locale header-language"><div class="lang-switcher"><select class="lang-select" onchange="if(this.value){window.location.href=this.value;}">';
-            foreach ( $langs as $l ) {
-                $selected = ! empty( $l['active'] ) ? ' selected' : '';
-                $url      = isset( $l['url'] ) ? $l['url'] : '';
+            foreach ( $langs as $lang_item ) {
+                $selected = ! empty( $lang_item['active'] ) ? ' selected' : '';
+                $url      = isset( $lang_item['url'] ) ? $lang_item['url'] : '';
                 $name     = '';
-                if ( isset( $l['native_name'] ) ) {
-                    $name = $l['native_name'];
-                } elseif ( isset( $l['translated_name'] ) ) {
-                    $name = $l['translated_name'];
-                } elseif ( isset( $l['language_code'] ) ) {
-                    $name = $l['language_code'];
+                if ( isset( $lang_item['native_name'] ) ) {
+                    $name = $lang_item['native_name'];
+                } elseif ( isset( $lang_item['translated_name'] ) ) {
+                    $name = $lang_item['translated_name'];
+                } elseif ( isset( $lang_item['language_code'] ) ) {
+                    $name = $lang_item['language_code'];
                 }
                 printf( '<option value="%s"%s>%s</option>', esc_url( $url ), $selected, esc_html( $name ) );
             }
