@@ -1,0 +1,103 @@
+--- a/wp-augoose/inc/woocommerce.php
++++ b/wp-augoose/inc/woocommerce.php
+@@ -1623,6 +1623,11 @@
+ add_action( 'wp_footer', 'wp_augoose_render_wishlist_sidebar', 30 );
+ function wp_augoose_render_wishlist_sidebar() {
++	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
++	if ( wp_doing_ajax() || isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
++		return;
++	}
+ 	if ( ! class_exists( 'WooCommerce' ) ) {
+ 		return;
+ 	}
+@@ -1865,6 +1870,11 @@
+ add_action( 'wp_footer', 'wp_augoose_mini_cart_html' );
+ function wp_augoose_mini_cart_html() {
++	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
++	if ( wp_doing_ajax() || isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
++		return;
++	}
+     if ( ! class_exists( 'WooCommerce' ) ) {
+         return;
+     }
+@@ -2350,6 +2360,11 @@
+ add_action( 'wp_footer', 'wp_augoose_hide_newsletter_checkbox' );
+ function wp_augoose_hide_newsletter_checkbox() {
++	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
++	if ( wp_doing_ajax() || isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
++		return;
++	}
+ 	if ( is_checkout() ) {
+ 		?>
+ 		<style>
+@@ -2884,6 +2899,11 @@
+ add_filter( 'woocommerce_update_order_review_fragments', 'wp_augoose_preserve_checkout_product_images', 10, 1 );
+ function wp_augoose_preserve_checkout_product_images( $fragments ) {
++	// CRITICAL: Only run if fragments are missing, and ensure output buffer is clean
++	// This filter runs during wc-ajax=update_order_review, so we must be careful
++	if ( ! is_array( $fragments ) ) {
++		$fragments = array();
++	}
+ 	// Ensure order review fragment includes product images
+ 	if ( ! isset( $fragments['.woocommerce-checkout-review-order-table'] ) ) {
+ 		ob_start();
+--- a/wp-content/plugins/doku-payment/Module/JokulCheckoutModule.php
++++ b/wp-content/plugins/doku-payment/Module/JokulCheckoutModule.php
+@@ -X,Y +X,Y @@
+ 
+-    $mainSettings = get_option('woocommerce_doku_gateway_settings');
++    // CRITICAL: Safely get settings with fallback to empty array
++    // get_option() can return false, causing "Trying to access array offset on false" errors
++    $mainSettings = get_option('woocommerce_doku_gateway_settings', array());
++    if (!is_array($mainSettings)) {
++        $mainSettings = array();
++    }
+ 
+-    $environment = $mainSettings['environment_payment_jokul'];
+-    $sandboxClientId = $mainSettings['sandbox_client_id'];
+-    $sandboxSharedKey = $mainSettings['sandbox_shared_key'];
+-    $prodClientId = $mainSettings['prod_client_id'];
+-    $prodSharedKey = $mainSettings['prod_shared_key'];
+-    $expiredTime = $mainSettings['expired_time'];
+-    $emailNotifications = $mainSettings['email_notifications'];
+-    $abandonedCart = $mainSettings['abandoned_cart'];
+-    $timeRangeAbandonedCart = $mainSettings['time_range_abandoned_cart'];
+-    $customTimeRangeAbandonedCart = $mainSettings['custom_time_range_abandoned_cart'];
+-    $sacCheck = $mainSettings['sac_check'];
+-    $sacTextbox = $mainSettings['sac_textbox'];
++    // Safe array access with null coalescing and sensible defaults
++    $environment = $mainSettings['environment_payment_jokul'] ?? 'sandbox';
++    $sandboxClientId = $mainSettings['sandbox_client_id'] ?? '';
++    $sandboxSharedKey = $mainSettings['sandbox_shared_key'] ?? '';
++    $prodClientId = $mainSettings['prod_client_id'] ?? '';
++    $prodSharedKey = $mainSettings['prod_shared_key'] ?? '';
++    $expiredTime = $mainSettings['expired_time'] ?? '';
++    $emailNotifications = $mainSettings['email_notifications'] ?? 'no';
++    $abandonedCart = $mainSettings['abandoned_cart'] ?? 'no';
++    $timeRangeAbandonedCart = $mainSettings['time_range_abandoned_cart'] ?? '';
++    $customTimeRangeAbandonedCart = $mainSettings['custom_time_range_abandoned_cart'] ?? '';
++    $sacCheck = $mainSettings['sac_check'] ?? 'no';
++    $sacTextbox = $mainSettings['sac_textbox'] ?? '';
+ 
+-    $queryString = $_SERVER['QUERY_STRING'];
++    // CRITICAL: Safe QUERY_STRING access with fallback
++    // $_SERVER['QUERY_STRING'] may not exist, causing "Undefined array key" errors
++    $queryString = $_SERVER['QUERY_STRING'] ?? '';
++    $queryString = is_string($queryString) ? $queryString : '';
+     $params = array_filter(explode('&', $queryString));
+ 
+-    if (WC()->session) {
++    // CRITICAL: Defensive check for WooCommerce session
++    // NEVER return from constructor, but wrap session-dependent code
++    if (function_exists('WC') && WC() && WC()->session) {
+         // session-dependent code
+     }
++
++    // CRITICAL: If this module runs during wc-ajax, ensure no output
++    // Add guards to prevent filters/actions that output HTML during AJAX
++    $is_ajax = (defined('DOING_AJAX') && DOING_AJAX) || wp_doing_ajax() || isset($_GET['wc-ajax']) || isset($_POST['wc-ajax']) || isset($_REQUEST['wc-ajax']);
++    if ($is_ajax) {
++        // Do NOT add filters/actions that alter titles or render pages during AJAX
++        // Do NOT echo/print anything
++        return; // If in constructor, return early
++    }

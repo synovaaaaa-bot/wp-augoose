@@ -224,17 +224,32 @@ jQuery(document).ready(function($) {
                     return;
                 }
                 
-                if (response && response.success) {
+                // Support both response formats:
+                // 1. wp_send_json_success format: { success: true, data: { fragments: {...} } }
+                // 2. WooCommerce format: { result: 'success', fragments: {...} }
+                const isSuccess = (response && response.success === true) || 
+                                  (response && response.result === 'success');
+                
+                if (isSuccess) {
                     console.log('Cart quantity updated successfully:', response);
                     
+                    // Get fragments from either format
+                    let fragments = null;
+                    if (response.data && response.data.fragments) {
+                        fragments = response.data.fragments;
+                    } else if (response.fragments) {
+                        fragments = response.fragments;
+                    }
+                    
                     // Update cart hash if provided (prevents checkout.min.js errors)
-                    if (response.data && response.data.cart_hash && typeof wc_checkout_params !== 'undefined') {
-                        wc_checkout_params.cart_hash = response.data.cart_hash;
+                    const cartHash = (response.data && response.data.cart_hash) || response.cart_hash || '';
+                    if (cartHash && typeof wc_checkout_params !== 'undefined') {
+                        wc_checkout_params.cart_hash = cartHash;
                     }
                     
                     // Update fragments FIRST to preserve product images
-                    if (response.data && response.data.fragments && typeof response.data.fragments === 'object') {
-                        $.each(response.data.fragments, function(key, value) {
+                    if (fragments && typeof fragments === 'object') {
+                        $.each(fragments, function(key, value) {
                             if (key && value) {
                                 const $target = $(key);
                                 if ($target.length) {

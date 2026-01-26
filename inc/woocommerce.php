@@ -11,6 +11,52 @@ if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) && file_exists( get_tem
 }
 
 /**
+ * Helper function: Check if current request is WooCommerce AJAX
+ * 
+ * CRITICAL: Use this to prevent HTML output during wc-ajax requests
+ * WooCommerce uses ?wc-ajax=update_order_review for checkout AJAX
+ * 
+ * @return bool True if this is a WooCommerce AJAX request
+ */
+function augoose_is_wc_ajax_request() {
+	// Check wp_doing_ajax() first (covers admin-ajax.php)
+	if ( wp_doing_ajax() ) {
+		// Check if it's a WooCommerce AJAX action
+		if ( isset( $_REQUEST['action'] ) ) {
+			$action = sanitize_text_field( $_REQUEST['action'] );
+			if ( strpos( $action, 'woocommerce_' ) === 0 || 
+			     $action === 'update_checkout_quantity' ||
+			     $action === 'update_order_review' ) {
+				return true;
+			}
+		}
+	}
+	
+	// Check wc-ajax endpoint (WooCommerce's standard AJAX endpoint)
+	if ( isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
+		return true;
+	}
+	
+	// Check DOING_AJAX constant
+	if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		// Additional check: if wc-ajax is in request, it's WC AJAX
+		if ( isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
+			return true;
+		}
+	}
+	
+	// Check REST_REQUEST (optional, for WooCommerce REST API)
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		// Only if it's a WooCommerce REST request
+		if ( isset( $_SERVER['REQUEST_URI'] ) && strpos( $_SERVER['REQUEST_URI'], '/wc/' ) !== false ) {
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+/**
  * Ensure WCML currency switching works properly
  * Don't interfere with WCML's currency conversion
  */
@@ -92,7 +138,13 @@ function wp_augoose_disable_checkout_block( $is_enabled, $feature ) {
  */
 add_action( 'template_redirect', 'wp_augoose_ensure_classic_checkout', 1 );
 function wp_augoose_ensure_classic_checkout() {
-	// Only on checkout page
+	// CRITICAL: Skip for wc-ajax requests - WooCommerce handles these
+	// wc-ajax requests are processed by WooCommerce before this hook
+	if ( isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
+		return;
+	}
+	
+	// Only on checkout page (not AJAX)
 	if ( ! is_checkout() ) {
 		return;
 	}
@@ -515,6 +567,13 @@ function wp_augoose_determine_currency( $country = '' ) {
  */
 add_action( 'template_redirect', 'wp_augoose_set_currency_once', 10 );
 function wp_augoose_set_currency_once() {
+	// CRITICAL: Skip during wc-ajax requests - WooCommerce handles these at priority 0
+	// We run at priority 10, so WooCommerce's do_wc_ajax() (priority 0) runs first
+	// But we still need to skip to avoid any potential output
+	if ( augoose_is_wc_ajax_request() ) {
+		return;
+	}
+	
 	// Skip admin dan AJAX (kecuali frontend AJAX)
 	if ( is_admin() && ! wp_doing_ajax() ) {
 		return;
@@ -1618,6 +1677,11 @@ function wp_augoose_payment_gateway_fields_english( $fields, $gateway_id ) {
 }
 
 function wp_augoose_render_wishlist_sidebar() {
+	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
+	if ( augoose_is_wc_ajax_request() ) {
+		return;
+	}
+	
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		return;
 	}
@@ -1655,6 +1719,11 @@ add_action( 'woocommerce_before_main_content', 'wp_augoose_wrapper_start', 10 );
 add_action( 'woocommerce_after_main_content', 'wp_augoose_wrapper_end', 10 );
 
 function wp_augoose_wrapper_start() {
+	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
+	if ( augoose_is_wc_ajax_request() ) {
+		return;
+	}
+	
 	// Don't add wrapper for checkout and cart pages (they have their own wrapper in templates)
 	if ( is_checkout() || is_cart() ) {
 		// Just add main tag without container, templates will handle their own containers
@@ -1665,6 +1734,11 @@ function wp_augoose_wrapper_start() {
 }
 
 function wp_augoose_wrapper_end() {
+	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
+	if ( augoose_is_wc_ajax_request() ) {
+		return;
+	}
+	
 	// Don't add wrapper for checkout and cart pages (they have their own wrapper in templates)
 	if ( is_checkout() || is_cart() ) {
 		echo '</main>';
@@ -1709,7 +1783,8 @@ add_filter( 'woocommerce_add_to_cart_fragments', 'wp_augoose_woocommerce_cart_li
 add_action(
 	'template_redirect',
 	function () {
-		if ( is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+		// CRITICAL: Skip during AJAX requests (including wc-ajax)
+		if ( is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || augoose_is_wc_ajax_request() ) {
 			return;
 		}
 		if ( function_exists( 'is_cart' ) && is_cart() ) {
@@ -1860,6 +1935,11 @@ function wp_augoose_mini_cart_fragments( $fragments ) {
  */
 add_action( 'wp_footer', 'wp_augoose_mini_cart_html' );
 function wp_augoose_mini_cart_html() {
+	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
+	if ( augoose_is_wc_ajax_request() ) {
+		return;
+	}
+	
     if ( ! class_exists( 'WooCommerce' ) ) {
         return;
     }
@@ -2345,6 +2425,11 @@ add_filter( 'woocommerce_checkout_newsletter_subscription_text', '__return_empty
 add_filter( 'woocommerce_registration_newsletter_subscription_text', '__return_empty_string', 999 );
 add_action( 'wp_footer', 'wp_augoose_hide_newsletter_checkbox' );
 function wp_augoose_hide_newsletter_checkbox() {
+	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
+	if ( augoose_is_wc_ajax_request() ) {
+		return;
+	}
+	
 	if ( is_checkout() ) {
 		?>
 		<style>
@@ -2442,51 +2527,48 @@ function wp_augoose_add_terms_checkbox() {
  * We hook early to clear output buffers before WooCommerce processes the request.
  * Following WooCommerce's pattern: clean output before any processing.
  */
+/**
+ * CRITICAL: Clean output buffer for WooCommerce AJAX requests ONLY
+ * 
+ * WooCommerce uses wc-ajax endpoint: ?wc-ajax=update_order_review
+ * We must ONLY clean output for actual AJAX requests, not form submissions.
+ * 
+ * Following WooCommerce's pattern: only clean for wc-ajax requests.
+ */
 add_action( 'init', 'wp_augoose_clean_output_for_woocommerce_ajax', 1 );
 add_action( 'wp_loaded', 'wp_augoose_clean_output_for_woocommerce_ajax', 1 );
 function wp_augoose_clean_output_for_woocommerce_ajax() {
-	// Only for AJAX requests
-	if ( ! wp_doing_ajax() ) {
+	// CRITICAL: Only for actual AJAX requests (wp_doing_ajax OR wc-ajax endpoint)
+	// Do NOT interfere with regular form submissions
+	$is_ajax = wp_doing_ajax();
+	$is_wc_ajax_endpoint = isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] );
+	
+	// Only proceed if this is a real AJAX request
+	if ( ! $is_ajax && ! $is_wc_ajax_endpoint ) {
 		return;
 	}
 	
-	// Check if this is a WooCommerce AJAX request
-	$is_wc_ajax = false;
-	
-	// Check wc-ajax endpoint (WooCommerce's standard AJAX endpoint)
-	if ( isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
-		$is_wc_ajax = true;
-	}
-	
-	// Check action parameter for WooCommerce-related actions
-	if ( isset( $_REQUEST['action'] ) ) {
-		$action = sanitize_text_field( $_REQUEST['action'] );
-		// WooCommerce checkout and cart actions
-		if ( strpos( $action, 'woocommerce' ) !== false || 
-		     strpos( $action, 'checkout' ) !== false ||
-		     strpos( $action, 'update_order_review' ) !== false ||
-		     strpos( $action, 'update_checkout' ) !== false ||
-		     strpos( $action, 'get_cart' ) !== false ||
-		     strpos( $action, 'add_to_cart' ) !== false ) {
-			$is_wc_ajax = true;
-		}
-	}
-	
-	// Check if WooCommerce is active and this might be a WC request
-	if ( class_exists( 'WooCommerce' ) ) {
-		// If we're on checkout page or cart page via AJAX, assume it's WC
-		if ( isset( $_REQUEST['wc_checkout'] ) || isset( $_REQUEST['wc_cart'] ) ) {
-			$is_wc_ajax = true;
-		}
-	}
-	
-	// Clear output buffers for WooCommerce AJAX requests
-	// This follows WooCommerce's pattern: clean output before JSON response
-	if ( $is_wc_ajax ) {
-		// Clear all output buffers to prevent HTML before JSON
-		// This is critical - any HTML output will cause "SyntaxError: Unexpected token '<'"
+	// For wc-ajax endpoint, WooCommerce handles it via template_redirect
+	// We only clean output buffer if it's a wc-ajax request
+	if ( $is_wc_ajax_endpoint ) {
+		// Clear output buffers BEFORE WooCommerce processes the request
+		// This prevents HTML output before JSON response
 		while ( ob_get_level() ) {
 			ob_end_clean();
+		}
+		return;
+	}
+	
+	// For admin-ajax.php requests, check if it's WooCommerce-related
+	if ( $is_ajax && isset( $_REQUEST['action'] ) ) {
+		$action = sanitize_text_field( $_REQUEST['action'] );
+		// Only clean for WooCommerce AJAX actions
+		if ( strpos( $action, 'woocommerce_' ) === 0 || 
+		     $action === 'update_checkout_quantity' ) {
+			// Clear output buffers to prevent HTML before JSON
+			while ( ob_get_level() ) {
+				ob_end_clean();
+			}
 		}
 	}
 }
@@ -2818,23 +2900,48 @@ function wp_augoose_update_checkout_quantity() {
 		}
 	}
 	
-	// Build response - EXACT format as WooCommerce update_order_review
-	$response = array(
-		'result'    => empty( $messages ) ? 'success' : 'failure',  // String: 'success' or 'failure'
-		'messages'  => is_string( $messages ) ? $messages : '',     // String: HTML messages or empty
-		'reload'    => false,                                        // Boolean: false (never reload for quantity update)
-		'fragments' => $fragments,                                   // Object: key-value pairs of selectors and HTML
-	);
+	// Build response - Support BOTH formats:
+	// 1. WooCommerce update_order_review format (for checkout.min.js)
+	// 2. wp_send_json_success format (for our custom JS)
 	
 	// CRITICAL: Ensure all values are proper types and never null/undefined
 	// This prevents "Cannot read properties of undefined (reading 'toString')" errors
-	$response['result'] = is_string( $response['result'] ) ? $response['result'] : 'success';
-	$response['messages'] = is_string( $response['messages'] ) ? $response['messages'] : '';
-	$response['reload'] = is_bool( $response['reload'] ) ? $response['reload'] : false;
-	$response['fragments'] = is_array( $response['fragments'] ) ? $response['fragments'] : array();
+	$result = empty( $messages ) ? 'success' : 'failure';
+	$result = is_string( $result ) ? $result : 'success';
+	$messages = is_string( $messages ) ? $messages : '';
+	$reload = false;
+	$fragments = is_array( $fragments ) ? $fragments : array();
+	
+	// Get cart hash for checkout.min.js compatibility
+	$cart_hash = '';
+	if ( function_exists( 'WC' ) && WC() && WC()->cart ) {
+		$cart_hash = WC()->cart->get_cart_hash();
+	}
+	
+	// Build dual-format response
+	// Format 1: WooCommerce update_order_review format (for checkout.min.js)
+	$wc_response = array(
+		'result'    => $result,
+		'messages'  => $messages,
+		'reload'    => $reload,
+		'fragments' => $fragments,
+	);
+	
+	// Format 2: wp_send_json_success format (for our custom JS)
+	$custom_response = array(
+		'success' => ( $result === 'success' ),
+		'data'    => array(
+			'fragments'  => $fragments,
+			'cart_hash'  => $cart_hash,
+			'message'    => $messages,
+		),
+	);
+	
+	// Merge both formats - our JS checks response.success, checkout.min.js checks result
+	$response = array_merge( $wc_response, $custom_response );
 	
 	// Send JSON response - use wp_send_json directly (same as WooCommerce)
-	// This ensures 100% compatibility with checkout.min.js
+	// This ensures 100% compatibility with both checkout.min.js and our custom JS
 	// Clear output buffer first to prevent any HTML before JSON
 	while ( ob_get_level() ) {
 		ob_end_clean();
@@ -2856,8 +2963,17 @@ function wp_augoose_update_checkout_quantity() {
  */
 add_filter( 'woocommerce_update_order_review_fragments', 'wp_augoose_preserve_checkout_product_images', 10, 1 );
 function wp_augoose_preserve_checkout_product_images( $fragments ) {
+	// CRITICAL: Ensure fragments is always an array
+	if ( ! is_array( $fragments ) ) {
+		$fragments = array();
+	}
+	
 	// Ensure order review fragment includes product images
 	if ( ! isset( $fragments['.woocommerce-checkout-review-order-table'] ) ) {
+		// Clear any existing output buffer before starting
+		while ( ob_get_level() ) {
+			ob_end_clean();
+		}
 		ob_start();
 		woocommerce_order_review();
 		$fragments['.woocommerce-checkout-review-order-table'] = ob_get_clean();

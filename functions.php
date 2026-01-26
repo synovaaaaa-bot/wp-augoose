@@ -1405,6 +1405,11 @@ add_action( 'wp_head', 'wp_augoose_add_wishlist_handler_inline', 5 );
  * Add JavaScript to force grid layout
  */
 function wp_augoose_force_grid_layout() {
+	// CRITICAL: Skip during AJAX requests to prevent HTML output before JSON
+	if ( function_exists( 'augoose_is_wc_ajax_request' ) && augoose_is_wc_ajax_request() ) {
+		return;
+	}
+	
     // Emergency JS should never run on production unless explicitly enabled.
     // Enable by adding `?augoose_debug=1` to the URL.
     if ( ! isset( $_GET['augoose_debug'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
