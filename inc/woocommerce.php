@@ -2742,6 +2742,12 @@ function wp_augoose_translate_shipping_labels( $html ) {
 		'PENGIRIMAN GRATIS' => 'FREE SHIPPING',
 		'Pengiriman Gratis' => 'Free Shipping',
 		'pengiriman gratis' => 'free shipping',
+		'GRATIS' => 'FREE',
+		'Gratis' => 'Free',
+		'gratis' => 'free',
+		'SHIPPING GRATIS' => 'FREE SHIPPING',
+		'Shipping Gratis' => 'Free Shipping',
+		'shipping gratis' => 'free shipping',
 	);
 	
 	foreach ( $translations as $indonesian => $english ) {
@@ -2764,6 +2770,12 @@ function wp_augoose_translate_shipping_method_label( $label, $method = null ) {
 		'PENGIRIMAN GRATIS' => 'FREE SHIPPING',
 		'Pengiriman Gratis' => 'Free Shipping',
 		'pengiriman gratis' => 'free shipping',
+		'GRATIS' => 'FREE',
+		'Gratis' => 'Free',
+		'gratis' => 'free',
+		'SHIPPING GRATIS' => 'FREE SHIPPING',
+		'Shipping Gratis' => 'Free Shipping',
+		'shipping gratis' => 'free shipping',
 	);
 	
 	foreach ( $translations as $indonesian => $english ) {
