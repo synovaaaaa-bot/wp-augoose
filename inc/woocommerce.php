@@ -2420,6 +2420,152 @@ function wp_augoose_remove_edit_link_from_checkout( $product_name, $cart_item, $
 	return $product_name;
 }
 
+/**
+ * Ensure DOKU payment uses amount and currency directly from WCML/WooCommerce order
+ * WITHOUT any manual modification, formatting, or recalculation
+ * 
+ * Core Rules:
+ * 1. Use amount from order object as single source of truth
+ * 2. NO override, manual input, or reformatting
+ * 3. NO comma (,) in amount - only dot (.) for decimal
+ * 4. Format: IDR = integer, others = 2 decimals
+ * 5. Separate display data from transaction data
+ * 
+ * @param array $args Payment gateway arguments
+ * @param WC_Order $order Order object
+ * @return array Modified arguments
+ */
+add_filter( 'woocommerce_gateway_doku_payment_args', 'wp_augoose_ensure_doku_amount_from_order', 10, 2 );
+add_filter( 'woocommerce_gateway_jokul_payment_args', 'wp_augoose_ensure_doku_amount_from_order', 10, 2 );
+function wp_augoose_ensure_doku_amount_from_order( $args, $order ) {
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return $args;
+	}
+	
+	// Step 1: Get amount directly from order object (WCML already converted)
+	$amount = (float) $order->get_total();
+	$currency = $order->get_currency();
+	
+	// Step 2: Sanitize - remove any commas (safety only, not for manual reformatting)
+	$amount = str_replace( ',', '', (string) $amount );
+	
+	// Step 3: Format by currency type
+	if ( $currency === 'IDR' ) {
+		// IDR: Integer only (no decimals)
+		$amount = (string) round( (float) $amount );
+	} else {
+		// Other currencies: 2 decimal places
+		$amount = number_format( (float) $amount, 2, '.', '' );
+	}
+	
+	// Step 4: Validation - ensure no comma in final amount
+	if ( strpos( $amount, ',' ) !== false ) {
+		error_log( 'DOKU Payment Error: Invalid amount format contains comma: ' . $amount );
+		// Fallback: remove comma and reformat
+		$amount = str_replace( ',', '', $amount );
+		if ( $currency === 'IDR' ) {
+			$amount = (string) round( (float) $amount );
+		} else {
+			$amount = number_format( (float) $amount, 2, '.', '' );
+		}
+	}
+	
+	// Step 5: Set amount and currency in args (override any manual values)
+	$args['amount'] = $amount;
+	$args['currency'] = $currency;
+	
+	// Log for debugging (remove in production if needed)
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log( sprintf(
+			'DOKU Payment: Order #%d - Amount: %s, Currency: %s (from order object)',
+			$order->get_id(),
+			$amount,
+			$currency
+		) );
+	}
+	
+	return $args;
+}
+
+/**
+ * Ensure DOKU payment gateway uses order total directly
+ * Hook into payment processing to validate amount source
+ */
+add_action( 'woocommerce_checkout_order_processed', 'wp_augoose_validate_doku_order_amount', 10, 3 );
+function wp_augoose_validate_doku_order_amount( $order_id, $posted_data, $order ) {
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+	
+	// Only validate for DOKU payment methods
+	$payment_method = $order->get_payment_method();
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return;
+	}
+	
+	// Get amount and currency from order (WCML already converted)
+	$order_total = (float) $order->get_total();
+	$order_currency = $order->get_currency();
+	
+	// Validate format
+	$total_str = (string) $order_total;
+	if ( strpos( $total_str, ',' ) !== false ) {
+		error_log( sprintf(
+			'DOKU Payment Warning: Order #%d has comma in total: %s. This should be fixed by WCML.',
+			$order_id,
+			$total_str
+		) );
+	}
+	
+	// Store clean amount in order meta for DOKU gateway to use
+	$clean_amount = str_replace( ',', '', $total_str );
+	if ( $order_currency === 'IDR' ) {
+		$clean_amount = (string) round( (float) $clean_amount );
+	} else {
+		$clean_amount = number_format( (float) $clean_amount, 2, '.', '' );
+	}
+	
+	// Store in order meta (DOKU gateway can read this)
+	$order->update_meta_data( '_doku_clean_amount', $clean_amount );
+	$order->update_meta_data( '_doku_currency', $order_currency );
+	$order->save_meta_data();
+}
+
+/**
+ * Filter DOKU payment gateway to use clean amount from order meta
+ * This ensures DOKU always gets properly formatted amount
+ */
+add_filter( 'woocommerce_gateway_doku_amount', 'wp_augoose_get_doku_amount_from_order_meta', 10, 2 );
+add_filter( 'woocommerce_gateway_jokul_amount', 'wp_augoose_get_doku_amount_from_order_meta', 10, 2 );
+function wp_augoose_get_doku_amount_from_order_meta( $amount, $order ) {
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return $amount;
+	}
+	
+	// Get clean amount from order meta (set by validation hook)
+	$clean_amount = $order->get_meta( '_doku_clean_amount' );
+	if ( ! empty( $clean_amount ) ) {
+		// Validate no comma
+		if ( strpos( $clean_amount, ',' ) === false ) {
+			return $clean_amount;
+		}
+	}
+	
+	// Fallback: get from order total and format
+	$order_total = (float) $order->get_total();
+	$order_currency = $order->get_currency();
+	
+	$amount = str_replace( ',', '', (string) $order_total );
+	if ( $order_currency === 'IDR' ) {
+		$amount = (string) round( (float) $amount );
+	} else {
+		$amount = number_format( (float) $amount, 2, '.', '' );
+	}
+	
+	return $amount;
+}
+
 add_filter( 'woocommerce_get_item_data', 'wp_augoose_format_cart_item_data', 10, 2 );
 
 /**
