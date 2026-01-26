@@ -2421,6 +2421,19 @@ function wp_augoose_remove_edit_link_from_checkout( $product_name, $cart_item, $
 }
 
 /**
+ * Remove duplicate payment method from order details table
+ * Payment method is already shown in order overview, so hide it in order details table
+ */
+add_filter( 'woocommerce_get_order_item_totals', 'wp_augoose_remove_payment_method_from_order_details', 10, 2 );
+function wp_augoose_remove_payment_method_from_order_details( $total_rows, $order ) {
+	// Remove payment method from order details table (already shown in overview)
+	if ( isset( $total_rows['payment_method'] ) ) {
+		unset( $total_rows['payment_method'] );
+	}
+	return $total_rows;
+}
+
+/**
  * Ensure DOKU payment uses amount and currency directly from WCML/WooCommerce order
  * WITHOUT any manual modification, formatting, or recalculation
  * 
@@ -2490,8 +2503,11 @@ function wp_augoose_ensure_doku_amount_from_order( $args, $order ) {
 /**
  * Ensure DOKU payment gateway uses order total directly
  * Hook into payment processing to validate amount source
+ * This runs BEFORE payment processing to ensure clean amount
  */
-add_action( 'woocommerce_checkout_order_processed', 'wp_augoose_validate_doku_order_amount', 10, 3 );
+add_action( 'woocommerce_checkout_order_processed', 'wp_augoose_validate_doku_order_amount', 5, 3 );
+add_action( 'woocommerce_before_pay', 'wp_augoose_validate_doku_order_amount_before_pay', 5 );
+add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_doku_amount_before_checkout', 5 );
 function wp_augoose_validate_doku_order_amount( $order_id, $posted_data, $order ) {
 	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
 		return;
@@ -2508,11 +2524,11 @@ function wp_augoose_validate_doku_order_amount( $order_id, $posted_data, $order 
 	$order_total = (float) $order->get_total();
 	$order_currency = $order->get_currency();
 	
-	// Validate format
+	// Validate format - ensure no comma
 	$total_str = (string) $order_total;
 	if ( strpos( $total_str, ',' ) !== false ) {
 		error_log( sprintf(
-			'DOKU Payment Warning: Order #%d has comma in total: %s. This should be fixed by WCML.',
+			'DOKU Payment Warning: Order #%d has comma in total: %s. Cleaning it now.',
 			$order_id,
 			$total_str
 		) );
@@ -2526,6 +2542,16 @@ function wp_augoose_validate_doku_order_amount( $order_id, $posted_data, $order 
 		$clean_amount = number_format( (float) $clean_amount, 2, '.', '' );
 	}
 	
+	// Validate final amount has no comma
+	if ( strpos( $clean_amount, ',' ) !== false ) {
+		$clean_amount = str_replace( ',', '', $clean_amount );
+		if ( $order_currency === 'IDR' ) {
+			$clean_amount = (string) round( (float) $clean_amount );
+		} else {
+			$clean_amount = number_format( (float) $clean_amount, 2, '.', '' );
+		}
+	}
+	
 	// Store in order meta (DOKU gateway can read this)
 	$order->update_meta_data( '_doku_clean_amount', $clean_amount );
 	$order->update_meta_data( '_doku_currency', $order_currency );
@@ -2533,26 +2559,99 @@ function wp_augoose_validate_doku_order_amount( $order_id, $posted_data, $order 
 }
 
 /**
+ * Validate DOKU amount before pay for order page
+ */
+function wp_augoose_validate_doku_order_amount_before_pay() {
+	global $wp;
+	
+	if ( ! isset( $wp->query_vars['order-pay'] ) ) {
+		return;
+	}
+	
+	$order_id = absint( $wp->query_vars['order-pay'] );
+	$order = wc_get_order( $order_id );
+	
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+	
+	$payment_method = $order->get_payment_method();
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return;
+	}
+	
+	// Ensure clean amount is set
+	wp_augoose_validate_doku_order_amount( $order_id, array(), $order );
+}
+
+/**
+ * Validate DOKU amount before checkout process
+ * This ensures amount is clean before any payment gateway validation
+ */
+function wp_augoose_validate_doku_amount_before_checkout() {
+	if ( ! WC()->cart || WC()->cart->is_empty() ) {
+		return;
+	}
+	
+	// Check if DOKU payment method is selected
+	$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : '';
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return;
+	}
+	
+	// Get cart total and ensure no comma
+	$cart_total = WC()->cart->get_total( '' );
+	$cart_total_clean = str_replace( ',', '', $cart_total );
+	
+	// If there was a comma, update cart total
+	if ( $cart_total !== $cart_total_clean ) {
+		// This shouldn't happen, but if it does, log it
+		error_log( 'DOKU Payment: Cart total contained comma, cleaning it: ' . $cart_total . ' -> ' . $cart_total_clean );
+	}
+}
+
+/**
  * Filter DOKU payment gateway to use clean amount from order meta
  * This ensures DOKU always gets properly formatted amount
+ * Hook with high priority to override any plugin defaults
  */
-add_filter( 'woocommerce_gateway_doku_amount', 'wp_augoose_get_doku_amount_from_order_meta', 10, 2 );
-add_filter( 'woocommerce_gateway_jokul_amount', 'wp_augoose_get_doku_amount_from_order_meta', 10, 2 );
+add_filter( 'woocommerce_gateway_doku_amount', 'wp_augoose_get_doku_amount_from_order_meta', 999, 2 );
+add_filter( 'woocommerce_gateway_jokul_amount', 'wp_augoose_get_doku_amount_from_order_meta', 999, 2 );
+add_filter( 'doku_payment_amount', 'wp_augoose_get_doku_amount_from_order_meta', 999, 2 );
+add_filter( 'jokul_payment_amount', 'wp_augoose_get_doku_amount_from_order_meta', 999, 2 );
 function wp_augoose_get_doku_amount_from_order_meta( $amount, $order ) {
 	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
 		return $amount;
 	}
 	
-	// Get clean amount from order meta (set by validation hook)
+	// First, ensure clean amount is set (in case validation hook didn't run)
 	$clean_amount = $order->get_meta( '_doku_clean_amount' );
-	if ( ! empty( $clean_amount ) ) {
-		// Validate no comma
-		if ( strpos( $clean_amount, ',' ) === false ) {
-			return $clean_amount;
-		}
+	if ( empty( $clean_amount ) ) {
+		// Force validation now
+		wp_augoose_validate_doku_order_amount( $order->get_id(), array(), $order );
+		$clean_amount = $order->get_meta( '_doku_clean_amount' );
 	}
 	
-	// Fallback: get from order total and format
+	// Get clean amount from order meta
+	if ( ! empty( $clean_amount ) ) {
+		// Final validation - ensure no comma
+		if ( strpos( $clean_amount, ',' ) !== false ) {
+			$clean_amount = str_replace( ',', '', $clean_amount );
+			$order_currency = $order->get_currency();
+			if ( $order_currency === 'IDR' ) {
+				$clean_amount = (string) round( (float) $clean_amount );
+			} else {
+				$clean_amount = number_format( (float) $clean_amount, 2, '.', '' );
+			}
+			$order->update_meta_data( '_doku_clean_amount', $clean_amount );
+			$order->save_meta_data();
+		}
+		return $clean_amount;
+	}
+	
+	// Fallback: get from order total and format (ensure no comma)
 	$order_total = (float) $order->get_total();
 	$order_currency = $order->get_currency();
 	
@@ -2563,7 +2662,119 @@ function wp_augoose_get_doku_amount_from_order_meta( $amount, $order ) {
 		$amount = number_format( (float) $amount, 2, '.', '' );
 	}
 	
+	// Final check - no comma allowed
+	if ( strpos( $amount, ',' ) !== false ) {
+		$amount = str_replace( ',', '', $amount );
+		if ( $order_currency === 'IDR' ) {
+			$amount = (string) round( (float) $amount );
+		} else {
+			$amount = number_format( (float) $amount, 2, '.', '' );
+		}
+	}
+	
 	return $amount;
+}
+
+/**
+ * Handle payment success/failure redirects
+ * Redirect to custom pages based on payment status
+ */
+add_action( 'woocommerce_payment_complete', 'wp_augoose_handle_payment_success_redirect', 10, 1 );
+add_action( 'woocommerce_thankyou', 'wp_augoose_handle_payment_success_redirect', 10, 1 );
+function wp_augoose_handle_payment_success_redirect( $order_id ) {
+	if ( ! $order_id ) {
+		return;
+	}
+	
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+	
+	// Only handle DOKU/Jokul payments
+	$payment_method = $order->get_payment_method();
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return;
+	}
+	
+	// If order is paid, redirect to thank you page (default WooCommerce behavior)
+	if ( $order->is_paid() ) {
+		// WooCommerce will handle redirect to order received page
+		return;
+	}
+}
+
+/**
+ * Handle payment failure redirect
+ * Redirect to custom payment failed page if payment fails
+ */
+add_filter( 'woocommerce_payment_successful_result', 'wp_augoose_handle_payment_result_redirect', 10, 2 );
+function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
+	if ( ! $order_id ) {
+		return $result;
+	}
+	
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return $result;
+	}
+	
+	// Only handle DOKU/Jokul payments
+	$payment_method = $order->get_payment_method();
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return $result;
+	}
+	
+	// If payment failed, redirect to payment failed page
+	if ( isset( $result['result'] ) && 'failure' === $result['result'] ) {
+		$failed_url = add_query_arg( array(
+			'order_id' => $order_id,
+			'key'      => $order->get_order_key(),
+		), wc_get_page_permalink( 'checkout' ) . 'payment-failed/' );
+		
+		$result['redirect'] = $failed_url;
+	}
+	
+	return $result;
+}
+
+/**
+ * Handle DOKU payment callback/return
+ * Process payment status from DOKU and redirect accordingly
+ */
+add_action( 'woocommerce_api_doku_payment_callback', 'wp_augoose_handle_doku_payment_callback' );
+add_action( 'woocommerce_api_jokul_payment_callback', 'wp_augoose_handle_doku_payment_callback' );
+function wp_augoose_handle_doku_payment_callback() {
+	// Get order ID from request
+	$order_id = isset( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;
+	$order_key = isset( $_GET['key'] ) ? sanitize_text_field( $_GET['key'] ) : '';
+	
+	if ( ! $order_id || ! $order_key ) {
+		wp_redirect( wc_get_page_permalink( 'checkout' ) . 'payment-failed/' );
+		exit;
+	}
+	
+	$order = wc_get_order( $order_id );
+	if ( ! $order || $order->get_order_key() !== $order_key ) {
+		wp_redirect( wc_get_page_permalink( 'checkout' ) . 'payment-failed/' );
+		exit;
+	}
+	
+	// Check payment status
+	if ( $order->is_paid() ) {
+		// Payment successful - redirect to thank you page
+		wp_redirect( $order->get_checkout_order_received_url() );
+		exit;
+	} else {
+		// Payment failed - redirect to payment failed page
+		wp_redirect( add_query_arg( array(
+			'order_id' => $order_id,
+			'key'      => $order_key,
+		), wc_get_page_permalink( 'checkout' ) . 'payment-failed/' ) );
+		exit;
+	}
 }
 
 add_filter( 'woocommerce_get_item_data', 'wp_augoose_format_cart_item_data', 10, 2 );

@@ -14,6 +14,38 @@ require_once get_template_directory() . '/inc/security.php';
 require_once get_template_directory() . '/inc/performance.php';
 
 /**
+ * Add rewrite rule for payment failed page
+ */
+add_action( 'init', 'wp_augoose_add_payment_failed_rewrite_rule' );
+function wp_augoose_add_payment_failed_rewrite_rule() {
+	add_rewrite_rule( '^checkout/payment-failed/?$', 'index.php?payment_failed=1', 'top' );
+	add_rewrite_tag( '%payment_failed%', '([^&]+)' );
+}
+
+/**
+ * Filter query vars to include payment_failed
+ */
+add_filter( 'query_vars', 'wp_augoose_add_payment_failed_query_var' );
+function wp_augoose_add_payment_failed_query_var( $vars ) {
+	$vars[] = 'payment_failed';
+	return $vars;
+}
+
+/**
+ * Template redirect for payment failed page
+ */
+add_action( 'template_redirect', 'wp_augoose_payment_failed_template_redirect' );
+function wp_augoose_payment_failed_template_redirect() {
+	if ( get_query_var( 'payment_failed' ) ) {
+		$template = locate_template( 'page-payment-failed.php' );
+		if ( $template ) {
+			include $template;
+			exit;
+		}
+	}
+}
+
+/**
  * Theme Setup
  */
 function wp_augoose_setup() {
