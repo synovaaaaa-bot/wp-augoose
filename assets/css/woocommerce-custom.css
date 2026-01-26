@@ -2470,6 +2470,12 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     min-width: 500px; /* Minimum width for better text readability */
 }
 
+/* Hide duplicate payment section and place order button if exists outside custom section */
+.checkout-summary-column > #payment.form-row.place-order,
+.checkout-summary-column .form-row.place-order {
+    display: none !important;
+}
+
 .checkout-payment-section {
     margin-top: 32px;
     padding-top: 32px;
@@ -2828,7 +2834,56 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     overflow-wrap: break-word;
 }
 
-/* Place Order Button */
+/* Place Order Button Section */
+.checkout-place-order-section {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.checkout-place-order-section .checkout-place-order-btn {
+    width: 100%;
+    padding: 18px 32px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 0 0 16px;
+}
+
+.checkout-place-order-section .checkout-place-order-btn:hover {
+    background: #2c3e50;
+}
+
+.checkout-place-order-section .checkout-place-order-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkout-place-order-section .checkout-security-note {
+    margin: 16px 0 0;
+    font-size: 11px;
+    color: #666;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.6;
+}
+
+.checkout-place-order-section .checkout-security-note svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #999;
+}
+
+/* Place Order Button (legacy - for backward compatibility) */
 .checkout-place-order {
     margin-top: 32px;
     padding-top: 32px;

@@ -1642,6 +1642,11 @@ if ( file_exists( get_template_directory() . '/inc/template-tags.php' ) ) {
  */
 if ( class_exists( 'WooCommerce' ) && file_exists( get_template_directory() . '/inc/woocommerce.php' ) ) {
     require get_template_directory() . '/inc/woocommerce.php';
+    
+    // Load WCML currency routing (must be after woocommerce.php)
+    if ( class_exists( 'woocommerce_wpml' ) ) {
+        require get_template_directory() . '/inc/wcml-currency-routing.php';
+    }
 }
 
 /**

@@ -152,6 +152,44 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
                                 </p>
                             </div>
 
+                            <!-- Place Order Button -->
+                            <div class="checkout-place-order-section">
+                                <?php do_action( 'woocommerce_checkout_before_terms_and_conditions' ); ?>
+                                
+                                <?php
+                                // Terms and conditions
+                                $terms_page_id = wc_terms_and_conditions_page_id();
+                                if ( $terms_page_id && apply_filters( 'woocommerce_checkout_show_terms', true ) ) {
+                                    $terms = get_post( $terms_page_id );
+                                    $terms_content = has_shortcode( $terms->post_content, 'woocommerce_checkout' ) ? $terms->post_content : '';
+                                    if ( $terms_content ) {
+                                        echo '<div class="woocommerce-terms-and-conditions-wrapper" style="display:none; max-height:200px; overflow:auto;">' . wp_kses_post( $terms_content ) . '</div>';
+                                    }
+                                }
+                                ?>
+                                
+                                <?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
+                                
+                                <?php
+                                $order_button_text = apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) );
+                                ?>
+                                
+                                <button type="submit" class="button alt checkout-place-order-btn<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="woocommerce_checkout_place_order" id="place_order" value="<?php echo esc_attr( $order_button_text ); ?>" data-value="<?php echo esc_attr( $order_button_text ); ?>">
+                                    <?php echo esc_html( $order_button_text ); ?>
+                                </button>
+                                
+                                <p class="checkout-security-note">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm-1-9h2v4h-2V5zm0 5h2v2H7v-2z"/>
+                                    </svg>
+                                    Secure checkout + Email confirmation sent
+                                </p>
+                                
+                                <?php do_action( 'woocommerce_review_order_after_submit' ); ?>
+                                
+                                <?php wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
+                            </div>
+
                             <?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
                             
                             <!-- Coupon Code - Below Order Summary -->
