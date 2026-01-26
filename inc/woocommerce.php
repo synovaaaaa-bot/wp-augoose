@@ -2634,17 +2634,34 @@ function wp_augoose_ensure_doku_amount_from_order( $args, $order ) {
 	$amount = wp_augoose_format_doku_amount( $order_total, $currency );
 	
 	// Step 3: Set amount and currency in args (override any manual values)
+	// Clean ALL possible amount fields in args
+	$amount_fields = array( 'amount', 'order_amount', 'payment_amount', 'doku_amount', 'total', 'order_total', 'value', 'price' );
+	foreach ( $amount_fields as $field ) {
+		if ( isset( $args[ $field ] ) ) {
+			// If field contains comma, clean it
+			$field_value = (string) $args[ $field ];
+			if ( strpos( $field_value, ',' ) !== false ) {
+				$args[ $field ] = wp_augoose_format_doku_amount( $field_value, $currency );
+			} else {
+				// Even if no comma, ensure it's properly formatted
+				$args[ $field ] = wp_augoose_format_doku_amount( $field_value, $currency );
+			}
+		}
+	}
+	
+	// Always set main amount field
 	$args['amount'] = $amount;
 	$args['currency'] = $currency;
 	
 	// Log for debugging (remove in production if needed)
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		error_log( sprintf(
-			'DOKU Payment: Order #%d - Original: %s, Formatted: %s, Currency: %s',
+			'DOKU Payment Args: Order #%d - Original: %s, Formatted: %s, Currency: %s, Args: %s',
 			$order->get_id(),
 			$order_total,
 			$amount,
-			$currency
+			$currency,
+			wp_json_encode( $args )
 		) );
 	}
 	
@@ -2678,6 +2695,11 @@ add_filter( 'formatted_woocommerce_price', 'wp_augoose_clean_formatted_price_for
 // Hook ke process_payment untuk memastikan amount bersih sebelum DOKU memproses
 add_action( 'woocommerce_api_wc_gateway_doku', 'wp_augoose_clean_doku_amount_before_api', 0 );
 add_action( 'woocommerce_api_wc_gateway_jokul', 'wp_augoose_clean_doku_amount_before_api', 0 );
+
+// Hook sebelum process_payment untuk memastikan order total bersih
+add_action( 'woocommerce_before_payment', 'wp_augoose_clean_order_total_before_payment', 0 );
+add_filter( 'woocommerce_order_get_total', 'wp_augoose_clean_order_get_total_for_doku', 999, 2 );
+add_filter( 'woocommerce_order_formatted_total', 'wp_augoose_clean_order_formatted_total_for_doku', 999, 2 );
 
 /**
  * Force clean amount BEFORE gateway validation runs
@@ -2874,6 +2896,102 @@ function wp_augoose_clean_doku_amount_before_api() {
 			}
 		}
 	}
+}
+
+/**
+ * Clean order total before payment is processed
+ * This ensures order total is clean when DOKU reads it
+ */
+function wp_augoose_clean_order_total_before_payment() {
+	// Get order from session or request
+	$order_id = WC()->session->get( 'order_awaiting_payment' );
+	if ( ! $order_id ) {
+		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
+	}
+	
+	if ( ! $order_id ) {
+		return;
+	}
+	
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+	
+	// Only for DOKU payment methods
+	$payment_method = $order->get_payment_method();
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return;
+	}
+	
+	// Ensure clean amount is set in order meta
+	wp_augoose_validate_doku_order_amount( $order_id, array(), $order );
+}
+
+/**
+ * Filter order get_total to ensure clean amount for DOKU
+ * This catches when DOKU reads order total directly
+ */
+function wp_augoose_clean_order_get_total_for_doku( $total, $order ) {
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return $total;
+	}
+	
+	// Only for DOKU payment methods
+	$payment_method = $order->get_payment_method();
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return $total;
+	}
+	
+	// If total is string and contains comma, clean it
+	if ( is_string( $total ) && strpos( $total, ',' ) !== false ) {
+		$numeric_value = preg_replace( '/[^\d.]/', '', $total );
+		$currency = $order->get_currency();
+		return wp_augoose_format_doku_amount( $numeric_value, $currency );
+	}
+	
+	// If total is float/numeric, ensure it's formatted correctly (no comma)
+	if ( is_numeric( $total ) ) {
+		$currency = $order->get_currency();
+		$formatted = wp_augoose_format_doku_amount( $total, $currency );
+		// Return as float if original was float, string if original was string
+		return is_float( $total ) ? (float) $formatted : $formatted;
+	}
+	
+	return $total;
+}
+
+/**
+ * Filter order formatted_total to ensure clean amount for DOKU
+ * This catches when DOKU reads formatted order total string
+ */
+function wp_augoose_clean_order_formatted_total_for_doku( $formatted_total, $order ) {
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return $formatted_total;
+	}
+	
+	// Only for DOKU payment methods
+	$payment_method = $order->get_payment_method();
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
+	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return $formatted_total;
+	}
+	
+	// Remove comma from formatted total
+	if ( strpos( $formatted_total, ',' ) !== false ) {
+		// Extract numeric value
+		$numeric_value = preg_replace( '/[^\d.]/', '', $formatted_total );
+		$currency = $order->get_currency();
+		$clean_amount = wp_augoose_format_doku_amount( $numeric_value, $currency );
+		
+		// Return formatted without comma (preserve currency symbol if any)
+		$currency_symbol = get_woocommerce_currency_symbol( $currency );
+		return $currency_symbol . $clean_amount;
+	}
+	
+	return $formatted_total;
 }
 
 function wp_augoose_validate_doku_order_amount( $order_id, $posted_data, $order ) {
