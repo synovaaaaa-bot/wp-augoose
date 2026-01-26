@@ -19,6 +19,15 @@ if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) && file_exists( get_tem
  * @return bool True if this is a WooCommerce AJAX request
  */
 function augoose_is_wc_ajax_request() {
+	// CRITICAL: Exclude WordPress Customizer requests
+	// Customizer uses customize_changeset_uuid parameter but is NOT an AJAX request
+	if ( isset( $_REQUEST['customize_changeset_uuid'] ) || 
+	     isset( $_GET['customize_changeset_uuid'] ) || 
+	     isset( $_POST['customize_changeset_uuid'] ) ||
+	     is_customize_preview() ) {
+		return false; // This is Customizer, not WooCommerce AJAX
+	}
+	
 	// Check wp_doing_ajax() first (covers admin-ajax.php)
 	if ( wp_doing_ajax() ) {
 		// Check if it's a WooCommerce AJAX action
@@ -141,6 +150,15 @@ function wp_augoose_ensure_classic_checkout() {
 	// CRITICAL: Skip for wc-ajax requests - WooCommerce handles these
 	// wc-ajax requests are processed by WooCommerce before this hook
 	if ( isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] ) ) {
+		return;
+	}
+	
+	// CRITICAL: Skip for WordPress Customizer requests
+	// Customizer needs to work normally, don't interfere
+	if ( isset( $_REQUEST['customize_changeset_uuid'] ) || 
+	     isset( $_GET['customize_changeset_uuid'] ) || 
+	     isset( $_POST['customize_changeset_uuid'] ) ||
+	     is_customize_preview() ) {
 		return;
 	}
 	
@@ -368,6 +386,15 @@ function wp_augoose_suppress_transient_deadlock_errors() {
  */
 add_action( 'init', 'wp_augoose_suppress_harmless_warnings', 1 );
 function wp_augoose_suppress_harmless_warnings() {
+	// CRITICAL: Exclude WordPress Customizer requests
+	// Customizer needs to see warnings/notices for debugging
+	if ( isset( $_REQUEST['customize_changeset_uuid'] ) || 
+	     isset( $_GET['customize_changeset_uuid'] ) || 
+	     isset( $_POST['customize_changeset_uuid'] ) ||
+	     is_customize_preview() ) {
+		return; // Don't suppress warnings in Customizer
+	}
+	
 	// Only suppress in production (keep warnings in debug mode for development)
 	if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
 		// Get existing error handler to chain it
@@ -2518,11 +2545,27 @@ function wp_augoose_add_terms_checkbox() {
  * 
  * Following WooCommerce's pattern: only clean for wc-ajax requests.
  */
+/**
+ * CRITICAL: Aggressive output buffer cleaning for WooCommerce AJAX
+ * This prevents ANY HTML output before JSON response
+ * 
+ * Hooked to multiple early hooks to catch output at different stages
+ */
 add_action( 'init', 'wp_augoose_clean_output_for_woocommerce_ajax', 1 );
 add_action( 'wp_loaded', 'wp_augoose_clean_output_for_woocommerce_ajax', 1 );
+add_action( 'template_redirect', 'wp_augoose_clean_output_for_woocommerce_ajax', 0 );
 function wp_augoose_clean_output_for_woocommerce_ajax() {
+	// CRITICAL: Exclude WordPress Customizer requests
+	// Customizer uses customize_changeset_uuid parameter but is NOT an AJAX request
+	if ( isset( $_REQUEST['customize_changeset_uuid'] ) || 
+	     isset( $_GET['customize_changeset_uuid'] ) || 
+	     isset( $_POST['customize_changeset_uuid'] ) ||
+	     is_customize_preview() ) {
+		return; // This is Customizer, not WooCommerce AJAX - don't interfere
+	}
+	
 	// CRITICAL: Only for actual AJAX requests (wp_doing_ajax OR wc-ajax endpoint)
-	// Do NOT interfere with regular form submissions
+	// Do NOT interfere with regular form submissions or Customizer
 	$is_ajax = wp_doing_ajax();
 	$is_wc_ajax_endpoint = isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] );
 	
@@ -2531,14 +2574,19 @@ function wp_augoose_clean_output_for_woocommerce_ajax() {
 		return;
 	}
 	
+	// CRITICAL: Clear ALL output buffers aggressively
+	// This prevents HTML/warnings/notices from corrupting JSON response
+	while ( ob_get_level() ) {
+		ob_end_clean();
+	}
+	
+	// Start fresh output buffer to catch any unexpected output
+	ob_start();
+	
 	// For wc-ajax endpoint, WooCommerce handles it via template_redirect
-	// We only clean output buffer if it's a wc-ajax request
 	if ( $is_wc_ajax_endpoint ) {
-		// Clear output buffers BEFORE WooCommerce processes the request
-		// This prevents HTML output before JSON response
-		while ( ob_get_level() ) {
-			ob_end_clean();
-		}
+		// Register shutdown function to clean buffer before WooCommerce sends JSON
+		add_action( 'shutdown', 'wp_augoose_final_clean_output_for_wc_ajax', 9999 );
 		return;
 	}
 	
@@ -2547,12 +2595,67 @@ function wp_augoose_clean_output_for_woocommerce_ajax() {
 		$action = sanitize_text_field( $_REQUEST['action'] );
 		// Only clean for WooCommerce AJAX actions
 		if ( strpos( $action, 'woocommerce_' ) === 0 || 
-		     $action === 'update_checkout_quantity' ) {
-			// Clear output buffers to prevent HTML before JSON
-			while ( ob_get_level() ) {
-				ob_end_clean();
-			}
+		     $action === 'update_checkout_quantity' ||
+		     $action === 'update_order_review' ) {
+			// Register shutdown function to clean buffer before response
+			add_action( 'shutdown', 'wp_augoose_final_clean_output_for_wc_ajax', 9999 );
 		}
+	}
+}
+
+/**
+ * Final output buffer cleaning before WooCommerce sends JSON
+ * This runs at shutdown (very late) to catch any last-minute output
+ */
+function wp_augoose_final_clean_output_for_wc_ajax() {
+	// CRITICAL: Exclude WordPress Customizer requests
+	if ( isset( $_REQUEST['customize_changeset_uuid'] ) || 
+	     isset( $_GET['customize_changeset_uuid'] ) || 
+	     isset( $_POST['customize_changeset_uuid'] ) ||
+	     is_customize_preview() ) {
+		return; // This is Customizer, not WooCommerce AJAX
+	}
+	
+	// Only for WooCommerce AJAX requests
+	$is_wc_ajax_endpoint = isset( $_REQUEST['wc-ajax'] ) || isset( $_GET['wc-ajax'] ) || isset( $_POST['wc-ajax'] );
+	$is_ajax = wp_doing_ajax();
+	
+	if ( ! $is_ajax && ! $is_wc_ajax_endpoint ) {
+		return;
+	}
+	
+	// Get any output that might have been generated
+	$output = ob_get_clean();
+	
+	// If output contains HTML (starts with <), discard it
+	// This prevents HTML from corrupting JSON response
+	if ( ! empty( $output ) && ( strpos( trim( $output ), '<' ) === 0 || strpos( trim( $output ), '<!' ) === 0 ) ) {
+		// Output contains HTML - discard it completely
+		// Clear all remaining buffers
+		while ( ob_get_level() ) {
+			ob_end_clean();
+		}
+		// Don't output anything - let WooCommerce send clean JSON
+		return;
+	}
+	
+	// If output is just whitespace or empty, clean it
+	if ( empty( trim( $output ) ) ) {
+		while ( ob_get_level() ) {
+			ob_end_clean();
+		}
+		return;
+	}
+	
+	// If output looks like JSON, keep it (might be from wp_send_json)
+	if ( strpos( trim( $output ), '{' ) === 0 || strpos( trim( $output ), '[' ) === 0 ) {
+		// Looks like JSON - let it through
+		return;
+	}
+	
+	// Any other output - discard it to be safe
+	while ( ob_get_level() ) {
+		ob_end_clean();
 	}
 }
 
@@ -2561,6 +2664,29 @@ function wp_augoose_clean_output_for_woocommerce_ajax() {
  * DOKU plugin has known issues accessing array offsets without validation
  * This prevents "Trying to access array offset on false" errors from breaking checkout
  */
+/**
+ * CRITICAL: Fix DOKU Payment plugin errors BEFORE checkout AJAX
+ * This must run early to prevent DOKU plugin from outputting HTML/warnings
+ */
+add_action( 'init', 'wp_augoose_fix_doku_plugin_errors', 1 );
+function wp_augoose_fix_doku_plugin_errors() {
+	// Only if DOKU plugin is active
+	if ( ! class_exists( 'WC_Gateway_Doku' ) && ! function_exists( 'doku_payment_init' ) ) {
+		return;
+	}
+	
+	// CRITICAL: Ensure $_SERVER['QUERY_STRING'] exists to prevent DOKU plugin errors
+	// DOKU plugin accesses $_SERVER['QUERY_STRING'] without checking if it exists
+	if ( ! isset( $_SERVER['QUERY_STRING'] ) ) {
+		$_SERVER['QUERY_STRING'] = '';
+	}
+	
+	// Ensure $_SERVER['QUERY_STRING'] is a string (not array or null)
+	if ( ! is_string( $_SERVER['QUERY_STRING'] ) ) {
+		$_SERVER['QUERY_STRING'] = '';
+	}
+}
+
 add_action( 'woocommerce_checkout_process', 'wp_augoose_fix_doku_checkout_errors', 1 );
 function wp_augoose_fix_doku_checkout_errors() {
 	// Only if DOKU plugin is active

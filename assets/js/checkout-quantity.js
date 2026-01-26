@@ -198,6 +198,14 @@ jQuery(document).ready(function($) {
                     if (response.trim().startsWith('<')) {
                         console.error('Server returned HTML instead of JSON:', response.substring(0, 200));
                         isUpdating = false;
+                        
+                        // CRITICAL: Unblock BlockUI immediately on HTML response
+                        if (typeof $ !== 'undefined') {
+                            $('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+                            $('.woocommerce-checkout').unblock();
+                            $(document.body).unblock();
+                        }
+                        
                         alert('Error updating cart. Server error detected. Page will reload.');
                         location.reload();
                         return;
@@ -209,6 +217,14 @@ jQuery(document).ready(function($) {
                         console.error('Invalid JSON response:', response.substring(0, 200));
                         console.error('Parse error:', e);
                         isUpdating = false;
+                        
+                        // CRITICAL: Unblock BlockUI immediately on parse error
+                        if (typeof $ !== 'undefined') {
+                            $('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+                            $('.woocommerce-checkout').unblock();
+                            $(document.body).unblock();
+                        }
+                        
                         alert('Error updating cart. Invalid response from server. Page will reload.');
                         location.reload();
                         return;
@@ -219,6 +235,14 @@ jQuery(document).ready(function($) {
                 if (!response || typeof response !== 'object') {
                     console.error('Invalid response structure:', response);
                     isUpdating = false;
+                    
+                    // CRITICAL: Unblock BlockUI immediately on invalid response
+                    if (typeof $ !== 'undefined') {
+                        $('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+                        $('.woocommerce-checkout').unblock();
+                        $(document.body).unblock();
+                    }
+                    
                     alert('Error updating cart. Invalid response structure. Page will reload.');
                     location.reload();
                     return;
@@ -288,12 +312,27 @@ jQuery(document).ready(function($) {
                         : 'Failed to update cart';
                     console.error('Cart update error:', errorMsg);
                     
+                    // CRITICAL: Unblock BlockUI before reload
+                    if (typeof $ !== 'undefined') {
+                        $('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+                        $('.woocommerce-checkout').unblock();
+                        $(document.body).unblock();
+                    }
+                    
                     // Reload page as fallback
                     location.reload();
                 }
             },
             error: function(xhr, status, error) {
                 console.error('Cart update AJAX error:', status, error);
+                
+                // CRITICAL: Unblock BlockUI immediately on error
+                // This prevents products from staying gray/faded
+                if (typeof $ !== 'undefined') {
+                    $('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+                    $('.woocommerce-checkout').unblock();
+                    $(document.body).unblock();
+                }
                 
                 // Check if response is HTML (error page)
                 if (xhr.responseText && xhr.responseText.trim().startsWith('<')) {
@@ -310,10 +349,105 @@ jQuery(document).ready(function($) {
             complete: function() {
                 isUpdating = false;
                 $('.updating, .removing').removeClass('updating removing');
+                
+                // CRITICAL: Always unblock BlockUI in complete handler
+                // This ensures BlockUI is unblocked even if success/error handlers fail
+                if (typeof $ !== 'undefined') {
+                    $('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+                    $('.woocommerce-checkout').unblock();
+                    $(document.body).unblock();
+                }
             }
         });
     }
 
+    // CRITICAL: Ensure WooCommerce checkout script is loaded
+    // If wc_checkout_form is not defined, checkout AJAX won't work
+    if (typeof wc_checkout_form === 'undefined') {
+        console.error('❌ CRITICAL: wc_checkout_form is NOT defined!');
+        console.error('WooCommerce checkout.min.js is NOT loaded!');
+        console.error('Checkout AJAX (wc-ajax=update_order_review) will NOT work!');
+        
+        // Try to trigger WooCommerce script load
+        if (typeof jQuery !== 'undefined' && jQuery(document.body)) {
+            jQuery(document.body).trigger('init_checkout');
+        }
+    } else {
+        console.log('✅ wc_checkout_form is loaded');
+    }
+    
+    // CRITICAL: Monitor if update_checkout is being triggered
+    // If not, checkout AJAX won't work
+    var updateCheckoutTriggered = false;
+    jQuery(document.body).on('update_checkout', function() {
+        updateCheckoutTriggered = true;
+        console.log('✅ update_checkout event triggered');
+    });
+    
+    // Check after 2 seconds if update_checkout was triggered
+    setTimeout(function() {
+        if (!updateCheckoutTriggered) {
+            console.warn('⚠️ update_checkout event was NOT triggered');
+            console.warn('This means checkout AJAX is NOT working');
+            console.warn('Possible causes:');
+            console.warn('  1. wc_checkout_form is not defined');
+            console.warn('  2. JS error preventing script execution');
+            console.warn('  3. Checkout form not found');
+        }
+    }, 2000);
+    
+    // CRITICAL: Global error handler to unblock BlockUI on any JS error
+    // This prevents products from staying gray/faded when JS errors occur
+    window.addEventListener('error', function(e) {
+        console.error('Global JS error detected:', e.error);
+        console.error('Error message:', e.message);
+        console.error('Error file:', e.filename);
+        console.error('Error line:', e.lineno);
+        
+        // Unblock all BlockUI instances
+        if (typeof jQuery !== 'undefined') {
+            jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+            jQuery('.woocommerce-checkout').unblock();
+            jQuery(document.body).unblock();
+            jQuery('.blockUI').remove(); // Force remove BlockUI overlay
+        }
+    }, true); // Use capture phase to catch errors early
+    
+    // CRITICAL: Unblock BlockUI on unhandled promise rejection
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('Unhandled promise rejection:', e.reason);
+        
+        // Unblock all BlockUI instances
+        if (typeof jQuery !== 'undefined') {
+            jQuery('.woocommerce-checkout-payment, .woocommerce-checkout-review-order-table').unblock();
+            jQuery('.woocommerce-checkout').unblock();
+            jQuery(document.body).unblock();
+            jQuery('.blockUI').remove(); // Force remove BlockUI overlay
+        }
+    });
+    
+    // CRITICAL: Periodic check to unblock stuck BlockUI
+    // This prevents products from staying gray/faded
+    setInterval(function() {
+        if (typeof jQuery !== 'undefined') {
+            var $blocked = jQuery('.woocommerce-checkout-payment.blocked, .woocommerce-checkout-review-order-table.blocked, .woocommerce-checkout.blocked');
+            if ($blocked.length > 0) {
+                // Check if BlockUI has been stuck for more than 10 seconds
+                var $overlay = jQuery('.blockUI');
+                if ($overlay.length > 0) {
+                    var stuckTime = $overlay.data('stuck-time') || Date.now();
+                    if (Date.now() - stuckTime > 10000) {
+                        console.warn('⚠️ BlockUI stuck for more than 10 seconds, forcing unblock');
+                        $blocked.unblock();
+                        $overlay.remove();
+                    } else if (!$overlay.data('stuck-time')) {
+                        $overlay.data('stuck-time', Date.now());
+                    }
+                }
+            }
+        }
+    }, 2000); // Check every 2 seconds
+    
     // Add loading state styles
     var style = document.createElement('style');
     style.textContent = `
