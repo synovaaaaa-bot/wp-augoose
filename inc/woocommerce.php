@@ -2658,9 +2658,26 @@ function wp_augoose_ensure_doku_amount_from_order( $args, $order ) {
  */
 add_action( 'woocommerce_checkout_order_processed', 'wp_augoose_validate_doku_order_amount', 5, 3 );
 add_action( 'woocommerce_before_pay', 'wp_augoose_validate_doku_order_amount_before_pay', 5 );
+// Hook paling awal untuk membersihkan amount SEBELUM validasi gateway
+add_action( 'woocommerce_before_checkout_process', 'wp_augoose_clean_cart_total_for_doku', 0 );
 add_action( 'woocommerce_checkout_process', 'wp_augoose_force_clean_amount_before_gateway_validate', 0 );
 add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_doku_amount_before_checkout', 1 );
 add_action( 'woocommerce_after_checkout_validation', 'wp_augoose_clean_doku_amount_before_validation', 1, 2 );
+
+// Filter untuk membersihkan cart total string (jika DOKU membaca dari formatted string)
+add_filter( 'woocommerce_cart_total', 'wp_augoose_clean_cart_total_string', 999, 1 );
+
+// Filter untuk memastikan amount bersih saat gateway membaca dari cart
+// Note: woocommerce_cart_get_total mungkin tidak ada, jadi kita gunakan filter lain
+add_filter( 'woocommerce_cart_subtotal', 'wp_augoose_clean_cart_get_total', 999, 1 );
+add_filter( 'woocommerce_cart_contents_total', 'wp_augoose_clean_cart_get_total', 999, 1 );
+
+// Filter untuk formatted price - DOKU mungkin membaca dari formatted price
+add_filter( 'formatted_woocommerce_price', 'wp_augoose_clean_formatted_price_for_doku', 999, 5 );
+
+// Hook ke process_payment untuk memastikan amount bersih sebelum DOKU memproses
+add_action( 'woocommerce_api_wc_gateway_doku', 'wp_augoose_clean_doku_amount_before_api', 0 );
+add_action( 'woocommerce_api_wc_gateway_jokul', 'wp_augoose_clean_doku_amount_before_api', 0 );
 
 /**
  * Force clean amount BEFORE gateway validation runs
@@ -2687,18 +2704,175 @@ function wp_augoose_force_clean_amount_before_gateway_validate() {
 
 	// Ambil total versi "edit" (lebih raw, tidak formatted)
 	$raw_total = WC()->cart->get_total( 'edit' ); // biasanya string numeric tanpa simbol
-	$clean_amount = wp_augoose_format_doku_amount( $raw_total, $currency );
+	
+	// Pastikan raw_total tidak mengandung koma (double check)
+	if ( is_string( $raw_total ) && strpos( $raw_total, ',' ) !== false ) {
+		$raw_total = str_replace( ',', '', $raw_total );
+	}
+	
+	// Convert to float first, then format
+	$raw_total_float = (float) preg_replace( '/[^\d.]/', '', (string) $raw_total );
+	$clean_amount = wp_augoose_format_doku_amount( $raw_total_float, $currency );
 
 	// Paksa isi field yang sering dicek gateway (karena kita tidak tahu DOKU cek yang mana)
-	$_POST['amount'] = $clean_amount;
-	$_POST['order_amount'] = $clean_amount;
-	$_POST['payment_amount'] = $clean_amount;
-	$_POST['doku_amount'] = $clean_amount;
+	// Clean semua kemungkinan field amount di $_POST, $_GET, dan $_REQUEST
+	$amount_fields = array( 'amount', 'order_amount', 'payment_amount', 'doku_amount', 'total', 'order_total', 'payment_total' );
+	foreach ( $amount_fields as $field ) {
+		$_POST[ $field ] = $clean_amount;
+		$_GET[ $field ] = $clean_amount;
+		$_REQUEST[ $field ] = $clean_amount;
+	}
 	$_POST['currency'] = $currency;
+	$_GET['currency'] = $currency;
+	$_REQUEST['currency'] = $currency;
 
 	// Debug sementara (hapus setelah beres)
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 		error_log( "DOKU PRE-VALIDATE: raw_total={$raw_total} currency={$currency} clean={$clean_amount}" );
+		error_log( "DOKU PRE-VALIDATE: _POST[amount]=" . ( isset( $_POST['amount'] ) ? $_POST['amount'] : 'not set' ) );
+		error_log( "DOKU PRE-VALIDATE: _POST[doku_amount]=" . ( isset( $_POST['doku_amount'] ) ? $_POST['doku_amount'] : 'not set' ) );
+	}
+}
+
+/**
+ * Clean cart total before checkout process starts
+ * This runs even earlier to ensure cart total is clean
+ */
+function wp_augoose_clean_cart_total_for_doku() {
+	if ( ! WC()->cart || WC()->cart->is_empty() ) {
+		return;
+	}
+
+	// Hanya untuk DOKU/Jokul
+	$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : '';
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return;
+	}
+
+	// Force recalculate cart totals to ensure clean values
+	WC()->cart->calculate_totals();
+}
+
+/**
+ * Filter cart total string to remove comma
+ * This ensures any formatted cart total string is clean
+ */
+function wp_augoose_clean_cart_total_string( $total ) {
+	// Only clean if DOKU payment method is selected
+	$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : '';
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return $total;
+	}
+
+	// Remove comma from total string
+	if ( strpos( $total, ',' ) !== false ) {
+		// Extract numeric value
+		$numeric_value = preg_replace( '/[^\d.]/', '', $total );
+		$currency = get_woocommerce_currency();
+		if ( isset( $_COOKIE['wp_augoose_currency'] ) && $_COOKIE['wp_augoose_currency'] ) {
+			$currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+		}
+		$clean_amount = wp_augoose_format_doku_amount( $numeric_value, $currency );
+		
+		// Return formatted without comma (preserve currency symbol if any)
+		$currency_symbol = get_woocommerce_currency_symbol( $currency );
+		return $currency_symbol . $clean_amount;
+	}
+
+	return $total;
+}
+
+/**
+ * Filter cart get_total() to ensure clean numeric value
+ * This catches when gateway reads amount directly from cart
+ */
+function wp_augoose_clean_cart_get_total( $total ) {
+	// Only clean if DOKU payment method is selected
+	$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : '';
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return $total;
+	}
+
+	// If total is string and contains comma, clean it
+	if ( is_string( $total ) && strpos( $total, ',' ) !== false ) {
+		$numeric_value = preg_replace( '/[^\d.]/', '', $total );
+		$currency = get_woocommerce_currency();
+		if ( isset( $_COOKIE['wp_augoose_currency'] ) && $_COOKIE['wp_augoose_currency'] ) {
+			$currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+		}
+		return wp_augoose_format_doku_amount( $numeric_value, $currency );
+	}
+
+	// If total is float/numeric, ensure it's formatted correctly
+	if ( is_numeric( $total ) ) {
+		$currency = get_woocommerce_currency();
+		if ( isset( $_COOKIE['wp_augoose_currency'] ) && $_COOKIE['wp_augoose_currency'] ) {
+			$currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+		}
+		return wp_augoose_format_doku_amount( $total, $currency );
+	}
+
+	return $total;
+}
+
+/**
+ * Filter formatted price to remove comma for DOKU
+ * This catches when DOKU reads formatted price strings
+ */
+function wp_augoose_clean_formatted_price_for_doku( $formatted_price, $price, $decimals, $decimal_separator, $thousand_separator ) {
+	// Only clean if DOKU payment method is selected
+	$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : '';
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return $formatted_price;
+	}
+
+	// Remove comma from formatted price
+	if ( strpos( $formatted_price, ',' ) !== false ) {
+		// Extract numeric value
+		$numeric_value = preg_replace( '/[^\d.]/', '', $formatted_price );
+		$currency = get_woocommerce_currency();
+		if ( isset( $_COOKIE['wp_augoose_currency'] ) && $_COOKIE['wp_augoose_currency'] ) {
+			$currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+		}
+		$clean_amount = wp_augoose_format_doku_amount( $numeric_value, $currency );
+		
+		// Return without comma (preserve currency symbol if any)
+		$currency_symbol = get_woocommerce_currency_symbol( $currency );
+		return $currency_symbol . $clean_amount;
+	}
+
+	return $formatted_price;
+}
+
+/**
+ * Clean amount before DOKU API processes payment
+ * This runs when DOKU gateway API is called
+ */
+function wp_augoose_clean_doku_amount_before_api() {
+	// Clean all amount fields in request
+	$amount_fields = array( 'amount', 'order_amount', 'payment_amount', 'doku_amount', 'total', 'order_total' );
+	$currency = get_woocommerce_currency();
+	if ( isset( $_COOKIE['wp_augoose_currency'] ) && $_COOKIE['wp_augoose_currency'] ) {
+		$currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+	}
+
+	foreach ( $amount_fields as $field ) {
+		if ( isset( $_POST[ $field ] ) ) {
+			$amount_value = sanitize_text_field( $_POST[ $field ] );
+			if ( strpos( $amount_value, ',' ) !== false ) {
+				$clean_amount = wp_augoose_format_doku_amount( $amount_value, $currency );
+				$_POST[ $field ] = $clean_amount;
+				$_REQUEST[ $field ] = $clean_amount;
+			}
+		}
+		if ( isset( $_GET[ $field ] ) ) {
+			$amount_value = sanitize_text_field( $_GET[ $field ] );
+			if ( strpos( $amount_value, ',' ) !== false ) {
+				$clean_amount = wp_augoose_format_doku_amount( $amount_value, $currency );
+				$_GET[ $field ] = $clean_amount;
+				$_REQUEST[ $field ] = $clean_amount;
+			}
+		}
 	}
 }
 
