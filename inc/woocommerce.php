@@ -2658,8 +2658,50 @@ function wp_augoose_ensure_doku_amount_from_order( $args, $order ) {
  */
 add_action( 'woocommerce_checkout_order_processed', 'wp_augoose_validate_doku_order_amount', 5, 3 );
 add_action( 'woocommerce_before_pay', 'wp_augoose_validate_doku_order_amount_before_pay', 5 );
+add_action( 'woocommerce_checkout_process', 'wp_augoose_force_clean_amount_before_gateway_validate', 0 );
 add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_doku_amount_before_checkout', 1 );
 add_action( 'woocommerce_after_checkout_validation', 'wp_augoose_clean_doku_amount_before_validation', 1, 2 );
+
+/**
+ * Force clean amount BEFORE gateway validation runs
+ * This runs with priority 0 to ensure it executes before DOKU's validate_fields()
+ * This prevents "Amount are not allowed using comma" error
+ */
+function wp_augoose_force_clean_amount_before_gateway_validate() {
+	// Pastikan cart ada
+	if ( ! WC()->cart || WC()->cart->is_empty() ) {
+		return;
+	}
+
+	// Hanya untuk DOKU/Jokul
+	$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( $_POST['payment_method'] ) : '';
+	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
+		return;
+	}
+
+	// Currency paling aman (ambil dari cookie kalau ada)
+	$currency = get_woocommerce_currency();
+	if ( isset( $_COOKIE['wp_augoose_currency'] ) && $_COOKIE['wp_augoose_currency'] ) {
+		$currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+	}
+
+	// Ambil total versi "edit" (lebih raw, tidak formatted)
+	$raw_total = WC()->cart->get_total( 'edit' ); // biasanya string numeric tanpa simbol
+	$clean_amount = wp_augoose_format_doku_amount( $raw_total, $currency );
+
+	// Paksa isi field yang sering dicek gateway (karena kita tidak tahu DOKU cek yang mana)
+	$_POST['amount'] = $clean_amount;
+	$_POST['order_amount'] = $clean_amount;
+	$_POST['payment_amount'] = $clean_amount;
+	$_POST['doku_amount'] = $clean_amount;
+	$_POST['currency'] = $currency;
+
+	// Debug sementara (hapus setelah beres)
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log( "DOKU PRE-VALIDATE: raw_total={$raw_total} currency={$currency} clean={$clean_amount}" );
+	}
+}
+
 function wp_augoose_validate_doku_order_amount( $order_id, $posted_data, $order ) {
 	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
 		return;
@@ -2739,8 +2781,8 @@ function wp_augoose_validate_doku_amount_before_checkout() {
 		return;
 	}
 	
-	// Get cart total and ensure no comma
-	$cart_total = WC()->cart->get_total( '' );
+	// Get cart total and ensure no comma (use 'edit' to get raw numeric value)
+	$cart_total = WC()->cart->get_total( 'edit' );
 	$cart_total_clean = str_replace( ',', '', $cart_total );
 	
 	// If there was a comma, update cart total
