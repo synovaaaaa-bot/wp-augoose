@@ -157,7 +157,6 @@ jQuery(document).ready(function($) {
             updateCartQuantity(cartKey, quantity);
         }, 150);
     });
-
     // Remove item
     $(document).on('click', '.remove-item-btn', function(e) {
         e.preventDefault();
