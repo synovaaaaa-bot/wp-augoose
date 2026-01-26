@@ -2752,7 +2752,7 @@ function wp_augoose_validate_doku_amount_before_checkout() {
 	// Also clean any DOKU amount fields in $_POST if they exist
 	if ( isset( $_POST['doku_amount'] ) ) {
 		$doku_amount = sanitize_text_field( $_POST['doku_amount'] );
-		$currency = isset( $_POST['currency'] ) ? sanitize_text_field( $_POST['currency'] ) : WC()->cart->get_currency();
+		$currency = isset( $_POST['currency'] ) ? sanitize_text_field( $_POST['currency'] ) : ( isset( $_COOKIE['wp_augoose_currency'] ) ? sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) : get_woocommerce_currency() );
 		$clean_doku_amount = wp_augoose_format_doku_amount( $doku_amount, $currency );
 		$_POST['doku_amount'] = $clean_doku_amount;
 	}
@@ -2762,7 +2762,6 @@ function wp_augoose_validate_doku_amount_before_checkout() {
  * Clean DOKU amount after checkout validation but before order creation
  * This ensures amount is clean even if DOKU plugin validates during checkout
  */
-add_action( 'woocommerce_after_checkout_validation', 'wp_augoose_clean_doku_amount_before_validation', 1, 2 );
 function wp_augoose_clean_doku_amount_before_validation( $data, $errors ) {
 	if ( ! WC()->cart || WC()->cart->is_empty() ) {
 		return;
@@ -2776,7 +2775,10 @@ function wp_augoose_clean_doku_amount_before_validation( $data, $errors ) {
 	}
 	
 	// Get currency
-	$currency = WC()->cart->get_currency();
+	$currency = get_woocommerce_currency();
+	if ( isset( $_COOKIE['wp_augoose_currency'] ) && $_COOKIE['wp_augoose_currency'] ) {
+		$currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+	}
 	
 	// Clean any amount fields in $_POST that DOKU might use
 	$amount_fields = array( 'doku_amount', 'amount', 'order_amount', 'payment_amount' );
