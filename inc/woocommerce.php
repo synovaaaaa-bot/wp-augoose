@@ -1323,6 +1323,17 @@ function wp_augoose_add_to_cart_message_english( $message, $products, $show_qty 
 			'telah ditambahkan ke keranjang',
 			'Telah ditambahkan ke keranjang',
 			'Ditambahkan ke keranjang',
+			'ditambahkan ke keranjang',
+			'belanja Anda',
+			'Belanja Anda',
+			'belanja anda',
+			'Belanja anda',
+			'keranjang belanja',
+			'Keranjang belanja',
+			'keranjang Anda',
+			'Keranjang Anda',
+			'keranjang anda',
+			'Keranjang anda',
 			'Lihat keranjang',
 			'Lanjutkan belanja',
 			'Lihat Keranjang',
@@ -1332,13 +1343,31 @@ function wp_augoose_add_to_cart_message_english( $message, $products, $show_qty 
 			'has been added to your cart',
 			'Has been added to your cart',
 			'Added to your cart',
+			'added to your cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
 			'View cart',
 			'Continue shopping',
-			'View cart',
-			'Continue shopping',
+			'View Cart',
+			'Continue Shopping',
 		),
 		$message
 	);
+	
+	// Remove duplicate "cart" if message contains "cart belanja Anda" or "your cart belanja Anda"
+	$message = preg_replace( '/\bcart\s+belanja\s+Anda\b/i', 'cart', $message );
+	$message = preg_replace( '/\bcart\s+belanja\s+anda\b/i', 'cart', $message );
+	$message = preg_replace( '/\byour\s+cart\s+belanja\s+Anda\b/i', 'your cart', $message );
+	$message = preg_replace( '/\byour\s+cart\s+belanja\s+anda\b/i', 'your cart', $message );
+	
 	return $message;
 }
 
@@ -1356,14 +1385,43 @@ function wp_augoose_product_add_to_cart_message_english( $text, $product ) {
 			'telah ditambahkan ke keranjang',
 			'Telah ditambahkan ke keranjang',
 			'Ditambahkan ke keranjang',
+			'ditambahkan ke keranjang',
+			'belanja Anda',
+			'Belanja Anda',
+			'belanja anda',
+			'Belanja anda',
+			'keranjang belanja',
+			'Keranjang belanja',
+			'keranjang Anda',
+			'Keranjang Anda',
+			'keranjang anda',
+			'Keranjang anda',
 		),
 		array(
 			'has been added to your cart',
 			'Has been added to your cart',
 			'Added to your cart',
+			'added to your cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
+			'cart',
+			'Cart',
 		),
 		$text
 	);
+	
+	// Remove duplicate "cart" if message contains "cart belanja Anda" or "your cart belanja Anda"
+	$text = preg_replace( '/\bcart\s+belanja\s+Anda\b/i', 'cart', $text );
+	$text = preg_replace( '/\bcart\s+belanja\s+anda\b/i', 'cart', $text );
+	$text = preg_replace( '/\byour\s+cart\s+belanja\s+Anda\b/i', 'your cart', $text );
+	$text = preg_replace( '/\byour\s+cart\s+belanja\s+anda\b/i', 'your cart', $text );
+	
 	return $text;
 }
 
@@ -1407,6 +1465,18 @@ function wp_augoose_force_notice_english( $message ) {
 		// Add to cart
 		'telah ditambahkan ke keranjang' => 'has been added to your cart',
 		'Telah ditambahkan ke keranjang' => 'Has been added to your cart',
+		'ditambahkan ke keranjang' => 'added to your cart',
+		'Ditambahkan ke keranjang' => 'Added to your cart',
+		'belanja Anda' => 'cart',
+		'Belanja Anda' => 'Cart',
+		'belanja anda' => 'cart',
+		'Belanja anda' => 'Cart',
+		'keranjang belanja' => 'cart',
+		'Keranjang belanja' => 'Cart',
+		'keranjang Anda' => 'cart',
+		'Keranjang Anda' => 'Cart',
+		'keranjang anda' => 'cart',
+		'Keranjang anda' => 'Cart',
 		'Berhasil ditambahkan' => 'Successfully added',
 		'berhasil ditambahkan' => 'successfully added',
 		// Error messages
@@ -2795,6 +2865,7 @@ function wp_augoose_handle_payment_success_redirect( $order_id ) {
 /**
  * Handle payment failure redirect
  * Redirect to custom payment failed page if payment fails
+ * Also invalidate order and create new session
  */
 add_filter( 'woocommerce_payment_successful_result', 'wp_augoose_handle_payment_result_redirect', 10, 2 );
 function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
@@ -2807,21 +2878,14 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 		return $result;
 	}
 	
-	// Only handle DOKU/Jokul payments
-	$payment_method = $order->get_payment_method();
-	if ( strpos( strtolower( $payment_method ), 'doku' ) === false && 
-	     strpos( strtolower( $payment_method ), 'jokul' ) === false ) {
-		return $result;
-	}
-	
-	// If payment failed, redirect to payment failed page
+	// If payment failed, invalidate order and redirect to new checkout
 	if ( isset( $result['result'] ) && 'failure' === $result['result'] ) {
-		$failed_url = add_query_arg( array(
-			'order_id' => $order_id,
-			'key'      => $order->get_order_key(),
-		), wc_get_page_permalink( 'checkout' ) . 'payment-failed/' );
+		// Invalidate the failed order
+		wp_augoose_invalidate_failed_order( $order_id, $order, 'failed' );
 		
-		$result['redirect'] = $failed_url;
+		// Redirect to checkout with payment_failed parameter
+		$checkout_url = wc_get_checkout_url();
+		$result['redirect'] = add_query_arg( 'payment_failed', '1', $checkout_url );
 	}
 	
 	return $result;
@@ -2850,16 +2914,23 @@ function wp_augoose_handle_doku_payment_callback() {
 	}
 	
 	// Check payment status
-	if ( $order->is_paid() ) {
+	$order_status = $order->get_status();
+	$payment_status = $order->get_meta( '_payment_status' );
+	
+	// Check if payment expired/failed/cancelled
+	$failure_statuses = array( 'failed', 'cancelled', 'expired' );
+	$is_expired = in_array( strtolower( $payment_status ), array( 'expired', 'expire', 'timeout' ), true );
+	
+	if ( $order->is_paid() && ! in_array( $order_status, $failure_statuses, true ) && ! $is_expired ) {
 		// Payment successful - redirect to thank you page
 		wp_redirect( $order->get_checkout_order_received_url() );
 		exit;
 	} else {
-		// Payment failed - redirect to payment failed page
-		wp_redirect( add_query_arg( array(
-			'order_id' => $order_id,
-			'key'      => $order_key,
-		), wc_get_page_permalink( 'checkout' ) . 'payment-failed/' ) );
+		// Payment failed/expired/cancelled - invalidate order and redirect to new checkout
+		wp_augoose_invalidate_failed_order( $order_id, $order, $order_status );
+		
+		$checkout_url = wc_get_checkout_url();
+		wp_redirect( add_query_arg( 'payment_failed', '1', $checkout_url ) );
 		exit;
 	}
 }
@@ -4098,4 +4169,215 @@ function wp_augoose_translate_endpoint_title( $title, $endpoint ) {
 	}
 	
 	return $title;
+}
+
+/**
+ * ========================================
+ * GUEST CHECKOUT & PAYMENT FAILURE HANDLING
+ * ========================================
+ */
+
+/**
+ * Generate and store guest UUID for guest checkout
+ */
+add_action( 'woocommerce_checkout_init', 'wp_augoose_init_guest_uuid', 5 );
+add_action( 'init', 'wp_augoose_init_guest_uuid', 5 );
+function wp_augoose_init_guest_uuid() {
+	// Only for non-logged-in users
+	if ( is_user_logged_in() ) {
+		return;
+	}
+	
+	// Check if we already have a guest UUID
+	if ( ! WC()->session ) {
+		return;
+	}
+	
+	$guest_uuid = WC()->session->get( 'guest_uuid' );
+	
+	// Generate new UUID if doesn't exist
+	if ( empty( $guest_uuid ) ) {
+		// Generate UUID v4
+		$guest_uuid = wp_augoose_generate_uuid();
+		WC()->session->set( 'guest_uuid', $guest_uuid );
+		WC()->session->save_data();
+	}
+}
+
+/**
+ * Generate UUID v4
+ */
+function wp_augoose_generate_uuid() {
+	// Use WordPress function if available (WP 5.1+)
+	if ( function_exists( 'wp_generate_uuid4' ) ) {
+		return wp_generate_uuid4();
+	}
+	
+	// Fallback: Generate UUID v4 manually
+	return sprintf(
+		'%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+		mt_rand( 0, 0xffff ),
+		mt_rand( 0, 0xffff ),
+		mt_rand( 0, 0xffff ),
+		mt_rand( 0, 0x0fff ) | 0x4000,
+		mt_rand( 0, 0x3fff ) | 0x8000,
+		mt_rand( 0, 0xffff ),
+		mt_rand( 0, 0xffff ),
+		mt_rand( 0, 0xffff )
+	);
+}
+
+/**
+ * Handle expired/failed/canceled payment - invalidate order and force new checkout
+ */
+add_action( 'woocommerce_order_status_changed', 'wp_augoose_handle_payment_failure', 10, 4 );
+add_action( 'woocommerce_order_status_failed', 'wp_augoose_handle_payment_failure_status', 10, 2 );
+add_action( 'woocommerce_order_status_cancelled', 'wp_augoose_handle_payment_failure_status', 10, 2 );
+function wp_augoose_handle_payment_failure( $order_id, $old_status, $new_status, $order ) {
+	// Only handle failed, cancelled, or expired statuses
+	$failure_statuses = array( 'failed', 'cancelled' );
+	
+	// Check if status changed to failure status
+	if ( ! in_array( $new_status, $failure_statuses, true ) ) {
+		return;
+	}
+	
+	// Check if order has payment method (not just draft)
+	$payment_method = $order->get_payment_method();
+	if ( empty( $payment_method ) ) {
+		return;
+	}
+	
+	wp_augoose_invalidate_failed_order( $order_id, $order, $new_status );
+}
+
+function wp_augoose_handle_payment_failure_status( $order_id, $order ) {
+	wp_augoose_invalidate_failed_order( $order_id, $order, $order->get_status() );
+}
+
+/**
+ * Invalidate failed order and force new checkout
+ */
+function wp_augoose_invalidate_failed_order( $order_id, $order, $status ) {
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+	
+	// Mark order as invalidated
+	$order->update_meta_data( '_payment_failed_invalidated', 'yes' );
+	$order->update_meta_data( '_payment_failed_at', current_time( 'mysql' ) );
+	$order->update_meta_data( '_payment_failed_status', $status );
+	$order->save_meta_data();
+	
+	// Clear cart
+	if ( WC()->cart ) {
+		WC()->cart->empty_cart();
+		WC()->cart->persistent_cart_destroy();
+	}
+	
+	// Clear session data related to this order
+	if ( WC()->session ) {
+		WC()->session->set( 'order_awaiting_payment', false );
+		WC()->session->set( 'chosen_payment_method', '' );
+		
+		// Generate new guest UUID for new session
+		if ( ! is_user_logged_in() ) {
+			$new_guest_uuid = wp_augoose_generate_uuid();
+			WC()->session->set( 'guest_uuid', $new_guest_uuid );
+		}
+		
+		WC()->session->save_data();
+	}
+	
+	// Log for debugging
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log( sprintf(
+			'Payment Failure: Order #%d invalidated (status: %s). Cart cleared, new session created.',
+			$order_id,
+			$status
+		) );
+	}
+}
+
+/**
+ * Check for expired payment status from payment gateway
+ * This handles payment gateways that set custom status like "expired"
+ */
+add_action( 'woocommerce_order_status_changed', 'wp_augoose_check_expired_payment', 20, 4 );
+function wp_augoose_check_expired_payment( $order_id, $old_status, $new_status, $order ) {
+	// Check for expired status (some gateways use custom status)
+	$expired_statuses = array( 'expired', 'payment-expired', 'payment_expired' );
+	
+	// Also check order meta for expired flag
+	$is_expired = $order->get_meta( '_payment_expired' );
+	$payment_status = $order->get_meta( '_payment_status' );
+	
+	if ( in_array( $new_status, $expired_statuses, true ) || 
+	     $is_expired === 'yes' || 
+	     in_array( strtolower( $payment_status ), array( 'expired', 'expire' ), true ) ) {
+		wp_augoose_invalidate_failed_order( $order_id, $order, 'expired' );
+	}
+}
+
+/**
+ * Prevent access to failed/cancelled orders - redirect to new checkout
+ */
+add_action( 'template_redirect', 'wp_augoose_redirect_failed_order_to_checkout', 5 );
+function wp_augoose_redirect_failed_order_to_checkout() {
+	global $wp;
+	
+	// Check if viewing a failed/cancelled order
+	if ( ! isset( $wp->query_vars['view-order'] ) && ! isset( $wp->query_vars['order-pay'] ) ) {
+		return;
+	}
+	
+	$order_id = isset( $wp->query_vars['view-order'] ) ? absint( $wp->query_vars['view-order'] ) : absint( $wp->query_vars['order-pay'] );
+	
+	if ( ! $order_id ) {
+		return;
+	}
+	
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return;
+	}
+	
+	// Check if order is invalidated due to payment failure
+	$is_invalidated = $order->get_meta( '_payment_failed_invalidated' );
+	$order_status = $order->get_status();
+	
+	$failure_statuses = array( 'failed', 'cancelled', 'expired' );
+	
+	// Redirect if order is failed/cancelled/expired and invalidated
+	if ( ( $is_invalidated === 'yes' || in_array( $order_status, $failure_statuses, true ) ) && ! is_user_logged_in() ) {
+		// Clear any order-related session
+		if ( WC()->session ) {
+			WC()->session->set( 'order_awaiting_payment', false );
+			
+			// Generate new guest UUID
+			$new_guest_uuid = wp_augoose_generate_uuid();
+			WC()->session->set( 'guest_uuid', $new_guest_uuid );
+			WC()->session->save_data();
+		}
+		
+		// Redirect to checkout with message
+		$checkout_url = wc_get_checkout_url();
+		wp_safe_redirect( add_query_arg( 'payment_failed', '1', $checkout_url ) );
+		exit;
+	}
+}
+
+/**
+ * Show message on checkout if redirected from failed payment
+ */
+add_action( 'woocommerce_before_checkout_form', 'wp_augoose_show_payment_failed_message', 5 );
+function wp_augoose_show_payment_failed_message() {
+	if ( ! isset( $_GET['payment_failed'] ) || $_GET['payment_failed'] !== '1' ) {
+		return;
+	}
+	
+	wc_add_notice(
+		'An error occurred while processing your order. Please check if there are any changes in your payment method and review your order history before placing another order.',
+		'error'
+	);
 }
