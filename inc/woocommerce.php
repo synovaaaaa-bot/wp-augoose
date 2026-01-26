@@ -2405,6 +2405,21 @@ function wp_augoose_cart_item_name( $product_name, $cart_item, $cart_item_key ) 
 	return $product_name;
 }
 
+/**
+ * Remove edit link from checkout review order
+ * Hide edit link that appears in checkout order review table
+ */
+add_filter( 'woocommerce_cart_item_name', 'wp_augoose_remove_edit_link_from_checkout', 20, 3 );
+function wp_augoose_remove_edit_link_from_checkout( $product_name, $cart_item, $cart_item_key ) {
+	// Only remove edit link in checkout context
+	if ( is_checkout() ) {
+		// Remove any edit links that might be added by plugins or themes
+		$product_name = preg_replace( '/<a[^>]*class="[^"]*edit[^"]*"[^>]*>.*?<\/a>/i', '', $product_name );
+		$product_name = preg_replace( '/<span[^>]*class="[^"]*edit[^"]*"[^>]*>.*?<\/span>/i', '', $product_name );
+	}
+	return $product_name;
+}
+
 add_filter( 'woocommerce_get_item_data', 'wp_augoose_format_cart_item_data', 10, 2 );
 
 /**

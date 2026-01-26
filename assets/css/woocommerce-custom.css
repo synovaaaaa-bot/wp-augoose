@@ -1487,6 +1487,7 @@ body.term-shirts ul.products {
 
 .product-edit {
     margin: 0;
+    display: none !important; /* Hide edit link in checkout */
 }
 
 .product-edit .edit-link {
@@ -1501,6 +1502,14 @@ body.term-shirts ul.products {
 
 .product-edit .edit-link:hover {
     color: #1a1a1a;
+}
+
+/* Hide edit link in checkout review order */
+.woocommerce-checkout .product-edit,
+.woocommerce-checkout-review-order-table .product-edit,
+.checkout-review-order .product-edit {
+    display: none !important;
+    visibility: hidden !important;
 }
 
 .woocommerce-cart-form__contents .product-total {
@@ -2334,10 +2343,10 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 
 .woocommerce-checkout #payment .payment_methods label {
     display: flex;
-    align-items: center;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 12px;
     cursor: pointer;
-    padding: 16px 18px;
+    padding: 14px 16px;
     border: 1px solid #e0e0e0;
     transition: all 0.2s ease;
     margin: 0;
@@ -2347,6 +2356,7 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     color: #1a1a1a;
     font-weight: 500;
     background: #fff;
+    flex-wrap: wrap;
 }
 
 .woocommerce-checkout #payment .payment_methods label:hover {
@@ -2355,11 +2365,12 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 }
 
 .woocommerce-checkout #payment .payment_methods input[type="radio"] {
-    margin: 0;
+    margin: 2px 0 0 0;
     width: 18px;
     height: 18px;
     cursor: pointer;
     flex-shrink: 0;
+    accent-color: #2c3e50;
 }
 
 .woocommerce-checkout #payment .payment_methods input[type="radio"]:checked + label,
@@ -2392,10 +2403,12 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 }
 
 .woocommerce-checkout .payment_box {
-    margin-top: 16px;
-    padding: 20px;
+    margin-top: 12px;
+    margin-left: 30px;
+    padding: 16px 18px;
     background: #f9f9f9;
     border: 1px solid #e0e0e0;
+    border-radius: 0;
 }
 
 .woocommerce-checkout .payment_box p {
@@ -3344,9 +3357,18 @@ body.woocommerce-cart .site-main .entry-content {
     }
     
     .woocommerce-checkout .payment_box {
-        margin-top: 14px;
-        padding: 18px;
+        margin-top: 12px;
+        margin-left: 0;
+        padding: 16px;
         font-size: 11px;
+    }
+    
+    /* Hide edit link in checkout tablet */
+    .woocommerce-checkout .product-edit,
+    .woocommerce-checkout-review-order-table .product-edit,
+    .checkout-review-order .product-edit {
+        display: none !important;
+        visibility: hidden !important;
     }
     
     .single-product-wrapper .tabs-nav {
@@ -3718,7 +3740,8 @@ body.woocommerce-cart .site-main .entry-content {
     
     .woocommerce-checkout .payment_box {
         margin-top: 12px;
-        padding: 16px;
+        margin-left: 0;
+        padding: 14px 16px;
         font-size: 11px;
         line-height: 1.5;
         border-radius: 0;
@@ -3732,6 +3755,14 @@ body.woocommerce-cart .site-main .entry-content {
     
     .woocommerce-checkout .payment_box p:last-child {
         margin-bottom: 0;
+    }
+    
+    /* Hide edit link in checkout mobile */
+    .woocommerce-checkout .product-edit,
+    .woocommerce-checkout-review-order-table .product-edit,
+    .checkout-review-order .product-edit {
+        display: none !important;
+        visibility: hidden !important;
     }
     
     .woocommerce-checkout .form-row {
