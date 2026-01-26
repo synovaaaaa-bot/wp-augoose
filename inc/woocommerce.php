@@ -2926,10 +2926,9 @@ function wp_augoose_update_checkout_quantity() {
 		ob_end_clean();
 	}
 	
-	// Security: Verify nonce
-	if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['security'] ) ), 'woocommerce-cart' ) ) {
-		wp_augoose_send_json_clean( array( 'message' => 'Security check failed.' ), false );
-	}
+	// CRITICAL: Verify nonce with our custom action name
+	// Don't use WooCommerce core nonce to avoid conflicts
+	check_ajax_referer( 'wp_augoose_update_qty', 'security' );
 	
 	// Security: Sanitize input
 	if ( ! function_exists( 'wp_augoose_sanitize_cart_key' ) ) {

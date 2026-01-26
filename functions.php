@@ -662,9 +662,10 @@ function wp_augoose_scripts() {
     if ( class_exists( 'WooCommerce' ) && ( function_exists( 'is_checkout' ) && is_checkout() ) ) {
         if ( file_exists( $theme_dir . '/assets/js/checkout-coupon.js' ) ) {
             wp_enqueue_script( 'wp-augoose-checkout-coupon', $theme_dir_uri . '/assets/js/checkout-coupon.js', array( 'jquery', 'wc-checkout' ), $asset_ver( 'assets/js/checkout-coupon.js' ), true );
-            wp_localize_script( 'wp-augoose-checkout-coupon', 'wc_checkout_params', array(
-                'ajax_url' => admin_url( 'admin-ajax.php' ),
-                'apply_coupon_nonce' => wp_create_nonce( 'apply-coupon' ),
+            // CRITICAL: Use unique object name to avoid overriding WooCommerce core wc_checkout_params
+            wp_localize_script( 'wp-augoose-checkout-coupon', 'wpAugooseCheckoutCoupon', array(
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'nonce'   => wp_create_nonce( 'apply-coupon' ),
             ) );
         }
         // Checkout Quantity Selector
@@ -677,29 +678,14 @@ function wp_augoose_scripts() {
                 $cart_hash = WC()->cart->get_cart_hash();
             }
             
-            // CRITICAL: Ensure wc_checkout_params matches WooCommerce's format
-            // WooCommerce expects: wc_ajax_url, checkout_url, update_order_review_nonce, etc.
-            // This is REQUIRED for checkout.min.js to work properly
-            $wc_ajax_url = '';
-            if ( class_exists( 'WC_AJAX' ) && method_exists( 'WC_AJAX', 'get_endpoint' ) ) {
-                $wc_ajax_url = WC_AJAX::get_endpoint( '%%endpoint%%' );
-            } else {
-                // Fallback if WC_AJAX class not available
-                $wc_ajax_url = home_url( '/?wc-ajax=%%endpoint%%' );
-            }
-            
-            $wc_checkout_params = array(
-                'ajax_url' => admin_url( 'admin-ajax.php' ),
-                'wc_ajax_url' => $wc_ajax_url, // CRITICAL: Required by checkout.min.js
-                'update_cart_nonce' => wp_create_nonce( 'woocommerce-cart' ),
-                'update_order_review_nonce' => wp_create_nonce( 'update-order-review' ), // CRITICAL: Required for update_order_review
-                'apply_coupon_nonce' => wp_create_nonce( 'apply-coupon' ),
-                'remove_coupon_nonce' => wp_create_nonce( 'remove-coupon' ),
-                'checkout_url' => esc_url_raw( wc_get_checkout_url() ), // CRITICAL: Required by checkout.min.js
-                'cart_hash' => $cart_hash ? $cart_hash : '',
-            );
-            
-            wp_localize_script( 'wp-augoose-checkout-quantity', 'wc_checkout_params', $wc_checkout_params );
+            // CRITICAL: Use unique object name to avoid overriding WooCommerce core wc_checkout_params
+            // WooCommerce core uses wc_checkout_params with many fields (nonce, i18n, endpoint, etc.)
+            // If we override it, core checkout.min.js will break (error .toString, update checkout fails, BlockUI stuck)
+            wp_localize_script( 'wp-augoose-checkout-quantity', 'wpAugooseCheckoutQty', array(
+                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+                'nonce'   => wp_create_nonce( 'wp_augoose_update_qty' ),
+                'cartHash' => $cart_hash ? $cart_hash : '',
+            ) );
         }
     }
     

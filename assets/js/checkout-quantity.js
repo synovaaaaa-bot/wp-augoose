@@ -180,7 +180,9 @@ jQuery(document).ready(function($) {
         
         $.ajax({
             type: 'POST',
-            url: wc_checkout_params.ajax_url,
+            url: (typeof wpAugooseCheckoutQty !== 'undefined' && wpAugooseCheckoutQty.ajaxUrl) 
+                ? wpAugooseCheckoutQty.ajaxUrl 
+                : (typeof wc_checkout_params !== 'undefined' ? wc_checkout_params.ajax_url : admin_url('admin-ajax.php')),
             timeout: 10000, // 10 second timeout
             dataType: 'json', // Explicitly expect JSON response
             contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -188,7 +190,9 @@ jQuery(document).ready(function($) {
                 action: 'update_checkout_quantity',
                 cart_key: cartKey,
                 quantity: quantity,
-                security: wc_checkout_params.update_cart_nonce
+                security: (typeof wpAugooseCheckoutQty !== 'undefined' && wpAugooseCheckoutQty.nonce) 
+                    ? wpAugooseCheckoutQty.nonce 
+                    : ''
             },
             success: function(response) {
                 // Response should already be parsed JSON due to dataType: 'json'
@@ -267,7 +271,12 @@ jQuery(document).ready(function($) {
                     
                     // Update cart hash if provided (prevents checkout.min.js errors)
                     const cartHash = (response.data && response.data.cart_hash) || response.cart_hash || '';
-                    if (cartHash && typeof wc_checkout_params !== 'undefined') {
+                    // Update our custom object (don't touch WooCommerce core wc_checkout_params)
+                    if (cartHash && typeof wpAugooseCheckoutQty !== 'undefined') {
+                        wpAugooseCheckoutQty.cartHash = cartHash;
+                    }
+                    // Also update WooCommerce core if it exists (for compatibility)
+                    if (cartHash && typeof wc_checkout_params !== 'undefined' && wc_checkout_params) {
                         wc_checkout_params.cart_hash = cartHash;
                     }
                     

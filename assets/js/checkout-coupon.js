@@ -22,12 +22,25 @@ jQuery(document).ready(function($) {
         $button.prop('disabled', true).text('Applying...');
         
         // Apply coupon via AJAX
+        // CRITICAL: Use WooCommerce core wc_checkout_params (don't override it)
+        // Fallback to our custom object if needed
+        const ajaxUrl = (typeof wc_checkout_params !== 'undefined' && wc_checkout_params.ajax_url) 
+            ? wc_checkout_params.ajax_url 
+            : (typeof wpAugooseCheckoutCoupon !== 'undefined' && wpAugooseCheckoutCoupon.ajaxUrl)
+            ? wpAugooseCheckoutCoupon.ajaxUrl
+            : '/wp-admin/admin-ajax.php';
+        const nonce = (typeof wc_checkout_params !== 'undefined' && wc_checkout_params.apply_coupon_nonce)
+            ? wc_checkout_params.apply_coupon_nonce
+            : (typeof wpAugooseCheckoutCoupon !== 'undefined' && wpAugooseCheckoutCoupon.nonce)
+            ? wpAugooseCheckoutCoupon.nonce
+            : '';
+        
         $.ajax({
-            url: wc_checkout_params.ajax_url || '/wp-admin/admin-ajax.php',
+            url: ajaxUrl,
             type: 'POST',
             data: {
                 action: 'woocommerce_apply_coupon',
-                security: wc_checkout_params.apply_coupon_nonce,
+                security: nonce,
                 coupon_code: couponCode
             },
             success: function(response) {
