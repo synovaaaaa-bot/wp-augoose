@@ -1275,6 +1275,44 @@ function wp_augoose_cart_item_modified_message_english( $message, $product ) {
 }
 
 /**
+ * Force WooCommerce cart removed notification to English
+ * Handles: "%s removed." and "Undo?" translations
+ */
+add_filter( 'gettext', 'wp_augoose_translate_cart_removed_notification', 20, 3 );
+function wp_augoose_translate_cart_removed_notification( $translated_text, $text, $domain ) {
+	// Only translate WooCommerce text
+	if ( 'woocommerce' !== $domain ) {
+		return $translated_text;
+	}
+	
+	// Translate cart removal messages
+	$translations = array(
+		'%s removed.' => '%s removed.',
+		'removed.' => 'removed.',
+		'Removed.' => 'Removed.',
+		'Undo?' => 'Undo?',
+		'undo?' => 'Undo?',
+	);
+	
+	// If text is already in Indonesian, translate it
+	$indonesian_patterns = array(
+		'/dihapus\.?\s*Batalkan\?/i' => 'removed. Undo?',
+		'/dihapus\.?/i' => 'removed.',
+		'/Dihapus\.?/i' => 'Removed.',
+		'/Batalkan\?/i' => 'Undo?',
+		'/batalkan\?/i' => 'Undo?',
+	);
+	
+	foreach ( $indonesian_patterns as $pattern => $replacement ) {
+		if ( preg_match( $pattern, $translated_text ) ) {
+			$translated_text = preg_replace( $pattern, $replacement, $translated_text );
+		}
+	}
+	
+	return $translated_text;
+}
+
+/**
  * Force WooCommerce add to cart messages to English
  */
 add_filter( 'wc_add_to_cart_message_html', 'wp_augoose_add_to_cart_message_english', 20, 3 );
@@ -1347,7 +1385,20 @@ function wp_augoose_force_notice_english( $message ) {
 	
 	// Common Indonesian to English translations for notices
 	$replacements = array(
-		// Cart removal
+		// Cart removal - format: "%s dihapus. Batalkan?"
+		'" dihapus. Batalkan?' => '" removed. Undo?',
+		'" dihapus. Batalkan' => '" removed. Undo',
+		' dihapus. Batalkan?' => ' removed. Undo?',
+		' dihapus. Batalkan' => ' removed. Undo',
+		'dihapus. Batalkan?' => 'removed. Undo?',
+		'Dihapus. Batalkan?' => 'Removed. Undo?',
+		'dihapus' => 'removed',
+		'Dihapus' => 'Removed',
+		'Batalkan?' => 'Undo?',
+		'batalkan?' => 'Undo?',
+		'Batalkan' => 'Undo',
+		'batalkan' => 'Undo',
+		// Cart removal - longer format
 		'telah dihapus dari keranjang' => 'has been removed from your cart',
 		'Telah dihapus dari keranjang' => 'Has been removed from your cart',
 		'tidak bisa dibeli lagi' => 'can no longer be purchased',
@@ -1380,6 +1431,13 @@ function wp_augoose_force_notice_english( $message ) {
 		'maaf, tampaknya tidak ada metode pembayaran' => 'sorry, it seems that there are no available payment methods',
 		'Tidak ada metode pembayaran' => 'No payment methods available',
 		'tidak ada metode pembayaran' => 'no payment methods available',
+		// Order processing errors
+		'Terjadi error saat memproses pesanan Anda.' => 'An error occurred while processing your order.',
+		'terjadi error saat memproses pesanan Anda' => 'an error occurred while processing your order',
+		'Periksa apakah ada perubahan dalam metode pembayaran Anda dan tinjau riwayat pemesanan sebelum membuat pesanan lagi.' => 'Please check if there are any changes in your payment method and review your order history before placing another order.',
+		'periksa apakah ada perubahan dalam metode pembayaran Anda' => 'please check if there are any changes in your payment method',
+		'tinjau riwayat pemesanan' => 'review your order history',
+		'sebelum membuat pesanan lagi' => 'before placing another order',
 		// General
 		'keranjang' => 'cart',
 		'Keranjang' => 'Cart',
@@ -3614,3 +3672,430 @@ function wp_augoose_preserve_checkout_product_images( $fragments ) {
 
 // Checkout field layout is controlled by the theme templates + `functions.php`.
 // Do NOT add CSS/JS here that hides fields; it breaks WooCommerce + WPML checkout flows.
+
+/**
+ * Disable My Account pages if no login system
+ * Hide all menu items and redirect to shop/home
+ */
+add_filter( 'woocommerce_account_menu_items', 'wp_augoose_disable_account_menu_if_no_login', 5, 2 );
+function wp_augoose_disable_account_menu_if_no_login( $items, $endpoints ) {
+	// If user is not logged in, hide all menu items except logout (which won't show anyway)
+	if ( ! is_user_logged_in() ) {
+		return array(); // Return empty array to hide all menu items
+	}
+	
+	return $items;
+}
+
+/**
+ * Redirect My Account pages to shop if user is not logged in
+ */
+add_action( 'template_redirect', 'wp_augoose_redirect_account_if_no_login', 5 );
+function wp_augoose_redirect_account_if_no_login() {
+	// Only redirect on My Account pages
+	if ( ! is_account_page() ) {
+		return;
+	}
+	
+	// If user is not logged in, redirect to shop
+	if ( ! is_user_logged_in() ) {
+		$shop_url = wc_get_page_permalink( 'shop' );
+		if ( ! $shop_url ) {
+			$shop_url = home_url();
+		}
+		wp_safe_redirect( $shop_url );
+		exit;
+	}
+}
+
+/**
+ * Hide My Account navigation if user is not logged in
+ */
+add_action( 'woocommerce_before_account_navigation', 'wp_augoose_hide_account_navigation_if_no_login', 5 );
+function wp_augoose_hide_account_navigation_if_no_login() {
+	if ( ! is_user_logged_in() ) {
+		// Remove navigation output
+		remove_action( 'woocommerce_account_navigation', 'woocommerce_account_navigation', 10 );
+		// Hide navigation with CSS as backup
+		echo '<style>.woocommerce-MyAccount-navigation { display: none !important; }</style>';
+	}
+}
+
+/**
+ * Translate My Account menu items to English
+ */
+add_filter( 'woocommerce_account_menu_items', 'wp_augoose_translate_account_menu_items', 20, 2 );
+function wp_augoose_translate_account_menu_items( $items, $endpoints ) {
+	// If no items (disabled), return early
+	if ( empty( $items ) ) {
+		return $items;
+	}
+	
+	$translations = array(
+		'Dasbor' => 'Dashboard',
+		'dasbor' => 'Dashboard',
+		'Pesanan' => 'Orders',
+		'pesanan' => 'Orders',
+		'Unduhan' => 'Downloads',
+		'unduhan' => 'Downloads',
+		'Alamat' => 'Address',
+		'alamat' => 'Address',
+		'Metode Pembayaran' => 'Payment methods',
+		'metode pembayaran' => 'Payment methods',
+		'Detail Akun' => 'Account details',
+		'detail akun' => 'Account details',
+		'Keluar' => 'Log out',
+		'keluar' => 'Log out',
+	);
+	
+	foreach ( $items as $key => $label ) {
+		if ( isset( $translations[ $label ] ) ) {
+			$items[ $key ] = $translations[ $label ];
+		} else {
+			// Also check case-insensitive
+			$label_lower = strtolower( $label );
+			foreach ( $translations as $id => $en ) {
+				if ( strtolower( $id ) === $label_lower ) {
+					$items[ $key ] = $en;
+					break;
+				}
+			}
+		}
+	}
+	
+	return $items;
+}
+
+/**
+ * Translate My Account Orders columns to English
+ */
+add_filter( 'woocommerce_account_orders_columns', 'wp_augoose_translate_orders_columns', 20 );
+function wp_augoose_translate_orders_columns( $columns ) {
+	$translations = array(
+		'Pesanan' => 'Order',
+		'pesanan' => 'Order',
+		'Tanggal' => 'Date',
+		'tanggal' => 'Date',
+		'Status' => 'Status',
+		'status' => 'Status',
+		'Total' => 'Total',
+		'total' => 'Total',
+		'Aksi' => 'Actions',
+		'aksi' => 'Actions',
+	);
+	
+	foreach ( $columns as $key => $label ) {
+		if ( isset( $translations[ $label ] ) ) {
+			$columns[ $key ] = $translations[ $label ];
+		} else {
+			// Case-insensitive check
+			$label_lower = strtolower( $label );
+			foreach ( $translations as $id => $en ) {
+				if ( strtolower( $id ) === $label_lower ) {
+					$columns[ $key ] = $en;
+					break;
+				}
+			}
+		}
+	}
+	
+	return $columns;
+}
+
+/**
+ * Translate order status names to English
+ */
+add_filter( 'woocommerce_get_order_status_name', 'wp_augoose_translate_order_status', 20, 2 );
+function wp_augoose_translate_order_status( $status_name, $status ) {
+	$translations = array(
+		'Dibatalkan' => 'Cancelled',
+		'dibatalkan' => 'Cancelled',
+		'Dibatalkan untuk' => 'Cancelled for',
+		'dibatalkan untuk' => 'cancelled for',
+		'Diproses' => 'Processing',
+		'diproses' => 'Processing',
+		'Selesai' => 'Completed',
+		'selesai' => 'Completed',
+		'Menunggu pembayaran' => 'Pending payment',
+		'menunggu pembayaran' => 'pending payment',
+		'Pembayaran ditahan' => 'On hold',
+		'pembayaran ditahan' => 'on hold',
+		'Gagal' => 'Failed',
+		'gagal' => 'Failed',
+		'Refunded' => 'Refunded',
+		'refunded' => 'Refunded',
+	);
+	
+	// Check for partial matches (e.g., "Dibatalkan untuk 1 item")
+	foreach ( $translations as $id => $en ) {
+		if ( stripos( $status_name, $id ) !== false ) {
+			$status_name = str_ireplace( $id, $en, $status_name );
+		}
+	}
+	
+	return $status_name;
+}
+
+/**
+ * Translate order action buttons to English
+ */
+add_filter( 'woocommerce_my_account_my_orders_actions', 'wp_augoose_translate_order_actions', 20, 2 );
+function wp_augoose_translate_order_actions( $actions, $order ) {
+	$translations = array(
+		'LIHAT' => 'View',
+		'Lihat' => 'View',
+		'lihat' => 'View',
+		'Bayar' => 'Pay',
+		'bayar' => 'Pay',
+		'Batal' => 'Cancel',
+		'batal' => 'Cancel',
+	);
+	
+	foreach ( $actions as $key => $action ) {
+		if ( isset( $action['name'] ) ) {
+			$name = $action['name'];
+			foreach ( $translations as $id => $en ) {
+				if ( stripos( $name, $id ) !== false ) {
+					$actions[ $key ]['name'] = str_ireplace( $id, $en, $name );
+					break;
+				}
+			}
+		}
+	}
+	
+	return $actions;
+}
+
+/**
+ * Translate all WooCommerce notices including error messages
+ */
+add_filter( 'woocommerce_add_error', 'wp_augoose_translate_all_notices', 10, 1 );
+add_filter( 'woocommerce_add_success', 'wp_augoose_translate_all_notices', 10, 1 );
+add_filter( 'woocommerce_add_info', 'wp_augoose_translate_all_notices', 10, 1 );
+add_filter( 'woocommerce_add_notice', 'wp_augoose_translate_all_notices', 10, 1 );
+function wp_augoose_translate_all_notices( $message ) {
+	if ( empty( $message ) ) {
+		return $message;
+	}
+	
+	// Additional translations for My Account and order processing
+	$additional_translations = array(
+		// Order processing errors
+		'Terjadi error saat memproses pesanan Anda.' => 'An error occurred while processing your order.',
+		'Terjadi error saat memproses pesanan Anda' => 'An error occurred while processing your order',
+		'terjadi error saat memproses pesanan Anda' => 'an error occurred while processing your order',
+		'Periksa apakah ada perubahan dalam metode pembayaran Anda dan tinjau riwayat pemesanan sebelum membuat pesanan lagi.' => 'Please check if there are any changes in your payment method and review your order history before placing another order.',
+		'periksa apakah ada perubahan dalam metode pembayaran Anda' => 'please check if there are any changes in your payment method',
+		'tinjau riwayat pemesanan' => 'review your order history',
+		'sebelum membuat pesanan lagi' => 'before placing another order',
+		'riwayat pemesanan' => 'order history',
+		'Riwayat pemesanan' => 'Order history',
+		// My Account specific
+		'Pesanan' => 'Orders',
+		'pesanan' => 'Orders',
+		'Dasbor' => 'Dashboard',
+		'dasbor' => 'Dashboard',
+		'Unduhan' => 'Downloads',
+		'unduhan' => 'Downloads',
+		'Alamat' => 'Address',
+		'alamat' => 'Address',
+		'Metode Pembayaran' => 'Payment methods',
+		'metode pembayaran' => 'Payment methods',
+		'Detail Akun' => 'Account details',
+		'detail akun' => 'Account details',
+		'Keluar' => 'Log out',
+		'keluar' => 'Log out',
+		// Order status
+		'Dibatalkan untuk' => 'Cancelled for',
+		'dibatalkan untuk' => 'cancelled for',
+		'item' => 'item',
+		'Item' => 'Item',
+		// Action buttons
+		'LIHAT' => 'View',
+		'Lihat' => 'View',
+		'lihat' => 'View',
+	);
+	
+	// Apply translations
+	$message = str_ireplace( array_keys( $additional_translations ), array_values( $additional_translations ), $message );
+	
+	return $message;
+}
+
+/**
+ * Translate order details status message
+ * Handles: "Order #%1$s was placed on %2$s and is currently %3$s."
+ */
+add_filter( 'woocommerce_order_details_status', 'wp_augoose_translate_order_details_status', 20, 2 );
+function wp_augoose_translate_order_details_status( $status_text, $order ) {
+	if ( empty( $status_text ) ) {
+		return $status_text;
+	}
+	
+	$translations = array(
+		'Pesanan' => 'Order',
+		'pesanan' => 'Order',
+		'PESANAN' => 'ORDER',
+		'dilakukan pada' => 'was placed on',
+		'Dilakukan pada' => 'Was placed on',
+		'saat ini' => 'is currently',
+		'Saat ini' => 'Is currently',
+		'dan saat ini' => 'and is currently',
+		'Dan saat ini' => 'And is currently',
+	);
+	
+	$status_text = str_ireplace( array_keys( $translations ), array_values( $translations ), $status_text );
+	
+	return $status_text;
+}
+
+/**
+ * Translate order details page text
+ * Handles: "Order details", "Product", "Total", "Actions", "Note:", etc.
+ */
+add_filter( 'gettext', 'wp_augoose_translate_order_details_text', 20, 3 );
+function wp_augoose_translate_order_details_text( $translated_text, $text, $domain ) {
+	// Only translate WooCommerce text
+	if ( 'woocommerce' !== $domain ) {
+		return $translated_text;
+	}
+	
+	// Only translate on My Account pages
+	if ( ! is_account_page() && ! is_wc_endpoint_url( 'view-order' ) ) {
+		return $translated_text;
+	}
+	
+	// Also translate cart removal messages on cart page
+	if ( is_cart() || ( isset( $_GET['removed_item'] ) || isset( $_GET['undo_item'] ) ) ) {
+		$cart_translations = array(
+			'dihapus' => 'removed',
+			'Dihapus' => 'Removed',
+			'Batalkan?' => 'Undo?',
+			'batalkan?' => 'Undo?',
+		);
+		
+		foreach ( $cart_translations as $id => $en ) {
+			if ( stripos( $translated_text, $id ) !== false ) {
+				$translated_text = str_ireplace( $id, $en, $translated_text );
+			}
+		}
+	}
+	
+	$translations = array(
+		// Order details page
+		'RINCIAN PESANAN' => 'ORDER DETAILS',
+		'Rincian pesanan' => 'Order details',
+		'rincian pesanan' => 'order details',
+		'PESANAN' => 'ORDER',
+		'Pesanan' => 'Order',
+		'pesanan' => 'Order',
+		'PRODUK' => 'PRODUCT',
+		'Produk' => 'Product',
+		'produk' => 'product',
+		'PENGIRIMAN' => 'SHIPPING',
+		'Pengiriman' => 'Shipping',
+		'pengiriman' => 'shipping',
+		'Pengiriman gratis' => 'Free shipping',
+		'pengiriman gratis' => 'free shipping',
+		'SUBTOTAL' => 'SUBTOTAL',
+		'Subtotal' => 'Subtotal',
+		'subtotal' => 'subtotal',
+		'TOTAL' => 'TOTAL',
+		'Total' => 'Total',
+		'total' => 'total',
+		'AKSI' => 'ACTIONS',
+		'Aksi' => 'Actions',
+		'aksi' => 'actions',
+		'Catatan' => 'Note',
+		'catatan' => 'note',
+		// Order status message
+		'dilakukan pada' => 'was placed on',
+		'Dilakukan pada' => 'Was placed on',
+		'saat ini' => 'is currently',
+		'Saat ini' => 'Is currently',
+		'dan saat ini' => 'and is currently',
+		'Dan saat ini' => 'And is currently',
+	);
+	
+	// Check if text needs translation
+	foreach ( $translations as $id => $en ) {
+		if ( stripos( $translated_text, $id ) !== false ) {
+			$translated_text = str_ireplace( $id, $en, $translated_text );
+		}
+	}
+	
+	return $translated_text;
+}
+
+/**
+ * Translate order totals labels
+ * Handles: "Subtotal", "Shipping", "Total", etc. in order details table
+ */
+add_filter( 'woocommerce_get_order_item_totals', 'wp_augoose_translate_order_totals', 20, 3 );
+function wp_augoose_translate_order_totals( $total_rows, $order, $tax_display ) {
+	if ( empty( $total_rows ) || ! is_array( $total_rows ) ) {
+		return $total_rows;
+	}
+	
+	$translations = array(
+		'SUBTOTAL' => 'SUBTOTAL',
+		'Subtotal' => 'Subtotal',
+		'subtotal' => 'Subtotal',
+		'PENGIRIMAN' => 'SHIPPING',
+		'Pengiriman' => 'Shipping',
+		'pengiriman' => 'Shipping',
+		'Pengiriman gratis' => 'Free shipping',
+		'pengiriman gratis' => 'Free shipping',
+		'TOTAL' => 'TOTAL',
+		'Total' => 'Total',
+		'total' => 'Total',
+		'PAJAK' => 'TAX',
+		'Pajak' => 'Tax',
+		'pajak' => 'Tax',
+		'DISKON' => 'DISCOUNT',
+		'Diskon' => 'Discount',
+		'diskon' => 'Discount',
+	);
+	
+	foreach ( $total_rows as $key => $total ) {
+		if ( isset( $total['label'] ) ) {
+			$label = $total['label'];
+			foreach ( $translations as $id => $en ) {
+				if ( stripos( $label, $id ) !== false ) {
+					$total_rows[ $key ]['label'] = str_ireplace( $id, $en, $label );
+					break;
+				}
+			}
+		}
+	}
+	
+	return $total_rows;
+}
+
+/**
+ * Translate My Account page titles
+ * Handles: "Order #3732", "Orders", etc.
+ */
+add_filter( 'woocommerce_endpoint_title', 'wp_augoose_translate_endpoint_title', 20, 2 );
+function wp_augoose_translate_endpoint_title( $title, $endpoint ) {
+	if ( empty( $title ) ) {
+		return $title;
+	}
+	
+	$translations = array(
+		'PESANAN' => 'ORDER',
+		'Pesanan' => 'Order',
+		'pesanan' => 'Order',
+		'Pesanan #' => 'Order #',
+		'pesanan #' => 'Order #',
+		'PESANAN #' => 'ORDER #',
+	);
+	
+	foreach ( $translations as $id => $en ) {
+		if ( stripos( $title, $id ) !== false ) {
+			$title = str_ireplace( $id, $en, $title );
+		}
+	}
+	
+	return $title;
+}
