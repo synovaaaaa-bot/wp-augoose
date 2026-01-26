@@ -2005,7 +2005,7 @@ body.term-shirts ul.products {
 
 .checkout-layout {
     display: grid;
-    grid-template-columns: 1fr 550px;
+    grid-template-columns: 1fr 600px; /* Increased from 550px for better readability */
     gap: 80px;
     align-items: start;
     width: 100%;
@@ -2307,6 +2307,9 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 }
 
 /* Payment Methods */
+/* Note: Payment method hook removed from woocommerce_checkout_order_review in inc/woocommerce.php
+   to prevent duplication. Payment method is rendered in custom section .checkout-payment-section */
+
 .woocommerce-checkout #payment {
     margin: 0;
     padding: 0;
@@ -2446,6 +2449,12 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     padding: 40px;
     width: 100%;
     max-width: 100%;
+    min-width: 0; /* Allow flex shrinking */
+}
+
+/* Ensure order summary wrapper has enough width for text readability */
+.checkout-summary-column {
+    min-width: 500px; /* Minimum width for better text readability */
 }
 
 .checkout-payment-section {
@@ -2481,6 +2490,7 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     width: 100%;
     border-collapse: collapse;
     margin: 0 0 24px;
+    table-layout: auto; /* Changed from fixed to auto for better text wrapping */
 }
 
 .woocommerce-checkout-review-order-table thead {
@@ -2498,14 +2508,18 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 .woocommerce-checkout-review-order-table .product-name {
     padding: 20px 0;
     width: 100%;
+    min-width: 0; /* Allow flex shrinking */
+    overflow: visible; /* Allow text wrapping */
+    word-wrap: break-word; /* Allow long product names to wrap */
 }
 
 .woocommerce-checkout-review-order-table .product-total {
     padding: 20px 0;
     text-align: right;
     vertical-align: top;
-    width: 120px;
-    min-width: 120px;
+    width: 140px; /* Increased from 120px for better price display */
+    min-width: 140px;
+    white-space: nowrap; /* Prevent price wrapping */
 }
 
 .product-item-summary {
@@ -2513,6 +2527,7 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     gap: 20px;
     align-items: flex-start;
     padding: 4px 0;
+    min-width: 0; /* Allow flex shrinking for long product names */
 }
 
 .product-item-summary .product-thumbnail {
@@ -2533,10 +2548,10 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 
 .product-item-summary .product-details {
     flex: 1;
-    min-width: 0;
+    min-width: 0; /* Critical: Allow text wrapping */
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px; /* Reduced from 10px for tighter spacing */
 }
 
 .product-item-summary .product-title {
@@ -2552,6 +2567,8 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     opacity: 1 !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    hyphens: auto; /* Allow hyphenation for long words */
+    max-width: 100%; /* Ensure title doesn't overflow */
 }
 
 .product-item-summary .product-meta {
@@ -3112,10 +3129,25 @@ body.woocommerce-cart .site-main .entry-content {
     .checkout-summary-column {
         position: static;
         order: -1;
+        min-width: 0; /* Remove min-width on mobile */
     }
 
     .checkout-forms-column {
         gap: 30px;
+    }
+    
+    .checkout-section {
+        margin-bottom: 30px;
+    }
+    
+    .checkout-section .section-title {
+        font-size: 10px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+    }
+    
+    .checkout-section .section-fields {
+        gap: 20px;
     }
     
     .single-product-wrapper .tabs-nav {
@@ -3417,10 +3449,45 @@ body.woocommerce-cart .site-main .entry-content {
     .checkout-summary-column {
         position: static;
         order: -1;
+        min-width: 0; /* Remove min-width on mobile */
     }
     
     .order-summary-wrapper {
         margin-bottom: 30px;
+        padding: 24px 16px; /* Reduced padding on mobile */
+    }
+    
+    .checkout-section {
+        margin-bottom: 24px;
+    }
+    
+    .checkout-section .section-title {
+        font-size: 10px;
+        margin-bottom: 16px;
+        padding-bottom: 10px;
+    }
+    
+    .checkout-section .section-fields {
+        gap: 16px;
+    }
+    
+    .checkout-payment-section {
+        margin-top: 24px;
+        padding-top: 24px;
+    }
+    
+    .woocommerce-checkout .form-row {
+        margin-bottom: 20px !important;
+    }
+    
+    .woocommerce-checkout .form-row input[type="text"],
+    .woocommerce-checkout .form-row input[type="email"],
+    .woocommerce-checkout .form-row input[type="tel"],
+    .woocommerce-checkout .form-row input[type="password"],
+    .woocommerce-checkout .form-row select,
+    .woocommerce-checkout .form-row textarea {
+        padding: 14px 16px !important;
+        font-size: 13px !important;
     }
     
     .progress-steps {

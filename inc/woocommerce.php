@@ -1067,6 +1067,13 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Catatan pesanan' => 'Order notes',
 			'Detail penagihan' => 'Billing details',
 			'Detail pengiriman' => 'Shipping details',
+			// Shipping labels
+			'PENGIRIMAN' => 'SHIPPING',
+			'Pengiriman' => 'Shipping',
+			'pengiriman' => 'shipping',
+			'PENGIRIMAN GRATIS' => 'FREE SHIPPING',
+			'Pengiriman Gratis' => 'Free Shipping',
+			'pengiriman gratis' => 'free shipping',
 			// Coupon
 			'Punya kupon? Klik di sini untuk memasukkan kode Anda' => 'Have a coupon? Click here to enter your code',
 			'Punya kupon?' => 'Have a coupon?',
@@ -1325,8 +1332,13 @@ function wp_augoose_product_add_to_cart_message_english( $text, $product ) {
 /**
  * Force all WooCommerce notices to English
  */
+/**
+ * Force ALL WooCommerce notices (error, success, info) to English
+ * This ensures no Indonesian text appears in notifications
+ */
 add_filter( 'woocommerce_add_error', 'wp_augoose_force_notice_english', 20, 1 );
 add_filter( 'woocommerce_add_success', 'wp_augoose_force_notice_english', 20, 1 );
+add_filter( 'woocommerce_add_info', 'wp_augoose_force_notice_english', 20, 1 );
 add_filter( 'woocommerce_add_notice', 'wp_augoose_force_notice_english', 20, 1 );
 function wp_augoose_force_notice_english( $message ) {
 	if ( empty( $message ) ) {
@@ -1344,11 +1356,47 @@ function wp_augoose_force_notice_english( $message ) {
 		// Add to cart
 		'telah ditambahkan ke keranjang' => 'has been added to your cart',
 		'Telah ditambahkan ke keranjang' => 'Has been added to your cart',
+		'Berhasil ditambahkan' => 'Successfully added',
+		'berhasil ditambahkan' => 'successfully added',
+		// Error messages
+		'Gagal menambahkan produk' => 'Failed to add product',
+		'gagal menambahkan produk' => 'failed to add product',
+		'Produk tidak ditemukan' => 'Product not found',
+		'produk tidak ditemukan' => 'product not found',
+		'ID produk tidak valid' => 'Invalid product ID',
+		'id produk tidak valid' => 'invalid product ID',
+		'Produk tidak dapat dibeli' => 'Product is not purchasable',
+		'produk tidak dapat dibeli' => 'product is not purchasable',
+		'Produk habis' => 'Product is out of stock',
+		'produk habis' => 'product is out of stock',
+		'Produk kehabisan stok' => 'Product is out of stock',
+		'produk kehabisan stok' => 'product is out of stock',
+		'Silakan pilih opsi produk' => 'Please choose product options',
+		'silakan pilih opsi produk' => 'please choose product options',
+		'Item keranjang tidak valid' => 'Invalid cart item',
+		'item keranjang tidak valid' => 'invalid cart item',
+		// Payment errors
+		'Maaf, tampaknya tidak ada metode pembayaran' => 'Sorry, it seems that there are no available payment methods',
+		'maaf, tampaknya tidak ada metode pembayaran' => 'sorry, it seems that there are no available payment methods',
+		'Tidak ada metode pembayaran' => 'No payment methods available',
+		'tidak ada metode pembayaran' => 'no payment methods available',
 		// General
 		'keranjang' => 'cart',
 		'Keranjang' => 'Cart',
 		'produk' => 'product',
 		'Produk' => 'Product',
+		'Maaf' => 'Sorry',
+		'maaf' => 'sorry',
+		'Silakan' => 'Please',
+		'silakan' => 'please',
+		'Mohon' => 'Please',
+		'mohon' => 'please',
+		'Terjadi kesalahan' => 'An error occurred',
+		'terjadi kesalahan' => 'an error occurred',
+		'Gagal' => 'Failed',
+		'gagal' => 'failed',
+		'Berhasil' => 'Success',
+		'berhasil' => 'success',
 	);
 	
 	$message = str_replace( array_keys( $replacements ), array_values( $replacements ), $message );
@@ -2664,6 +2712,67 @@ function wp_augoose_final_clean_output_for_wc_ajax() {
  * DOKU plugin has known issues accessing array offsets without validation
  * This prevents "Trying to access array offset on false" errors from breaking checkout
  */
+/**
+ * Remove payment method from woocommerce_checkout_order_review hook
+ * We render payment method in custom section .checkout-payment-section instead
+ * This prevents payment method from appearing twice
+ * WooCommerce default: add_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
+ */
+remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
+
+/**
+ * Translate Shipping Labels from Indonesian to English
+ * Fixes "PENGIRIMAN" and "PENGIRIMAN GRATIS" labels in checkout
+ */
+add_filter( 'woocommerce_cart_totals_shipping_html', 'wp_augoose_translate_shipping_labels', 10, 1 );
+add_filter( 'woocommerce_shipping_method_label', 'wp_augoose_translate_shipping_method_label', 10, 2 );
+add_filter( 'woocommerce_cart_shipping_method_full_label', 'wp_augoose_translate_shipping_method_label', 10, 2 );
+add_filter( 'woocommerce_cart_shipping_method_label', 'wp_augoose_translate_shipping_method_label', 10, 2 );
+add_filter( 'woocommerce_shipping_package_name', 'wp_augoose_translate_shipping_method_label', 10, 2 );
+function wp_augoose_translate_shipping_labels( $html ) {
+	if ( empty( $html ) ) {
+		return $html;
+	}
+	
+	// Translate common Indonesian shipping labels to English
+	$translations = array(
+		'PENGIRIMAN' => 'SHIPPING',
+		'Pengiriman' => 'Shipping',
+		'pengiriman' => 'shipping',
+		'PENGIRIMAN GRATIS' => 'FREE SHIPPING',
+		'Pengiriman Gratis' => 'Free Shipping',
+		'pengiriman gratis' => 'free shipping',
+	);
+	
+	foreach ( $translations as $indonesian => $english ) {
+		$html = str_replace( $indonesian, $english, $html );
+	}
+	
+	return $html;
+}
+
+function wp_augoose_translate_shipping_method_label( $label, $method = null ) {
+	if ( empty( $label ) || ! is_string( $label ) ) {
+		return $label;
+	}
+	
+	// Translate common Indonesian shipping labels to English
+	$translations = array(
+		'PENGIRIMAN' => 'SHIPPING',
+		'Pengiriman' => 'Shipping',
+		'pengiriman' => 'shipping',
+		'PENGIRIMAN GRATIS' => 'FREE SHIPPING',
+		'Pengiriman Gratis' => 'Free Shipping',
+		'pengiriman gratis' => 'free shipping',
+	);
+	
+	foreach ( $translations as $indonesian => $english ) {
+		$label = str_replace( $indonesian, $english, $label );
+	}
+	
+	return $label;
+}
+
 /**
  * CRITICAL: Fix DOKU Payment plugin errors BEFORE checkout AJAX
  * This must run early to prevent DOKU plugin from outputting HTML/warnings

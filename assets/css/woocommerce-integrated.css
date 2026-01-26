@@ -578,17 +578,19 @@ body.woocommerce-checkout .entry-title {
 .order-summary-wrapper .woocommerce-checkout-review-order-table .product-name {
     padding: 18px 0;
     padding-right: 24px;
-    overflow: hidden;
+    overflow: visible; /* Changed from hidden to allow text wrapping */
+    word-wrap: break-word; /* Allow long product names to wrap */
+    min-width: 0; /* Allow flex shrinking */
 }
 
 .order-summary-wrapper .woocommerce-checkout-review-order-table .product-total {
     padding: 18px 0;
     text-align: right;
     white-space: nowrap;
-    width: 150px;
-    font-size: 12px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    width: 160px; /* Increased from 150px for better price display */
+    min-width: 160px;
+    font-size: 13px; /* Increased from 12px for better readability */
+    overflow: visible; /* Changed from hidden to show full price */
 }
 
 /* Move price below product name on mobile/tablet */
