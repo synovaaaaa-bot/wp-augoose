@@ -280,38 +280,77 @@ function wp_augoose_filter_payment_gateways_by_currency( $available_gateways ) {
 	}
 	
 	// Force IDR check for ASEAN countries at checkout
+	// This ensures DOKU is shown for ID/SG/MY countries
 	if ( is_checkout() ) {
 		$country = wp_augoose_get_customer_country();
 		$idr_countries = wp_augoose_get_idr_countries();
 		
 		if ( $country && in_array( $country, $idr_countries, true ) ) {
-			$current_currency = 'IDR';
+			// Force IDR for ID/SG/MY countries (unless USD was selected)
+			// Check if USD was explicitly selected
+			$explicit_usd = false;
+			if ( WC()->session ) {
+				$explicit_usd = WC()->session->get( 'wp_augoose_explicit_usd' );
+			}
+			
+			if ( ! $explicit_usd ) {
+				$current_currency = 'IDR';
+			}
 		}
+	}
+	
+	// Debug logging
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && is_checkout() ) {
+		error_log( "WP_Augoose Payment Gateway Filter: current_currency={$current_currency}, country=" . ( isset( $country ) ? $country : 'unknown' ) );
 	}
 	
 	// Filter gateways based on currency
 	if ( $current_currency === 'IDR' ) {
 		// IDR: Only show DOKU/Jokul gateways, hide PayPal/Credit Card
+		$doku_found = false;
+		$gateways_to_remove = array();
+		
 		foreach ( $available_gateways as $gateway_id => $gateway ) {
 			$gateway_id_lower = strtolower( $gateway_id );
 			
-			// Remove PayPal and other non-DOKU gateways
-			if ( strpos( $gateway_id_lower, 'doku' ) === false && 
-			     strpos( $gateway_id_lower, 'jokul' ) === false ) {
-				// This is not DOKU, remove it
-				unset( $available_gateways[ $gateway_id ] );
+			// Check if this is DOKU/Jokul gateway
+			if ( strpos( $gateway_id_lower, 'doku' ) !== false || 
+			     strpos( $gateway_id_lower, 'jokul' ) !== false ) {
+				$doku_found = true;
+				continue; // Keep DOKU gateways
 			}
+			
+			// Mark non-DOKU gateways for removal
+			$gateways_to_remove[] = $gateway_id;
+		}
+		
+		// Remove non-DOKU gateways
+		foreach ( $gateways_to_remove as $gateway_id ) {
+			unset( $available_gateways[ $gateway_id ] );
+		}
+		
+		// Debug: Log if DOKU not found
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && ! $doku_found ) {
+			$all_gateway_ids = array_keys( $available_gateways );
+			error_log( "WP_Augoose: DOKU gateway not found! Available gateways: " . implode( ', ', $all_gateway_ids ) );
 		}
 	} else {
 		// Non-IDR: Only show PayPal/Credit Card, hide DOKU
+		$gateways_to_remove = array();
+		
 		foreach ( $available_gateways as $gateway_id => $gateway ) {
 			$gateway_id_lower = strtolower( $gateway_id );
 			
-			// Remove DOKU gateways
+			// Mark DOKU gateways for removal
 			if ( strpos( $gateway_id_lower, 'doku' ) !== false || 
 			     strpos( $gateway_id_lower, 'jokul' ) !== false ) {
-				unset( $available_gateways[ $gateway_id ] );
+				$gateways_to_remove[] = $gateway_id;
 			}
+		}
+		
+		// Remove DOKU gateways
+		foreach ( $gateways_to_remove as $gateway_id ) {
+			unset( $available_gateways[ $gateway_id ] );
 		}
 	}
 	

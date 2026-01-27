@@ -5351,16 +5351,21 @@ function wp_augoose_use_converted_cart_item_subtotal( $subtotal_html, $cart_item
  */
 add_filter( 'woocommerce_cart_subtotal', 'wp_augoose_force_idr_cart_subtotal', 999, 3 );
 function wp_augoose_force_idr_cart_subtotal( $subtotal_html, $compound, $cart ) {
-	// Check if cart has converted items
+	// Check if cart has converted items or currency is IDR
 	if ( ! $cart || $cart->is_empty() ) {
 		return $subtotal_html;
 	}
 	
-	$has_converted = false;
-	foreach ( $cart->get_cart() as $cart_item ) {
-		if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
-			$has_converted = true;
-			break;
+	// Check if currency is IDR
+	$current_currency = get_woocommerce_currency();
+	$has_converted = ( $current_currency === 'IDR' );
+	
+	if ( ! $has_converted ) {
+		foreach ( $cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
+				$has_converted = true;
+				break;
+			}
 		}
 	}
 	
@@ -5381,11 +5386,16 @@ function wp_augoose_force_idr_cart_total( $total_html ) {
 		return $total_html;
 	}
 	
-	$has_converted = false;
-	foreach ( WC()->cart->get_cart() as $cart_item ) {
-		if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
-			$has_converted = true;
-			break;
+	// Check if currency is IDR or items were converted
+	$current_currency = get_woocommerce_currency();
+	$has_converted = ( $current_currency === 'IDR' );
+	
+	if ( ! $has_converted ) {
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
+				$has_converted = true;
+				break;
+			}
 		}
 	}
 	
@@ -5406,11 +5416,16 @@ function wp_augoose_force_idr_cart_totals_subtotal( $subtotal_html ) {
 		return $subtotal_html;
 	}
 	
-	$has_converted = false;
-	foreach ( WC()->cart->get_cart() as $cart_item ) {
-		if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
-			$has_converted = true;
-			break;
+	// Check if currency is IDR
+	$current_currency = get_woocommerce_currency();
+	$has_converted = ( $current_currency === 'IDR' );
+	
+	if ( ! $has_converted ) {
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
+				$has_converted = true;
+				break;
+			}
 		}
 	}
 	
@@ -5428,11 +5443,16 @@ function wp_augoose_force_idr_cart_totals_order_total( $total_html ) {
 		return $total_html;
 	}
 	
-	$has_converted = false;
-	foreach ( WC()->cart->get_cart() as $cart_item ) {
-		if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
-			$has_converted = true;
-			break;
+	// Check if currency is IDR or items were converted
+	$current_currency = get_woocommerce_currency();
+	$has_converted = ( $current_currency === 'IDR' );
+	
+	if ( ! $has_converted ) {
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
+				$has_converted = true;
+				break;
+			}
 		}
 	}
 	

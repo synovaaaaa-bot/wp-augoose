@@ -122,6 +122,11 @@ do_action( 'woocommerce_before_cart' ); ?>
 
             <!-- Cart Totals -->
             <div class="cart-totals-simple">
+                <div class="cart-total-row">
+                    <span class="total-label">Total</span>
+                    <span class="total-amount"><?php wc_cart_totals_order_total_html(); ?></span>
+                </div>
+                
                 <?php
                 // Display currency conversion notice if items were converted
                 $show_notice = false;
@@ -160,7 +165,7 @@ do_action( 'woocommerce_before_cart' ); ?>
                     }
                 }
                 
-                // Always show notice if currency is IDR
+                // Always show notice if currency is IDR - place after total
                 if ( $show_notice ) {
                     $notice_text = '';
                     if ( $original_currency && in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
@@ -193,11 +198,6 @@ do_action( 'woocommerce_before_cart' ); ?>
                         </circle>
                     </svg>
                     <span>Converting prices to IDR...</span>
-                </div>
-                
-                <div class="cart-total-row">
-                    <span class="total-label">Total</span>
-                    <span class="total-amount"><?php wc_cart_totals_order_total_html(); ?></span>
                 </div>
                 
                 <div class="cart-buttons">
