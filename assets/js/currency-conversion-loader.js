@@ -31,10 +31,56 @@
         return document.querySelector('.cart-item-simple, .woocommerce-cart-form') !== null;
     }
 
+    // Log exchange rates to console for validation
+    function logExchangeRates() {
+        if ( typeof wpAugooseCurrencyRates !== 'undefined' && wpAugooseCurrencyRates.exchange_rates ) {
+            const rates = wpAugooseCurrencyRates.exchange_rates;
+            const baseCurrency = wpAugooseCurrencyRates.base_currency || 'IDR';
+            
+            console.group('💱 WP Augoose - Currency Exchange Rates (from WCML)');
+            console.log('Base Currency:', baseCurrency);
+            console.log('Exchange Rates (relative to base):');
+            
+            // Log all rates
+            for (const [currency, rate] of Object.entries(rates)) {
+                if (currency === baseCurrency) {
+                    console.log(`  ${currency}: ${rate} (default)`);
+                } else {
+                    // Calculate conversion rate to IDR
+                    const idrRate = rates['IDR'] || 1;
+                    const currencyRate = rate || 1;
+                    const conversionRate = idrRate / currencyRate;
+                    console.log(`  ${currency}: ${rate} → 1 ${currency} = ${conversionRate.toFixed(2)} IDR`);
+                }
+            }
+            
+            // Log conversion examples for SGD and MYR
+            if (rates['SGD'] && rates['IDR']) {
+                const sgdToIdr = rates['IDR'] / rates['SGD'];
+                console.log('\n📊 Conversion Examples:');
+                console.log(`  1 SGD = ${sgdToIdr.toFixed(2)} IDR`);
+                console.log(`  74 SGD = ${(74 * sgdToIdr).toFixed(2)} IDR`);
+            }
+            
+            if (rates['MYR'] && rates['IDR']) {
+                const myrToIdr = rates['IDR'] / rates['MYR'];
+                console.log(`  1 MYR = ${myrToIdr.toFixed(2)} IDR`);
+                console.log(`  80 MYR = ${(80 * myrToIdr).toFixed(2)} IDR`);
+            }
+            
+            console.log('\n💡 These rates are used for currency conversion in cart/checkout');
+            console.log('💡 Rates are updated from WCML settings (can be updated per hour)');
+            console.groupEnd();
+        }
+    }
+
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
         // Hide loading by default (will show if needed)
         hideConversionLoading();
+        
+        // Log exchange rates for validation
+        logExchangeRates();
 
         // Show loading when cart is being updated
         if (typeof jQuery !== 'undefined' && jQuery.fn.on) {
@@ -50,6 +96,8 @@
                 // Small delay to ensure conversion is complete
                 setTimeout(function() {
                     hideConversionLoading();
+                    // Log rates again after cart update to show current rates
+                    logExchangeRates();
                 }, 500);
             });
 

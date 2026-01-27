@@ -667,6 +667,26 @@ function wp_augoose_scripts() {
         if ( ( function_exists( 'is_cart' ) && is_cart() ) || ( function_exists( 'is_checkout' ) && is_checkout() ) ) {
             if ( file_exists( $theme_dir . '/assets/js/currency-conversion-loader.js' ) ) {
                 wp_enqueue_script( 'wp-augoose-currency-conversion-loader', $theme_dir_uri . '/assets/js/currency-conversion-loader.js', array( 'jquery', 'wc-cart' ), $asset_ver( 'assets/js/currency-conversion-loader.js' ), true );
+                
+                // Pass exchange rates to JavaScript for console logging
+                $exchange_rates_data = array();
+                if ( class_exists( 'woocommerce_wpml' ) ) {
+                    global $woocommerce_wpml;
+                    if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
+                        $multi_currency = $woocommerce_wpml->multi_currency;
+                        if ( method_exists( $multi_currency, 'get_exchange_rates' ) ) {
+                            $exchange_rates = $multi_currency->get_exchange_rates();
+                            if ( is_array( $exchange_rates ) && ! empty( $exchange_rates ) ) {
+                                $exchange_rates_data = $exchange_rates;
+                            }
+                        }
+                    }
+                }
+                
+                wp_localize_script( 'wp-augoose-currency-conversion-loader', 'wpAugooseCurrencyRates', array(
+                    'exchange_rates' => $exchange_rates_data,
+                    'base_currency' => get_woocommerce_currency(),
+                ) );
             }
         }
         if ( file_exists( $theme_dir . '/assets/css/cart-sidebar-detailed.css' ) ) {
