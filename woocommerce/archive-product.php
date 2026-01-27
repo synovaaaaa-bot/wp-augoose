@@ -50,8 +50,12 @@ do_action( 'woocommerce_before_main_content' );
 	 * @since 8.6.0
 	 *
 	 * @hooked woocommerce_product_taxonomy_archive_header - 10
+	 * 
+	 * NOTE: woocommerce_product_taxonomy_archive_header displays category title again,
+	 * causing duplicate titles. We skip this hook to prevent duplication.
 	 */
-	do_action( 'woocommerce_shop_loop_header' );
+	// Skip woocommerce_shop_loop_header to prevent duplicate title
+	// do_action( 'woocommerce_shop_loop_header' );
 	?>
 
 	<!-- Backdrop for filter overlay -->

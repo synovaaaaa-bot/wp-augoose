@@ -88,6 +88,16 @@ function wp_augoose_ensure_wcml_currency_works() {
 }
 
 /**
+ * Remove duplicate category title on product taxonomy archives
+ * woocommerce_product_taxonomy_archive_header displays title again, causing duplication
+ */
+add_action( 'init', 'wp_augoose_remove_duplicate_category_title', 20 );
+function wp_augoose_remove_duplicate_category_title() {
+	// Remove woocommerce_product_taxonomy_archive_header to prevent duplicate titles
+	remove_action( 'woocommerce_shop_loop_header', 'woocommerce_product_taxonomy_archive_header', 10 );
+}
+
+/**
  * WooCommerce setup function.
  */
 function wp_augoose_woocommerce_setup() {
