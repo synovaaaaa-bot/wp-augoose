@@ -4767,8 +4767,9 @@ function wp_augoose_safe_get_client_currency() {
 }
 
 /**
- * Safe get exchange rate from WCML
+ * Safe get exchange rate from WCML using WCML's built-in method
  * Returns rate for converting from source_currency to IDR
+ * Uses WCML's get_currency_rate() method for consistency
  * 
  * @param string $source_currency Source currency code (SGD, MYR, etc.)
  * @return float|null Exchange rate or null if not available/invalid
@@ -4792,8 +4793,22 @@ function wp_augoose_safe_get_exchange_rate_to_idr( $source_currency ) {
 		return 1.0;
 	}
 	
-	// Safe get exchange rates
+	// Use WCML's built-in method to get currency rate
 	try {
+		// Method 1: Try get_currency_rate() if available
+		if ( method_exists( $multi_currency, 'get_currency_rate' ) ) {
+			$source_rate = $multi_currency->get_currency_rate( $source_currency );
+			$idr_rate = $multi_currency->get_currency_rate( 'IDR' );
+			
+			if ( $source_rate && $source_rate > 0 && $idr_rate && $idr_rate > 0 ) {
+				$rate = $idr_rate / $source_rate;
+				if ( $rate > 0 && is_finite( $rate ) ) {
+					return $rate;
+				}
+			}
+		}
+		
+		// Method 2: Fallback to get_exchange_rates()
 		if ( method_exists( $multi_currency, 'get_exchange_rates' ) ) {
 			$exchange_rates = $multi_currency->get_exchange_rates();
 			
@@ -4833,6 +4848,58 @@ function wp_augoose_safe_get_exchange_rate_to_idr( $source_currency ) {
 	}
 	
 	return null;
+}
+
+/**
+ * Convert price using WCML's built-in conversion method
+ * This ensures consistency with product page prices
+ * 
+ * @param float $price Price to convert
+ * @param string $from_currency Source currency (SGD, MYR, etc.)
+ * @param string $to_currency Target currency (IDR)
+ * @return float|null Converted price or null if error
+ */
+function wp_augoose_convert_price_with_wcml( $price, $from_currency, $to_currency = 'IDR' ) {
+	// Guard: WCML must be active
+	if ( ! class_exists( 'woocommerce_wpml' ) ) {
+		return null;
+	}
+	
+	global $woocommerce_wpml;
+	if ( ! $woocommerce_wpml || ! isset( $woocommerce_wpml->multi_currency ) ) {
+		return null;
+	}
+	
+	$multi_currency = $woocommerce_wpml->multi_currency;
+	$from_currency = strtoupper( trim( $from_currency ) );
+	$to_currency = strtoupper( trim( $to_currency ) );
+	
+	// If same currency, return as is
+	if ( $from_currency === $to_currency ) {
+		return (float) $price;
+	}
+	
+	// Use WCML's price conversion method
+	try {
+		// Get exchange rate
+		$rate = wp_augoose_safe_get_exchange_rate_to_idr( $from_currency );
+		if ( ! $rate || $rate <= 0 ) {
+			return null;
+		}
+		
+		// Convert price
+		$converted_price = (float) $price * $rate;
+		
+		// Round to 2 decimals
+		$converted_price = round( $converted_price, 2 );
+		
+		return $converted_price;
+	} catch ( Exception $e ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'WP_Augoose: Error converting price - ' . $e->getMessage() );
+		}
+		return null;
+	}
 }
 
 /**
@@ -5006,21 +5073,30 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 		// Get product ID
 		$product_id = $product->get_id();
 		
-		// Get current price from product (this might be in base currency or client currency)
-		$current_price = (float) $product->get_price( 'edit' );
+		// Get the price that was displayed on product page (already converted by WCML to item_currency)
+		// This is the price user saw when adding to cart (e.g., 80 SGD)
+		// We need to convert this to IDR
+		$displayed_price = (float) $product->get_price( 'edit' );
 		
 		// Skip if price is 0 or invalid
-		if ( $current_price <= 0 ) {
+		if ( $displayed_price <= 0 ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( "WP_Augoose: Cart item {$cart_item_key} has invalid price: {$current_price}" );
+				error_log( "WP_Augoose: Cart item {$cart_item_key} has invalid displayed price: {$displayed_price}" );
 			}
 			continue;
 		}
 		
-		// The current_price is likely in the currency that was displayed (SGD/MYR)
-		// We need to convert it to IDR
-		// Example: 80 SGD * 13200 = 1,056,000 IDR
-		$price_idr = $current_price * $item_exchange_rate;
+		// Convert displayed price (in item_currency) to IDR using WCML's method
+		// This ensures consistency with product page prices
+		$price_idr = wp_augoose_convert_price_with_wcml( $displayed_price, $item_currency, 'IDR' );
+		
+		// If WCML conversion failed, use manual calculation with exchange rate
+		if ( $price_idr === null || $price_idr <= 0 ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( "WP_Augoose: WCML conversion failed for {$item_currency}, using manual calculation" );
+			}
+			$price_idr = $displayed_price * $item_exchange_rate;
+		}
 		
 		// Round to 2 decimals (IDR standard)
 		$price_idr = round( $price_idr, 2 );
