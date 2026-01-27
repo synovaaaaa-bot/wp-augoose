@@ -155,6 +155,13 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
                             <!-- Place Order Button -->
                             <div class="checkout-place-order-section">
                                 <?php
+                                // Terms checkbox - call function directly since hook might not be called
+                                if ( function_exists( 'wp_augoose_add_terms_checkbox' ) ) {
+                                    wp_augoose_add_terms_checkbox();
+                                }
+                                ?>
+                                
+                                <?php
                                 $order_button_text = apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) );
                                 ?>
                                 
