@@ -154,15 +154,6 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
                             <!-- Place Order Button -->
                             <div class="checkout-place-order-section">
-                                <?php do_action( 'woocommerce_checkout_before_terms_and_conditions' ); ?>
-                                
-                                <?php
-                                // Terms and conditions - use WooCommerce template
-                                wc_get_template( 'checkout/terms.php' );
-                                ?>
-                                
-                                <?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
-                                
                                 <?php
                                 $order_button_text = apply_filters( 'woocommerce_order_button_text', __( 'Place order', 'woocommerce' ) );
                                 ?>
@@ -170,6 +161,23 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
                                 <button type="submit" class="button alt checkout-place-order-btn<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="woocommerce_checkout_place_order" id="place_order" value="<?php echo esc_attr( $order_button_text ); ?>" data-value="<?php echo esc_attr( $order_button_text ); ?>">
                                     <?php echo esc_html( $order_button_text ); ?>
                                 </button>
+                                
+                                <?php
+                                // Terms of Service link (below Place Order button)
+                                $terms_page_id = wc_terms_and_conditions_page_id();
+                                if ( $terms_page_id ) {
+                                    $terms_url = get_permalink( $terms_page_id );
+                                    if ( $terms_url ) {
+                                        ?>
+                                        <p class="checkout-terms-link">
+                                            <a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" class="terms-of-service-link">
+                                                Terms of Service
+                                            </a>
+                                        </p>
+                                        <?php
+                                    }
+                                }
+                                ?>
                                 
                                 <p class="checkout-security-note">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">

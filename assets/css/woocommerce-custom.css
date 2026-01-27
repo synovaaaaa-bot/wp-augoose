@@ -2865,6 +2865,25 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     cursor: not-allowed;
 }
 
+.checkout-place-order-section .checkout-terms-link {
+    text-align: center;
+    margin: 16px 0 0;
+    padding: 0;
+}
+
+.checkout-place-order-section .checkout-terms-link .terms-of-service-link {
+    color: #2c3e50;
+    text-decoration: underline;
+    font-size: 12px;
+    font-weight: 400;
+    transition: color 0.2s ease;
+}
+
+.checkout-place-order-section .checkout-terms-link .terms-of-service-link:hover {
+    color: #1a252f;
+    text-decoration: none;
+}
+
 .checkout-place-order-section .checkout-security-note {
     margin: 16px 0 0;
     font-size: 11px;
