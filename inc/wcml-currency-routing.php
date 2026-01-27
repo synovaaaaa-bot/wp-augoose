@@ -14,9 +14,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Countries that should use IDR currency
+ * Note: USD countries should NOT be forced to IDR (they use PayPal)
  */
 function wp_augoose_get_idr_countries() {
 	return array( 'ID', 'SG', 'MY' ); // Indonesia, Singapore, Malaysia
+}
+
+/**
+ * Countries that should use USD currency (no conversion to IDR)
+ */
+function wp_augoose_get_usd_countries() {
+	// Add USD countries here if needed
+	// For now, any country NOT in ID/SG/MY will use their selected currency
+	return array();
 }
 
 /**
@@ -97,44 +107,62 @@ function wp_augoose_force_idr_for_asean_countries() {
 	
 	$idr_countries = wp_augoose_get_idr_countries();
 	
-	// If country is ID/SG/MY, force IDR currency
+	// Get current client currency first
+	global $woocommerce_wpml;
+	$current_currency = null;
+	if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
+		$multi_currency = $woocommerce_wpml->multi_currency;
+		if ( method_exists( $multi_currency, 'get_client_currency' ) ) {
+			$current_currency = $multi_currency->get_client_currency();
+		}
+	}
+	
+	// IMPORTANT: If current currency is USD, do NOT force IDR
+	// USD should stay USD for PayPal payment
+	// This allows users to choose USD even if they're from ID/SG/MY
+	if ( $current_currency === 'USD' ) {
+		return; // Skip - let USD stay USD
+	}
+	
+	// If country is ID/SG/MY AND currency is SGD or MYR, force IDR currency
+	// But if user selected USD, keep USD (handled above)
 	if ( in_array( $country, $idr_countries, true ) ) {
-		// Set WCML currency to IDR
-		global $woocommerce_wpml;
-		if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
-			$multi_currency = $woocommerce_wpml->multi_currency;
-			
-			// Check if IDR is available in WCML
-			$available_currencies = $multi_currency->get_currency_codes();
-			if ( in_array( 'IDR', $available_currencies, true ) ) {
-				// Get current currency before changing
-				$current_currency = $multi_currency->get_client_currency();
+		// Only force IDR if currency is SGD or MYR (not USD)
+		// If currency is null or not SGD/MYR, skip forcing
+		if ( $current_currency && in_array( $current_currency, array( 'SGD', 'MYR' ), true ) ) {
+			// Set WCML currency to IDR
+			if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
+				$multi_currency = $woocommerce_wpml->multi_currency;
 				
-				// Save original currency to session for conversion notice
-				if ( $current_currency !== 'IDR' && WC()->session ) {
-					WC()->session->set( 'wp_augoose_original_currency', $current_currency );
-				}
-				
-				// Set client currency to IDR (this triggers WCML conversion)
-				$multi_currency->set_client_currency( 'IDR' );
-				
-				// If currency changed, trigger cart recalculation to apply conversion
-				if ( $current_currency !== 'IDR' && WC()->cart && ! WC()->cart->is_empty() ) {
-					// Force cart to recalculate with new currency
-					// This will trigger WCML to convert prices using exchange rates
-					WC()->cart->calculate_totals();
+				// Check if IDR is available in WCML
+				$available_currencies = $multi_currency->get_currency_codes();
+				if ( in_array( 'IDR', $available_currencies, true ) ) {
+					// Save original currency to session for conversion notice
+					if ( $current_currency && $current_currency !== 'IDR' && WC()->session ) {
+						WC()->session->set( 'wp_augoose_original_currency', $current_currency );
+					}
+					
+					// Set client currency to IDR (this triggers WCML conversion)
+					$multi_currency->set_client_currency( 'IDR' );
+					
+					// If currency changed, trigger cart recalculation to apply conversion
+					if ( $current_currency !== 'IDR' && WC()->cart && ! WC()->cart->is_empty() ) {
+						// Force cart to recalculate with new currency
+						// This will trigger WCML to convert prices using exchange rates
+						WC()->cart->calculate_totals();
+					}
 				}
 			}
-		}
-		
-		// Also set in session/cookie for persistence
-		if ( WC()->session ) {
-			WC()->session->set( 'client_currency', 'IDR' );
-		}
-		
-		// Set cookie for WCML
-		if ( ! headers_sent() ) {
-			wc_setcookie( 'wcml_client_currency', 'IDR', time() + DAY_IN_SECONDS );
+			
+			// Also set in session/cookie for persistence
+			if ( WC()->session ) {
+				WC()->session->set( 'client_currency', 'IDR' );
+			}
+			
+			// Set cookie for WCML
+			if ( ! headers_sent() ) {
+				wc_setcookie( 'wcml_client_currency', 'IDR', time() + DAY_IN_SECONDS );
+			}
 		}
 	}
 }
@@ -202,6 +230,12 @@ function wp_augoose_force_idr_currency_checkout( $currency ) {
 		return $currency;
 	}
 	
+	// IMPORTANT: If current currency is USD, do NOT force IDR
+	// USD should stay USD for PayPal payment
+	if ( $currency === 'USD' ) {
+		return 'USD'; // Keep USD
+	}
+	
 	$country = wp_augoose_get_customer_country();
 	if ( ! $country ) {
 		return $currency;
@@ -209,7 +243,7 @@ function wp_augoose_force_idr_currency_checkout( $currency ) {
 	
 	$idr_countries = wp_augoose_get_idr_countries();
 	
-	// Force IDR for ID/SG/MY
+	// Force IDR for ID/SG/MY (but not USD)
 	if ( in_array( $country, $idr_countries, true ) ) {
 		return 'IDR';
 	}
