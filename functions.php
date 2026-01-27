@@ -663,6 +663,12 @@ function wp_augoose_scripts() {
     
     // Cart Sidebar - Detailed & Compact
     if ( class_exists( 'WooCommerce' ) ) {
+        // Currency conversion loading indicator (for cart and checkout)
+        if ( ( function_exists( 'is_cart' ) && is_cart() ) || ( function_exists( 'is_checkout' ) && is_checkout() ) ) {
+            if ( file_exists( $theme_dir . '/assets/js/currency-conversion-loader.js' ) ) {
+                wp_enqueue_script( 'wp-augoose-currency-conversion-loader', $theme_dir_uri . '/assets/js/currency-conversion-loader.js', array( 'jquery', 'wc-cart' ), $asset_ver( 'assets/js/currency-conversion-loader.js' ), true );
+            }
+        }
         if ( file_exists( $theme_dir . '/assets/css/cart-sidebar-detailed.css' ) ) {
             wp_enqueue_style( 'wp-augoose-cart-sidebar-detailed', $theme_dir_uri . '/assets/css/cart-sidebar-detailed.css', array(), $asset_ver( 'assets/css/cart-sidebar-detailed.css' ), 'all' );
         }

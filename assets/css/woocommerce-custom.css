@@ -5126,6 +5126,73 @@ body.size-guide-open {
     font-weight: 600;
 }
 
+/* Cart Currency Conversion Loading Indicator */
+.cart-currency-conversion-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    border-left: 3px solid #0073aa;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #555;
+}
+
+.cart-currency-conversion-loading .spinner {
+    animation: spin 1s linear infinite;
+    color: #0073aa;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cart-currency-conversion-loading span {
+    color: #0073aa;
+    font-weight: 500;
+}
+
+/* Checkout Currency Conversion Notice */
+.woocommerce-checkout-review-order-table .currency-conversion-notice {
+    background-color: transparent;
+}
+
+.woocommerce-checkout-review-order-table .currency-conversion-notice-content {
+    padding: 12px 0;
+}
+
+.woocommerce-checkout-review-order-table .currency-conversion-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border-left: 3px solid #2c3e50;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #555;
+}
+
+.woocommerce-checkout-review-order-table .currency-conversion-info svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #2c3e50;
+    opacity: 0.8;
+}
+
+.woocommerce-checkout-review-order-table .currency-conversion-info strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .currency-conversion-info {
         font-size: 11px;
