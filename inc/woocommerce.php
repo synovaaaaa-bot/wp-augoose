@@ -4836,21 +4836,65 @@ function wp_augoose_safe_get_exchange_rate_to_idr( $source_currency ) {
 }
 
 /**
+ * Save original currency when item is added to cart
+ * This helps us know what currency the price was in
+ */
+add_filter( 'woocommerce_add_cart_item_data', 'wp_augoose_save_original_currency_to_cart_item', 10, 3 );
+function wp_augoose_save_original_currency_to_cart_item( $cart_item_data, $product_id, $variation_id ) {
+	// Guard: Ensure cart_item_data is array
+	if ( ! is_array( $cart_item_data ) ) {
+		$cart_item_data = array();
+	}
+	
+	// Guard: Validate product_id
+	if ( ! $product_id || ! is_numeric( $product_id ) ) {
+		return $cart_item_data;
+	}
+	
+	// Get client currency at the time item is added
+	$client_currency = wp_augoose_safe_get_client_currency();
+	
+	// If not from WCML, try cookie
+	if ( ! $client_currency && isset( $_COOKIE['wp_augoose_currency'] ) ) {
+		$cookie_currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
+		if ( $cookie_currency ) {
+			$client_currency = strtoupper( trim( $cookie_currency ) );
+		}
+	}
+	
+	// Save to cart item data (only if valid currency)
+	if ( $client_currency && is_string( $client_currency ) && strlen( $client_currency ) === 3 ) {
+		$cart_item_data['wp_augoose_original_currency'] = $client_currency;
+		
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( "WP_Augoose: Saved original currency {$client_currency} for product #{$product_id}" );
+		}
+	}
+	
+	return $cart_item_data;
+}
+
+/**
  * Convert cart item prices from foreign currency to IDR
  * Only converts SGD and MYR to IDR
  * USD stays USD (no conversion)
  * 
  * Hook: woocommerce_before_calculate_totals
- * Priority: 5 (early, before other calculations)
+ * Priority: 1 (very early, before WCML and other calculations)
  * 
  * IMPORTANT: This runs BEFORE wcml-currency-routing.php forces IDR
  * So we need to check the ORIGINAL currency before it's forced to IDR
  */
-add_action( 'woocommerce_before_calculate_totals', 'wp_augoose_convert_cart_items_to_idr', 5 );
+add_action( 'woocommerce_before_calculate_totals', 'wp_augoose_convert_cart_items_to_idr', 1 );
 
 function wp_augoose_convert_cart_items_to_idr( $cart ) {
 	// Guard: Cart must exist and not empty
-	if ( ! $cart || ! is_a( $cart, 'WC_Cart' ) || $cart->is_empty() ) {
+	if ( ! $cart || ! is_a( $cart, 'WC_Cart' ) ) {
+		return;
+	}
+	
+	// Guard: Check if cart is empty
+	if ( $cart->is_empty() ) {
 		return;
 	}
 	
@@ -4859,11 +4903,41 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 		return;
 	}
 	
-	// Get client currency BEFORE any forcing happens
-	// We need to check the original currency that user selected
-	$client_currency = wp_augoose_safe_get_client_currency();
+	// Guard: Ensure cart_contents is accessible
+	if ( ! isset( $cart->cart_contents ) || ! is_array( $cart->cart_contents ) ) {
+		return;
+	}
+	
+	// Process each cart item to get original currency
+	$client_currency = null;
+	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+		// Check if cart item has original currency saved
+		if ( isset( $cart_item['wp_augoose_original_currency'] ) ) {
+			$client_currency = $cart_item['wp_augoose_original_currency'];
+			break; // Use first item's currency
+		}
+	}
+	
+	// If not found in cart items, check session
+	if ( ! $client_currency && function_exists( 'WC' ) && WC()->session ) {
+		$client_currency = WC()->session->get( 'wp_augoose_original_currency' );
+	}
+	
+	// If still not found, get from WCML
 	if ( ! $client_currency ) {
-		return; // WCML not configured or error
+		$client_currency = wp_augoose_safe_get_client_currency();
+	}
+	
+	// If still no currency, try to get from cookie (user's selected currency)
+	if ( ! $client_currency && isset( $_COOKIE['wp_augoose_currency'] ) ) {
+		$client_currency = strtoupper( trim( sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) ) );
+	}
+	
+	if ( ! $client_currency ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'WP_Augoose: Cannot determine client currency for conversion' );
+		}
+		return; // Cannot determine currency
 	}
 	
 	// IMPORTANT: USD stays USD (no conversion)
@@ -4885,10 +4959,17 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 		return; // Rate not available - skip conversion to prevent errors
 	}
 	
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		error_log( "WP_Augoose: Starting conversion - currency: {$client_currency}, rate: {$exchange_rate}" );
+	}
+	
 	// Process each cart item
 	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
 		// Skip if already converted (prevent double conversion)
 		if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( "WP_Augoose: Cart item {$cart_item_key} already converted, skipping" );
+			}
 			continue;
 		}
 		
@@ -4898,38 +4979,151 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 			continue;
 		}
 		
-		// Get current price (this is in client currency from WCML)
-		// WCML has already converted the price to client currency (SGD/MYR)
-		// So we need to convert it to IDR using exchange rate
+		// Get original currency for this specific cart item
+		$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
+			? $cart_item['wp_augoose_original_currency'] 
+			: $client_currency;
+		
+		// Skip if this item's currency is USD
+		if ( $item_currency === 'USD' ) {
+			continue; // USD items don't need conversion
+		}
+		
+		// Skip if this item's currency is not SGD or MYR
+		if ( ! in_array( $item_currency, array( 'SGD', 'MYR' ), true ) ) {
+			continue;
+		}
+		
+		// Get exchange rate for this item's currency
+		$item_exchange_rate = wp_augoose_safe_get_exchange_rate_to_idr( $item_currency );
+		if ( ! $item_exchange_rate || $item_exchange_rate <= 0 ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( "WP_Augoose: Cannot get exchange rate for {$item_currency}" );
+			}
+			continue;
+		}
+		
+		// Get product ID
+		$product_id = $product->get_id();
+		
+		// Get current price from product (this might be in base currency or client currency)
 		$current_price = (float) $product->get_price( 'edit' );
 		
 		// Skip if price is 0 or invalid
 		if ( $current_price <= 0 ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( "WP_Augoose: Cart item {$cart_item_key} has invalid price: {$current_price}" );
+			}
 			continue;
 		}
 		
-		// Convert to IDR
-		// current_price is in client_currency (SGD/MYR)
-		// We multiply by exchange_rate to get IDR
-		// Example: 80 SGD * 13200 (rate) = 1,056,000 IDR
-		$price_idr = $current_price * $exchange_rate;
+		// The current_price is likely in the currency that was displayed (SGD/MYR)
+		// We need to convert it to IDR
+		// Example: 80 SGD * 13200 = 1,056,000 IDR
+		$price_idr = $current_price * $item_exchange_rate;
 		
 		// Round to 2 decimals (IDR standard)
 		$price_idr = round( $price_idr, 2 );
 		
+		// Validate price_idr before setting
+		if ( ! is_finite( $price_idr ) || $price_idr <= 0 ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( "WP_Augoose: Invalid converted price {$price_idr} for product #{$product_id}" );
+			}
+			continue;
+		}
+		
 		// Set converted price (WooCommerce treats this as base currency IDR)
-		$product->set_price( $price_idr );
+		// Use set_price() to update the product price
+		try {
+			$product->set_price( $price_idr );
+			
+			// Also update the product data directly to ensure it's used
+			if ( isset( $product->data ) && is_array( $product->data ) ) {
+				$product->data['price'] = (string) $price_idr;
+			}
+		} catch ( Exception $e ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( "WP_Augoose: Error setting price for product #{$product_id} - " . $e->getMessage() );
+			}
+			continue; // Skip this item if error
+		}
+		
+		// Store converted price in cart item data for later retrieval
+		if ( isset( $cart->cart_contents[ $cart_item_key ] ) ) {
+			$cart->cart_contents[ $cart_item_key ]['wp_augoose_converted_price_idr'] = $price_idr;
+			
+			// Also update the product object in cart item
+			$cart->cart_contents[ $cart_item_key ]['data'] = $product;
+		}
 		
 		// Mark as converted to prevent double conversion
 		$cart->cart_contents[ $cart_item_key ]['wp_augoose_converted_to_idr'] = true;
-		$cart->cart_contents[ $cart_item_key ]['wp_augoose_original_currency'] = $client_currency;
+		$cart->cart_contents[ $cart_item_key ]['wp_augoose_original_currency'] = $item_currency;
 		$cart->cart_contents[ $cart_item_key ]['wp_augoose_original_price'] = $current_price;
-		$cart->cart_contents[ $cart_item_key ]['wp_augoose_exchange_rate'] = $exchange_rate;
+		$cart->cart_contents[ $cart_item_key ]['wp_augoose_exchange_rate'] = $item_exchange_rate;
 		
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( "WP_Augoose: Converted cart item - {$client_currency} {$current_price} → IDR {$price_idr} (rate: {$exchange_rate})" );
+			error_log( "WP_Augoose: Converted cart item #{$product_id} - {$item_currency} {$current_price} → IDR {$price_idr} (rate: {$item_exchange_rate})" );
 		}
 	}
+}
+
+/**
+ * Filter cart item price to use converted price
+ * This ensures the converted price is used in cart calculations
+ */
+add_filter( 'woocommerce_cart_item_price', 'wp_augoose_use_converted_cart_item_price', 999, 3 );
+function wp_augoose_use_converted_cart_item_price( $price_html, $cart_item, $cart_item_key ) {
+	// Guard: Check if cart_item is valid array
+	if ( ! is_array( $cart_item ) ) {
+		return $price_html;
+	}
+	
+	// Check if this item has been converted
+	if ( isset( $cart_item['wp_augoose_converted_price_idr'] ) ) {
+		$converted_price = (float) $cart_item['wp_augoose_converted_price_idr'];
+		
+		// Validate price
+		if ( $converted_price > 0 && is_finite( $converted_price ) ) {
+			$price_html = wc_price( $converted_price );
+		}
+	}
+	
+	return $price_html;
+}
+
+/**
+ * Filter cart item subtotal to use converted price
+ */
+add_filter( 'woocommerce_cart_item_subtotal', 'wp_augoose_use_converted_cart_item_subtotal', 999, 3 );
+function wp_augoose_use_converted_cart_item_subtotal( $subtotal_html, $cart_item, $cart_item_key ) {
+	// Guard: Check if cart_item is valid array
+	if ( ! is_array( $cart_item ) ) {
+		return $subtotal_html;
+	}
+	
+	// Check if this item has been converted
+	if ( isset( $cart_item['wp_augoose_converted_price_idr'] ) ) {
+		$converted_price = (float) $cart_item['wp_augoose_converted_price_idr'];
+		
+		// Validate price
+		if ( $converted_price > 0 && is_finite( $converted_price ) ) {
+			$quantity = isset( $cart_item['quantity'] ) ? (int) $cart_item['quantity'] : 1;
+			
+			// Validate quantity
+			if ( $quantity > 0 ) {
+				$subtotal = $converted_price * $quantity;
+				
+				// Validate subtotal
+				if ( $subtotal > 0 && is_finite( $subtotal ) ) {
+					$subtotal_html = wc_price( $subtotal );
+				}
+			}
+		}
+	}
+	
+	return $subtotal_html;
 }
 
 /**
