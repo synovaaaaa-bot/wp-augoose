@@ -5074,8 +5074,8 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 		$product_id = $product->get_id();
 		
 		// Get the price that was displayed on product page (already converted by WCML to item_currency)
-		// This is the price user saw when adding to cart (e.g., 80 SGD)
-		// We need to convert this to IDR
+		// WCML sudah otomatis convert ke SGD/MYR di product page (misalnya 80 SGD)
+		// Kita ambil harga yang sudah dikonversi WCML ini
 		$displayed_price = (float) $product->get_price( 'edit' );
 		
 		// Skip if price is 0 or invalid
@@ -5086,14 +5086,62 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 			continue;
 		}
 		
-		// Convert displayed price (in item_currency) to IDR using WCML's method
-		// This ensures consistency with product page prices
-		$price_idr = wp_augoose_convert_price_with_wcml( $displayed_price, $item_currency, 'IDR' );
+		// Get WCML exchange rate untuk convert dari item_currency ke IDR
+		// WCML sudah punya data rate, kita pakai itu
+		global $woocommerce_wpml;
+		$price_idr = null;
 		
-		// If WCML conversion failed, use manual calculation with exchange rate
+		if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
+			$multi_currency = $woocommerce_wpml->multi_currency;
+			
+			// Get rate dari WCML untuk convert item_currency ke IDR
+			try {
+				// Method 1: Try get_currency_rate() - ini method resmi WCML
+				if ( method_exists( $multi_currency, 'get_currency_rate' ) ) {
+					$item_rate = $multi_currency->get_currency_rate( $item_currency );
+					$idr_rate = $multi_currency->get_currency_rate( 'IDR' );
+					
+					if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
+						// Convert: displayed_price (dalam item_currency) ke IDR
+						// Formula: price_idr = displayed_price * (idr_rate / item_rate)
+						$conversion_rate = $idr_rate / $item_rate;
+						$price_idr = $displayed_price * $conversion_rate;
+						
+						if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+							error_log( "WP_Augoose: Using WCML get_currency_rate - {$item_currency} rate: {$item_rate}, IDR rate: {$idr_rate}, conversion_rate: {$conversion_rate}, displayed: {$displayed_price}, converted: {$price_idr}" );
+						}
+					}
+				}
+				
+				// Method 2: Fallback ke get_exchange_rates() jika get_currency_rate tidak ada
+				if ( $price_idr === null && method_exists( $multi_currency, 'get_exchange_rates' ) ) {
+					$exchange_rates = $multi_currency->get_exchange_rates();
+					
+					if ( is_array( $exchange_rates ) && ! empty( $exchange_rates ) ) {
+						$item_rate = isset( $exchange_rates[ $item_currency ] ) ? (float) $exchange_rates[ $item_currency ] : null;
+						$idr_rate = isset( $exchange_rates['IDR'] ) ? (float) $exchange_rates['IDR'] : null;
+						
+						if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
+							$conversion_rate = $idr_rate / $item_rate;
+							$price_idr = $displayed_price * $conversion_rate;
+							
+							if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+								error_log( "WP_Augoose: Using WCML get_exchange_rates - {$item_currency} rate: {$item_rate}, IDR rate: {$idr_rate}, conversion_rate: {$conversion_rate}, displayed: {$displayed_price}, converted: {$price_idr}" );
+							}
+						}
+					}
+				}
+			} catch ( Exception $e ) {
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( 'WP_Augoose: Error getting WCML rate - ' . $e->getMessage() );
+				}
+			}
+		}
+		
+		// Fallback: Jika WCML method gagal, pakai rate yang sudah kita hitung sebelumnya
 		if ( $price_idr === null || $price_idr <= 0 ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( "WP_Augoose: WCML conversion failed for {$item_currency}, using manual calculation" );
+				error_log( "WP_Augoose: WCML rate method failed, using fallback rate for {$item_currency}" );
 			}
 			$price_idr = $displayed_price * $item_exchange_rate;
 		}
