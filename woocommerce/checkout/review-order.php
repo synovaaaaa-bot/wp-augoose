@@ -164,21 +164,53 @@ defined( 'ABSPATH' ) || exit;
 
 		<?php
 		// Display currency conversion notice if items were converted
-		$has_converted_items = false;
+		$show_notice = false;
 		$original_currency = null;
-		if ( function_exists( 'WC' ) && WC()->cart && ! WC()->cart->is_empty() ) {
-			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
-					$has_converted_items = true;
+		$current_currency = get_woocommerce_currency();
+		
+		// Always show notice if current currency is IDR (items were converted)
+		// This ensures note appears even if original currency is not found
+		if ( $current_currency === 'IDR' ) {
+			$show_notice = true;
+			
+			// Try to get original currency from multiple sources
+			if ( function_exists( 'WC' ) && WC()->cart && ! WC()->cart->is_empty() ) {
+				// 1. Check cart items
+				foreach ( WC()->cart->get_cart() as $cart_item ) {
 					if ( isset( $cart_item['wp_augoose_original_currency'] ) ) {
 						$original_currency = $cart_item['wp_augoose_original_currency'];
+						if ( in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
+							break;
+						}
 					}
-					break;
+				}
+			}
+			
+			// 2. Check session
+			if ( ! $original_currency && function_exists( 'WC' ) && WC()->session ) {
+				$original_currency = WC()->session->get( 'wp_augoose_original_currency' );
+			}
+			
+			// 3. Check cookie
+			if ( ! $original_currency && isset( $_COOKIE['wp_augoose_currency'] ) ) {
+				$cookie_currency = strtoupper( trim( sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) ) );
+				if ( in_array( $cookie_currency, array( 'SGD', 'MYR' ), true ) ) {
+					$original_currency = $cookie_currency;
 				}
 			}
 		}
 		
-		if ( $has_converted_items && $original_currency && in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
+		// Always show notice if currency is IDR
+		if ( $show_notice ) {
+			$notice_text = '';
+			if ( $original_currency && in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
+				$notice_text = sprintf(
+					'<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes. Original currency was %s.',
+					esc_html( $original_currency )
+				);
+			} else {
+				$notice_text = '<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes.';
+			}
 			?>
 			<tr class="currency-conversion-notice">
 				<th></th>
@@ -188,7 +220,7 @@ defined( 'ABSPATH' ) || exit;
 							<path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm-1-9h2v4h-2V5zm0 5h2v2H7v-2z"/>
 						</svg>
 						<span>
-							<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes. Original currency was <?php echo esc_html( $original_currency ); ?>.
+							<?php echo wp_kses_post( $notice_text ); ?>
 						</span>
 					</div>
 				</td>
