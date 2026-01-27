@@ -4961,39 +4961,42 @@ function wp_augoose_save_original_currency_to_cart_item( $cart_item_data, $produ
 		$multi_currency = $woocommerce_wpml->multi_currency;
 		
 		try {
-			// Get rate from WCML
-			if ( method_exists( $multi_currency, 'get_currency_rate' ) ) {
-				$item_rate = $multi_currency->get_currency_rate( $client_currency );
-				$idr_rate = $multi_currency->get_currency_rate( 'IDR' );
-				
-				if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
-					// Convert: displayed_price (dalam client_currency) ke IDR
-					$conversion_rate = $idr_rate / $item_rate;
-					$price_idr = $displayed_price * $conversion_rate;
-					$price_idr = round( $price_idr, 2 );
-					
-					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-						error_log( "WP_Augoose: Add to cart - Product #{$product_id}, {$client_currency} {$displayed_price} → IDR {$price_idr} (rate: {$conversion_rate})" );
-					}
-				}
-			}
-			
-			// Fallback to get_exchange_rates()
-			if ( $price_idr === null && method_exists( $multi_currency, 'get_exchange_rates' ) ) {
+			// Get rate from WCML - get_exchange_rates() returns latest rates (updated per hour)
+			// This ensures we always use the most current exchange rates
+			if ( method_exists( $multi_currency, 'get_exchange_rates' ) ) {
 				$exchange_rates = $multi_currency->get_exchange_rates();
 				
 				if ( is_array( $exchange_rates ) && ! empty( $exchange_rates ) ) {
+					// Get rates from exchange_rates array (this is the source of truth from WCML)
 					$item_rate = isset( $exchange_rates[ $client_currency ] ) ? (float) $exchange_rates[ $client_currency ] : null;
 					$idr_rate = isset( $exchange_rates['IDR'] ) ? (float) $exchange_rates['IDR'] : null;
 					
 					if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
+						// Convert: displayed_price (dalam client_currency) ke IDR
+						// Formula: price_idr = displayed_price * (idr_rate / item_rate)
 						$conversion_rate = $idr_rate / $item_rate;
 						$price_idr = $displayed_price * $conversion_rate;
 						$price_idr = round( $price_idr, 2 );
 						
 						if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-							error_log( "WP_Augoose: Add to cart (fallback) - Product #{$product_id}, {$client_currency} {$displayed_price} → IDR {$price_idr} (rate: {$conversion_rate})" );
+							error_log( "WP_Augoose: Add to cart - Product #{$product_id}, {$client_currency} {$displayed_price} → IDR {$price_idr} (item_rate: {$item_rate}, idr_rate: {$idr_rate}, conversion_rate: {$conversion_rate})" );
 						}
+					}
+				}
+			}
+			
+			// Fallback to get_currency_rate() if get_exchange_rates() not available
+			if ( $price_idr === null && method_exists( $multi_currency, 'get_currency_rate' ) ) {
+				$item_rate = $multi_currency->get_currency_rate( $client_currency );
+				$idr_rate = $multi_currency->get_currency_rate( 'IDR' );
+				
+				if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
+					$conversion_rate = $idr_rate / $item_rate;
+					$price_idr = $displayed_price * $conversion_rate;
+					$price_idr = round( $price_idr, 2 );
+					
+					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+						error_log( "WP_Augoose: Add to cart (fallback) - Product #{$product_id}, {$client_currency} {$displayed_price} → IDR {$price_idr} (rate: {$conversion_rate})" );
 					}
 				}
 			}
@@ -5195,7 +5198,32 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 			$multi_currency = $woocommerce_wpml->multi_currency;
 			
 			try {
-				if ( method_exists( $multi_currency, 'get_currency_rate' ) ) {
+				// Get rate from WCML - get_exchange_rates() returns latest rates (updated per hour)
+				// This ensures we always use the most current exchange rates
+				if ( method_exists( $multi_currency, 'get_exchange_rates' ) ) {
+					$exchange_rates = $multi_currency->get_exchange_rates();
+					
+					if ( is_array( $exchange_rates ) && ! empty( $exchange_rates ) ) {
+						// Get rates from exchange_rates array (this is the source of truth from WCML)
+						$item_rate = isset( $exchange_rates[ $item_currency ] ) ? (float) $exchange_rates[ $item_currency ] : null;
+						$idr_rate = isset( $exchange_rates['IDR'] ) ? (float) $exchange_rates['IDR'] : null;
+						
+						if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
+							// Convert: displayed_price (dalam item_currency) ke IDR
+							// Formula: price_idr = displayed_price * (idr_rate / item_rate)
+							$conversion_rate = $idr_rate / $item_rate;
+							$price_idr = $displayed_price * $conversion_rate;
+							$price_idr = round( $price_idr, 2 );
+							
+							if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+								error_log( "WP_Augoose: Cart conversion - {$item_currency} {$displayed_price} → IDR {$price_idr} (item_rate: {$item_rate}, idr_rate: {$idr_rate}, conversion_rate: {$conversion_rate})" );
+							}
+						}
+					}
+				}
+				
+				// Fallback to get_currency_rate() if get_exchange_rates() not available
+				if ( $price_idr === null && method_exists( $multi_currency, 'get_currency_rate' ) ) {
 					$item_rate = $multi_currency->get_currency_rate( $item_currency );
 					$idr_rate = $multi_currency->get_currency_rate( 'IDR' );
 					
@@ -5203,19 +5231,9 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 						$conversion_rate = $idr_rate / $item_rate;
 						$price_idr = $displayed_price * $conversion_rate;
 						$price_idr = round( $price_idr, 2 );
-					}
-				}
-				
-				if ( $price_idr === null && method_exists( $multi_currency, 'get_exchange_rates' ) ) {
-					$exchange_rates = $multi_currency->get_exchange_rates();
-					if ( is_array( $exchange_rates ) && ! empty( $exchange_rates ) ) {
-						$item_rate = isset( $exchange_rates[ $item_currency ] ) ? (float) $exchange_rates[ $item_currency ] : null;
-						$idr_rate = isset( $exchange_rates['IDR'] ) ? (float) $exchange_rates['IDR'] : null;
 						
-						if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
-							$conversion_rate = $idr_rate / $item_rate;
-							$price_idr = $displayed_price * $conversion_rate;
-							$price_idr = round( $price_idr, 2 );
+						if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+							error_log( "WP_Augoose: Cart conversion (fallback) - {$item_currency} {$displayed_price} → IDR {$price_idr} (rate: {$conversion_rate})" );
 						}
 					}
 				}
@@ -5286,7 +5304,8 @@ function wp_augoose_use_converted_cart_item_price( $price_html, $cart_item, $car
 		
 		// Validate price
 		if ( $converted_price > 0 && is_finite( $converted_price ) ) {
-			$price_html = wc_price( $converted_price );
+			// Force IDR currency when displaying converted price
+			$price_html = wc_price( $converted_price, array( 'currency' => 'IDR' ) );
 		}
 	}
 	
@@ -5317,7 +5336,8 @@ function wp_augoose_use_converted_cart_item_subtotal( $subtotal_html, $cart_item
 				
 				// Validate subtotal
 				if ( $subtotal > 0 && is_finite( $subtotal ) ) {
-					$subtotal_html = wc_price( $subtotal );
+					// Force IDR currency when displaying converted subtotal
+					$subtotal_html = wc_price( $subtotal, array( 'currency' => 'IDR' ) );
 				}
 			}
 		}
