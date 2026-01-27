@@ -157,15 +157,8 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
                                 <?php do_action( 'woocommerce_checkout_before_terms_and_conditions' ); ?>
                                 
                                 <?php
-                                // Terms and conditions
-                                $terms_page_id = wc_terms_and_conditions_page_id();
-                                if ( $terms_page_id && apply_filters( 'woocommerce_checkout_show_terms', true ) ) {
-                                    $terms = get_post( $terms_page_id );
-                                    $terms_content = has_shortcode( $terms->post_content, 'woocommerce_checkout' ) ? $terms->post_content : '';
-                                    if ( $terms_content ) {
-                                        echo '<div class="woocommerce-terms-and-conditions-wrapper" style="display:none; max-height:200px; overflow:auto;">' . wp_kses_post( $terms_content ) . '</div>';
-                                    }
-                                }
+                                // Terms and conditions - use WooCommerce template
+                                wc_get_template( 'checkout/terms.php' );
                                 ?>
                                 
                                 <?php do_action( 'woocommerce_checkout_after_terms_and_conditions' ); ?>
