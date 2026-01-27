@@ -122,6 +122,34 @@ do_action( 'woocommerce_before_cart' ); ?>
 
             <!-- Cart Totals -->
             <div class="cart-totals-simple">
+                <?php
+                // Display currency conversion notice if items were converted
+                $has_converted_items = false;
+                $original_currency = null;
+                foreach ( WC()->cart->get_cart() as $cart_item ) {
+                    if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
+                        $has_converted_items = true;
+                        if ( isset( $cart_item['wp_augoose_original_currency'] ) ) {
+                            $original_currency = $cart_item['wp_augoose_original_currency'];
+                        }
+                        break;
+                    }
+                }
+                
+                if ( $has_converted_items && $original_currency && in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
+                    ?>
+                    <div class="cart-currency-conversion-notice">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm-1-9h2v4h-2V5zm0 5h2v2H7v-2z"/>
+                        </svg>
+                        <span>
+                            <strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout. Original currency was <?php echo esc_html( $original_currency ); ?>.
+                        </span>
+                    </div>
+                    <?php
+                }
+                ?>
+                
                 <div class="cart-total-row">
                     <span class="total-label">Total</span>
                     <span class="total-amount"><?php wc_cart_totals_order_total_html(); ?></span>
