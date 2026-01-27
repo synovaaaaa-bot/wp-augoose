@@ -3395,42 +3395,30 @@ function wp_augoose_hide_newsletter_checkbox() {
  */
 add_action( 'woocommerce_review_order_before_submit', 'wp_augoose_add_terms_checkbox', 10 );
 function wp_augoose_add_terms_checkbox() {
-	// Get Terms page URL - try multiple methods
-	$terms_url = '';
-	
-	// Method 1: WooCommerce Terms page setting
-	$terms_page_id = wc_get_page_id( 'terms' );
-	if ( $terms_page_id ) {
-		$terms_url = get_permalink( $terms_page_id );
-	}
-	
-	// Method 2: Try to find page by slug
-	if ( empty( $terms_url ) ) {
-		$terms_page = get_page_by_path( 'terms-of-service' );
-		if ( $terms_page ) {
-			$terms_url = get_permalink( $terms_page->ID );
+	// Get Terms page URL - use same method as footer.php
+	$page_url = static function ( $slug ) {
+		$p = get_page_by_path( (string) $slug );
+		if ( $p instanceof WP_Post ) {
+			$url = get_permalink( $p );
+			if ( $url ) {
+				return $url;
+			}
 		}
-	}
+		return '#';
+	};
 	
-	// Method 3: Try alternative slug
-	if ( empty( $terms_url ) ) {
-		$terms_page = get_page_by_path( 'terms' );
-		if ( $terms_page ) {
-			$terms_url = get_permalink( $terms_page->ID );
-		}
-	}
+	$terms_url = $page_url( 'terms-of-service' );
 	
-	// Fallback to fixed URL
-	if ( empty( $terms_url ) ) {
-		$terms_url = home_url( '/terms-of-service/' );
-	}
+	// Get Privacy Policy URL
+	$privacy_page_id = get_option( 'wp_page_for_privacy_policy' );
+	$privacy_url = $privacy_page_id ? get_permalink( $privacy_page_id ) : '#';
 	
 	?>
 	<p class="form-row validate-required terms-checkbox-custom" id="terms_checkbox_field">
 		<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
 			<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms_custom" id="terms_custom" value="1" <?php checked( isset( $_POST['terms_custom'] ), true ); ?> />
 			<span class="woocommerce-form__label-text">
-				Agree for <a href="<?php echo esc_url( $terms_url ); ?>" target="_blank">Terms & Conditions</a>
+				I have read and agree to the <a href="<?php echo esc_url( $terms_url ); ?>" target="_blank">Terms of Service</a> and <a href="<?php echo esc_url( $privacy_url ); ?>" target="_blank">Privacy Policy</a>.
 			</span>
 			<span class="required">*</span>
 		</label>
@@ -3694,10 +3682,13 @@ function wp_augoose_fix_doku_checkout_errors() {
 	}
 }
 
+/**
+ * Validate Terms Checkbox
+ */
 add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_terms_checkbox' );
 function wp_augoose_validate_terms_checkbox() {
 	if ( empty( $_POST['terms_custom'] ) ) {
-		wc_add_notice( 'Please confirm that you have read the Terms of Service.', 'error' );
+		wc_add_notice( 'Please confirm that you have read and agree to the Terms of Service and Privacy Policy.', 'error' );
 	}
 }
 

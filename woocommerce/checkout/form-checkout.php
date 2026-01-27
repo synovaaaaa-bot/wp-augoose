@@ -162,30 +162,6 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
                                     <?php echo esc_html( $order_button_text ); ?>
                                 </button>
                                 
-                                <?php
-                                // Terms of Service link (below Place Order button)
-                                // Use same method as footer.php
-                                $page_url = static function ( $slug ) {
-                                    $p = get_page_by_path( (string) $slug );
-                                    if ( $p instanceof WP_Post ) {
-                                        $url = get_permalink( $p );
-                                        if ( $url ) {
-                                            return $url;
-                                        }
-                                    }
-                                    return '#';
-                                };
-                                $terms_url = $page_url( 'terms-of-service' );
-                                
-                                // Display link (always show, even if URL is #)
-                                ?>
-                                <p class="checkout-terms-link">
-                                    <a href="<?php echo esc_url( $terms_url ); ?>" target="_blank" class="terms-of-service-link">
-                                        Terms of Service
-                                    </a>
-                                </p>
-                                <?php
-                                ?>
                                 
                                 <p class="checkout-security-note">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
