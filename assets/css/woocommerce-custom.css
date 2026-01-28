@@ -5099,7 +5099,57 @@ body.size-guide-open {
     font-weight: 600;
 }
 
-/* Cart Page Currency Conversion Notice */
+/* Cart Page Currency Conversion Notice - Using New Clean Design */
+.cart-page-simple .wp-augoose-currency-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-top: 16px;
+    margin-bottom: 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #0073aa;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.cart-page-simple .wp-augoose-currency-notice:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    border-left-color: #005a87;
+}
+
+.cart-page-simple .wp-augoose-currency-notice-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    color: #0073aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-page-simple .wp-augoose-currency-notice-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.cart-page-simple .wp-augoose-currency-notice-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.cart-page-simple .wp-augoose-currency-notice-text strong {
+    color: #0073aa;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Legacy support - keep old classes for backward compatibility */
 .cart-page-simple .cart-currency-conversion-notice {
     display: flex;
     align-items: flex-start;
@@ -5159,7 +5209,64 @@ body.size-guide-open {
     font-weight: 500;
 }
 
-/* Checkout Currency Conversion Notice */
+/* Checkout Currency Conversion Notice - New Clean Design */
+.wp-augoose-currency-notice-row {
+    border-top: 1px solid #e0e0e0;
+}
+
+.wp-augoose-currency-notice-cell {
+    padding: 16px 0 !important;
+    border: none !important;
+}
+
+.wp-augoose-currency-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e0e0e0;
+    border-left: 4px solid #0073aa;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.wp-augoose-currency-notice:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    border-left-color: #005a87;
+}
+
+.wp-augoose-currency-notice-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    color: #0073aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wp-augoose-currency-notice-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.wp-augoose-currency-notice-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.wp-augoose-currency-notice-text strong {
+    color: #0073aa;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Legacy support - keep old classes for backward compatibility */
 .woocommerce-checkout-review-order-table .currency-conversion-notice {
     background-color: transparent;
 }
@@ -5193,7 +5300,33 @@ body.size-guide-open {
     font-weight: 600;
 }
 
+/* Responsive Design for Currency Notice */
 @media (max-width: 768px) {
+    .wp-augoose-currency-notice {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+    
+    .wp-augoose-currency-notice-icon {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .wp-augoose-currency-notice-text {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+    
+    .wp-augoose-currency-notice-text strong {
+        font-size: 12px;
+    }
+    
+    .cart-page-simple .wp-augoose-currency-notice {
+        margin-top: 12px;
+        padding: 12px 14px;
+    }
+    
+    /* Legacy support */
     .currency-conversion-info {
         font-size: 11px;
         padding: 10px 12px;

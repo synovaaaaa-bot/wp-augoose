@@ -177,13 +177,16 @@ do_action( 'woocommerce_before_cart' ); ?>
                         $notice_text = '<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes.';
                     }
                     ?>
-                    <div class="cart-currency-conversion-notice">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                            <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zm-1-9h2v4h-2V5zm0 5h2v2H7v-2z"/>
-                        </svg>
-                        <span>
+                    <div class="wp-augoose-currency-notice">
+                        <div class="wp-augoose-currency-notice-icon">
+                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                <path d="M9 6V9M9 12H9.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="wp-augoose-currency-notice-text">
                             <?php echo wp_kses_post( $notice_text ); ?>
-                        </span>
+                        </div>
                     </div>
                     <?php
                 }
