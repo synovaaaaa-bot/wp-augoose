@@ -165,31 +165,7 @@ do_action( 'woocommerce_before_cart' ); ?>
                     }
                 }
                 
-                // Always show notice if currency is IDR - place after total
-                if ( $show_notice ) {
-                    $notice_text = '';
-                    if ( $original_currency && in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
-                        $notice_text = sprintf(
-                            '<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes. Original currency was %s.',
-                            esc_html( $original_currency )
-                        );
-                    } else {
-                        $notice_text = '<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes.';
-                    }
-                    ?>
-                    <div class="wp-augoose-currency-notice">
-                        <div class="wp-augoose-currency-notice-icon">
-                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
-                                <path d="M9 6V9M9 12H9.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <div class="wp-augoose-currency-notice-text">
-                            <?php echo wp_kses_post( $notice_text ); ?>
-                        </div>
-                    </div>
-                    <?php
-                }
+                // (Currency conversion notice for cart removed as per latest requirement.)
                 ?>
                 
                 <!-- Loading indicator for currency conversion -->

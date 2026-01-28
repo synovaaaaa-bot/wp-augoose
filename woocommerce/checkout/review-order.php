@@ -163,72 +163,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php do_action( 'woocommerce_review_order_after_order_total' ); ?>
 
 		<?php
-		// Display currency conversion notice if items were converted
-		$show_notice = false;
-		$original_currency = null;
-		$current_currency = get_woocommerce_currency();
-		
-		// Always show notice if current currency is IDR (items were converted)
-		// This ensures note appears even if original currency is not found
-		if ( $current_currency === 'IDR' ) {
-			$show_notice = true;
-			
-			// Try to get original currency from multiple sources
-			if ( function_exists( 'WC' ) && WC()->cart && ! WC()->cart->is_empty() ) {
-				// 1. Check cart items
-				foreach ( WC()->cart->get_cart() as $cart_item ) {
-					if ( isset( $cart_item['wp_augoose_original_currency'] ) ) {
-						$original_currency = $cart_item['wp_augoose_original_currency'];
-						if ( in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
-							break;
-						}
-					}
-				}
-			}
-			
-			// 2. Check session
-			if ( ! $original_currency && function_exists( 'WC' ) && WC()->session ) {
-				$original_currency = WC()->session->get( 'wp_augoose_original_currency' );
-			}
-			
-			// 3. Check cookie
-			if ( ! $original_currency && isset( $_COOKIE['wp_augoose_currency'] ) ) {
-				$cookie_currency = strtoupper( trim( sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) ) );
-				if ( in_array( $cookie_currency, array( 'SGD', 'MYR' ), true ) ) {
-					$original_currency = $cookie_currency;
-				}
-			}
-		}
-		
-		// Always show notice if currency is IDR
-		if ( $show_notice ) {
-			$notice_text = '';
-			if ( $original_currency && in_array( $original_currency, array( 'SGD', 'MYR' ), true ) ) {
-				$notice_text = sprintf(
-					'<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes. Original currency was %s.',
-					esc_html( $original_currency )
-				);
-			} else {
-				$notice_text = '<strong>Price converted:</strong> All prices shown above have been converted to IDR (Indonesian Rupiah) for checkout purposes.';
-			}
-			?>
-			<tr class="wp-augoose-currency-notice-row">
-				<td colspan="2" class="wp-augoose-currency-notice-cell">
-					<div class="wp-augoose-currency-notice">
-						<div class="wp-augoose-currency-notice-icon">
-							<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.5" fill="none"/>
-								<path d="M9 6V9M9 12H9.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-							</svg>
-						</div>
-						<div class="wp-augoose-currency-notice-text">
-							<?php echo wp_kses_post( $notice_text ); ?>
-						</div>
-					</div>
-				</td>
-			</tr>
-			<?php
-		}
+		// Currency conversion notice row removed as per latest requirement.
 		?>
 
 	</tfoot>
