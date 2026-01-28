@@ -116,7 +116,30 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
         <div class="cart-sidebar-footer">
             <div class="cart-sidebar-total">
                 <span class="cart-sidebar-total-label">Total</span>
-                <span class="cart-sidebar-total-amount"><?php wc_cart_totals_order_total_html(); ?></span>
+				<span class="cart-sidebar-total-amount">
+					<?php
+					// Ensure mini-cart total is shown in IDR when items are converted
+					$current_currency = get_woocommerce_currency();
+					$force_idr        = ( 'IDR' === $current_currency );
+
+					if ( ! $force_idr && function_exists( 'WC' ) && WC()->cart ) {
+						foreach ( WC()->cart->get_cart() as $cart_item ) {
+							if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && true === $cart_item['wp_augoose_converted_to_idr'] ) {
+								$force_idr = true;
+								break;
+							}
+						}
+					}
+
+					if ( $force_idr && function_exists( 'WC' ) && WC()->cart ) {
+						$total_raw = WC()->cart->get_total( 'edit' );
+						echo wc_price( $total_raw, array( 'currency' => 'IDR' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					} else {
+						// Fallback to WooCommerce default rendering (e.g. USD for PayPal flow)
+						wc_cart_totals_order_total_html();
+					}
+					?>
+				</span>
             </div>
             
             <div class="cart-sidebar-buttons">
