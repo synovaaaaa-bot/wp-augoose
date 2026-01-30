@@ -3198,7 +3198,11 @@ body.woocommerce-checkout #secondary,
 body.woocommerce-page.woocommerce-checkout #secondary,
 body.woocommerce-page.woocommerce-cart #secondary,
 body.page-template-page-checkout #secondary,
-body.page-template-page-cart #secondary {
+body.page-template-page-cart #secondary,
+body.woocommerce-shop #secondary,
+body.post-type-archive-product #secondary,
+body.tax-product_cat #secondary,
+body.tax-product_tag #secondary {
     display: none !important;
 }
 
