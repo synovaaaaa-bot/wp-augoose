@@ -1549,13 +1549,104 @@ function wp_augoose_product_add_to_cart_message_english( $text, $product ) {
  * Force ALL WooCommerce notices (error, success, info) to English
  * This ensures no Indonesian text appears in notifications
  */
-add_filter( 'woocommerce_add_error', 'wp_augoose_force_notice_english', 20, 1 );
-add_filter( 'woocommerce_add_success', 'wp_augoose_force_notice_english', 20, 1 );
-add_filter( 'woocommerce_add_info', 'wp_augoose_force_notice_english', 20, 1 );
-add_filter( 'woocommerce_add_notice', 'wp_augoose_force_notice_english', 20, 1 );
+add_filter( 'woocommerce_add_error', 'wp_augoose_force_notice_english', 1, 1 );
+add_filter( 'woocommerce_add_success', 'wp_augoose_force_notice_english', 1, 1 );
+add_filter( 'woocommerce_add_info', 'wp_augoose_force_notice_english', 1, 1 );
+add_filter( 'woocommerce_add_notice', 'wp_augoose_force_notice_english', 1, 1 );
+add_filter( 'woocommerce_add_message', 'wp_augoose_force_notice_english', 1, 1 );
 function wp_augoose_force_notice_english( $message ) {
 	if ( empty( $message ) ) {
 		return $message;
+	}
+	
+	// Remove HTML tags for processing
+	$clean_message = wp_strip_all_tags( $message );
+	$clean_message = trim( $clean_message );
+	
+	// Pattern 1: "Penagihan [Field] harus diisi." or "Pengiriman [Field] harus diisi."
+	// This pattern captures fields with special characters like "State / County", "Postcode / ZIP", etc.
+	if ( preg_match( '/^(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi\.?$/i', $clean_message, $matches ) ) {
+		$type = trim( $matches[1] );
+		$field = trim( $matches[2] );
+		
+		// Convert type to English
+		if ( stripos( $type, 'Penagihan' ) !== false || stripos( $type, 'penagihan' ) !== false ) {
+			$type = 'Billing';
+		} elseif ( stripos( $type, 'Pengiriman' ) !== false || stripos( $type, 'pengiriman' ) !== false ) {
+			$type = 'Shipping';
+		}
+		
+		// Reconstruct message with HTML if original had it
+		if ( strpos( $message, '<strong>' ) !== false ) {
+			return sprintf( '<strong>%s %s</strong> is required.', $type, $field );
+		} else {
+			return sprintf( '%s %s is required.', $type, $field );
+		}
+	}
+	
+	// Pattern 2: More flexible - match any message containing "Penagihan/Pengiriman" + field + "harus diisi"
+	// This pattern captures fields with special characters like "State / County"
+	if ( preg_match( '/(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi/i', $clean_message, $matches ) ) {
+		$type = trim( $matches[1] );
+		$field = trim( $matches[2] );
+		
+		// Convert type to English
+		if ( stripos( $type, 'Penagihan' ) !== false || stripos( $type, 'penagihan' ) !== false ) {
+			$type = 'Billing';
+		} elseif ( stripos( $type, 'Pengiriman' ) !== false || stripos( $type, 'pengiriman' ) !== false ) {
+			$type = 'Shipping';
+		}
+		
+		// Reconstruct message with HTML if original had it
+		if ( strpos( $message, '<strong>' ) !== false ) {
+			return sprintf( '<strong>%s %s</strong> is required.', $type, $field );
+		} else {
+			return sprintf( '%s %s is required.', $type, $field );
+		}
+	}
+	
+	// Pattern 3: Direct string replacement for "harus diisi" (ALWAYS run FIRST)
+	// This ensures we catch all variations even if regex doesn't match
+	// CRITICAL: This must run FIRST to catch all cases including fields with special characters
+	// Check for Indonesian text in the message (both with and without HTML)
+	if ( stripos( $message, 'Penagihan' ) !== false || 
+	     stripos( $message, 'Pengiriman' ) !== false || 
+	     stripos( $message, 'harus diisi' ) !== false ||
+	     stripos( $clean_message, 'Penagihan' ) !== false || 
+	     stripos( $clean_message, 'Pengiriman' ) !== false || 
+	     stripos( $clean_message, 'harus diisi' ) !== false ) {
+		
+		// Replace "Penagihan" with "Billing" and "Pengiriman" with "Shipping"
+		$message = str_ireplace( 'Penagihan', 'Billing', $message );
+		$message = str_ireplace( 'Pengiriman', 'Shipping', $message );
+		
+		// Replace "harus diisi" with "is required" (all variations)
+		$message = str_ireplace( 'harus diisi', 'is required', $message );
+		$message = str_ireplace( 'Harus diisi', 'Is required', $message );
+		$message = str_ireplace( 'HARUS DIISI', 'IS REQUIRED', $message );
+		$message = str_ireplace( 'harus diisi.', 'is required.', $message );
+		$message = str_ireplace( 'Harus diisi.', 'Is required.', $message );
+		$message = str_ireplace( 'HARUS DIISI.', 'IS REQUIRED.', $message );
+		$message = str_ireplace( 'harus diisi', 'is required', $message );
+		
+		// Return immediately after replacement
+		return $message;
+	}
+	
+	// Pattern 4: "[Field] harus diisi." (without prefix)
+	if ( preg_match( '/^(.+?)\s+harus\s+diisi\.?$/i', $clean_message, $matches ) && 
+	     stripos( $clean_message, 'Penagihan' ) === false && 
+	     stripos( $clean_message, 'Pengiriman' ) === false &&
+	     stripos( $clean_message, 'Billing' ) === false &&
+	     stripos( $clean_message, 'Shipping' ) === false ) {
+		$field = trim( $matches[1] );
+		
+		// Reconstruct message with HTML if original had it
+		if ( strpos( $message, '<strong>' ) !== false ) {
+			return sprintf( '<strong>%s</strong> is required.', $field );
+		} else {
+			return sprintf( '%s is required.', $field );
+		}
 	}
 	
 	// Common Indonesian to English translations for notices
@@ -1642,9 +1733,45 @@ function wp_augoose_force_notice_english( $message ) {
 		'gagal' => 'failed',
 		'Berhasil' => 'Success',
 		'berhasil' => 'success',
+		// Additional checkout validation errors
+		'harus diisi' => 'is required',
+		'Harus diisi' => 'Is required',
+		'HARUS DIISI' => 'IS REQUIRED',
+		'harus diisi.' => 'is required.',
+		'Harus diisi.' => 'Is required.',
+		'HARUS DIISI.' => 'IS REQUIRED.',
+		'Penagihan' => 'Billing',
+		'penagihan' => 'Billing',
+		'PENAGIHAN' => 'BILLING',
+		'Pengiriman' => 'Shipping',
+		'pengiriman' => 'Shipping',
+		'PENGIRIMAN' => 'SHIPPING',
 	);
 	
 	$message = str_replace( array_keys( $replacements ), array_values( $replacements ), $message );
+	
+	// Final check: if message still contains Indonesian text, do aggressive replacement
+	if ( stripos( $message, 'Penagihan' ) !== false || 
+	     stripos( $message, 'Pengiriman' ) !== false || 
+	     stripos( $message, 'harus diisi' ) !== false ||
+	     stripos( $message, 'dihapus' ) !== false ||
+	     stripos( $message, 'keranjang' ) !== false ||
+	     stripos( $message, 'produk' ) !== false ||
+	     stripos( $message, 'Maaf' ) !== false ||
+	     stripos( $message, 'Silakan' ) !== false ||
+	     stripos( $message, 'Mohon' ) !== false ) {
+		
+		// Aggressive replacement for any remaining Indonesian text
+		$message = str_ireplace( 'Penagihan', 'Billing', $message );
+		$message = str_ireplace( 'Pengiriman', 'Shipping', $message );
+		$message = str_ireplace( 'harus diisi', 'is required', $message );
+		$message = str_ireplace( 'dihapus', 'removed', $message );
+		$message = str_ireplace( 'keranjang', 'cart', $message );
+		$message = str_ireplace( 'produk', 'product', $message );
+		$message = str_ireplace( 'Maaf', 'Sorry', $message );
+		$message = str_ireplace( 'Silakan', 'Please', $message );
+		$message = str_ireplace( 'Mohon', 'Please', $message );
+	}
 	
 	return $message;
 }
@@ -4566,6 +4693,54 @@ function wp_augoose_translate_shipping_message( $message ) {
 }
 
 /**
+ * Translate checkout required field notice
+ * This filter catches the error message before it's displayed
+ * CRITICAL: This runs with high priority (1) to catch messages before other filters
+ */
+add_filter( 'woocommerce_checkout_required_field_notice', 'wp_augoose_translate_required_field_notice', 1, 3 );
+function wp_augoose_translate_required_field_notice( $notice, $field_label, $field_key ) {
+	if ( empty( $notice ) ) {
+		return $notice;
+	}
+	
+	// Remove HTML tags for processing
+	$clean_notice = wp_strip_all_tags( $notice );
+	$clean_notice = trim( $clean_notice );
+	
+	// Check if notice contains Indonesian text (both with and without HTML)
+	if ( stripos( $clean_notice, 'Penagihan' ) !== false || 
+	     stripos( $clean_notice, 'Pengiriman' ) !== false || 
+	     stripos( $clean_notice, 'harus diisi' ) !== false ||
+	     stripos( $notice, 'Penagihan' ) !== false || 
+	     stripos( $notice, 'Pengiriman' ) !== false || 
+	     stripos( $notice, 'harus diisi' ) !== false ) {
+		
+		// Determine if it's billing or shipping
+		$type = 'Billing';
+		if ( stripos( $field_key, 'shipping' ) !== false || stripos( $clean_notice, 'Pengiriman' ) !== false ) {
+			$type = 'Shipping';
+		} elseif ( stripos( $clean_notice, 'Penagihan' ) !== false ) {
+			$type = 'Billing';
+		}
+		
+		// Extract field name from notice
+		$field_name = $field_label;
+		if ( preg_match( '/(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi/i', $clean_notice, $matches ) ) {
+			$field_name = trim( $matches[2] );
+		}
+		
+		// Reconstruct notice with HTML if original had it
+		if ( strpos( $notice, '<strong>' ) !== false ) {
+			return sprintf( '<strong>%s %s</strong> is required.', $type, $field_name );
+		} else {
+			return sprintf( '%s %s is required.', $type, $field_name );
+		}
+	}
+	
+	return $notice;
+}
+
+/**
  * CRITICAL: Fix DOKU Payment plugin errors BEFORE checkout AJAX
  * This must run early to prevent DOKU plugin from outputting HTML/warnings
  */
@@ -5202,13 +5377,51 @@ function wp_augoose_translate_order_actions( $actions, $order ) {
 
 /**
  * Translate all WooCommerce notices including error messages
+ * This runs with priority 5 as a backup to catch any messages that might have been missed
  */
-add_filter( 'woocommerce_add_error', 'wp_augoose_translate_all_notices', 10, 1 );
-add_filter( 'woocommerce_add_success', 'wp_augoose_translate_all_notices', 10, 1 );
-add_filter( 'woocommerce_add_info', 'wp_augoose_translate_all_notices', 10, 1 );
-add_filter( 'woocommerce_add_notice', 'wp_augoose_translate_all_notices', 10, 1 );
+add_filter( 'woocommerce_add_error', 'wp_augoose_translate_all_notices', 5, 1 );
+add_filter( 'woocommerce_add_success', 'wp_augoose_translate_all_notices', 5, 1 );
+add_filter( 'woocommerce_add_info', 'wp_augoose_translate_all_notices', 5, 1 );
+add_filter( 'woocommerce_add_notice', 'wp_augoose_translate_all_notices', 5, 1 );
+add_filter( 'woocommerce_add_message', 'wp_augoose_translate_all_notices', 5, 1 );
 function wp_augoose_translate_all_notices( $message ) {
 	if ( empty( $message ) ) {
+		return $message;
+	}
+	
+	// Remove HTML tags for processing
+	$clean_message = wp_strip_all_tags( $message );
+	$clean_message = trim( $clean_message );
+	
+	// Pattern matching for "Penagihan/Pengiriman ... harus diisi"
+	if ( preg_match( '/(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi/i', $clean_message, $matches ) ) {
+		$type = trim( $matches[1] );
+		$field = trim( $matches[2] );
+		
+		// Convert type to English
+		if ( stripos( $type, 'Penagihan' ) !== false || stripos( $type, 'penagihan' ) !== false ) {
+			$type = 'Billing';
+		} elseif ( stripos( $type, 'Pengiriman' ) !== false || stripos( $type, 'pengiriman' ) !== false ) {
+			$type = 'Shipping';
+		}
+		
+		// Reconstruct message with HTML if original had it
+		if ( strpos( $message, '<strong>' ) !== false ) {
+			return sprintf( '<strong>%s %s</strong> is required.', $type, $field );
+		} else {
+			return sprintf( '%s %s is required.', $type, $field );
+		}
+	}
+	
+	// Additional check: direct string replacement for any remaining Indonesian text
+	if ( stripos( $message, 'Penagihan' ) !== false || 
+	     stripos( $message, 'Pengiriman' ) !== false || 
+	     stripos( $message, 'harus diisi' ) !== false ) {
+		$message = str_ireplace( 'Penagihan', 'Billing', $message );
+		$message = str_ireplace( 'Pengiriman', 'Shipping', $message );
+		$message = str_ireplace( 'harus diisi', 'is required', $message );
+		$message = str_ireplace( 'Harus diisi', 'Is required', $message );
+		$message = str_ireplace( 'HARUS DIISI', 'IS REQUIRED', $message );
 		return $message;
 	}
 	
