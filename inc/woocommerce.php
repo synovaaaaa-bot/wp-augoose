@@ -1773,14 +1773,18 @@ function wp_augoose_checkout_fields_english( $fields ) {
 		}
 	}
 	
-	// Process order fields
+	// Remove order notes field (order_comments) - per user request
 	if ( isset( $fields['order'] ) && isset( $fields['order']['order_comments'] ) ) {
-		$fields['order']['order_comments']['label'] = 'Order notes';
-		$fields['order']['order_comments']['placeholder'] = 'Notes about your order, e.g. special notes for delivery.';
+		unset( $fields['order']['order_comments'] );
 	}
 	
 	return $fields;
 }
+
+/**
+ * Disable order notes field in checkout
+ */
+add_filter( 'woocommerce_enable_order_notes_field', '__return_false', 20 );
 
 /**
  * Limit allowed countries to specific list only
@@ -2215,6 +2219,20 @@ function wp_augoose_form_field_english( $args, $key, $value ) {
 		}
 		if ( ! isset( $args['placeholder'] ) || empty( $args['placeholder'] ) ) {
 			$args['placeholder'] = 'Select a country / region...';
+		}
+		
+		// Force data-placeholder attribute to English for Select2
+		if ( isset( $args['custom_attributes'] ) && is_array( $args['custom_attributes'] ) ) {
+			if ( isset( $args['custom_attributes']['data-placeholder'] ) ) {
+				$data_placeholder = $args['custom_attributes']['data-placeholder'];
+				if ( strpos( $data_placeholder, 'Pilih negara' ) !== false || strpos( $data_placeholder, 'pilih negara' ) !== false || strpos( $data_placeholder, 'wilayah' ) !== false ) {
+					$args['custom_attributes']['data-placeholder'] = 'Select a country / region...';
+				}
+			} else {
+				$args['custom_attributes']['data-placeholder'] = 'Select a country / region...';
+			}
+		} else {
+			$args['custom_attributes'] = array( 'data-placeholder' => 'Select a country / region...' );
 		}
 	}
 	return $args;

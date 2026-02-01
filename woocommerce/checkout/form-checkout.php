@@ -94,23 +94,8 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
                             </div>
 
                             <?php
-                            // Additional information (order notes) - render in its own section (NOT inside shipping).
-                            $order_fields = $checkout->get_checkout_fields( 'order' );
-                            if ( ! empty( $order_fields ) && apply_filters( 'woocommerce_enable_order_notes_field', true ) ) :
-                                ?>
-                                <div class="checkout-section checkout-section--additional">
-                                    <h2 class="section-title">ADDITIONAL INFORMATION</h2>
-                                    <div class="section-fields">
-                                        <?php do_action( 'woocommerce_before_order_notes', $checkout ); ?>
-                                        <?php
-                                        foreach ( $order_fields as $key => $field ) {
-                                            woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
-                                        }
-                                        ?>
-                                        <?php do_action( 'woocommerce_after_order_notes', $checkout ); ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
+                            // Additional information (order notes) - REMOVED per user request
+                            ?>
 
                             <?php /* Shipping method section intentionally hidden (no customer choice). */ ?>
 

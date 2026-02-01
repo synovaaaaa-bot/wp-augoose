@@ -1275,24 +1275,249 @@
                 }
             });
             
-            // Force country names in dropdowns
-            $('select[name*="country"] option').each(function() {
-                var text = $(this).text();
-                var countryMap = {
-                    'Amerika Serikat': 'United States',
-                    'Singapura': 'Singapore',
-                    'Jepang': 'Japan',
-                    'Korea Selatan': 'South Korea',
-                    'Cina': 'China',
-                    'Filipina': 'Philippines',
-                    'Inggris': 'United Kingdom',
-                    'Inggris Raya': 'United Kingdom'
-                };
-                if (countryMap[text]) {
-                    $(this).text(countryMap[text]);
+        // Force country names in dropdowns - Comprehensive translation map
+        $('select[name*="country"] option').each(function() {
+            var text = $(this).text().trim();
+            var countryMap = {
+                // A
+                'Afganistan': 'Afghanistan',
+                'Afghanistan': 'Afghanistan',
+                'Albania': 'Albania',
+                'Aljazair': 'Algeria',
+                'Algeria': 'Algeria',
+                'Samoa Amerika': 'American Samoa',
+                'American Samoa': 'American Samoa',
+                'Amerika Serikat': 'United States',
+                'United States': 'United States',
+                'Argentina': 'Argentina',
+                'Austria': 'Austria',
+                'Australia': 'Australia',
+                'Azerbaijan': 'Azerbaijan',
+                // B
+                'Bahrain': 'Bahrain',
+                'Belgia': 'Belgium',
+                'Belgium': 'Belgium',
+                'Belanda': 'Netherlands',
+                'Netherlands': 'Netherlands',
+                'Brasil': 'Brazil',
+                'Brazil': 'Brazil',
+                'Brunei': 'Brunei',
+                'Brunei Darussalam': 'Brunei',
+                'Bulgaria': 'Bulgaria',
+                // C
+                'Kamboja': 'Cambodia',
+                'Cambodia': 'Cambodia',
+                'Kanada': 'Canada',
+                'Canada': 'Canada',
+                'Cili': 'Chile',
+                'Chile': 'Chile',
+                'Tiongkok': 'China',
+                'Cina': 'China',
+                'China': 'China',
+                'Kolombia': 'Colombia',
+                'Colombia': 'Colombia',
+                'Kosta Rika': 'Costa Rica',
+                'Costa Rica': 'Costa Rica',
+                'Kroasia': 'Croatia',
+                'Croatia': 'Croatia',
+                'Republik Ceko': 'Czech Republic',
+                'Ceko': 'Czech Republic',
+                'Czech Republic': 'Czech Republic',
+                // D
+                'Denmark': 'Denmark',
+                // E
+                'Mesir': 'Egypt',
+                'Egypt': 'Egypt',
+                // F
+                'Finlandia': 'Finland',
+                'Finland': 'Finland',
+                'Perancis': 'France',
+                'Prancis': 'France',
+                'France': 'France',
+                // G
+                'Jerman': 'Germany',
+                'Germany': 'Germany',
+                'Yunani': 'Greece',
+                'Greece': 'Greece',
+                // H
+                'Hong Kong': 'Hong Kong',
+                'Hungaria': 'Hungary',
+                'Hungary': 'Hungary',
+                // I
+                'India': 'India',
+                'Indonesia': 'Indonesia',
+                'Iran': 'Iran',
+                'Irlandia': 'Ireland',
+                'Ireland': 'Ireland',
+                'Italia': 'Italy',
+                'Italy': 'Italy',
+                // J
+                'Jepang': 'Japan',
+                'Japan': 'Japan',
+                // K
+                'Kazakhstan': 'Kazakhstan',
+                'Korea Selatan': 'South Korea',
+                'Korea': 'South Korea',
+                'South Korea': 'South Korea',
+                'Kuwait': 'Kuwait',
+                // L
+                'Laos': 'Laos',
+                'Luksemburg': 'Luxembourg',
+                'Luxembourg': 'Luxembourg',
+                // M
+                'Makao': 'Macau',
+                'Macau': 'Macau',
+                'Maladewa': 'Maldives',
+                'Maldives': 'Maldives',
+                'Malaysia': 'Malaysia',
+                'Meksiko': 'Mexico',
+                'Mexico': 'Mexico',
+                'Monako': 'Monaco',
+                'Monaco': 'Monaco',
+                'Mongolia': 'Mongolia',
+                'Maroko': 'Morocco',
+                'Morocco': 'Morocco',
+                'Myanmar': 'Myanmar',
+                // N
+                'Nepal': 'Nepal',
+                'Belanda': 'Netherlands',
+                'Netherlands': 'Netherlands',
+                'Selandia Baru': 'New Zealand',
+                'New Zealand': 'New Zealand',
+                // P
+                'Paraguay': 'Paraguay',
+                'Peru': 'Peru',
+                'Filipina': 'Philippines',
+                'Philippines': 'Philippines',
+                'Polandia': 'Poland',
+                'Poland': 'Poland',
+                'Portugal': 'Portugal',
+                'Puerto Riko': 'Puerto Rico',
+                'Puerto Rico': 'Puerto Rico',
+                // S
+                'Arab Saudi': 'Saudi Arabia',
+                'Saudi Arbia': 'Saudi Arabia',
+                'Saudi Arabia': 'Saudi Arabia',
+                'Singapura': 'Singapore',
+                'Singapore': 'Singapore',
+                'Spanyol': 'Spain',
+                'Spain': 'Spain',
+                'Swedia': 'Sweden',
+                'Sweden': 'Sweden',
+                'Swiss': 'Switzerland',
+                'Switzerland': 'Switzerland',
+                // T
+                'Taiwan': 'Taiwan',
+                'Thailand': 'Thailand',
+                'Tunisia': 'Tunisia',
+                'Turki': 'Turkey',
+                'Turkey': 'Turkey',
+                // U
+                'Ukraina': 'Ukraine',
+                'Ukraine': 'Ukraine',
+                'Uni Emirat Arab': 'United Arab Emirates',
+                'United Arab Emirates': 'United Arab Emirates',
+                'Inggris': 'United Kingdom',
+                'Inggris Raya': 'United Kingdom',
+                'United Kingdom': 'United Kingdom',
+                'Amerika Serikat': 'United States',
+                'United States': 'United States',
+                'Uruguay': 'Uruguay',
+                'Uzbekistan': 'Uzbekistan',
+                // V
+                'Venezuela': 'Venezuela',
+                'Vietnam': 'Vietnam'
+            };
+            
+            // Direct match
+            if (countryMap[text]) {
+                $(this).text(countryMap[text]);
+            } else {
+                // Case-insensitive partial match
+                for (var idName in countryMap) {
+                    if (text.toLowerCase().includes(idName.toLowerCase()) || idName.toLowerCase().includes(text.toLowerCase())) {
+                        $(this).text(countryMap[idName]);
+                        break;
+                    }
+                }
+            }
+        });
+        
+        // Force Select2 placeholder to English
+        function forceSelect2PlaceholderEnglish() {
+            // Update data-placeholder attribute
+            $('select[name*="country"]').each(function() {
+                var $select = $(this);
+                var placeholder = $select.attr('data-placeholder') || $select.attr('placeholder') || '';
+                
+                // Check if placeholder contains Indonesian text
+                if (placeholder && (
+                    placeholder.includes('Pilih negara') || 
+                    placeholder.includes('pilih negara') || 
+                    placeholder.includes('wilayah') ||
+                    placeholder.includes('Wilayah')
+                )) {
+                    $select.attr('data-placeholder', 'Select a country / region...');
+                    $select.attr('placeholder', 'Select a country / region...');
+                } else if (!placeholder || placeholder === '') {
+                    $select.attr('data-placeholder', 'Select a country / region...');
+                    $select.attr('placeholder', 'Select a country / region...');
+                }
+                
+                // Update Select2 placeholder if already initialized
+                if ($select.hasClass('select2-hidden-accessible') || $select.data('select2')) {
+                    try {
+                        var select2Instance = $select.data('select2');
+                        if (select2Instance && select2Instance.options) {
+                            select2Instance.options.options.placeholder = {
+                                id: '',
+                                text: 'Select a country / region...'
+                            };
+                            
+                            // Update the rendered placeholder text
+                            var $rendered = $select.next('.select2-container').find('.select2-selection__rendered');
+                            if ($rendered.length && $rendered.hasClass('select2-selection__placeholder')) {
+                                $rendered.text('Select a country / region...');
+                            }
+                            
+                            // If no value selected, update placeholder
+                            if (!$select.val() || $select.val() === '') {
+                                $rendered = $select.next('.select2-container').find('.select2-selection__rendered');
+                                var placeholderText = $rendered.text();
+                                if (placeholderText && (
+                                    placeholderText.includes('Pilih negara') || 
+                                    placeholderText.includes('pilih negara') || 
+                                    placeholderText.includes('wilayah')
+                                )) {
+                                    $rendered.text('Select a country / region...');
+                                }
+                            }
+                        }
+                    } catch(e) {
+                        // Select2 might not be initialized yet, ignore error
+                    }
                 }
             });
         }
+        
+        // Run immediately
+        forceSelect2PlaceholderEnglish();
+        
+        // Run after Select2 initialization
+        $(document.body).on('select2:open select2:select country_to_state_changed', function() {
+            setTimeout(forceSelect2PlaceholderEnglish, 50);
+        });
+        
+        // Watch for Select2 initialization
+        if (typeof $.fn.selectWoo !== 'undefined' || typeof $.fn.select2 !== 'undefined') {
+            var originalSelectWoo = $.fn.selectWoo || $.fn.select2;
+            $.fn.selectWoo = $.fn.select2 = function() {
+                var result = originalSelectWoo.apply(this, arguments);
+                setTimeout(forceSelect2PlaceholderEnglish, 100);
+                return result;
+            };
+        }
+    }
         
         // Run on page load
         forceCheckoutFieldsEnglish();
