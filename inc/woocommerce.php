@@ -1549,120 +1549,6 @@ function wp_augoose_product_add_to_cart_message_english( $text, $product ) {
  * Force ALL WooCommerce notices (error, success, info) to English
  * This ensures no Indonesian text appears in notifications
  */
-/**
- * Translate checkout validation context strings (Billing %s, Shipping %s)
- * This catches strings before they're formatted into error messages
- */
-add_filter( 'gettext_with_context', 'wp_augoose_translate_checkout_validation_context', 10, 4 );
-function wp_augoose_translate_checkout_validation_context( $translated, $text, $context, $domain ) {
-	if ( $domain === 'woocommerce' && $context === 'checkout-validation' ) {
-		// Ensure "Billing %s" and "Shipping %s" are in English
-		if ( $text === 'Billing %s' || $text === 'Shipping %s' ) {
-			// If translated to Indonesian, return English
-			if ( stripos( $translated, 'Penagihan' ) !== false ) {
-				return 'Billing %s';
-			}
-			if ( stripos( $translated, 'Pengiriman' ) !== false ) {
-				return 'Shipping %s';
-			}
-		}
-	}
-	return $translated;
-}
-
-/**
- * Translate checkout validation error messages from Indonesian to English
- * This runs with high priority to catch errors before they're displayed
- */
-add_filter( 'woocommerce_add_error', 'wp_augoose_translate_checkout_errors', 1, 1 );
-function wp_augoose_translate_checkout_errors( $message ) {
-	if ( empty( $message ) ) {
-		return $message;
-	}
-	
-	// Remove HTML tags for processing
-	$clean_message = wp_strip_all_tags( $message );
-	$clean_message = trim( $clean_message );
-	
-	// Pattern 1: "Penagihan [Field] harus diisi." or "Pengiriman [Field] harus diisi."
-	// More flexible pattern to catch variations
-	if ( preg_match( '/^(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi\.?$/i', $clean_message, $matches ) ) {
-		$type = trim( $matches[1] );
-		$field = trim( $matches[2] );
-		
-		// Convert type to English
-		if ( stripos( $type, 'Penagihan' ) !== false || stripos( $type, 'penagihan' ) !== false ) {
-			$type = 'Billing';
-		} elseif ( stripos( $type, 'Pengiriman' ) !== false || stripos( $type, 'pengiriman' ) !== false ) {
-			$type = 'Shipping';
-		}
-		
-		// Reconstruct message with HTML if original had it
-		if ( strpos( $message, '<strong>' ) !== false ) {
-			return sprintf( '<strong>%s %s</strong> is required.', $type, $field );
-		} else {
-			return sprintf( '%s %s is required.', $type, $field );
-		}
-	}
-	
-	// Pattern 2: More flexible - match any message containing "Penagihan/Pengiriman" + field + "harus diisi"
-	if ( preg_match( '/(Penagihan|Pengiriman|penagihan|pengiriman)\s+([^harus]+?)\s+harus\s+diisi/i', $clean_message, $matches ) ) {
-		$type = trim( $matches[1] );
-		$field = trim( $matches[2] );
-		
-		// Convert type to English
-		if ( stripos( $type, 'Penagihan' ) !== false || stripos( $type, 'penagihan' ) !== false ) {
-			$type = 'Billing';
-		} elseif ( stripos( $type, 'Pengiriman' ) !== false || stripos( $type, 'pengiriman' ) !== false ) {
-			$type = 'Shipping';
-		}
-		
-		// Reconstruct message with HTML if original had it
-		if ( strpos( $message, '<strong>' ) !== false ) {
-			return sprintf( '<strong>%s %s</strong> is required.', $type, $field );
-		} else {
-			return sprintf( '%s %s is required.', $type, $field );
-		}
-	}
-	
-	// Pattern 3: Direct string replacement as fallback (ALWAYS run)
-	// This ensures we catch all variations even if regex doesn't match
-	// Replace "Penagihan" with "Billing" and "Pengiriman" with "Shipping"
-	$has_indonesian = false;
-	if ( stripos( $message, 'Penagihan' ) !== false || stripos( $message, 'Pengiriman' ) !== false || stripos( $message, 'harus diisi' ) !== false ) {
-		$has_indonesian = true;
-		$message = str_ireplace( 'Penagihan', 'Billing', $message );
-		$message = str_ireplace( 'Pengiriman', 'Shipping', $message );
-		$message = str_ireplace( 'harus diisi', 'is required', $message );
-		$message = str_ireplace( 'Harus diisi', 'Is required', $message );
-		$message = str_ireplace( 'HARUS DIISI', 'IS REQUIRED', $message );
-		
-		// If we found Indonesian text and replaced it, return immediately
-		// This ensures we don't process it again with pattern matching
-		if ( $has_indonesian ) {
-			return $message;
-		}
-	}
-	
-	// Pattern 4: "[Field] harus diisi." (without prefix)
-	if ( preg_match( '/^(.+?)\s+harus\s+diisi\.?$/i', $clean_message, $matches ) && 
-	     stripos( $clean_message, 'Penagihan' ) === false && 
-	     stripos( $clean_message, 'Pengiriman' ) === false &&
-	     stripos( $clean_message, 'Billing' ) === false &&
-	     stripos( $clean_message, 'Shipping' ) === false ) {
-		$field = trim( $matches[1] );
-		
-		// Reconstruct message with HTML if original had it
-		if ( strpos( $message, '<strong>' ) !== false ) {
-			return sprintf( '<strong>%s</strong> is required.', $field );
-		} else {
-			return sprintf( '%s is required.', $field );
-		}
-	}
-	
-	return $message;
-}
-
 add_filter( 'woocommerce_add_error', 'wp_augoose_force_notice_english', 20, 1 );
 add_filter( 'woocommerce_add_success', 'wp_augoose_force_notice_english', 20, 1 );
 add_filter( 'woocommerce_add_info', 'wp_augoose_force_notice_english', 20, 1 );
@@ -1674,14 +1560,6 @@ function wp_augoose_force_notice_english( $message ) {
 	
 	// Common Indonesian to English translations for notices
 	$replacements = array(
-		// Checkout validation errors
-		'harus diisi' => 'is required',
-		'Harus diisi' => 'Is required',
-		'HARUS DIISI' => 'IS REQUIRED',
-		'Penagihan' => 'Billing',
-		'penagihan' => 'billing',
-		'Pengiriman' => 'Shipping',
-		'pengiriman' => 'shipping',
 		// Cart removal - format: "%s dihapus. Batalkan?"
 		'" dihapus. Batalkan?' => '" removed. Undo?',
 		'" dihapus. Batalkan' => '" removed. Undo',
@@ -1770,11 +1648,6 @@ function wp_augoose_force_notice_english( $message ) {
 	
 	return $message;
 }
-
-/**
- * Disable order notes field in checkout
- */
-add_filter( 'woocommerce_enable_order_notes_field', '__return_false', 20 );
 
 /**
  * Force checkout form fields to English
@@ -1900,9 +1773,10 @@ function wp_augoose_checkout_fields_english( $fields ) {
 		}
 	}
 	
-	// Remove order notes field (order_comments)
+	// Process order fields
 	if ( isset( $fields['order'] ) && isset( $fields['order']['order_comments'] ) ) {
-		unset( $fields['order']['order_comments'] );
+		$fields['order']['order_comments']['label'] = 'Order notes';
+		$fields['order']['order_comments']['placeholder'] = 'Notes about your order, e.g. special notes for delivery.';
 	}
 	
 	return $fields;
@@ -2035,7 +1909,6 @@ function wp_augoose_countries_english( $countries ) {
 			$english_countries_file = WC()->plugin_path() . '/i18n/countries.php';
 			if ( file_exists( $english_countries_file ) ) {
 				// Load English countries directly (this file contains English names by default)
-				// Don't use switch_to_locale as it may cause issues
 				$english_countries = include $english_countries_file;
 				
 				// Ensure we got an array
@@ -2062,9 +1935,12 @@ function wp_augoose_countries_english( $countries ) {
 	$country_translations = array(
 		// A
 		'Afganistan' => 'Afghanistan',
+		'Afghanistan' => 'Afghanistan',
 		'Albania' => 'Albania',
 		'Aljazair' => 'Algeria',
+		'Algeria' => 'Algeria',
 		'Samoa Amerika' => 'American Samoa',
+		'American Samoa' => 'American Samoa',
 		'Amerika Serikat' => 'United States',
 		'Argentina' => 'Argentina',
 		'Austria' => 'Austria',
@@ -2073,48 +1949,69 @@ function wp_augoose_countries_english( $countries ) {
 		// B
 		'Bahrain' => 'Bahrain',
 		'Belgia' => 'Belgium',
+		'Belgium' => 'Belgium',
 		'Belanda' => 'Netherlands',
+		'Netherlands' => 'Netherlands',
 		'Brasil' => 'Brazil',
+		'Brazil' => 'Brazil',
 		'Brunei' => 'Brunei',
 		'Brunei Darussalam' => 'Brunei',
 		'Bulgaria' => 'Bulgaria',
 		// C
 		'Kamboja' => 'Cambodia',
+		'Cambodia' => 'Cambodia',
 		'Kanada' => 'Canada',
+		'Canada' => 'Canada',
 		'Cili' => 'Chile',
+		'Chile' => 'Chile',
 		'Tiongkok' => 'China',
 		'Cina' => 'China',
+		'China' => 'China',
 		'Kolombia' => 'Colombia',
+		'Colombia' => 'Colombia',
 		'Kosta Rika' => 'Costa Rica',
+		'Costa Rica' => 'Costa Rica',
 		'Kroasia' => 'Croatia',
+		'Croatia' => 'Croatia',
 		'Republik Ceko' => 'Czech Republic',
 		'Ceko' => 'Czech Republic',
+		'Czech Republic' => 'Czech Republic',
 		// D
 		'Denmark' => 'Denmark',
 		// E
 		'Mesir' => 'Egypt',
+		'Egypt' => 'Egypt',
 		// F
 		'Finlandia' => 'Finland',
+		'Finland' => 'Finland',
 		'Perancis' => 'France',
 		'Prancis' => 'France',
+		'France' => 'France',
 		// G
 		'Jerman' => 'Germany',
+		'Germany' => 'Germany',
 		'Yunani' => 'Greece',
+		'Greece' => 'Greece',
 		// H
 		'Hong Kong' => 'Hong Kong',
 		'Hungaria' => 'Hungary',
+		'Hungary' => 'Hungary',
 		// I
 		'India' => 'India',
 		'Indonesia' => 'Indonesia',
 		'Iran' => 'Iran',
 		'Irlandia' => 'Ireland',
+		'Ireland' => 'Ireland',
 		'Italia' => 'Italy',
+		'Italy' => 'Italy',
 		// J
 		'Jepang' => 'Japan',
+		'Japan' => 'Japan',
 		// K
 		'Kazakhstan' => 'Kazakhstan',
 		'Korea Selatan' => 'South Korea',
 		'Korea' => 'South Korea',
+		'South Korea' => 'South Korea',
 		'Kuwait' => 'Kuwait',
 		// L
 		'Laos' => 'Laos',
@@ -2122,41 +2019,64 @@ function wp_augoose_countries_english( $countries ) {
 		'Luxembourg' => 'Luxembourg',
 		// M
 		'Makao' => 'Macau',
+		'Macau' => 'Macau',
 		'Maladewa' => 'Maldives',
+		'Maldives' => 'Maldives',
 		'Malaysia' => 'Malaysia',
 		'Meksiko' => 'Mexico',
+		'Mexico' => 'Mexico',
 		'Monako' => 'Monaco',
+		'Monaco' => 'Monaco',
 		'Mongolia' => 'Mongolia',
 		'Maroko' => 'Morocco',
+		'Morocco' => 'Morocco',
 		'Myanmar' => 'Myanmar',
 		// N
 		'Nepal' => 'Nepal',
 		'Belanda' => 'Netherlands',
+		'Netherlands' => 'Netherlands',
 		'Selandia Baru' => 'New Zealand',
+		'New Zealand' => 'New Zealand',
 		// P
 		'Paraguay' => 'Paraguay',
 		'Peru' => 'Peru',
+		'Peru' => 'Peru',
 		'Filipina' => 'Philippines',
+		'Philippines' => 'Philippines',
 		'Polandia' => 'Poland',
+		'Poland' => 'Poland',
 		'Portugal' => 'Portugal',
 		'Puerto Riko' => 'Puerto Rico',
+		'Puerto Rico' => 'Puerto Rico',
 		// S
 		'Arab Saudi' => 'Saudi Arabia',
 		'Saudi Arbia' => 'Saudi Arabia',
+		'Saudi Arabia' => 'Saudi Arabia',
 		'Singapura' => 'Singapore',
+		'Singapore' => 'Singapore',
 		'Spanyol' => 'Spain',
+		'Spain' => 'Spain',
 		'Swedia' => 'Sweden',
+		'Sweden' => 'Sweden',
 		'Swiss' => 'Switzerland',
+		'Switzerland' => 'Switzerland',
 		// T
 		'Taiwan' => 'Taiwan',
 		'Thailand' => 'Thailand',
 		'Tunisia' => 'Tunisia',
+		'Tunisia' => 'Tunisia',
 		'Turki' => 'Turkey',
+		'Turkey' => 'Turkey',
 		// U
 		'Ukraina' => 'Ukraine',
+		'Ukraine' => 'Ukraine',
 		'Uni Emirat Arab' => 'United Arab Emirates',
+		'United Arab Emirates' => 'United Arab Emirates',
 		'Inggris' => 'United Kingdom',
 		'Inggris Raya' => 'United Kingdom',
+		'United Kingdom' => 'United Kingdom',
+		'Amerika Serikat' => 'United States',
+		'United States' => 'United States',
 		'Uruguay' => 'Uruguay',
 		'Uzbekistan' => 'Uzbekistan',
 		// V
@@ -2181,77 +2101,6 @@ function wp_augoose_countries_english( $countries ) {
 	}
 	
 	return $countries;
-}
-
-/**
- * Auto-fill billing country from geolocation on first checkout load
- */
-add_filter( 'woocommerce_checkout_get_value', 'wp_augoose_set_billing_country_from_geolocation', 10, 2 );
-function wp_augoose_set_billing_country_from_geolocation( $value, $input ) {
-	// Guard checks - ensure WooCommerce is loaded
-	if ( ! function_exists( 'WC' ) ) {
-		return $value;
-	}
-	
-	$wc = WC();
-	if ( ! $wc ) {
-		return $value;
-	}
-	
-	// Only set billing_country if it's empty and we're on checkout
-	if ( $input === 'billing_country' && empty( $value ) && function_exists( 'is_checkout' ) && is_checkout() ) {
-		try {
-			// Check if customer already has a saved country
-			if ( isset( $wc->customer ) && $wc->customer ) {
-				$saved_country = $wc->customer->get_billing_country();
-				if ( ! empty( $saved_country ) ) {
-					return $saved_country;
-				}
-			}
-			
-			// Get country from geolocation
-			if ( function_exists( 'wc_get_customer_geolocation' ) ) {
-				$geolocation = wc_get_customer_geolocation();
-				if ( ! empty( $geolocation['country'] ) && isset( $wc->countries ) && $wc->countries ) {
-					// Validate country is in allowed list
-					$allowed_countries = $wc->countries->get_allowed_countries();
-					if ( ! empty( $allowed_countries ) && isset( $allowed_countries[ $geolocation['country'] ] ) ) {
-						// Set customer billing country
-						if ( isset( $wc->customer ) && $wc->customer ) {
-							$wc->customer->set_billing_country( $geolocation['country'] );
-							$wc->customer->save();
-						}
-						return $geolocation['country'];
-					}
-				}
-			}
-			
-			// Fallback: try our custom geolocation function
-			if ( function_exists( 'wp_augoose_get_user_country_from_ip' ) ) {
-				$country_code = wp_augoose_get_user_country_from_ip();
-				if ( ! empty( $country_code ) && isset( $wc->countries ) && $wc->countries ) {
-					// Validate country is in allowed list
-					$allowed_countries = $wc->countries->get_allowed_countries();
-					if ( ! empty( $allowed_countries ) && isset( $allowed_countries[ $country_code ] ) ) {
-						// Set customer billing country
-						if ( isset( $wc->customer ) && $wc->customer ) {
-							$wc->customer->set_billing_country( $country_code );
-							$wc->customer->save();
-						}
-						return $country_code;
-					}
-				}
-			}
-		} catch ( Exception $e ) {
-			// If there's an error, just return the original value
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( 'Error in wp_augoose_set_billing_country_from_geolocation: ' . $e->getMessage() );
-			}
-			return $value;
-		}
-	}
-	
-	return $value;
 }
 
 /**
