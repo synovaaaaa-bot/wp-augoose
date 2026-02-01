@@ -6037,7 +6037,11 @@ function wp_augoose_force_idr_cart_subtotal( $subtotal_html, $compound, $cart ) 
 	}
 	
 	// IMPORTANT: Skip if currency is USD (no conversion for USD)
-	$current_currency = get_woocommerce_currency();
+	// Use client currency from WCML instead of base currency
+	$current_currency = wp_augoose_safe_get_client_currency();
+	if ( ! $current_currency ) {
+		$current_currency = get_woocommerce_currency();
+	}
 	if ( $current_currency === 'USD' ) {
 		return $subtotal_html; // USD stays USD - no conversion
 	}
@@ -6080,7 +6084,11 @@ function wp_augoose_force_idr_cart_total( $total_html ) {
 	}
 	
 	// IMPORTANT: Skip if currency is USD (no conversion for USD)
-	$current_currency = get_woocommerce_currency();
+	// Use client currency from WCML instead of base currency
+	$current_currency = wp_augoose_safe_get_client_currency();
+	if ( ! $current_currency ) {
+		$current_currency = get_woocommerce_currency();
+	}
 	if ( $current_currency === 'USD' ) {
 		return $total_html; // USD stays USD - no conversion
 	}
@@ -6123,7 +6131,11 @@ function wp_augoose_force_idr_cart_totals_subtotal( $subtotal_html ) {
 	}
 	
 	// IMPORTANT: Skip if currency is USD (no conversion for USD)
-	$current_currency = get_woocommerce_currency();
+	// Use client currency from WCML instead of base currency
+	$current_currency = wp_augoose_safe_get_client_currency();
+	if ( ! $current_currency ) {
+		$current_currency = get_woocommerce_currency();
+	}
 	if ( $current_currency === 'USD' ) {
 		return $subtotal_html; // USD stays USD - no conversion
 	}
@@ -6163,7 +6175,11 @@ function wp_augoose_force_idr_cart_totals_order_total( $total_html ) {
 	}
 	
 	// IMPORTANT: Skip if currency is USD (no conversion for USD)
-	$current_currency = get_woocommerce_currency();
+	// Use client currency from WCML instead of base currency
+	$current_currency = wp_augoose_safe_get_client_currency();
+	if ( ! $current_currency ) {
+		$current_currency = get_woocommerce_currency();
+	}
 	if ( $current_currency === 'USD' ) {
 		return $total_html; // USD stays USD - no conversion
 	}
