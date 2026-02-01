@@ -4147,27 +4147,6 @@ body.woocommerce-cart .site-main .entry-content {
     margin-top: 20px;
 }
 
-.size-guide-image-wrapper {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.size-guide-image {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    border: 1px solid #e0e0e0;
-}
-
-.size-guide-image-wrapper[style*="display: none"] {
-    display: none !important;
-}
-
-.size-guide-image-wrapper[style*="display: block"] {
-    display: block !important;
-}
-
 .size-guide-table {
     width: 100% !important;
     border-collapse: collapse !important;

@@ -2595,46 +2595,9 @@ function wp_augoose_variation_scripts() {
 					}
 				});
 				
-				// Size guide link - open modal
-				$(document).on("click", ".size-guide-link", function(e) {
-					e.preventDefault();
-					var guide = 'jacket-regular'; // default
-					var url = window.location.href.toLowerCase();
-					var title = document.title.toLowerCase();
-					
-					// Determine guide based on product
-					if (url.includes('jacket') || title.includes('jacket')) {
-						if (url.includes('vintage') || url.includes('boxy') || title.includes('vintage') || title.includes('boxy')) {
-							guide = 'jacket-vintage';
-						} else {
-							guide = 'jacket-regular';
-						}
-					} else if (url.includes('pants') || title.includes('pants')) {
-						if (url.includes('straight') || url.includes('sentinel') || url.includes('fatigue') || title.includes('straight') || title.includes('sentinel') || title.includes('fatigue')) {
-							guide = 'pants-straight';
-						} else {
-							guide = 'pants-regular';
-						}
-					} else if (url.includes('shirt') || url.includes('vest') || title.includes('shirt') || title.includes('vest')) {
-						guide = 'workshirt-vest';
-					}
-					
-					// Open modal with appropriate tab
-					if (typeof openSizeGuide === 'function') {
-						openSizeGuide(guide);
-					} else {
-						// Fallback: trigger click on footer link
-						var modal = document.getElementById('size-guide-modal');
-						if (modal) {
-							modal.style.display = 'flex';
-							// Trigger tab click
-							var tab = modal.querySelector('.size-guide-tab[data-guide="' + guide + '"]');
-							if (tab) {
-								tab.click();
-							}
-						}
-					}
-				});
+				// Size guide link - now opens image directly (no modal)
+				// Link href is set in template, so it will open in new tab automatically
+				// No JavaScript needed - removed preventDefault to allow direct link navigation
 				
 				// Close size guide modal
 				$(document).on("click", ".size-guide-modal-close, .size-guide-modal-overlay", function(e) {
