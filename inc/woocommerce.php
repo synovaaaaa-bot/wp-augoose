@@ -4937,30 +4937,6 @@ function wp_augoose_ajax_add_to_cart() {
 }
 
 /**
- * Helper function to send clean JSON response
- * Clears output buffer before sending JSON to prevent HTML corruption
- */
-function wp_augoose_send_json_clean( $data, $success = true ) {
-	// Clear all output buffers
-	while ( ob_get_level() ) {
-		ob_end_clean();
-	}
-	
-	// Set proper headers
-	if ( ! headers_sent() ) {
-		header( 'Content-Type: application/json; charset=utf-8' );
-	}
-	
-	// Send JSON response
-	if ( $success ) {
-		wp_send_json_success( $data );
-	} else {
-		wp_send_json_error( $data );
-	}
-	exit;
-}
-
-/**
  * AJAX handler for updating cart quantity on checkout
  */
 add_action( 'wp_ajax_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
@@ -5013,31 +4989,15 @@ function wp_augoose_update_checkout_quantity() {
 		ob_end_clean();
 	}
 	
-	// Get cart fragments for mini cart (always needed)
-	$fragments_array = array();
-	
-	// Always get mini cart fragment
+	// Get order review fragment to preserve product images
 	ob_start();
-	woocommerce_mini_cart();
-	$mini_cart = ob_get_clean();
-	$fragments_array['div.widget_shopping_cart_content'] = is_string( $mini_cart ) ? $mini_cart : '';
-	$fragments_array['div.cart-sidebar-items'] = is_string( $mini_cart ) ? $mini_cart : '';
+	woocommerce_order_review();
+	$order_review_html = ob_get_clean();
 	
-	// Get checkout fragments only if on checkout page
-	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
-		// Get order review fragment to preserve product images
-		ob_start();
-		woocommerce_order_review();
-		$order_review_html = ob_get_clean();
-		
-		// Get checkout payment fragment
-		ob_start();
-		woocommerce_checkout_payment();
-		$payment_html = ob_get_clean();
-		
-		$fragments_array['.woocommerce-checkout-review-order-table'] = is_string( $order_review_html ) ? $order_review_html : '';
-		$fragments_array['.woocommerce-checkout-payment'] = is_string( $payment_html ) ? $payment_html : '';
-	}
+	// Get checkout payment fragment
+	ob_start();
+	woocommerce_checkout_payment();
+	$payment_html = ob_get_clean();
 	
 	// Get messages if any (must be after fragments to avoid output issues)
 	$messages = '';
@@ -5051,6 +5011,12 @@ function wp_augoose_update_checkout_quantity() {
 	// CRITICAL: Follow WooCommerce's EXACT response format to prevent checkout.min.js errors
 	// WooCommerce update_order_review expects: result (string), messages (string), reload (boolean), fragments (object)
 	// Reference: woocommerce/includes/class-wc-ajax.php line 459-472
+	
+	// Prepare fragments - ensure they are strings
+	$fragments_array = array(
+		'.woocommerce-checkout-review-order-table' => is_string( $order_review_html ) ? $order_review_html : '',
+		'.woocommerce-checkout-payment' => is_string( $payment_html ) ? $payment_html : '',
+	);
 	
 	// Apply filter (same as WooCommerce does)
 	$fragments = apply_filters( 'woocommerce_update_order_review_fragments', $fragments_array );
