@@ -7,14 +7,11 @@
   Header stack (Announcement + Header)
    ============================================ */
 .header-stack {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 200 !important;
+    position: sticky;
+    top: 0;
+    z-index: 200;
     /* Prevent duplication */
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    transform: translateY(0) !important;
+    display: block;
 }
 
 .announcement-bar {
@@ -48,10 +45,7 @@
     top: auto !important;
     z-index: 200;
     /* Prevent duplication */
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    transform: translateY(0) !important;
+    display: block;
 }
 
 .site-header.scrolled {
@@ -144,7 +138,6 @@
     color: #000;
     text-decoration: none;
     transition: color 0.3s;
-    font-family: inherit; /* Use same font as body */
 }
 
 .header-category-menu a:hover {
@@ -482,16 +475,14 @@ body.mobile-menu-open .mobile-menu {
 }
 
 .mobile-menu a {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
     color: #000;
     text-decoration: none;
     display: block;
     padding: 12px 0;
     transition: color 0.3s;
-    font-family: inherit; /* Use same font as body */
 }
 
 .mobile-menu a:hover {
@@ -539,21 +530,13 @@ body.mobile-menu-open .mobile-menu {
 @media (max-width: 768px) {
     /* Prevent header duplication */
     .header-stack {
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 200 !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        transform: translateY(0) !important;
+        position: sticky;
+        top: 0;
+        z-index: 200;
     }
     
     .site-header {
         position: relative !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        transform: translateY(0) !important;
     }
     
     .header-container {

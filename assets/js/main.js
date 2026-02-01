@@ -192,30 +192,13 @@
         });
     }
 
-    // Sticky Header - Ensure header always visible
+    // Sticky Header
     function initStickyHeader() {
-        const headerStack = $('.header-stack');
         const header = $('.site-header');
         const headerHeight = header.outerHeight();
 
-        // Ensure header is always visible
-        headerStack.css({
-            'display': 'block',
-            'visibility': 'visible',
-            'opacity': '1',
-            'transform': 'translateY(0)'
-        });
-
         $(window).on('scroll', function() {
             const currentScroll = $(this).scrollTop();
-
-            // Always keep header visible
-            headerStack.css({
-                'display': 'block',
-                'visibility': 'visible',
-                'opacity': '1',
-                'transform': 'translateY(0)'
-            });
 
             if (currentScroll > headerHeight) {
                 header.addClass('scrolled');
