@@ -1230,6 +1230,14 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Kode POS' => 'Postcode / ZIP',
 			'Negara' => 'Country / Region',
 			'negara' => 'Country / Region',
+			'Negara / Wilayah' => 'Country / Region',
+			'negara / wilayah' => 'Country / Region',
+			'Negara/Wilayah' => 'Country / Region',
+			'negara/wilayah' => 'Country / Region',
+			'Wilayah' => 'Region',
+			'wilayah' => 'Region',
+			'Update country / region' => 'Update country / region',
+			'Update country / region&hellip;' => 'Update country / region',
 			'Telepon' => 'Phone',
 			'telepon' => 'Phone',
 			'Email' => 'Email address',
@@ -1245,6 +1253,12 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Email address (optional)' => 'Email address (optional)',
 			'Country/Region' => 'Country / Region',
 			'Country/Region (optional)' => 'Country / Region (optional)',
+			'Country / Wilayah' => 'Country / Region',
+			'Negara / Region' => 'Country / Region',
+			'Pilih negara / wilayah' => 'Select a country / region...',
+			'pilih negara / wilayah' => 'Select a country / region...',
+			'Pilih Negara / Wilayah' => 'Select a country / region...',
+			'Pilih negara / wilayah&hellip;' => 'Select a country / region...',
 			'First name (optional)' => 'First name (optional)',
 			'Last name (optional)' => 'Last name (optional)',
 			'Company name' => 'Company name',
@@ -1273,10 +1287,35 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'pilih opsi' => 'Choose an option',
 			'Pilih Opsi' => 'Choose an option',
 			'Choose an option' => 'Choose an option',
+			// Checkout validation error messages
+			'%s is a required field.' => '%s is required.',
+			'%s harus diisi.' => '%s is required.',
+			'%s Harus diisi.' => '%s is required.',
+			'%s HARUS DIISI.' => '%s IS REQUIRED.',
+			'Billing %s' => 'Billing %s',
+			'Shipping %s' => 'Shipping %s',
+			'Penagihan %s' => 'Billing %s',
+			'Pengiriman %s' => 'Shipping %s',
 		);
 		
 		if ( isset( $english_texts[ $translated_text ] ) ) {
 			return $english_texts[ $translated_text ];
+		}
+		
+		// Pattern matching for dynamic error messages
+		if ( $domain === 'woocommerce' ) {
+			// Match: "Penagihan [Field] harus diisi" or "Pengiriman [Field] harus diisi"
+			if ( preg_match( '/^(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi/i', $translated_text, $matches ) ) {
+				$type = ucfirst( strtolower( $matches[1] ) );
+				$field = $matches[2];
+				return $type . ' ' . $field . ' is required';
+			}
+			
+			// Match: "[Field] harus diisi"
+			if ( preg_match( '/^(.+?)\s+harus\s+diisi/i', $translated_text, $matches ) ) {
+				$field = $matches[1];
+				return $field . ' is required';
+			}
 		}
 		
 		// Force "Filter" for price filter button
@@ -1628,12 +1667,51 @@ function wp_augoose_force_notice_english( $message ) {
 		'gagal' => 'failed',
 		'Berhasil' => 'Success',
 		'berhasil' => 'success',
+		// Checkout validation errors
+		'harus diisi' => 'is required',
+		'Harus diisi' => 'Is required',
+		'HARUS DIISI' => 'IS REQUIRED',
+		'Penagihan' => 'Billing',
+		'penagihan' => 'billing',
+		'Pengiriman' => 'Shipping',
+		'pengiriman' => 'shipping',
+		'Penagihan First name harus diisi' => 'Billing First name is required',
+		'Penagihan Last name harus diisi' => 'Billing Last name is required',
+		'Penagihan Address harus diisi' => 'Billing Address is required',
+		'Penagihan City harus diisi' => 'Billing City is required',
+		'Penagihan State / County harus diisi' => 'Billing State / County is required',
+		'Penagihan Postcode / ZIP harus diisi' => 'Billing Postcode / ZIP is required',
+		'Penagihan Country Code harus diisi' => 'Billing Country Code is required',
+		'Penagihan Phone harus diisi' => 'Billing Phone is required',
+		'Penagihan Email address harus diisi' => 'Billing Email address is required',
+		'Pengiriman First name harus diisi' => 'Shipping First name is required',
+		'Pengiriman Last name harus diisi' => 'Shipping Last name is required',
+		'Pengiriman Address harus diisi' => 'Shipping Address is required',
+		'Pengiriman City harus diisi' => 'Shipping City is required',
+		'Pengiriman State / County harus diisi' => 'Shipping State / County is required',
+		'Pengiriman Postcode / ZIP harus diisi' => 'Shipping Postcode / ZIP is required',
+		'Pengiriman Country Code harus diisi' => 'Shipping Country Code is required',
+		'Pengiriman Phone harus diisi' => 'Shipping Phone is required',
+		'Pengiriman Email address harus diisi' => 'Shipping Email address is required',
 	);
 	
 	$message = str_replace( array_keys( $replacements ), array_values( $replacements ), $message );
 	
+	// Pattern-based replacement for dynamic error messages
+	// Match: "Penagihan [Field] harus diisi" or "Pengiriman [Field] harus diisi"
+	if ( preg_match( '/^(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi/i', $message, $matches ) ) {
+		$type = ucfirst( strtolower( $matches[1] ) );
+		$field = $matches[2];
+		$message = $type . ' ' . $field . ' is required';
+	}
+	
 	return $message;
 }
+
+/**
+ * Disable order notes field in checkout
+ */
+add_filter( 'woocommerce_enable_order_notes_field', '__return_false', 20 );
 
 /**
  * Force checkout form fields to English
@@ -1759,10 +1837,9 @@ function wp_augoose_checkout_fields_english( $fields ) {
 		}
 	}
 	
-	// Process order fields
+	// Remove order notes field (order_comments)
 	if ( isset( $fields['order'] ) && isset( $fields['order']['order_comments'] ) ) {
-		$fields['order']['order_comments']['label'] = 'Order notes';
-		$fields['order']['order_comments']['placeholder'] = 'Notes about your order, e.g. special notes for delivery.';
+		unset( $fields['order']['order_comments'] );
 	}
 	
 	return $fields;
@@ -1882,22 +1959,149 @@ function wp_augoose_get_allowed_country_codes() {
  * Force country names to English
  */
 add_filter( 'woocommerce_countries', 'wp_augoose_countries_english', 20 );
+add_filter( 'woocommerce_countries_allowed_countries', 'wp_augoose_countries_english', 20 );
+add_filter( 'woocommerce_countries_shipping_countries', 'wp_augoose_countries_english', 20 );
 function wp_augoose_countries_english( $countries ) {
-	// Common country name translations from Indonesian to English
+	if ( ! is_array( $countries ) || empty( $countries ) ) {
+		return $countries;
+	}
+	
+	// Load default English country names from WooCommerce directly
+	if ( class_exists( 'WooCommerce' ) && function_exists( 'WC' ) ) {
+		$english_countries_file = WC()->plugin_path() . '/i18n/countries.php';
+		if ( file_exists( $english_countries_file ) ) {
+			// Load English countries directly (this file contains English names by default)
+			$english_countries = include $english_countries_file;
+			
+			// Replace all country names with English versions
+			foreach ( $countries as $code => $name ) {
+				if ( isset( $english_countries[ $code ] ) ) {
+					$countries[ $code ] = $english_countries[ $code ];
+				}
+			}
+			
+			return $countries;
+		}
+	}
+	
+	// Fallback: Comprehensive country name translations from Indonesian to English
 	$country_translations = array(
+		// A
+		'Afganistan' => 'Afghanistan',
+		'Albania' => 'Albania',
+		'Aljazair' => 'Algeria',
+		'Samoa Amerika' => 'American Samoa',
 		'Amerika Serikat' => 'United States',
+		'Argentina' => 'Argentina',
+		'Austria' => 'Austria',
+		'Australia' => 'Australia',
+		'Azerbaijan' => 'Azerbaijan',
+		// B
+		'Bahrain' => 'Bahrain',
+		'Belgia' => 'Belgium',
+		'Brasil' => 'Brazil',
+		'Brunei' => 'Brunei',
+		'Brunei Darussalam' => 'Brunei',
+		'Bulgaria' => 'Bulgaria',
+		// C
+		'Kamboja' => 'Cambodia',
+		'Kanada' => 'Canada',
+		'Cili' => 'Chile',
+		'Tiongkok' => 'China',
+		'Cina' => 'China',
+		'Kolombia' => 'Colombia',
+		'Kosta Rika' => 'Costa Rica',
+		'Kroasia' => 'Croatia',
+		'Republik Ceko' => 'Czech Republic',
+		'Ceko' => 'Czech Republic',
+		// D
+		'Denmark' => 'Denmark',
+		// E
+		'Mesir' => 'Egypt',
+		// F
+		'Finlandia' => 'Finland',
+		'Perancis' => 'France',
+		'Prancis' => 'France',
+		// G
+		'Jerman' => 'Germany',
+		'Yunani' => 'Greece',
+		// H
+		'Hong Kong' => 'Hong Kong',
+		'Hungaria' => 'Hungary',
+		// I
+		'India' => 'India',
+		'Indonesia' => 'Indonesia',
+		'Iran' => 'Iran',
+		'Irlandia' => 'Ireland',
+		'Italia' => 'Italy',
+		// J
+		'Jepang' => 'Japan',
+		// K
+		'Kazakhstan' => 'Kazakhstan',
+		'Korea Selatan' => 'South Korea',
+		'Korea' => 'South Korea',
+		'Kuwait' => 'Kuwait',
+		// L
+		'Laos' => 'Laos',
+		'Luksemburg' => 'Luxembourg',
+		'Luxembourg' => 'Luxembourg',
+		// M
+		'Makao' => 'Macau',
+		'Maladewa' => 'Maldives',
+		'Malaysia' => 'Malaysia',
+		'Meksiko' => 'Mexico',
+		'Monako' => 'Monaco',
+		'Mongolia' => 'Mongolia',
+		'Maroko' => 'Morocco',
+		'Myanmar' => 'Myanmar',
+		// N
+		'Nepal' => 'Nepal',
+		'Belanda' => 'Netherlands',
+		'Selandia Baru' => 'New Zealand',
+		// P
+		'Paraguay' => 'Paraguay',
+		'Peru' => 'Peru',
+		'Filipina' => 'Philippines',
+		'Polandia' => 'Poland',
+		'Portugal' => 'Portugal',
+		'Puerto Riko' => 'Puerto Rico',
+		// S
+		'Arab Saudi' => 'Saudi Arabia',
+		'Saudi Arbia' => 'Saudi Arabia',
+		'Singapura' => 'Singapore',
+		'Spanyol' => 'Spain',
+		'Swedia' => 'Sweden',
+		'Swiss' => 'Switzerland',
+		// T
+		'Taiwan' => 'Taiwan',
+		'Thailand' => 'Thailand',
+		'Tunisia' => 'Tunisia',
+		'Turki' => 'Turkey',
+		// U
+		'Ukraina' => 'Ukraine',
+		'Uni Emirat Arab' => 'United Arab Emirates',
 		'Inggris' => 'United Kingdom',
 		'Inggris Raya' => 'United Kingdom',
-		'Singapura' => 'Singapore',
-		'Jepang' => 'Japan',
-		'Korea Selatan' => 'South Korea',
-		'Cina' => 'China',
-		'Filipina' => 'Philippines',
+		'Uruguay' => 'Uruguay',
+		'Uzbekistan' => 'Uzbekistan',
+		// V
+		'Venezuela' => 'Venezuela',
+		'Vietnam' => 'Vietnam',
 	);
 	
+	// Apply translations
 	foreach ( $countries as $code => $name ) {
+		// Direct translation
 		if ( isset( $country_translations[ $name ] ) ) {
 			$countries[ $code ] = $country_translations[ $name ];
+		} else {
+			// Case-insensitive check for partial matches
+			foreach ( $country_translations as $id_name => $en_name ) {
+				if ( stripos( $name, $id_name ) !== false || stripos( $id_name, $name ) !== false ) {
+					$countries[ $code ] = $en_name;
+					break;
+				}
+			}
 		}
 	}
 	
@@ -1920,9 +2124,20 @@ function wp_augoose_country_locale_english( $locale ) {
 							'ALAMAT JALAN' => 'Address',
 							'Alamat jalan' => 'Address',
 							'Street address' => 'Address',
+							'Negara' => 'Country / Region',
+							'negara' => 'Country / Region',
+							'Negara / Wilayah' => 'Country / Region',
+							'negara / wilayah' => 'Country / Region',
+							'Country/Region' => 'Country / Region',
+							'Country / Wilayah' => 'Country / Region',
+							'Negara / Region' => 'Country / Region',
 						);
 						if ( isset( $indonesian_labels[ $field_data['label'] ] ) ) {
 							$locale[ $country ][ $field_key ]['label'] = $indonesian_labels[ $field_data['label'] ];
+						}
+						// Always set to English if contains "negara" or "wilayah"
+						if ( stripos( $field_data['label'], 'negara' ) !== false || stripos( $field_data['label'], 'wilayah' ) !== false ) {
+							$locale[ $country ][ $field_key ]['label'] = 'Country / Region';
 						}
 					}
 					if ( isset( $field_data['placeholder'] ) ) {
@@ -1933,9 +2148,19 @@ function wp_augoose_country_locale_english( $locale ) {
 							'Apartemen, suit, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
 							'apartemen, suit, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
 							'Apartemen, suite, unit, dll. (opsional)' => 'Apartment, suite, unit, etc. (optional)',
+							'Pilih negara' => 'Select a country / region...',
+							'pilih negara' => 'Select a country / region...',
+							'Pilih negara / wilayah' => 'Select a country / region...',
+							'pilih negara / wilayah' => 'Select a country / region...',
+							'Pilih Negara' => 'Select a country / region...',
+							'Pilih Wilayah' => 'Select a country / region...',
 						);
 						if ( isset( $indonesian_placeholders[ $field_data['placeholder'] ] ) ) {
 							$locale[ $country ][ $field_key ]['placeholder'] = $indonesian_placeholders[ $field_data['placeholder'] ];
+						}
+						// Always set to English if contains "negara", "wilayah", or "pilih"
+						if ( stripos( $field_data['placeholder'], 'negara' ) !== false || stripos( $field_data['placeholder'], 'wilayah' ) !== false || stripos( $field_data['placeholder'], 'pilih' ) !== false ) {
+							$locale[ $country ][ $field_key ]['placeholder'] = 'Select a country / region...';
 						}
 					}
 				}
@@ -1964,9 +2189,33 @@ function wp_augoose_form_field_english( $args, $key, $value ) {
 			$args['placeholder'] = 'Apartment, suite, unit, etc. (optional)';
 		}
 	}
-	// Force country/region placeholder to English
+	// Force country/region label and placeholder to English
 	if ( strpos( $key, 'country' ) !== false && ! strpos( $key, 'phone_country_code' ) ) {
-		if ( isset( $args['placeholder'] ) && ( strpos( $args['placeholder'], 'Pilih negara' ) !== false || strpos( $args['placeholder'], 'pilih negara' ) !== false || strpos( $args['placeholder'], 'wilayah' ) !== false ) ) {
+		// Force label to English
+		if ( isset( $args['label'] ) ) {
+			$indonesian_labels = array(
+				'Negara' => 'Country / Region',
+				'negara' => 'Country / Region',
+				'Negara / Wilayah' => 'Country / Region',
+				'negara / wilayah' => 'Country / Region',
+				'Country/Region' => 'Country / Region',
+				'Country / Wilayah' => 'Country / Region',
+				'Negara / Region' => 'Country / Region',
+			);
+			foreach ( $indonesian_labels as $id => $en ) {
+				if ( stripos( $args['label'], $id ) !== false ) {
+					$args['label'] = $en;
+					break;
+				}
+			}
+			// Always set to English if contains "negara" or "wilayah"
+			if ( stripos( $args['label'], 'negara' ) !== false || stripos( $args['label'], 'wilayah' ) !== false ) {
+				$args['label'] = 'Country / Region';
+			}
+		}
+		
+		// Force placeholder to English
+		if ( isset( $args['placeholder'] ) && ( strpos( $args['placeholder'], 'Pilih negara' ) !== false || strpos( $args['placeholder'], 'pilih negara' ) !== false || strpos( $args['placeholder'], 'wilayah' ) !== false || strpos( $args['placeholder'], 'Wilayah' ) !== false ) ) {
 			$args['placeholder'] = 'Select a country / region...';
 		}
 		if ( ! isset( $args['placeholder'] ) || empty( $args['placeholder'] ) ) {
@@ -4367,6 +4616,112 @@ function wp_augoose_validate_phone_country_code() {
 }
 
 /**
+ * Translate checkout required field error messages
+ */
+add_filter( 'woocommerce_checkout_required_field_notice', 'wp_augoose_translate_required_field_notice', 20, 3 );
+function wp_augoose_translate_required_field_notice( $notice, $field_label, $field_key ) {
+	// Remove HTML tags from notice for processing
+	$clean_notice = wp_strip_all_tags( $notice );
+	
+	// If notice contains Indonesian text, translate it
+	if ( stripos( $clean_notice, 'harus diisi' ) !== false || stripos( $clean_notice, 'Penagihan' ) !== false || stripos( $clean_notice, 'Pengiriman' ) !== false ) {
+		// Extract field name from field_label
+		$field_name = wp_strip_all_tags( $field_label );
+		
+		// Determine if it's billing or shipping
+		$is_billing = ( stripos( $field_key, 'billing' ) !== false || stripos( $clean_notice, 'Penagihan' ) !== false );
+		$is_shipping = ( stripos( $field_key, 'shipping' ) !== false || stripos( $clean_notice, 'Pengiriman' ) !== false );
+		
+		$prefix = '';
+		if ( $is_billing ) {
+			$prefix = 'Billing ';
+		} elseif ( $is_shipping ) {
+			$prefix = 'Shipping ';
+		}
+		
+		// Return English format
+		return sprintf( '<strong>%s</strong> is required.', $prefix . $field_name );
+	}
+	
+	// If notice is already in English format, return as is
+	return $notice;
+}
+
+/**
+ * Translate WooCommerce checkout validation context strings
+ * This handles "Billing %s" and "Shipping %s" translations
+ */
+add_filter( 'gettext_with_context', 'wp_augoose_translate_checkout_validation_context', 20, 4 );
+function wp_augoose_translate_checkout_validation_context( $translated, $text, $context, $domain ) {
+	if ( $domain === 'woocommerce' && $context === 'checkout-validation' ) {
+		// Translate "Billing %s" and "Shipping %s" from Indonesian to English
+		if ( $text === 'Billing %s' ) {
+			// If already translated to Indonesian, return English
+			if ( stripos( $translated, 'Penagihan' ) !== false ) {
+				return 'Billing %s';
+			}
+		}
+		if ( $text === 'Shipping %s' ) {
+			// If already translated to Indonesian, return English
+			if ( stripos( $translated, 'Pengiriman' ) !== false ) {
+				return 'Shipping %s';
+			}
+		}
+	}
+	return $translated;
+}
+
+/**
+ * Hook into WooCommerce error messages to translate them
+ * This catches errors before they're displayed
+ */
+add_filter( 'woocommerce_add_error', 'wp_augoose_translate_checkout_error_before_add', 5, 1 );
+function wp_augoose_translate_checkout_error_before_add( $message ) {
+	if ( empty( $message ) ) {
+		return $message;
+	}
+	
+	// Remove HTML tags for processing
+	$clean_message = wp_strip_all_tags( $message );
+	
+	// Pattern: "Penagihan [Field] harus diisi" or "Pengiriman [Field] harus diisi"
+	if ( preg_match( '/^(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi/i', $clean_message, $matches ) ) {
+		$type = ucfirst( strtolower( $matches[1] ) );
+		$field = trim( $matches[2] );
+		
+		// Convert type
+		if ( stripos( $type, 'Penagihan' ) !== false || stripos( $type, 'penagihan' ) !== false ) {
+			$type = 'Billing';
+		} elseif ( stripos( $type, 'Pengiriman' ) !== false || stripos( $type, 'pengiriman' ) !== false ) {
+			$type = 'Shipping';
+		}
+		
+		// Reconstruct message with HTML if original had it
+		if ( strpos( $message, '<strong>' ) !== false ) {
+			return sprintf( '<strong>%s %s</strong> is required.', $type, $field );
+		} else {
+			return sprintf( '%s %s is required.', $type, $field );
+		}
+	}
+	
+	// Pattern: "[Field] harus diisi" (without prefix)
+	if ( preg_match( '/^(.+?)\s+harus\s+diisi/i', $clean_message, $matches ) && 
+	     stripos( $clean_message, 'Penagihan' ) === false && 
+	     stripos( $clean_message, 'Pengiriman' ) === false ) {
+		$field = trim( $matches[1] );
+		
+		// Reconstruct message with HTML if original had it
+		if ( strpos( $message, '<strong>' ) !== false ) {
+			return sprintf( '<strong>%s</strong> is required.', $field );
+		} else {
+			return sprintf( '%s is required.', $field );
+		}
+	}
+	
+	return $message;
+}
+
+/**
  * Enqueue cart scripts
  */
 add_action( 'wp_enqueue_scripts', 'wp_augoose_cart_scripts' );
@@ -4388,19 +4743,35 @@ function wp_augoose_cart_scripts() {
 						
 						$minus.on("click", function(e) {
 							e.preventDefault();
+							e.stopPropagation();
+							e.stopImmediatePropagation();
+							
 							var currentVal = parseInt($input.val()) || 0;
 							var min = parseInt($input.attr("min")) || 0;
+							
 							if (currentVal > min) {
-								$input.val(currentVal - 1).trigger("change");
+								var newVal = currentVal - 1;
+								$input.val(newVal);
+								
+								// Trigger change event only once
+								$input.trigger("change");
 							}
 						});
 						
 						$plus.on("click", function(e) {
 							e.preventDefault();
+							e.stopPropagation();
+							e.stopImmediatePropagation();
+							
 							var currentVal = parseInt($input.val()) || 0;
 							var max = parseInt($input.attr("max")) || 9999;
+							
 							if (currentVal < max) {
-								$input.val(currentVal + 1).trigger("change");
+								var newVal = currentVal + 1;
+								$input.val(newVal);
+								
+								// Trigger change event only once
+								$input.trigger("change");
 							}
 						});
 					}
@@ -4566,6 +4937,30 @@ function wp_augoose_ajax_add_to_cart() {
 }
 
 /**
+ * Helper function to send clean JSON response
+ * Clears output buffer before sending JSON to prevent HTML corruption
+ */
+function wp_augoose_send_json_clean( $data, $success = true ) {
+	// Clear all output buffers
+	while ( ob_get_level() ) {
+		ob_end_clean();
+	}
+	
+	// Set proper headers
+	if ( ! headers_sent() ) {
+		header( 'Content-Type: application/json; charset=utf-8' );
+	}
+	
+	// Send JSON response
+	if ( $success ) {
+		wp_send_json_success( $data );
+	} else {
+		wp_send_json_error( $data );
+	}
+	exit;
+}
+
+/**
  * AJAX handler for updating cart quantity on checkout
  */
 add_action( 'wp_ajax_update_checkout_quantity', 'wp_augoose_update_checkout_quantity' );
@@ -4618,15 +5013,31 @@ function wp_augoose_update_checkout_quantity() {
 		ob_end_clean();
 	}
 	
-	// Get order review fragment to preserve product images
-	ob_start();
-	woocommerce_order_review();
-	$order_review_html = ob_get_clean();
+	// Get cart fragments for mini cart (always needed)
+	$fragments_array = array();
 	
-	// Get checkout payment fragment
+	// Always get mini cart fragment
 	ob_start();
-	woocommerce_checkout_payment();
-	$payment_html = ob_get_clean();
+	woocommerce_mini_cart();
+	$mini_cart = ob_get_clean();
+	$fragments_array['div.widget_shopping_cart_content'] = is_string( $mini_cart ) ? $mini_cart : '';
+	$fragments_array['div.cart-sidebar-items'] = is_string( $mini_cart ) ? $mini_cart : '';
+	
+	// Get checkout fragments only if on checkout page
+	if ( function_exists( 'is_checkout' ) && is_checkout() ) {
+		// Get order review fragment to preserve product images
+		ob_start();
+		woocommerce_order_review();
+		$order_review_html = ob_get_clean();
+		
+		// Get checkout payment fragment
+		ob_start();
+		woocommerce_checkout_payment();
+		$payment_html = ob_get_clean();
+		
+		$fragments_array['.woocommerce-checkout-review-order-table'] = is_string( $order_review_html ) ? $order_review_html : '';
+		$fragments_array['.woocommerce-checkout-payment'] = is_string( $payment_html ) ? $payment_html : '';
+	}
 	
 	// Get messages if any (must be after fragments to avoid output issues)
 	$messages = '';
@@ -4640,12 +5051,6 @@ function wp_augoose_update_checkout_quantity() {
 	// CRITICAL: Follow WooCommerce's EXACT response format to prevent checkout.min.js errors
 	// WooCommerce update_order_review expects: result (string), messages (string), reload (boolean), fragments (object)
 	// Reference: woocommerce/includes/class-wc-ajax.php line 459-472
-	
-	// Prepare fragments - ensure they are strings
-	$fragments_array = array(
-		'.woocommerce-checkout-review-order-table' => is_string( $order_review_html ) ? $order_review_html : '',
-		'.woocommerce-checkout-payment' => is_string( $payment_html ) ? $payment_html : '',
-	);
 	
 	// Apply filter (same as WooCommerce does)
 	$fragments = apply_filters( 'woocommerce_update_order_review_fragments', $fragments_array );
@@ -4986,10 +5391,44 @@ function wp_augoose_translate_all_notices( $message ) {
 		'LIHAT' => 'View',
 		'Lihat' => 'View',
 		'lihat' => 'View',
+		// Checkout validation errors
+		'harus diisi' => 'is required',
+		'Harus diisi' => 'Is required',
+		'HARUS DIISI' => 'IS REQUIRED',
+		'Penagihan' => 'Billing',
+		'penagihan' => 'billing',
+		'Pengiriman' => 'Shipping',
+		'pengiriman' => 'shipping',
+		'Penagihan First name harus diisi' => 'Billing First name is required',
+		'Penagihan Last name harus diisi' => 'Billing Last name is required',
+		'Penagihan Address harus diisi' => 'Billing Address is required',
+		'Penagihan City harus diisi' => 'Billing City is required',
+		'Penagihan State / County harus diisi' => 'Billing State / County is required',
+		'Penagihan Postcode / ZIP harus diisi' => 'Billing Postcode / ZIP is required',
+		'Penagihan Country Code harus diisi' => 'Billing Country Code is required',
+		'Penagihan Phone harus diisi' => 'Billing Phone is required',
+		'Penagihan Email address harus diisi' => 'Billing Email address is required',
+		'Pengiriman First name harus diisi' => 'Shipping First name is required',
+		'Pengiriman Last name harus diisi' => 'Shipping Last name is required',
+		'Pengiriman Address harus diisi' => 'Shipping Address is required',
+		'Pengiriman City harus diisi' => 'Shipping City is required',
+		'Pengiriman State / County harus diisi' => 'Shipping State / County is required',
+		'Pengiriman Postcode / ZIP harus diisi' => 'Shipping Postcode / ZIP is required',
+		'Pengiriman Country Code harus diisi' => 'Shipping Country Code is required',
+		'Pengiriman Phone harus diisi' => 'Shipping Phone is required',
+		'Pengiriman Email address harus diisi' => 'Shipping Email address is required',
 	);
 	
 	// Apply translations
 	$message = str_ireplace( array_keys( $additional_translations ), array_values( $additional_translations ), $message );
+	
+	// Pattern-based replacement for dynamic error messages
+	// Match: "Penagihan [Field] harus diisi" or "Pengiriman [Field] harus diisi"
+	if ( preg_match( '/^(Penagihan|Pengiriman|penagihan|pengiriman)\s+(.+?)\s+harus\s+diisi/i', $message, $matches ) ) {
+		$type = ucfirst( strtolower( $matches[1] ) );
+		$field = $matches[2];
+		$message = $type . ' ' . $field . ' is required';
+	}
 	
 	return $message;
 }

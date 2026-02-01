@@ -683,24 +683,36 @@
         // Minus button
         $(document).on('click', '.quantity .minus', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
             const input = $(this).siblings('.qty');
-            const min = parseFloat(input.attr('min'));
-            let val = parseFloat(input.val());
+            const min = parseFloat(input.attr('min')) || 0;
+            let val = parseFloat(input.val()) || 0;
 
             if (val > min) {
-                input.val(val - 1).trigger('change');
+                const newVal = val - 1;
+                input.val(newVal);
+                // Trigger change event only once
+                input.trigger('change');
             }
         });
 
         // Plus button
         $(document).on('click', '.quantity .plus', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            
             const input = $(this).siblings('.qty');
-            const max = parseFloat(input.attr('max'));
-            let val = parseFloat(input.val());
+            const max = parseFloat(input.attr('max')) || 9999;
+            let val = parseFloat(input.val()) || 0;
 
             if (!max || val < max) {
-                input.val(val + 1).trigger('change');
+                const newVal = val + 1;
+                input.val(newVal);
+                // Trigger change event only once
+                input.trigger('change');
             }
         });
     }
