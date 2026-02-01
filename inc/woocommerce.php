@@ -11,6 +11,99 @@ if ( ! function_exists( 'wp_augoose_verify_ajax_nonce' ) && file_exists( get_tem
 }
 
 /**
+ * Get size chart URL based on product category/name
+ * Returns the appropriate size chart image URL for the product
+ * 
+ * @param WC_Product|int|null $product Product object or product ID
+ * @return string Size chart image URL
+ */
+function wp_augoose_get_size_chart_url( $product = null ) {
+	// Get product object
+	if ( is_numeric( $product ) ) {
+		$product = wc_get_product( $product );
+	} elseif ( ! $product ) {
+		global $product;
+	}
+	
+	if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
+		// Default to pants regular fit if product not found
+		return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+	}
+	
+	$product_name = strtolower( $product->get_name() );
+	$product_categories = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) );
+	$category_names = array_map( 'strtolower', $product_categories );
+	
+	// Check product name and categories to determine size chart
+	// Jacket Regular (Service)
+	if ( 
+		strpos( $product_name, 'jacket' ) !== false && 
+		( strpos( $product_name, 'regular' ) !== false || strpos( $product_name, 'service' ) !== false ) &&
+		strpos( $product_name, 'vintage' ) === false && strpos( $product_name, 'boxy' ) === false
+	) {
+		return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg';
+	}
+	
+	// Jacket Vintage Boxy Fit
+	if ( 
+		strpos( $product_name, 'jacket' ) !== false && 
+		( strpos( $product_name, 'vintage' ) !== false || strpos( $product_name, 'boxy' ) !== false )
+	) {
+		return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Vintage-Boxy-Fit_Size-Chart.jpg';
+	}
+	
+	// Pants Straight Fit (Sentinel, Fatigue)
+	if ( 
+		strpos( $product_name, 'pants' ) !== false && 
+		( strpos( $product_name, 'straight' ) !== false || strpos( $product_name, 'sentinel' ) !== false || strpos( $product_name, 'fatigue' ) !== false )
+	) {
+		return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Straight-Fit-Sentinel-Fatigue_Size-Chart.jpg';
+	}
+	
+	// Workshirt and Vest
+	if ( 
+		strpos( $product_name, 'workshirt' ) !== false || 
+		strpos( $product_name, 'work shirt' ) !== false ||
+		strpos( $product_name, 'vest' ) !== false ||
+		( strpos( $product_name, 'shirt' ) !== false && strpos( $product_name, 'work' ) !== false )
+	) {
+		return 'https://augoose.co/wp-content/uploads/2026/01/Workshirt-and-Vest_Size-Chart.jpg';
+	}
+	
+	// Pants Regular Fit (Double Knee, Carpenter, Utility) - default for pants
+	if ( strpos( $product_name, 'pants' ) !== false ) {
+		return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+	}
+	
+	// Check categories as fallback
+	foreach ( $category_names as $cat_name ) {
+		// Jacket categories
+		if ( strpos( $cat_name, 'jacket' ) !== false ) {
+			if ( strpos( $cat_name, 'vintage' ) !== false || strpos( $cat_name, 'boxy' ) !== false ) {
+				return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Vintage-Boxy-Fit_Size-Chart.jpg';
+			}
+			return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg';
+		}
+		
+		// Pants categories
+		if ( strpos( $cat_name, 'pants' ) !== false || strpos( $cat_name, 'trouser' ) !== false ) {
+			if ( strpos( $cat_name, 'straight' ) !== false || strpos( $cat_name, 'sentinel' ) !== false || strpos( $cat_name, 'fatigue' ) !== false ) {
+				return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Straight-Fit-Sentinel-Fatigue_Size-Chart.jpg';
+			}
+			return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+		}
+		
+		// Shirt/Vest categories
+		if ( strpos( $cat_name, 'shirt' ) !== false || strpos( $cat_name, 'vest' ) !== false ) {
+			return 'https://augoose.co/wp-content/uploads/2026/01/Workshirt-and-Vest_Size-Chart.jpg';
+		}
+	}
+	
+	// Default to pants regular fit
+	return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+}
+
+/**
  * Helper function: Check if current request is WooCommerce AJAX
  * 
  * CRITICAL: Use this to prevent HTML output during wc-ajax requests
@@ -1578,25 +1671,52 @@ function wp_augoose_checkout_fields_english( $fields ) {
 		'order_comments' => 'Notes about your order, e.g. special notes for delivery.',
 	);
 	
-	// Process billing fields and add Secondary Name
+	// Process billing fields
 	if ( isset( $fields['billing'] ) ) {
-		// Add Secondary Name field after First Name
-		$first_name_priority = isset( $fields['billing']['billing_first_name']['priority'] ) ? $fields['billing']['billing_first_name']['priority'] : 10;
+		// Ensure last_name field exists and make it required
+		if ( ! isset( $fields['billing']['billing_last_name'] ) ) {
+			// Create last_name field if it doesn't exist
+			$first_name_priority = isset( $fields['billing']['billing_first_name']['priority'] ) ? $fields['billing']['billing_first_name']['priority'] : 10;
+			$fields['billing']['billing_last_name'] = array(
+				'label'       => 'Last name',
+				'placeholder' => 'Last name',
+				'required'    => true,
+				'class'       => array( 'form-row-wide' ),
+				'priority'    => $first_name_priority + 1,
+				'type'        => 'text',
+			);
+		} else {
+			// Make existing last_name required
+			$fields['billing']['billing_last_name']['required'] = true;
+			$fields['billing']['billing_last_name']['label'] = 'Last name';
+			$fields['billing']['billing_last_name']['placeholder'] = 'Last name';
+		}
 		
-		$fields['billing']['billing_secondary_name'] = array(
-			'label'       => 'Secondary name',
-			'placeholder' => 'Secondary name (optional)',
-			'required'    => false,
-			'class'       => array( 'form-row-wide' ),
-			'priority'    => $first_name_priority + 1,
-			'type'        => 'text',
-		);
+		// Add phone country code field before phone
+		if ( isset( $fields['billing']['billing_phone'] ) ) {
+			$phone_priority = isset( $fields['billing']['billing_phone']['priority'] ) ? $fields['billing']['billing_phone']['priority'] : 100;
+			
+			// Add country code dropdown before phone
+			$fields['billing']['billing_phone_country_code'] = array(
+				'label'       => 'Country code',
+				'placeholder' => 'Code',
+				'required'    => true,
+				'class'       => array( 'form-row-first', 'phone-country-code' ),
+				'priority'    => $phone_priority - 1,
+				'type'        => 'select',
+				'options'     => wp_augoose_get_country_codes(),
+			);
+			
+			// Adjust phone field to be second column
+			$fields['billing']['billing_phone']['class'] = array( 'form-row-last' );
+			$fields['billing']['billing_phone']['priority'] = $phone_priority;
+		}
 		
 		foreach ( $fields['billing'] as $key => $field ) {
 			$field_key = str_replace( 'billing_', '', $key );
 			
-			// Skip secondary_name from English mapping (already set above)
-			if ( $field_key === 'secondary_name' ) {
+			// Skip phone_country_code from English mapping (already set above)
+			if ( $field_key === 'phone_country_code' ) {
 				continue;
 			}
 			
@@ -1645,6 +1765,113 @@ function wp_augoose_checkout_fields_english( $fields ) {
 	}
 	
 	return $fields;
+}
+
+/**
+ * Limit allowed countries to specific list only
+ */
+add_filter( 'woocommerce_countries_allowed_countries', 'wp_augoose_limit_allowed_countries', 10, 1 );
+function wp_augoose_limit_allowed_countries( $countries ) {
+	// Get allowed country codes from helper function
+	$allowed_country_codes = wp_augoose_get_allowed_country_codes();
+	
+	// Filter countries to only include allowed ones
+	$filtered_countries = array();
+	foreach ( $allowed_country_codes as $code ) {
+		if ( isset( $countries[ $code ] ) ) {
+			$filtered_countries[ $code ] = $countries[ $code ];
+		}
+	}
+	
+	return $filtered_countries;
+}
+
+/**
+ * Limit shipping countries to the same allowed list
+ */
+add_filter( 'woocommerce_countries_shipping_countries', 'wp_augoose_limit_shipping_countries', 10, 1 );
+function wp_augoose_limit_shipping_countries( $countries ) {
+	// Use the same allowed countries list
+	return wp_augoose_limit_allowed_countries( $countries );
+}
+
+/**
+ * Get list of allowed country codes (helper function)
+ */
+function wp_augoose_get_allowed_country_codes() {
+	return array(
+		'AF', // Afghanistan
+		'AL', // Albania
+		'DZ', // Algeria
+		'AS', // American Samoa
+		'AR', // Argentina
+		'AT', // Austria
+		'AU', // Australia
+		'AZ', // Azerbaijan
+		'BH', // Bahrain
+		'BE', // Belgium
+		'BR', // Brazil
+		'BN', // Brunei
+		'BG', // Bulgaria
+		'KH', // Cambodia
+		'CA', // Canada
+		'CL', // Chile
+		'CN', // China
+		'CO', // Colombia
+		'CR', // Costa Rica
+		'HR', // Croatia
+		'CZ', // Czech
+		'DK', // Denmark
+		'EG', // Egypt
+		'FI', // Finland
+		'FR', // France
+		'DE', // Germany
+		'GR', // Greece
+		'HK', // Hong Kong
+		'HU', // Hungary
+		'IN', // India
+		'IR', // Iran
+		'IE', // Ireland
+		'IT', // Italy
+		'JP', // Japan
+		'KZ', // Kazakhstan
+		'KR', // Korea
+		'KW', // Kuwait
+		'LA', // Laos
+		'LU', // Luxembourg
+		'MO', // Macau
+		'MV', // Maldives
+		'MX', // Mexico
+		'MC', // Monaco
+		'MN', // Mongolia
+		'MA', // Morocco
+		'MM', // Myanmar
+		'NP', // Nepal
+		'NL', // Netherlands
+		'NZ', // New Zealand
+		'PY', // Paraguay
+		'PE', // Peru
+		'PH', // Philippines
+		'PL', // Poland
+		'PT', // Portugal
+		'PR', // Puerto Rico
+		'SA', // Saudi Arabia
+		'ES', // Spain
+		'SE', // Sweden
+		'CH', // Switzerland
+		'TW', // Taiwan
+		'TH', // Thailand
+		'TN', // Tunisia
+		'TR', // Turkey
+		'UA', // Ukraine
+		'AE', // United Arab Emirates
+		'GB', // UK
+		'UY', // Uruguay
+		'US', // USA
+		'UZ', // Uzbekistan
+		'VE', // Venezuela
+		'VN', // Vietnam
+	);
 }
 
 /**
@@ -2368,12 +2595,9 @@ function wp_augoose_variation_scripts() {
 					}
 				});
 				
-				// Size guide link - open modal
-				$(document).on("click", ".size-guide-link", function(e) {
-					e.preventDefault();
-					$("#size-guide-modal").fadeIn(300);
-					$("body").css("overflow", "hidden");
-				});
+				// Size guide link - now opens image directly (no modal)
+				// Link href is set in template, so it will open in new tab automatically
+				// No JavaScript needed - removed preventDefault to allow direct link navigation
 				
 				// Close size guide modal
 				$(document).on("click", ".size-guide-modal-close, .size-guide-modal-overlay", function(e) {
@@ -3331,24 +3555,94 @@ function wp_augoose_quantity_input_args( $args, $product ) {
 }
 
 /**
- * Save Secondary Name to order meta
+ * Get country codes for phone dropdown
  */
-add_action( 'woocommerce_checkout_update_order_meta', 'wp_augoose_save_secondary_name_to_order', 10, 1 );
-function wp_augoose_save_secondary_name_to_order( $order_id ) {
-	if ( ! empty( $_POST['billing_secondary_name'] ) ) {
-		$secondary_name = sanitize_text_field( $_POST['billing_secondary_name'] );
-		update_post_meta( $order_id, '_billing_secondary_name', $secondary_name );
+function wp_augoose_get_country_codes() {
+	return array(
+		''   => 'Select code',
+		'+1' => '+1 (US/CA)',
+		'+62' => '+62 (ID)',
+		'+65' => '+65 (SG)',
+		'+60' => '+60 (MY)',
+		'+44' => '+44 (UK)',
+		'+61' => '+61 (AU)',
+		'+81' => '+81 (JP)',
+		'+82' => '+82 (KR)',
+		'+86' => '+86 (CN)',
+		'+91' => '+91 (IN)',
+		'+66' => '+66 (TH)',
+		'+84' => '+84 (VN)',
+		'+63' => '+63 (PH)',
+		'+64' => '+64 (NZ)',
+		'+33' => '+33 (FR)',
+		'+49' => '+49 (DE)',
+		'+39' => '+39 (IT)',
+		'+34' => '+34 (ES)',
+		'+31' => '+31 (NL)',
+		'+32' => '+32 (BE)',
+		'+41' => '+41 (CH)',
+		'+46' => '+46 (SE)',
+		'+47' => '+47 (NO)',
+		'+45' => '+45 (DK)',
+		'+358' => '+358 (FI)',
+		'+351' => '+351 (PT)',
+		'+353' => '+353 (IE)',
+		'+48' => '+48 (PL)',
+		'+420' => '+420 (CZ)',
+		'+36' => '+36 (HU)',
+		'+40' => '+40 (RO)',
+		'+7' => '+7 (RU)',
+		'+971' => '+971 (AE)',
+		'+966' => '+966 (SA)',
+		'+974' => '+974 (QA)',
+		'+965' => '+965 (KW)',
+		'+973' => '+973 (BH)',
+		'+968' => '+968 (OM)',
+		'+961' => '+961 (LB)',
+		'+962' => '+962 (JO)',
+		'+20' => '+20 (EG)',
+		'+27' => '+27 (ZA)',
+		'+234' => '+234 (NG)',
+		'+254' => '+254 (KE)',
+		'+52' => '+52 (MX)',
+		'+55' => '+55 (BR)',
+		'+54' => '+54 (AR)',
+		'+56' => '+56 (CL)',
+		'+57' => '+57 (CO)',
+		'+51' => '+51 (PE)',
+	);
+}
+
+/**
+ * Save phone country code to order meta
+ */
+add_action( 'woocommerce_checkout_update_order_meta', 'wp_augoose_save_phone_country_code_to_order', 10, 1 );
+function wp_augoose_save_phone_country_code_to_order( $order_id ) {
+	if ( ! empty( $_POST['billing_phone_country_code'] ) ) {
+		$country_code = sanitize_text_field( $_POST['billing_phone_country_code'] );
+		update_post_meta( $order_id, '_billing_phone_country_code', $country_code );
+		
+		// Also update phone number to include country code
+		if ( ! empty( $_POST['billing_phone'] ) ) {
+			$phone = sanitize_text_field( $_POST['billing_phone'] );
+			$full_phone = $country_code . $phone;
+			update_post_meta( $order_id, '_billing_phone_full', $full_phone );
+		}
 	}
 }
 
 /**
- * Display Secondary Name in Admin Order Details
+ * Display phone country code in Admin Order Details
  */
-add_action( 'woocommerce_admin_order_data_after_billing_address', 'wp_augoose_display_secondary_name_in_admin', 10, 1 );
-function wp_augoose_display_secondary_name_in_admin( $order ) {
-	$secondary_name = get_post_meta( $order->get_id(), '_billing_secondary_name', true );
-	if ( ! empty( $secondary_name ) ) {
-		echo '<p><strong>Secondary name:</strong> ' . esc_html( $secondary_name ) . '</p>';
+add_action( 'woocommerce_admin_order_data_after_billing_address', 'wp_augoose_display_phone_country_code_in_admin', 10, 1 );
+function wp_augoose_display_phone_country_code_in_admin( $order ) {
+	$country_code = get_post_meta( $order->get_id(), '_billing_phone_country_code', true );
+	$full_phone = get_post_meta( $order->get_id(), '_billing_phone_full', true );
+	if ( ! empty( $country_code ) ) {
+		echo '<p><strong>Phone country code:</strong> ' . esc_html( $country_code ) . '</p>';
+		if ( ! empty( $full_phone ) ) {
+			echo '<p><strong>Full phone:</strong> ' . esc_html( $full_phone ) . '</p>';
+		}
 	}
 }
 
@@ -3699,6 +3993,16 @@ add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_terms_checkbox'
 function wp_augoose_validate_terms_checkbox() {
 	if ( empty( $_POST['terms_custom'] ) ) {
 		wc_add_notice( 'Please confirm that you have read and agree to the Terms of Service and Privacy Policy.', 'error' );
+	}
+}
+
+/**
+ * Validate phone country code
+ */
+add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_phone_country_code' );
+function wp_augoose_validate_phone_country_code() {
+	if ( empty( $_POST['billing_phone_country_code'] ) ) {
+		wc_add_notice( 'Please select a country code for your phone number.', 'error' );
 	}
 }
 

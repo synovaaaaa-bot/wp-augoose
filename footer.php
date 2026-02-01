@@ -86,9 +86,9 @@
                         ?>
                     <?php else : ?>
                         <ul class="footer-links">
-                            <li><a href="#" class="footer-size-guide-link" data-guide="jackets"><?php echo esc_html__( 'Jacket size and fit guide', 'wp-augoose' ); ?></a></li>
-                            <li><a href="#" class="footer-size-guide-link" data-guide="pants"><?php echo esc_html__( 'Pants size and fit guide', 'wp-augoose' ); ?></a></li>
-                            <li><a href="#"><?php echo esc_html__( 'Order & shipping', 'wp-augoose' ); ?></a></li>
+                            <li><a href="https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg" target="_blank"><?php echo esc_html__( 'Jacket size and fit guide', 'wp-augoose' ); ?></a></li>
+                            <li><a href="https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg" target="_blank"><?php echo esc_html__( 'Pants size and fit guide', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#" class="order-shipping-link"><?php echo esc_html__( 'Order & shipping', 'wp-augoose' ); ?></a></li>
                         </ul>
                     <?php endif; ?>
                 </div>
@@ -411,6 +411,103 @@
         </div>
     </div>
 
+    <!-- Order & Shipping Modal -->
+    <div class="order-shipping-modal" id="order-shipping-modal" style="display: none;">
+        <div class="order-shipping-overlay"></div>
+        <div class="order-shipping-content-wrapper">
+            <button class="order-shipping-close" aria-label="Close order & shipping">&times;</button>
+            <div class="order-shipping-content">
+                <h2 class="order-shipping-title">ORDER & SHIPPING</h2>
+                
+                <div class="shipping-table-wrapper">
+                    <table class="shipping-table">
+                        <thead>
+                            <tr>
+                                <th>Country</th>
+                                <th>Est. Min. Weight (kg)</th>
+                                <th>Price starts at (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Afghanistan</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Albania</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Algeria</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>American Samoa</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Argentina</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Austria</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Australia</td><td>1</td><td>$36.00</td></tr>
+                            <tr><td>Azerbaijan</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Bahrain</td><td>1</td><td>$47.00</td></tr>
+                            <tr><td>Belgium</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Brazil</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Brunei</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Bulgaria</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Cambodia</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Canada</td><td>1</td><td>$44.00</td></tr>
+                            <tr><td>Chile</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>China1</td><td>1</td><td>$32.00</td></tr>
+                            <tr><td>China2</td><td>1</td><td>$36.00</td></tr>
+                            <tr><td>Colombia</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Costa Rica</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Croatia</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Czech</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Denmark</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Egypt</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Finland</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>France</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Germany</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Greece</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Hong Kong</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Hungary</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>India</td><td>1</td><td>$47.00</td></tr>
+                            <tr><td>Iran</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Ireland</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Italy</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Japan</td><td>1</td><td>$32.00</td></tr>
+                            <tr><td>Kazakhstan</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Korea</td><td>1</td><td>$36.00</td></tr>
+                            <tr><td>Kuwait</td><td>1</td><td>$47.00</td></tr>
+                            <tr><td>Laos</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Luxembourg</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Macau</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Maldives</td><td>1</td><td>$47.00</td></tr>
+                            <tr><td>Mexico</td><td>1</td><td>$44.00</td></tr>
+                            <tr><td>Monaco</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Mongolia</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Morocco</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Myanmar</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Nepal</td><td>1</td><td>$47.00</td></tr>
+                            <tr><td>Netherlands</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>New Zealand</td><td>1</td><td>$36.00</td></tr>
+                            <tr><td>Paraguay</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Peru</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Philippines</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Poland</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Portugal</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Puerto Rico</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Saudi Arabia</td><td>1</td><td>$47.00</td></tr>
+                            <tr><td>Spain</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Sweden</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Switzerland</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Taiwan</td><td>1</td><td>$36.00</td></tr>
+                            <tr><td>Thailand</td><td>1</td><td>$29.00</td></tr>
+                            <tr><td>Tunisia</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Turkey</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Ukraine</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>United Arab Emirates</td><td>1</td><td>$47.00</td></tr>
+                            <tr><td>UK</td><td>1</td><td>$52.00</td></tr>
+                            <tr><td>Uruguay</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>USA</td><td>1</td><td>$44.00</td></tr>
+                            <tr><td>Uzbekistan</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Venezuela</td><td>1</td><td>$68.00</td></tr>
+                            <tr><td>Vietnam</td><td>1</td><td>$29.00</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <script>
 // Size Guide Modal - Simple inline script to ensure it works
 (function() {
@@ -464,36 +561,11 @@
     function init() {
         console.log('Initializing size guide...');
         
-        // Footer links
-        var footerLinks = document.querySelectorAll('.footer-size-guide-link');
-        console.log('Found footer links:', footerLinks.length);
-        for (var i = 0; i < footerLinks.length; i++) {
-            footerLinks[i].addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var guide = this.getAttribute('data-guide') || 'pants';
-                console.log('Footer link clicked:', guide);
-                openSizeGuide(guide);
-            });
-        }
+        // Footer links - now open image directly (no modal)
+        // Links are already set to direct image URLs, no JavaScript needed
         
-        // Product page SIZE GUIDE link
-        var sizeGuideLinks = document.querySelectorAll('.size-guide-link');
-        console.log('Found size guide links:', sizeGuideLinks.length);
-        for (var i = 0; i < sizeGuideLinks.length; i++) {
-            sizeGuideLinks[i].addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                var guide = 'pants';
-                var url = window.location.href.toLowerCase();
-                var title = document.title.toLowerCase();
-                if (url.includes('jacket') || url.includes('shirt') || title.includes('jacket') || title.includes('shirt')) {
-                    guide = 'jackets';
-                }
-                console.log('Size guide link clicked:', guide);
-                openSizeGuide(guide);
-            });
-        }
+        // Product page SIZE GUIDE link - now opens image directly
+        // Links are already set to direct image URLs in template, no JavaScript needed
         
         // Close buttons
         var closeBtns = document.querySelectorAll('.size-guide-close, .size-guide-overlay');
@@ -540,6 +612,65 @@
     
     // Also try after a short delay to ensure everything is loaded
     setTimeout(init, 500);
+})();
+
+// Order & Shipping Modal
+(function() {
+    function openOrderShipping() {
+        var modal = document.getElementById('order-shipping-modal');
+        if (!modal) {
+            console.error('Order & shipping modal not found in DOM');
+            return;
+        }
+        
+        modal.setAttribute('style', 'display: flex !important; visibility: visible !important; opacity: 1 !important;');
+        document.body.classList.add('order-shipping-open');
+    }
+    
+    function closeOrderShipping() {
+        var modal = document.getElementById('order-shipping-modal');
+        if (modal) {
+            modal.setAttribute('style', 'display: none !important; visibility: hidden !important;');
+            document.body.classList.remove('order-shipping-open');
+        }
+    }
+    
+    function initOrderShipping() {
+        // Footer link
+        var orderShippingLinks = document.querySelectorAll('.order-shipping-link');
+        for (var i = 0; i < orderShippingLinks.length; i++) {
+            orderShippingLinks[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openOrderShipping();
+            });
+        }
+        
+        // Close buttons
+        var closeBtns = document.querySelectorAll('.order-shipping-close, .order-shipping-overlay');
+        for (var i = 0; i < closeBtns.length; i++) {
+            closeBtns[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeOrderShipping();
+            });
+        }
+        
+        // ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                closeOrderShipping();
+            }
+        });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOrderShipping);
+    } else {
+        initOrderShipping();
+    }
+    
+    setTimeout(initOrderShipping, 500);
 })();
 </script>
 

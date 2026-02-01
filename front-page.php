@@ -48,16 +48,27 @@ get_header();
 					<a class="section-link" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">VIEW ALL</a>
 				</div>
 				<?php
-				// Check if we have products first
-				$products = wc_get_products( array( 
-					'limit' => 8,
-					'status' => 'publish'
+				// Get only featured products for Latest Collection
+				$featured_products = wc_get_products( array( 
+					'limit' => 12,
+					'status' => 'publish',
+					'featured' => true,
+					'orderby' => 'date',
+					'order' => 'DESC'
 				) );
 				
-				if ( $products && count( $products ) > 0 ) {
-					// Use custom template for Latest Collection
+				if ( $featured_products && count( $featured_products ) > 0 ) {
+					// Display featured products using custom template
 					echo '<div class="latest-collection-products">';
-					echo do_shortcode( '[products limit="12" columns="6" orderby="date" class="latest"]' );
+					echo '<div class="woocommerce"><ul class="products columns-4 latest">';
+					
+					global $product;
+					foreach ( $featured_products as $product ) {
+						// Set global product for template (wc_get_products returns WC_Product objects)
+						wc_get_template_part( 'content', 'product-latest' );
+					}
+					
+					echo '</ul></div>';
 					echo '</div>';
 				} else {
 					// Show dummy products for demo

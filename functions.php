@@ -191,6 +191,26 @@ function wp_augoose_maybe_create_static_pages() {
                     update_post_meta( $existing->ID, '_wp_page_template', $p['template'] );
                 }
             }
+            
+            // Update content if old email is found (for FAQ and Terms pages)
+            if ( $p['slug'] === 'faq' || $p['slug'] === 'terms-of-service' ) {
+                $current_content = $existing->post_content;
+                // Check if old email exists in content
+                if ( strpos( $current_content, 'contact@augoose.co' ) !== false ) {
+                    // Replace old email with new email
+                    $updated_content = str_replace( 'contact@augoose.co', 'halo@augoose.co', $current_content );
+                    // Also replace in mailto links
+                    $updated_content = str_replace( 'mailto:contact@augoose.co', 'mailto:halo@augoose.co', $updated_content );
+                    
+                    if ( $updated_content !== $current_content ) {
+                        wp_update_post( array(
+                            'ID' => $existing->ID,
+                            'post_content' => $updated_content,
+                        ) );
+                    }
+                }
+            }
+            
             continue;
         }
 
@@ -224,6 +244,54 @@ function wp_augoose_seed_static_pages_once() {
 }
 add_action( 'after_switch_theme', 'wp_augoose_seed_static_pages_once' );
 add_action( 'admin_init', 'wp_augoose_seed_static_pages_once' );
+
+/**
+ * Update email in existing FAQ and Terms pages
+ * This function updates old email (contact@augoose.co) to new email (halo@augoose.co)
+ * Runs once on admin_init to update existing pages
+ */
+function wp_augoose_update_email_in_pages() {
+    // Only run in admin context
+    if ( ! is_admin() ) {
+        return;
+    }
+    
+    // Check if already updated (run once)
+    if ( '1' === get_option( 'wp_augoose_email_updated', '0' ) ) {
+        return;
+    }
+    
+    $pages_to_update = array( 'faq', 'terms-of-service' );
+    $updated = false;
+    
+    foreach ( $pages_to_update as $slug ) {
+        $page = get_page_by_path( $slug );
+        if ( $page instanceof WP_Post ) {
+            $current_content = $page->post_content;
+            $updated_content = $current_content;
+            
+            // Replace old email with new email (case insensitive)
+            $updated_content = preg_replace( '/contact@augoose\.co/i', 'halo@augoose.co', $updated_content );
+            // Also replace in mailto links
+            $updated_content = preg_replace( '/mailto:contact@augoose\.co/i', 'mailto:halo@augoose.co', $updated_content );
+            
+            // Only update if content changed
+            if ( $updated_content !== $current_content ) {
+                wp_update_post( array(
+                    'ID' => $page->ID,
+                    'post_content' => $updated_content,
+                ) );
+                $updated = true;
+            }
+        }
+    }
+    
+    // Mark as updated if any page was updated
+    if ( $updated ) {
+        update_option( 'wp_augoose_email_updated', '1' );
+    }
+}
+add_action( 'admin_init', 'wp_augoose_update_email_in_pages' );
 
 /**
  * =========================
