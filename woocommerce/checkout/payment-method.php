@@ -16,13 +16,22 @@ if ( strpos( $gateway_id_lower, 'doku' ) !== false || strpos( $gateway_id_lower,
 	$is_doku = true;
 }
 
+// Check if this is PayPal gateway
+$is_paypal = false;
+$gateway_title_lower = strtolower( $gateway->get_title() );
+if ( strpos( $gateway_id_lower, 'paypal' ) !== false || 
+     strpos( $gateway_id_lower, 'ppcp' ) !== false ||
+     strpos( $gateway_title_lower, 'paypal' ) !== false ) {
+	$is_paypal = true;
+}
+
 // Check if this is Credit/Debit Card gateway
 $is_credit_card = false;
-if ( strpos( $gateway_id_lower, 'card' ) !== false || 
-     strpos( $gateway_id_lower, 'credit' ) !== false || 
-     strpos( $gateway_id_lower, 'debit' ) !== false ||
-     strpos( $gateway_id_lower, 'stripe' ) !== false ||
-     strpos( $gateway_id_lower, 'ppcp' ) !== false ) {
+if ( ( strpos( $gateway_id_lower, 'card' ) !== false || 
+      strpos( $gateway_id_lower, 'credit' ) !== false || 
+      strpos( $gateway_id_lower, 'debit' ) !== false ||
+      strpos( $gateway_id_lower, 'stripe' ) !== false ) &&
+     ! $is_paypal ) {
 	$is_credit_card = true;
 }
 ?>
@@ -45,6 +54,16 @@ if ( strpos( $gateway_id_lower, 'card' ) !== false ||
 				<img src="<?php echo esc_url( $icon_base . 'mastercard.svg' ); ?>" alt="Mastercard" class="credit-card-icon" onerror="this.style.display='none';" />
 				<img src="<?php echo esc_url( $icon_base . 'amex.svg' ); ?>" alt="American Express" class="credit-card-icon" onerror="this.style.display='none';" />
 				<img src="<?php echo esc_url( $icon_base . 'jcb.svg' ); ?>" alt="JCB" class="credit-card-icon" onerror="this.style.display='none';" />
+			</div>
+		<?php elseif ( $is_paypal ) : ?>
+			<div class="wp-augoose-paypal-icon">
+				<?php
+				// Use PayPal official logo
+				$paypal_logo_url = 'https://www.paypalobjects.com/webstatic/mktg/logo-center/logo_paypal_marcas_206x29.png';
+				// Fallback to SVG if PNG fails
+				$paypal_fallback = 'https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg';
+				?>
+				<img src="<?php echo esc_url( $paypal_logo_url ); ?>" alt="PayPal" class="paypal-icon" onerror="this.onerror=null; this.src='<?php echo esc_js( $paypal_fallback ); ?>';" />
 			</div>
 		<?php else : ?>
 			<?php 

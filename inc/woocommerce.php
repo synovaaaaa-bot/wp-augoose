@@ -1696,10 +1696,10 @@ function wp_augoose_checkout_fields_english( $fields ) {
 		if ( isset( $fields['billing']['billing_phone'] ) ) {
 			$phone_priority = isset( $fields['billing']['billing_phone']['priority'] ) ? $fields['billing']['billing_phone']['priority'] : 100;
 			
-			// Add country code dropdown - will be hidden and rendered inline with phone
+			// Add country code dropdown - will be rendered inline with phone
 			$fields['billing']['billing_phone_country_code'] = array(
-				'label'       => 'Country code',
-				'placeholder' => 'Code',
+				'label'       => 'Country Code',
+				'placeholder' => 'Select code',
 				'required'    => true,
 				'class'       => array( 'form-row-wide', 'phone-country-code-wrapper' ),
 				'priority'    => $phone_priority - 1,
@@ -1708,6 +1708,7 @@ function wp_augoose_checkout_fields_english( $fields ) {
 			);
 			
 			// Adjust phone field to be inline with country code
+			$fields['billing']['billing_phone']['label'] = 'Phone Number';
 			$fields['billing']['billing_phone']['class'] = array( 'form-row-wide', 'phone-with-country-code' );
 			$fields['billing']['billing_phone']['priority'] = $phone_priority;
 		}
@@ -1871,6 +1872,9 @@ function wp_augoose_get_allowed_country_codes() {
 		'UZ', // Uzbekistan
 		'VE', // Venezuela
 		'VN', // Vietnam
+		'ID', // Indonesia
+		'SG', // Singapore
+		'MY', // Malaysia
 	);
 }
 
