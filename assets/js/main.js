@@ -1252,32 +1252,6 @@
                     $(this).text(countryMap[text]);
                 }
             });
-            
-            // Force country placeholder
-            $('select[name*="country"]').each(function() {
-                var $select = $(this);
-                var placeholder = $select.attr('data-placeholder') || $select.attr('placeholder') || '';
-                if (placeholder.includes('Pilih negara') || placeholder.includes('pilih negara') || placeholder.includes('wilayah')) {
-                    $select.attr('data-placeholder', 'Select a country / region...');
-                }
-                if (!placeholder || placeholder === '') {
-                    $select.attr('data-placeholder', 'Select a country / region...');
-                }
-                // Also update the first option text
-                var $firstOption = $select.find('option:first');
-                if ($firstOption.length && ($firstOption.text().includes('Pilih negara') || $firstOption.text().includes('pilih negara') || $firstOption.text().includes('wilayah'))) {
-                    $firstOption.text('Select a country / region...');
-                }
-            });
-            
-            // Force shipping message to English
-            $('.woocommerce-shipping-totals, .shipping').each(function() {
-                var $this = $(this);
-                var text = $this.text();
-                if (text.includes('Masukkan alamat Anda') || text.includes('untuk melihat opsi pengiriman')) {
-                    $this.html($this.html().replace(/Masukkan alamat Anda untuk melihat opsi pengiriman/gi, 'Enter your address to view shipping options'));
-                }
-            });
         }
         
         // Run on page load

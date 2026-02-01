@@ -1651,7 +1651,6 @@ function wp_augoose_checkout_fields_english( $fields ) {
 		'state' => 'State / County',
 		'postcode' => 'Postcode / ZIP',
 		'country' => 'Country / Region',
-		'country_placeholder' => 'Select a country / region...',
 		'phone' => 'Phone',
 		'email' => 'Email address',
 		'order_comments' => 'Order notes',
@@ -1693,15 +1692,23 @@ function wp_augoose_checkout_fields_english( $fields ) {
 			$fields['billing']['billing_last_name']['placeholder'] = 'Last name';
 		}
 		
-		// Phone field will have country code added via custom rendering filter
+		// Add phone country code field before phone
 		if ( isset( $fields['billing']['billing_phone'] ) ) {
 			$phone_priority = isset( $fields['billing']['billing_phone']['priority'] ) ? $fields['billing']['billing_phone']['priority'] : 100;
 			
-			// Remove country code as separate field - it will be rendered inside phone field
-			unset( $fields['billing']['billing_phone_country_code'] );
+			// Add country code dropdown before phone
+			$fields['billing']['billing_phone_country_code'] = array(
+				'label'       => 'Country code',
+				'placeholder' => 'Code',
+				'required'    => true,
+				'class'       => array( 'form-row-first', 'phone-country-code' ),
+				'priority'    => $phone_priority - 1,
+				'type'        => 'select',
+				'options'     => wp_augoose_get_country_codes(),
+			);
 			
-			// Phone field stays as form-row-wide
-			$fields['billing']['billing_phone']['class'] = array( 'form-row-wide' );
+			// Adjust phone field to be second column
+			$fields['billing']['billing_phone']['class'] = array( 'form-row-last' );
 			$fields['billing']['billing_phone']['priority'] = $phone_priority;
 		}
 		
@@ -1718,10 +1725,6 @@ function wp_augoose_checkout_fields_english( $fields ) {
 			}
 			if ( isset( $english_placeholders[ $field_key ] ) ) {
 				$fields['billing'][ $key ]['placeholder'] = $english_placeholders[ $field_key ];
-			}
-			// Force override for country field placeholder
-			if ( $field_key === 'country' ) {
-				$fields['billing'][ $key ]['placeholder'] = 'Select a country / region...';
 			}
 			// Force override for address fields
 			if ( $field_key === 'address_1' ) {
@@ -1943,15 +1946,6 @@ function wp_augoose_country_locale_english( $locale ) {
  */
 add_filter( 'woocommerce_form_field_args', 'wp_augoose_form_field_english', 20, 3 );
 function wp_augoose_form_field_english( $args, $key, $value ) {
-	// Force country field placeholder
-	if ( strpos( $key, 'country' ) !== false && ! strpos( $key, 'country_code' ) ) {
-		if ( isset( $args['placeholder'] ) && ( strpos( $args['placeholder'], 'Pilih negara' ) !== false || strpos( $args['placeholder'], 'pilih negara' ) !== false || strpos( $args['placeholder'], 'wilayah' ) !== false ) ) {
-			$args['placeholder'] = 'Select a country / region...';
-		}
-		if ( empty( $args['placeholder'] ) ) {
-			$args['placeholder'] = 'Select a country / region...';
-		}
-	}
 	// Force address field labels
 	if ( strpos( $key, 'address_1' ) !== false ) {
 		if ( isset( $args['label'] ) && ( $args['label'] === 'ALAMAT JALAN' || $args['label'] === 'Alamat jalan' || $args['label'] === 'Street address' ) ) {
@@ -3922,27 +3916,6 @@ function wp_augoose_final_clean_output_for_wc_ajax() {
 remove_action( 'woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20 );
 
 /**
- * Translate Shipping Messages from Indonesian to English
- */
-add_filter( 'woocommerce_shipping_may_be_available_html', 'wp_augoose_translate_shipping_message', 10, 1 );
-function wp_augoose_translate_shipping_message( $html ) {
-	$translations = array(
-		'Masukkan alamat Anda untuk melihat opsi pengiriman' => 'Enter your address to view shipping options',
-		'Masukkan alamat Anda' => 'Enter your address',
-		'untuk melihat opsi pengiriman' => 'to view shipping options',
-		'opsi pengiriman' => 'shipping options',
-	);
-	
-	foreach ( $translations as $indo => $eng ) {
-		$html = str_replace( $indo, $eng, $html );
-		$html = str_replace( ucfirst( $indo ), ucfirst( $eng ), $html );
-		$html = str_replace( strtoupper( $indo ), strtoupper( $eng ), $html );
-	}
-	
-	return $html;
-}
-
-/**
  * Translate Shipping Labels from Indonesian to English
  * Fixes "PENGIRIMAN" and "PENGIRIMAN GRATIS" labels in checkout
  */
@@ -4068,47 +4041,6 @@ function wp_augoose_validate_phone_country_code() {
 	if ( empty( $_POST['billing_phone_country_code'] ) ) {
 		wc_add_notice( 'Please select a country code for your phone number.', 'error' );
 	}
-}
-
-/**
- * Custom rendering for phone field with country code
- * Country code appears small next to phone field
- */
-add_filter( 'woocommerce_form_field_tel', 'wp_augoose_custom_phone_field_with_country_code', 10, 4 );
-function wp_augoose_custom_phone_field_with_country_code( $field, $key, $args, $value ) {
-	// Only apply to billing_phone field
-	if ( $key !== 'billing_phone' ) {
-		return $field;
-	}
-	
-	// Get country code value
-	$country_code_value = '';
-	if ( isset( $_POST['billing_phone_country_code'] ) ) {
-		$country_code_value = sanitize_text_field( $_POST['billing_phone_country_code'] );
-	} elseif ( WC()->customer && WC()->customer->get_meta( 'billing_phone_country_code' ) ) {
-		$country_code_value = WC()->customer->get_meta( 'billing_phone_country_code' );
-	}
-	
-	// Build country code select
-	$country_codes = wp_augoose_get_country_codes();
-	$country_code_options = '<option value="">Code</option>';
-	foreach ( $country_codes as $code => $label ) {
-		$selected = selected( $country_code_value, $code, false );
-		$country_code_options .= '<option value="' . esc_attr( $code ) . '" ' . $selected . '>' . esc_html( $code ) . '</option>';
-	}
-	
-	$country_code_field = '<select name="billing_phone_country_code" id="billing_phone_country_code" class="phone-country-code-select" required>
-		' . $country_code_options . '
-	</select>';
-	
-	// Replace woocommerce-input-wrapper with our custom wrapper
-	$field = str_replace( 
-		'<span class="woocommerce-input-wrapper">',
-		'<span class="woocommerce-input-wrapper phone-field-wrapper">' . $country_code_field,
-		$field
-	);
-	
-	return $field;
 }
 
 /**
