@@ -2010,17 +2010,33 @@ function wp_augoose_filter_payment_gateways_by_location( $available_gateways ) {
 		return $available_gateways;
 	}
 	
-	// Get customer billing country
+	// Get customer billing country - try multiple methods
 	$billing_country = '';
-	if ( WC()->customer && WC()->customer->get_billing_country() ) {
-		$billing_country = WC()->customer->get_billing_country();
-	} elseif ( isset( $_POST['billing_country'] ) ) {
+	
+	// Method 1: From POST data (AJAX checkout update)
+	if ( isset( $_POST['billing_country'] ) && ! empty( $_POST['billing_country'] ) ) {
 		$billing_country = sanitize_text_field( $_POST['billing_country'] );
-	} elseif ( WC()->checkout() && WC()->checkout()->get_value( 'billing_country' ) ) {
-		$billing_country = WC()->checkout()->get_value( 'billing_country' );
+	}
+	// Method 2: From WC customer object
+	elseif ( WC()->customer && WC()->customer->get_billing_country() ) {
+		$billing_country = WC()->customer->get_billing_country();
+	}
+	// Method 3: From checkout form value
+	elseif ( WC()->checkout() ) {
+		$checkout_country = WC()->checkout()->get_value( 'billing_country' );
+		if ( ! empty( $checkout_country ) ) {
+			$billing_country = $checkout_country;
+		}
+	}
+	// Method 4: From session (if available)
+	elseif ( WC()->session && WC()->session->get( 'customer' ) ) {
+		$session_customer = WC()->session->get( 'customer' );
+		if ( isset( $session_customer['country'] ) && ! empty( $session_customer['country'] ) ) {
+			$billing_country = $session_customer['country'];
+		}
 	}
 	
-	// If no country selected yet, show all methods
+	// If no country selected yet, show all methods (important for initial page load)
 	if ( empty( $billing_country ) ) {
 		return $available_gateways;
 	}
@@ -2035,8 +2051,21 @@ function wp_augoose_filter_payment_gateways_by_location( $available_gateways ) {
 		// SG, MY, ID -> Only DOKU
 		foreach ( $available_gateways as $gateway_id => $gateway ) {
 			$gateway_id_lower = strtolower( $gateway_id );
-			if ( strpos( $gateway_id_lower, 'doku' ) !== false || 
-			     strpos( $gateway_id_lower, 'jokul' ) !== false ) {
+			$gateway_title_lower = strtolower( $gateway->get_title() );
+			$gateway_class = get_class( $gateway );
+			$gateway_class_lower = strtolower( $gateway_class );
+			
+			// Check multiple ways to detect DOKU
+			$is_doku = (
+				strpos( $gateway_id_lower, 'doku' ) !== false || 
+				strpos( $gateway_id_lower, 'jokul' ) !== false ||
+				strpos( $gateway_title_lower, 'doku' ) !== false ||
+				strpos( $gateway_title_lower, 'jokul' ) !== false ||
+				strpos( $gateway_class_lower, 'doku' ) !== false ||
+				strpos( $gateway_class_lower, 'jokul' ) !== false
+			);
+			
+			if ( $is_doku ) {
 				$filtered_gateways[ $gateway_id ] = $gateway;
 			}
 		}
@@ -2066,12 +2095,154 @@ function wp_augoose_filter_payment_gateways_by_location( $available_gateways ) {
 		}
 	}
 	
-	// If no gateways match, return original (fallback)
+	// If no gateways match, return original (fallback to prevent empty payment methods)
 	if ( empty( $filtered_gateways ) ) {
 		return $available_gateways;
 	}
 	
+	// Auto-select DOKU for SG, MY, ID countries
+	if ( in_array( $billing_country, $doku_countries, true ) && ! empty( $filtered_gateways ) ) {
+		// Set first DOKU gateway as chosen/default
+		foreach ( $filtered_gateways as $gateway_id => $gateway ) {
+			$gateway->chosen = true;
+			break; // Set first one as chosen
+		}
+	}
+	
 	return $filtered_gateways;
+}
+
+/**
+ * Validate payment method during checkout process
+ * Ensure SG, MY, ID customers use DOKU
+ */
+add_action( 'woocommerce_checkout_process', 'wp_augoose_validate_payment_method_by_country', 10 );
+function wp_augoose_validate_payment_method_by_country() {
+	if ( ! isset( $_POST['payment_method'] ) || ! isset( $_POST['billing_country'] ) ) {
+		return;
+	}
+	
+	$payment_method = sanitize_text_field( $_POST['payment_method'] );
+	$billing_country = sanitize_text_field( $_POST['billing_country'] );
+	
+	// Countries that must use DOKU
+	$doku_countries = array( 'SG', 'MY', 'ID' );
+	
+	if ( in_array( $billing_country, $doku_countries, true ) ) {
+		// Must use DOKU for SG, MY, ID
+		$payment_method_lower = strtolower( $payment_method );
+		$is_doku = (
+			strpos( $payment_method_lower, 'doku' ) !== false || 
+			strpos( $payment_method_lower, 'jokul' ) !== false
+		);
+		
+		if ( ! $is_doku ) {
+			// Find DOKU gateway and force it
+			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+			$doku_gateway_id = null;
+			
+			foreach ( $available_gateways as $gateway_id => $gateway ) {
+				$gateway_id_lower = strtolower( $gateway_id );
+				if ( strpos( $gateway_id_lower, 'doku' ) !== false || 
+				     strpos( $gateway_id_lower, 'jokul' ) !== false ) {
+					$doku_gateway_id = $gateway_id;
+					break;
+				}
+			}
+			
+			if ( $doku_gateway_id ) {
+				// Force DOKU payment method
+				$_POST['payment_method'] = $doku_gateway_id;
+				wc_add_notice( 'Payment method has been automatically set to DOKU for your location.', 'notice' );
+			} else {
+				wc_add_notice( 'DOKU payment method is required for your location. Please contact us if you need assistance.', 'error' );
+			}
+		}
+	} else {
+		// Other countries should not use DOKU
+		$payment_method_lower = strtolower( $payment_method );
+		$is_doku = (
+			strpos( $payment_method_lower, 'doku' ) !== false || 
+			strpos( $payment_method_lower, 'jokul' ) !== false
+		);
+		
+		if ( $is_doku ) {
+			// Find alternative payment method (PayPal or Card)
+			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+			$alternative_gateway_id = null;
+			
+			foreach ( $available_gateways as $gateway_id => $gateway ) {
+				$gateway_id_lower = strtolower( $gateway_id );
+				$gateway_title_lower = strtolower( $gateway->get_title() );
+				
+				$is_paypal = ( strpos( $gateway_id_lower, 'paypal' ) !== false || 
+				               strpos( $gateway_id_lower, 'ppcp' ) !== false ||
+				               strpos( $gateway_title_lower, 'paypal' ) !== false );
+				
+				$is_card = ( strpos( $gateway_id_lower, 'card' ) !== false || 
+				             strpos( $gateway_id_lower, 'credit' ) !== false || 
+				             strpos( $gateway_id_lower, 'debit' ) !== false ||
+				             strpos( $gateway_id_lower, 'stripe' ) !== false );
+				
+				if ( $is_paypal || $is_card ) {
+					$alternative_gateway_id = $gateway_id;
+					break;
+				}
+			}
+			
+			if ( $alternative_gateway_id ) {
+				$_POST['payment_method'] = $alternative_gateway_id;
+				wc_add_notice( 'Payment method has been automatically set for your location.', 'notice' );
+			} else {
+				wc_add_notice( 'Please select a valid payment method for your location.', 'error' );
+			}
+		}
+	}
+}
+
+/**
+ * Auto-select DOKU payment method via JavaScript when country changes
+ */
+add_action( 'wp_footer', 'wp_augoose_auto_select_doku_js' );
+function wp_augoose_auto_select_doku_js() {
+	if ( ! is_checkout() ) {
+		return;
+	}
+	?>
+	<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		var dokuCountries = ['SG', 'MY', 'ID'];
+		
+		function autoSelectDoku() {
+			var billingCountry = $('select[name="billing_country"]').val();
+			
+			if (billingCountry && dokuCountries.indexOf(billingCountry) !== -1) {
+				// Find DOKU payment method and select it
+				$('input[name="payment_method"]').each(function() {
+					var paymentMethod = $(this).val().toLowerCase();
+					if (paymentMethod.indexOf('doku') !== -1 || paymentMethod.indexOf('jokul') !== -1) {
+						$(this).prop('checked', true).trigger('change');
+						return false; // Break loop
+					}
+				});
+			}
+		}
+		
+		// Run on page load
+		autoSelectDoku();
+		
+		// Run when country changes
+		$(document.body).on('change', 'select[name="billing_country"]', function() {
+			setTimeout(autoSelectDoku, 500);
+		});
+		
+		// Run after checkout update
+		$(document.body).on('updated_checkout', function() {
+			setTimeout(autoSelectDoku, 500);
+		});
+	});
+	</script>
+	<?php
 }
 
 /**
