@@ -6,20 +6,24 @@
 /* CRITICAL OVERRIDE - HIGHEST PRIORITY */
 .latest-collection .woocommerce ul.products,
 .latest-collection .woocommerce ul.products.columns-4,
+.latest-collection .woocommerce ul.products.columns-6,
 .latest-collection .woocommerce ul.products.latest,
 .latest-collection ul.products,
 .latest-collection ul.products.columns-4,
+.latest-collection ul.products.columns-6,
 .latest-collection ul.products.latest {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 30px !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 20px !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 20px !important;
     list-style: none !important;
     flex-direction: unset !important;
     flex-wrap: unset !important;
     align-items: unset !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
 }
 
 .latest-collection .woocommerce ul.products li.product,

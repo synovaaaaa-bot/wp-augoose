@@ -60,7 +60,7 @@ get_header();
 				if ( $featured_products && count( $featured_products ) > 0 ) {
 					// Display featured products using custom template
 					echo '<div class="latest-collection-products">';
-					echo '<div class="woocommerce"><ul class="products columns-4 latest">';
+					echo '<div class="woocommerce"><ul class="products columns-6 latest">';
 					
 					global $product;
 					foreach ( $featured_products as $product ) {

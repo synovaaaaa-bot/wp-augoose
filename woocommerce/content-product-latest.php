@@ -63,8 +63,9 @@ if ( $is_on_sale ) {
 			
 			<?php
 			// Product link wrapper for image - AFTER wishlist button (so wishlist is outside link)
-			if ( function_exists( 'woocommerce_template_loop_product_link_open' ) ) {
-				woocommerce_template_loop_product_link_open();
+			$product_permalink = $product->get_permalink();
+			if ( $product_permalink ) {
+				echo '<a href="' . esc_url( $product_permalink ) . '" class="woocommerce-loop-product__link">';
 			}
 			
 			// Thumbnail
@@ -72,8 +73,8 @@ if ( $is_on_sale ) {
 				woocommerce_template_loop_product_thumbnail();
 			}
 			
-			if ( function_exists( 'woocommerce_template_loop_product_link_close' ) ) {
-				woocommerce_template_loop_product_link_close();
+			if ( $product_permalink ) {
+				echo '</a>';
 			}
 			?>
 		</div>

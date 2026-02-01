@@ -12,7 +12,8 @@
     max-width: 100% !important;
     margin: 48px 0 0 !important;
     padding: 0 !important;
-    overflow-x: hidden !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
   }
   
   .latest-collection .container{
@@ -114,7 +115,8 @@
     max-height: 100% !important;
   }
   
-  .latest-collection .lc-card .lc-thumb a{
+  .latest-collection .lc-card .lc-thumb a,
+  .latest-collection .lc-card .product-thumbnail a.woocommerce-loop-product__link{
     display: flex;
     width: 100%;
     height: 100%;
@@ -123,6 +125,30 @@
     z-index: 1;
     align-items: center;
     justify-content: center;
+    text-decoration: none !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+  
+  .latest-collection .lc-card .product-wishlist{
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 20 !important; /* Higher than product link */
+    pointer-events: auto !important;
+  }
+  
+  .latest-collection .lc-card .product-wishlist button{
+    pointer-events: auto !important;
+    cursor: pointer !important;
+  }
+  
+  /* Ensure product title link is clickable */
+  .latest-collection .lc-card .woocommerce-loop-product__title a{
+    text-decoration: none !important;
+    color: inherit !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
   }
   
   /* ===================================
@@ -154,7 +180,8 @@
     position: absolute;
     top: 12px;
     right: 12px;
-    z-index: 10;
+    z-index: 20 !important; /* Higher than product link to ensure it's clickable */
+    pointer-events: auto !important;
   }
   
   .latest-collection .lc-card .wishlist-toggle{
@@ -430,77 +457,58 @@
   }
   
   /* ===================================
-     SLIDER MODE (HORIZONTAL)
+     SLIDER MODE DISABLED - Use Grid Only
      =================================== */
   .latest-collection .latest-collection-products{
     position: relative;
     width: 100%;
-    overflow: hidden;
+    overflow: visible !important;
   }
   
-  /* override grid to flex */
+  /* Force grid layout - NO slider */
   .latest-collection .latest-collection-products .woocommerce ul.products,
   .latest-collection .latest-collection-products ul.products{
-    display: flex !important;
-    flex-direction: row !important;
-    grid-template-columns: none !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    flex-direction: unset !important;
   
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    scroll-snap-type: none !important;
+    scroll-behavior: auto !important;
   
-    scroll-snap-type: x mandatory !important;
-    scroll-behavior: smooth !important;
-    -webkit-overflow-scrolling: touch !important;
-  
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-  
-    gap: 16px !important;
+    gap: 20px !important;
     padding: 0 20px !important;
     margin: 0 !important;
     list-style: none !important;
   }
   
-  .latest-collection .latest-collection-products .woocommerce ul.products::-webkit-scrollbar{
-    display: none !important;
-  }
-  
   .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card,
   .latest-collection .latest-collection-products ul.products li.product-item.lc-card{
-    flex: 0 0 calc((100% - 100px) / 6) !important;
-    min-width: calc((100% - 100px) / 6) !important;
-    scroll-snap-align: start !important;
+    flex: none !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    width: auto !important;
+    scroll-snap-align: unset !important;
   }
   
-  /* responsive slider widths */
-  @media (max-width: 1400px){
-    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card{
-      flex: 0 0 calc((100% - 90px) / 5) !important;
-      min-width: calc((100% - 90px) / 5) !important;
-    }
-  }
+  /* Responsive grid - 6 columns desktop, 3 tablet, 2 mobile */
   @media (max-width: 1200px){
-    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card{
-      flex: 0 0 calc((100% - 80px) / 4) !important;
-      min-width: calc((100% - 80px) / 4) !important;
-    }
-  }
-  @media (max-width: 992px){
-    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card{
-      flex: 0 0 calc((100% - 60px) / 3) !important;
-      min-width: calc((100% - 60px) / 3) !important;
+    .latest-collection .latest-collection-products .woocommerce ul.products,
+    .latest-collection .latest-collection-products ul.products{
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     }
   }
   @media (max-width: 768px){
-    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card{
-      flex: 0 0 calc((100% - 40px) / 2) !important;
-      min-width: calc((100% - 40px) / 2) !important;
+    .latest-collection .latest-collection-products .woocommerce ul.products,
+    .latest-collection .latest-collection-products ul.products{
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
   }
   @media (max-width: 480px){
-    .latest-collection .latest-collection-products .woocommerce ul.products li.product-item.lc-card{
-      flex: 0 0 calc(100% - 24px) !important;
-      min-width: calc(100% - 24px) !important;
+    .latest-collection .latest-collection-products .woocommerce ul.products,
+    .latest-collection .latest-collection-products ul.products{
+      grid-template-columns: 1fr !important;
     }
   }
   

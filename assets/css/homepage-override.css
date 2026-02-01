@@ -16,11 +16,11 @@ html body .latest-collection .woocommerce ul.products.columns-5,
 html body .latest-collection .woocommerce ul.products.columns-6,
 html body .latest-collection .woocommerce ul.products.latest {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 30px !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 20px !important;
     list-style: none !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 20px !important;
     width: 100% !important;
     clear: both !important;
     flex-direction: unset !important;
@@ -31,6 +31,8 @@ html body .latest-collection .woocommerce ul.products.latest {
     /* Nuclear option - override everything */
     flex: none !important;
     word-break: unset !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
 }
 
 html body div.latest-collection div.container div.woocommerce ul.products li.product,

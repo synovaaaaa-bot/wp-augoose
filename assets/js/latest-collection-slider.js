@@ -227,14 +227,13 @@
         });
     }
     
-    // Initialize when DOM is ready
-    $(document).ready(function() {
-        initLatestCollectionSlider();
-    });
+    // DISABLED: Use grid layout instead of slider
+    // $(document).ready(function() {
+    //     initLatestCollectionSlider();
+    // });
     
-    // Also initialize after AJAX updates (if products are loaded dynamically)
-    $(document.body).on('updated_wc_div', function() {
-        setTimeout(initLatestCollectionSlider, 500);
-    });
+    // $(document.body).on('updated_wc_div', function() {
+    //     setTimeout(initLatestCollectionSlider, 500);
+    // });
     
 })(jQuery);
