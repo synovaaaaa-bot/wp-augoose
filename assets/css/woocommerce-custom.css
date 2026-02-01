@@ -3887,8 +3887,37 @@ body.woocommerce-cart .site-main .entry-content {
         visibility: hidden !important;
     }
     
+    /* Checkout form responsive */
+    .woocommerce form.checkout {
+        grid-template-columns: 1fr !important;
+        gap: 30px !important;
+        padding: 0 16px !important;
+    }
+    
+    .woocommerce-checkout .col2-set {
+        grid-template-columns: 1fr !important;
+        gap: 30px !important;
+    }
+    
     .woocommerce-checkout .form-row {
         margin-bottom: 20px !important;
+        width: 100% !important;
+        float: none !important;
+        padding: 0 !important;
+    }
+    
+    .woocommerce-checkout .form-row.form-row-first,
+    .woocommerce-checkout .form-row.form-row-last {
+        width: 100% !important;
+        float: none !important;
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
+    
+    .woocommerce-checkout .form-row label {
+        font-size: 11px !important;
+        margin-bottom: 8px !important;
+        display: block !important;
     }
     
     .woocommerce-checkout .form-row input[type="text"],
@@ -3897,8 +3926,67 @@ body.woocommerce-cart .site-main .entry-content {
     .woocommerce-checkout .form-row input[type="password"],
     .woocommerce-checkout .form-row select,
     .woocommerce-checkout .form-row textarea {
+        width: 100% !important;
         padding: 14px 16px !important;
         font-size: 13px !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Checkout sections mobile */
+    .woocommerce-checkout h3 {
+        font-size: 12px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    /* Order review mobile */
+    .woocommerce-checkout-review-order {
+        margin-top: 30px !important;
+    }
+    
+    .woocommerce-checkout-review-order-table {
+        font-size: 12px !important;
+    }
+    
+    .woocommerce-checkout-review-order-table .product-name {
+        padding: 16px 0 !important;
+    }
+    
+    .woocommerce-checkout-review-order-table .product-total {
+        padding: 16px 0 !important;
+        width: auto !important;
+        min-width: 100px !important;
+    }
+    
+    .product-item-summary {
+        gap: 12px !important;
+    }
+    
+    .product-item-summary .product-thumbnail {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .product-item-summary .product-title {
+        font-size: 13px !important;
+    }
+    
+    /* Shipping methods mobile */
+    .woocommerce-checkout .woocommerce-shipping-methods label,
+    .woocommerce-checkout #shipping_method label {
+        padding: 12px !important;
+        font-size: 11px !important;
+    }
+    
+    /* Payment methods mobile */
+    .woocommerce-checkout #payment .payment_methods label {
+        padding: 12px 14px !important;
+        font-size: 11px !important;
+    }
+    
+    .woocommerce-checkout .payment_box {
+        margin-left: 0 !important;
+        padding: 12px 14px !important;
+        font-size: 11px !important;
     }
     
     /* Place Order Button Mobile */
@@ -5586,59 +5674,73 @@ body.size-guide-open {
 /* Phone field with country code - inline layout */
 .phone-field-group {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
+    align-items: stretch;
+    gap: 12px;
     width: 100%;
 }
 
 .phone-country-code-wrapper {
     flex-shrink: 0;
     width: auto;
-    max-width: 100px;
-    min-width: 80px;
+    max-width: 110px;
+    min-width: 90px;
+    display: flex;
+    align-items: stretch;
 }
 
 .phone-country-code-wrapper select {
     width: 100%;
-    max-width: 100px;
-    min-width: 80px;
-    padding: 16px 8px !important;
+    max-width: 110px;
+    min-width: 90px;
+    padding: 16px 10px !important;
     font-size: 12px !important;
     text-align: center;
+    height: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
+    background: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }
 
 .phone-with-country-code {
     flex: 1;
     min-width: 0;
     width: auto;
+    display: flex;
+    align-items: stretch;
 }
 
 .phone-with-country-code input {
     width: 100%;
     padding: 16px 12px !important;
     font-size: 13px !important;
+    height: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
 }
 
-/* Mobile: Stack phone fields vertically */
+/* Mobile: Responsive phone fields */
 @media (max-width: 768px) {
     .phone-field-group {
         flex-direction: row;
-        gap: 8px;
-        align-items: center;
+        gap: 10px;
+        align-items: stretch;
     }
     
     .phone-country-code-wrapper {
         width: auto;
-        max-width: 90px;
-        min-width: 70px;
+        max-width: 100px;
+        min-width: 85px;
         flex-shrink: 0;
     }
     
     .phone-country-code-wrapper select {
         width: 100%;
-        max-width: 90px;
-        min-width: 70px;
-        padding: 14px 6px !important;
+        max-width: 100px;
+        min-width: 85px;
+        padding: 14px 8px !important;
         font-size: 11px !important;
     }
     
@@ -5651,6 +5753,29 @@ body.size-guide-open {
         width: 100%;
         padding: 14px 12px !important;
         font-size: 13px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .phone-field-group {
+        gap: 8px;
+    }
+    
+    .phone-country-code-wrapper {
+        max-width: 90px;
+        min-width: 80px;
+    }
+    
+    .phone-country-code-wrapper select {
+        max-width: 90px;
+        min-width: 80px;
+        padding: 12px 6px !important;
+        font-size: 10px !important;
+    }
+    
+    .phone-with-country-code input {
+        padding: 12px 10px !important;
+        font-size: 12px !important;
     }
 }
 
