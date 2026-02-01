@@ -2025,10 +2025,12 @@ function wp_augoose_get_allowed_country_codes() {
 
 /**
  * Force country names to English
+ * CRITICAL: Run with high priority (1) to ensure it runs before other filters
  */
-add_filter( 'woocommerce_countries', 'wp_augoose_countries_english', 20 );
-add_filter( 'woocommerce_countries_allowed_countries', 'wp_augoose_countries_english', 20 );
-add_filter( 'woocommerce_countries_shipping_countries', 'wp_augoose_countries_english', 20 );
+add_filter( 'woocommerce_countries', 'wp_augoose_countries_english', 1, 1 );
+add_filter( 'woocommerce_countries_allowed_countries', 'wp_augoose_countries_english', 1, 1 );
+add_filter( 'woocommerce_countries_shipping_countries', 'wp_augoose_countries_english', 1, 1 );
+add_filter( 'woocommerce_form_field_country', 'wp_augoose_countries_english', 1, 1 );
 function wp_augoose_countries_english( $countries ) {
 	if ( ! is_array( $countries ) || empty( $countries ) ) {
 		return $countries;
@@ -2039,8 +2041,19 @@ function wp_augoose_countries_english( $countries ) {
 		try {
 			$english_countries_file = WC()->plugin_path() . '/i18n/countries.php';
 			if ( file_exists( $english_countries_file ) ) {
+				// Temporarily switch locale to en_US to get English names
+				$original_locale = get_locale();
+				if ( function_exists( 'switch_to_locale' ) ) {
+					switch_to_locale( 'en_US' );
+				}
+				
 				// Load English countries directly (this file contains English names by default)
 				$english_countries = include $english_countries_file;
+				
+				// Restore original locale
+				if ( function_exists( 'restore_previous_locale' ) ) {
+					restore_previous_locale();
+				}
 				
 				// Ensure we got an array
 				if ( is_array( $english_countries ) ) {

@@ -230,7 +230,7 @@
         // Run on scroll - ensure header stays visible
         $(window).on('scroll', function() {
             ensureHeaderVisible();
-            
+
             const currentScroll = $(this).scrollTop();
             if (currentScroll > 50) {
                 header.addClass('scrolled');
@@ -1274,11 +1274,14 @@
                     $(this).html($(this).html().replace(/Punya kupon\?/gi, 'Have a coupon?').replace(/Klik di sini untuk memasukkan kode Anda/gi, 'Click here to enter your code'));
                 }
             });
-            
+        }
+        
         // Force country names in dropdowns - Comprehensive translation map
-        $('select[name*="country"] option').each(function() {
-            var text = $(this).text().trim();
-            var countryMap = {
+        function forceCountryNamesEnglish() {
+            // Update option text
+            $('select[name*="country"] option').each(function() {
+                var text = $(this).text().trim();
+                var countryMap = {
                 // A
                 'Afganistan': 'Afghanistan',
                 'Afghanistan': 'Afghanistan',
@@ -1287,7 +1290,7 @@
                 'Algeria': 'Algeria',
                 'Samoa Amerika': 'American Samoa',
                 'American Samoa': 'American Samoa',
-                'Amerika Serikat': 'United States',
+                    'Amerika Serikat': 'United States',
                 'United States': 'United States',
                 'Argentina': 'Argentina',
                 'Austria': 'Austria',
@@ -1352,11 +1355,11 @@
                 'Italia': 'Italy',
                 'Italy': 'Italy',
                 // J
-                'Jepang': 'Japan',
+                    'Jepang': 'Japan',
                 'Japan': 'Japan',
                 // K
                 'Kazakhstan': 'Kazakhstan',
-                'Korea Selatan': 'South Korea',
+                    'Korea Selatan': 'South Korea',
                 'Korea': 'South Korea',
                 'South Korea': 'South Korea',
                 'Kuwait': 'Kuwait',
@@ -1387,7 +1390,7 @@
                 // P
                 'Paraguay': 'Paraguay',
                 'Peru': 'Peru',
-                'Filipina': 'Philippines',
+                    'Filipina': 'Philippines',
                 'Philippines': 'Philippines',
                 'Polandia': 'Poland',
                 'Poland': 'Poland',
@@ -1417,7 +1420,7 @@
                 'Ukraine': 'Ukraine',
                 'Uni Emirat Arab': 'United Arab Emirates',
                 'United Arab Emirates': 'United Arab Emirates',
-                'Inggris': 'United Kingdom',
+                    'Inggris': 'United Kingdom',
                 'Inggris Raya': 'United Kingdom',
                 'United Kingdom': 'United Kingdom',
                 'Amerika Serikat': 'United States',
@@ -1429,19 +1432,207 @@
                 'Vietnam': 'Vietnam'
             };
             
-            // Direct match
-            if (countryMap[text]) {
-                $(this).text(countryMap[text]);
-            } else {
-                // Case-insensitive partial match
-                for (var idName in countryMap) {
-                    if (text.toLowerCase().includes(idName.toLowerCase()) || idName.toLowerCase().includes(text.toLowerCase())) {
-                        $(this).text(countryMap[idName]);
-                        break;
+                // Direct match
+                if (countryMap[text]) {
+                    $(this).text(countryMap[text]);
+                } else {
+                    // Case-insensitive partial match
+                    for (var idName in countryMap) {
+                        if (text.toLowerCase().includes(idName.toLowerCase()) || idName.toLowerCase().includes(text.toLowerCase())) {
+                            $(this).text(countryMap[idName]);
+                            break;
+                        }
                     }
                 }
-            }
+            });
+            
+            // Update Select2 rendered text if Select2 is initialized
+            $('select[name*="country"]').each(function() {
+                var $select = $(this);
+                if ($select.hasClass('select2-hidden-accessible') || $select.data('select2')) {
+                    try {
+                        var selectedText = $select.find('option:selected').text().trim();
+                        var countryMap = {
+                            // A
+                            'Afganistan': 'Afghanistan',
+                            'Afghanistan': 'Afghanistan',
+                            'Albania': 'Albania',
+                            'Aljazair': 'Algeria',
+                            'Algeria': 'Algeria',
+                            'Samoa Amerika': 'American Samoa',
+                            'American Samoa': 'American Samoa',
+                            'Amerika Serikat': 'United States',
+                            'United States': 'United States',
+                            'Argentina': 'Argentina',
+                            'Austria': 'Austria',
+                            'Australia': 'Australia',
+                            'Azerbaijan': 'Azerbaijan',
+                            // B
+                            'Bahrain': 'Bahrain',
+                            'Belgia': 'Belgium',
+                            'Belgium': 'Belgium',
+                            'Belanda': 'Netherlands',
+                            'Netherlands': 'Netherlands',
+                            'Brasil': 'Brazil',
+                            'Brazil': 'Brazil',
+                            'Brunei': 'Brunei',
+                            'Brunei Darussalam': 'Brunei',
+                            'Bulgaria': 'Bulgaria',
+                            // C
+                            'Kamboja': 'Cambodia',
+                            'Cambodia': 'Cambodia',
+                            'Kanada': 'Canada',
+                            'Canada': 'Canada',
+                            'Cili': 'Chile',
+                            'Chile': 'Chile',
+                            'Tiongkok': 'China',
+                            'Cina': 'China',
+                            'China': 'China',
+                            'Kolombia': 'Colombia',
+                            'Colombia': 'Colombia',
+                            'Kosta Rika': 'Costa Rica',
+                            'Costa Rica': 'Costa Rica',
+                            'Kroasia': 'Croatia',
+                            'Croatia': 'Croatia',
+                            'Republik Ceko': 'Czech Republic',
+                            'Ceko': 'Czech Republic',
+                            'Czech Republic': 'Czech Republic',
+                            // D
+                            'Denmark': 'Denmark',
+                            // E
+                            'Mesir': 'Egypt',
+                            'Egypt': 'Egypt',
+                            // F
+                            'Finlandia': 'Finland',
+                            'Finland': 'Finland',
+                            'Perancis': 'France',
+                            'Prancis': 'France',
+                            'France': 'France',
+                            // G
+                            'Jerman': 'Germany',
+                            'Germany': 'Germany',
+                            'Yunani': 'Greece',
+                            'Greece': 'Greece',
+                            // H
+                            'Hong Kong': 'Hong Kong',
+                            'Hungaria': 'Hungary',
+                            'Hungary': 'Hungary',
+                            // I
+                            'India': 'India',
+                            'Indonesia': 'Indonesia',
+                            'Iran': 'Iran',
+                            'Irlandia': 'Ireland',
+                            'Ireland': 'Ireland',
+                            'Italia': 'Italy',
+                            'Italy': 'Italy',
+                            // J
+                            'Jepang': 'Japan',
+                            'Japan': 'Japan',
+                            // K
+                            'Kazakhstan': 'Kazakhstan',
+                            'Korea Selatan': 'South Korea',
+                            'Korea': 'South Korea',
+                            'South Korea': 'South Korea',
+                            'Kuwait': 'Kuwait',
+                            // L
+                            'Laos': 'Laos',
+                            'Luksemburg': 'Luxembourg',
+                            'Luxembourg': 'Luxembourg',
+                            // M
+                            'Makao': 'Macau',
+                            'Macau': 'Macau',
+                            'Maladewa': 'Maldives',
+                            'Maldives': 'Maldives',
+                            'Malaysia': 'Malaysia',
+                            'Meksiko': 'Mexico',
+                            'Mexico': 'Mexico',
+                            'Monako': 'Monaco',
+                            'Monaco': 'Monaco',
+                            'Mongolia': 'Mongolia',
+                            'Maroko': 'Morocco',
+                            'Morocco': 'Morocco',
+                            'Myanmar': 'Myanmar',
+                            // N
+                            'Nepal': 'Nepal',
+                            'Belanda': 'Netherlands',
+                            'Netherlands': 'Netherlands',
+                            'Selandia Baru': 'New Zealand',
+                            'New Zealand': 'New Zealand',
+                            // P
+                            'Paraguay': 'Paraguay',
+                            'Peru': 'Peru',
+                            'Filipina': 'Philippines',
+                            'Philippines': 'Philippines',
+                            'Polandia': 'Poland',
+                            'Poland': 'Poland',
+                            'Portugal': 'Portugal',
+                            'Puerto Riko': 'Puerto Rico',
+                            'Puerto Rico': 'Puerto Rico',
+                            // S
+                            'Arab Saudi': 'Saudi Arabia',
+                            'Saudi Arbia': 'Saudi Arabia',
+                            'Saudi Arabia': 'Saudi Arabia',
+                            'Singapura': 'Singapore',
+                            'Singapore': 'Singapore',
+                            'Spanyol': 'Spain',
+                            'Spain': 'Spain',
+                            'Swedia': 'Sweden',
+                            'Sweden': 'Sweden',
+                            'Swiss': 'Switzerland',
+                            'Switzerland': 'Switzerland',
+                            // T
+                            'Taiwan': 'Taiwan',
+                            'Thailand': 'Thailand',
+                            'Tunisia': 'Tunisia',
+                            'Turki': 'Turkey',
+                            'Turkey': 'Turkey',
+                            // U
+                            'Ukraina': 'Ukraine',
+                            'Ukraine': 'Ukraine',
+                            'Uni Emirat Arab': 'United Arab Emirates',
+                            'United Arab Emirates': 'United Arab Emirates',
+                            'Inggris': 'United Kingdom',
+                            'Inggris Raya': 'United Kingdom',
+                            'United Kingdom': 'United Kingdom',
+                            'Amerika Serikat': 'United States',
+                            'United States': 'United States',
+                            'Uruguay': 'Uruguay',
+                            'Uzbekistan': 'Uzbekistan',
+                            // V
+                            'Venezuela': 'Venezuela',
+                            'Vietnam': 'Vietnam'
+                        };
+                        
+                        if (countryMap[selectedText]) {
+                            var $rendered = $select.next('.select2-container').find('.select2-selection__rendered');
+                            if ($rendered.length) {
+                                $rendered.text(countryMap[selectedText]);
+                            }
+                        }
+                    } catch(e) {
+                        // Select2 might not be initialized yet, ignore error
+                    }
+                }
+            });
+        }
+        
+        // Run immediately
+        forceCountryNamesEnglish();
+        
+        // Run after Select2 initialization
+        $(document.body).on('select2:open select2:select country_to_state_changed updated_checkout', function() {
+            setTimeout(forceCountryNamesEnglish, 50);
         });
+        
+        // Watch for Select2 initialization
+        if (typeof $.fn.selectWoo !== 'undefined' || typeof $.fn.select2 !== 'undefined') {
+            var originalSelectWoo = $.fn.selectWoo || $.fn.select2;
+            $.fn.selectWoo = $.fn.select2 = function() {
+                var result = originalSelectWoo.apply(this, arguments);
+                setTimeout(forceCountryNamesEnglish, 100);
+                return result;
+            };
+        }
         
         // Force Select2 placeholder to English
         function forceSelect2PlaceholderEnglish() {
@@ -1514,10 +1705,10 @@
             $.fn.selectWoo = $.fn.select2 = function() {
                 var result = originalSelectWoo.apply(this, arguments);
                 setTimeout(forceSelect2PlaceholderEnglish, 100);
+                setTimeout(forceCountryNamesEnglish, 100);
                 return result;
             };
         }
-    }
         
         // Run on page load
         forceCheckoutFieldsEnglish();
