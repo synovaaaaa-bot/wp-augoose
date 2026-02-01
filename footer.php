@@ -86,8 +86,8 @@
                         ?>
                     <?php else : ?>
                         <ul class="footer-links">
-                            <li><a href="https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg" target="_blank"><?php echo esc_html__( 'Jacket size and fit guide', 'wp-augoose' ); ?></a></li>
-                            <li><a href="https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg" target="_blank"><?php echo esc_html__( 'Pants size and fit guide', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#" class="footer-size-guide-link" data-guide="jacket-regular"><?php echo esc_html__( 'Jacket size and fit guide', 'wp-augoose' ); ?></a></li>
+                            <li><a href="#" class="footer-size-guide-link" data-guide="pants-regular"><?php echo esc_html__( 'Pants size and fit guide', 'wp-augoose' ); ?></a></li>
                             <li><a href="#" class="order-shipping-link"><?php echo esc_html__( 'Order & shipping', 'wp-augoose' ); ?></a></li>
                         </ul>
                     <?php endif; ?>
@@ -158,254 +158,36 @@
             <div class="size-guide-content">
                 <h2 class="size-guide-title">SIZE GUIDE</h2>
                 <div class="size-guide-tabs">
-                    <button class="size-guide-tab active" data-guide="pants">PANTS SIZE AND FIT GUIDE</button>
-                    <button class="size-guide-tab" data-guide="jackets">JACKETS SIZE AND FIT GUIDE</button>
-                    <button class="size-guide-tab" data-guide="international">INTERNATIONAL SIZE GUIDE</button>
+                    <button class="size-guide-tab active" data-guide="jacket-regular">JACKET REGULAR (SERVICE) SIZE GUIDE</button>
+                    <button class="size-guide-tab" data-guide="jacket-vintage">JACKET VINTAGE BOXY FIT SIZE GUIDE</button>
+                    <button class="size-guide-tab" data-guide="pants-regular">PANTS REGULAR FIT (DOUBLE KNEE, CARPENTER, UTILITY) SIZE GUIDE</button>
+                    <button class="size-guide-tab" data-guide="pants-straight">PANTS STRAIGHT FIT (SENTINEL, FATIGUE) SIZE GUIDE</button>
+                    <button class="size-guide-tab" data-guide="workshirt-vest">WORKSHIRT AND VEST SIZE GUIDE</button>
                 </div>
                 
-                <!-- Pants Size Guide -->
-                <div class="size-guide-table-wrapper" data-guide="pants">
-                    <table class="size-guide-table">
-                        <thead>
-                            <tr>
-                                <th>SIZE</th>
-                                <th>28</th>
-                                <th>30</th>
-                                <th>32</th>
-                                <th>34</th>
-                                <th>36</th>
-                                <th>38</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>WAIST</td>
-                                <td>78</td>
-                                <td>84</td>
-                                <td>89</td>
-                                <td>95</td>
-                                <td>99</td>
-                                <td>104</td>
-                            </tr>
-                            <tr>
-                                <td>INSEAM</td>
-                                <td>31</td>
-                                <td>31</td>
-                                <td>31</td>
-                                <td>31</td>
-                                <td>31</td>
-                                <td>31</td>
-                            </tr>
-                            <tr>
-                                <td>OPEN LEG</td>
-                                <td>22</td>
-                                <td>22</td>
-                                <td>22</td>
-                                <td>23</td>
-                                <td>23</td>
-                                <td>23</td>
-                            </tr>
-                            <tr>
-                                <td>FRONT RISE</td>
-                                <td>31</td>
-                                <td>32</td>
-                                <td>33</td>
-                                <td>33</td>
-                                <td>34</td>
-                                <td>37</td>
-                            </tr>
-                            <tr>
-                                <td>BACK RISE</td>
-                                <td>41</td>
-                                <td>42</td>
-                                <td>43</td>
-                                <td>44</td>
-                                <td>45</td>
-                                <td>48</td>
-                            </tr>
-                            <tr>
-                                <td>THIGH</td>
-                                <td>62</td>
-                                <td>64</td>
-                                <td>66</td>
-                                <td>68</td>
-                                <td>72</td>
-                                <td>74</td>
-                            </tr>
-                            <tr>
-                                <td>KNEE</td>
-                                <td>23.5</td>
-                                <td>24.5</td>
-                                <td>25.5</td>
-                                <td>28</td>
-                                <td>28</td>
-                                <td>30</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p class="size-guide-disclaimer">*The garments are cut and sewn by hand, so measurement may vary slightly each pairs</p>
+                <!-- Jacket Regular (Service) Size Guide -->
+                <div class="size-guide-image-wrapper" data-guide="jacket-regular">
+                    <img src="https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg" alt="Jacket Regular Service Size Chart" class="size-guide-image" />
                 </div>
                 
-                <!-- Jackets Size Guide -->
-                <div class="size-guide-table-wrapper" data-guide="jackets" style="display: none;">
-                    <div class="size-guide-product-name">
-                        <h3>AUGOOSE active jacket</h3>
-                    </div>
-                    <table class="size-guide-table">
-                        <thead>
-                            <tr>
-                                <th>SIZE</th>
-                                <th>S</th>
-                                <th>M</th>
-                                <th>L</th>
-                                <th>XL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>SHOULDER</td>
-                                <td>44</td>
-                                <td>46</td>
-                                <td>48</td>
-                                <td>50</td>
-                            </tr>
-                            <tr>
-                                <td>WIDTH</td>
-                                <td>55</td>
-                                <td>58</td>
-                                <td>61</td>
-                                <td>64</td>
-                            </tr>
-                            <tr>
-                                <td>HIP</td>
-                                <td>54</td>
-                                <td>57</td>
-                                <td>60</td>
-                                <td>63</td>
-                            </tr>
-                            <tr>
-                                <td>SLEEVE</td>
-                                <td>58</td>
-                                <td>60</td>
-                                <td>62</td>
-                                <td>63</td>
-                            </tr>
-                            <tr>
-                                <td>LENGTH</td>
-                                <td>61</td>
-                                <td>63</td>
-                                <td>65</td>
-                                <td>67</td>
-                            </tr>
-                            <tr>
-                                <td>CUFF</td>
-                                <td>14</td>
-                                <td>15</td>
-                                <td>15.5</td>
-                                <td>16</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p class="size-guide-disclaimer">*The garments are cut and sewn by hand, so measurement may vary slightly each pairs</p>
+                <!-- Jacket Vintage Boxy Fit Size Guide -->
+                <div class="size-guide-image-wrapper" data-guide="jacket-vintage" style="display: none;">
+                    <img src="https://augoose.co/wp-content/uploads/2026/01/Jacket-Vintage-Boxy-Fit_Size-Chart.jpg" alt="Jacket Vintage Boxy Fit Size Chart" class="size-guide-image" />
                 </div>
                 
-                <!-- International Size Guide -->
-                <div class="size-guide-table-wrapper" data-guide="international" style="display: none;">
-                    <div class="size-guide-section-header">
-                        <div class="size-guide-section-title">
-                            <h3>Mens XS to 5X</h3>
-                        </div>
-                        <div class="size-guide-section-subtitle">
-                            <h3>International</h3>
-                        </div>
-                    </div>
-                    <p class="size-guide-description">Sizing for mens styles that are available in sizes XS to 5X.</p>
-                    <table class="size-guide-table size-guide-international">
-                        <thead>
-                            <tr>
-                                <th>SIZE</th>
-                                <th>UK/AUS</th>
-                                <th>UK CHEST</th>
-                                <th>UK WAIST</th>
-                                <th>IT/FR</th>
-                                <th>JP TOPS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>XS</td>
-                                <td>XS</td>
-                                <td>34</td>
-                                <td>28</td>
-                                <td>44</td>
-                                <td>1</td>
-                            </tr>
-                            <tr>
-                                <td>S</td>
-                                <td>S</td>
-                                <td>36</td>
-                                <td>30</td>
-                                <td>46</td>
-                                <td>2</td>
-                            </tr>
-                            <tr>
-                                <td>M</td>
-                                <td>M</td>
-                                <td>38</td>
-                                <td>32</td>
-                                <td>48</td>
-                                <td>3</td>
-                            </tr>
-                            <tr>
-                                <td>L</td>
-                                <td>L</td>
-                                <td>40</td>
-                                <td>34</td>
-                                <td>50</td>
-                                <td>4</td>
-                            </tr>
-                            <tr>
-                                <td>XL</td>
-                                <td>XL</td>
-                                <td>42</td>
-                                <td>36</td>
-                                <td>52</td>
-                                <td>5</td>
-                            </tr>
-                            <tr>
-                                <td>2X</td>
-                                <td>2X</td>
-                                <td>44</td>
-                                <td>38</td>
-                                <td>54</td>
-                                <td>6</td>
-                            </tr>
-                            <tr>
-                                <td>3X</td>
-                                <td>3X</td>
-                                <td>46</td>
-                                <td>40</td>
-                                <td>56</td>
-                                <td>7</td>
-                            </tr>
-                            <tr>
-                                <td>4X</td>
-                                <td>4X</td>
-                                <td>48</td>
-                                <td>42</td>
-                                <td>58</td>
-                                <td>8</td>
-                            </tr>
-                            <tr>
-                                <td>5X</td>
-                                <td>5X</td>
-                                <td>50</td>
-                                <td>44</td>
-                                <td>60</td>
-                                <td>9</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Pants Regular Fit Size Guide -->
+                <div class="size-guide-image-wrapper" data-guide="pants-regular" style="display: none;">
+                    <img src="https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg" alt="Pants Regular Fit Size Chart" class="size-guide-image" />
+                </div>
+                
+                <!-- Pants Straight Fit Size Guide -->
+                <div class="size-guide-image-wrapper" data-guide="pants-straight" style="display: none;">
+                    <img src="https://augoose.co/wp-content/uploads/2026/01/Pants-Straight-Fit-Sentinel-Fatigue_Size-Chart.jpg" alt="Pants Straight Fit Size Chart" class="size-guide-image" />
+                </div>
+                
+                <!-- Workshirt and Vest Size Guide -->
+                <div class="size-guide-image-wrapper" data-guide="workshirt-vest" style="display: none;">
+                    <img src="https://augoose.co/wp-content/uploads/2026/01/Workshirt-and-Vest_Size-Chart.jpg" alt="Workshirt and Vest Size Chart" class="size-guide-image" />
                 </div>
             </div>
         </div>
@@ -512,7 +294,7 @@
 // Size Guide Modal - Simple inline script to ensure it works
 (function() {
     function openSizeGuide(guide) {
-        guide = guide || 'pants';
+        guide = guide || 'jacket-regular';
         var modal = document.getElementById('size-guide-modal');
         if (!modal) {
             console.error('Size guide modal not found in DOM');
@@ -523,7 +305,7 @@
         
         // Show correct guide
         var tabs = modal.querySelectorAll('.size-guide-tab');
-        var wrappers = modal.querySelectorAll('.size-guide-table-wrapper');
+        var wrappers = modal.querySelectorAll('.size-guide-image-wrapper');
         
         for (var i = 0; i < tabs.length; i++) {
             if (tabs[i].getAttribute('data-guide') === guide) {
@@ -561,11 +343,28 @@
     function init() {
         console.log('Initializing size guide...');
         
-        // Footer links - now open image directly (no modal)
-        // Links are already set to direct image URLs, no JavaScript needed
+        // Footer links - open modal with appropriate tab
+        var footerLinks = document.querySelectorAll('.footer-size-guide-link');
+        for (var i = 0; i < footerLinks.length; i++) {
+            footerLinks[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var guide = this.getAttribute('data-guide') || 'jacket-regular';
+                openSizeGuide(guide);
+            });
+        }
         
-        // Product page SIZE GUIDE link - now opens image directly
-        // Links are already set to direct image URLs in template, no JavaScript needed
+        // Product page SIZE GUIDE link - open modal with product-specific tab
+        var sizeGuideLinks = document.querySelectorAll('.size-guide-link');
+        for (var i = 0; i < sizeGuideLinks.length; i++) {
+            sizeGuideLinks[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Get guide from data attribute or default to jacket-regular
+                var guide = this.getAttribute('data-guide') || 'jacket-regular';
+                openSizeGuide(guide);
+            });
+        }
         
         // Close buttons
         var closeBtns = document.querySelectorAll('.size-guide-close, .size-guide-overlay');

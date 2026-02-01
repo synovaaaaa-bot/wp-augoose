@@ -192,20 +192,60 @@
         });
     }
 
-    // Sticky Header
+    // Sticky Header - Ensure header always visible
     function initStickyHeader() {
+        const headerStack = $('.header-stack');
         const header = $('.site-header');
-        const headerHeight = header.outerHeight();
-
+        
+        // Ensure header is always visible and no space above
+        function ensureHeaderVisible() {
+            headerStack.css({
+                'display': 'block',
+                'visibility': 'visible',
+                'opacity': '1',
+                'transform': 'translateY(0)',
+                'margin-top': '0',
+                'padding-top': '0',
+                'position': 'sticky',
+                'top': '0'
+            });
+            
+            header.css({
+                'display': 'block',
+                'visibility': 'visible',
+                'opacity': '1',
+                'transform': 'translateY(0)',
+                'margin-top': '0',
+                'padding-top': '0'
+            });
+            
+            // Remove any space above header
+            $('body').css('padding-top', '0');
+            $('html').css('padding-top', '0');
+        }
+        
+        // Run immediately
+        ensureHeaderVisible();
+        
+        // Run on scroll - ensure header stays visible
         $(window).on('scroll', function() {
+            ensureHeaderVisible();
+            
             const currentScroll = $(this).scrollTop();
-
-            if (currentScroll > headerHeight) {
+            if (currentScroll > 50) {
                 header.addClass('scrolled');
             } else {
                 header.removeClass('scrolled');
             }
         });
+        
+        // Run on resize
+        $(window).on('resize', function() {
+            ensureHeaderVisible();
+        });
+        
+        // Run periodically to ensure it stays visible
+        setInterval(ensureHeaderVisible, 500);
     }
 
     // Shop Filters Toggle (Archive pages) - Off-Canvas with No Layout Shift
@@ -1265,6 +1305,49 @@
         // Also watch for address field updates
         $(document).on('change', 'select[name*="country"]', function() {
             setTimeout(forceCheckoutFieldsEnglish, 200);
+        });
+        
+        // Force shipping message to English
+        function translateShippingMessage() {
+            $('.woocommerce-shipping-totals, .shipping, .woocommerce-shipping-fields, .woocommerce-shipping-calculator').each(function() {
+                var $this = $(this);
+                var text = $this.text();
+                if (text.includes('Masukkan alamat') || text.includes('masukkan alamat') || text.includes('opsi pengiriman')) {
+                    $this.html($this.html().replace(/Masukkan alamat Anda untuk melihat opsi pengiriman/gi, 'Enter your address to view shipping options.'));
+                    $this.html($this.html().replace(/Masukkan alamat Anda untuk melihat opsi/gi, 'Enter your address to view shipping options.'));
+                }
+            });
+        }
+        translateShippingMessage();
+        
+        // Arrange phone field with country code - inline layout
+        function arrangePhoneField() {
+            var $phoneField = $('.form-row.phone-with-country-code');
+            var $countryCodeField = $('.form-row.phone-country-code-wrapper');
+            
+            if ($phoneField.length && $countryCodeField.length) {
+                // Wrap both in a flex container if not already wrapped
+                var $phoneParent = $phoneField.parent();
+                var $countryParent = $countryCodeField.parent();
+                
+                if (!$phoneParent.hasClass('phone-field-group') && !$countryParent.hasClass('phone-field-group')) {
+                    // Find common parent
+                    var $commonParent = $phoneField.closest('.woocommerce-billing-fields, .woocommerce-checkout, form');
+                    if ($commonParent.length) {
+                        // Create wrapper
+                        $phoneField.add($countryCodeField).wrapAll('<div class="phone-field-group"></div>');
+                    }
+                }
+            }
+        }
+        
+        // Run on page load and after checkout update
+        arrangePhoneField();
+        $(document.body).on('updated_checkout', function() {
+            setTimeout(function() {
+                arrangePhoneField();
+                translateShippingMessage();
+            }, 100);
         });
         
         // Handle variable product button - redirect to product page

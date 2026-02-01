@@ -1692,23 +1692,23 @@ function wp_augoose_checkout_fields_english( $fields ) {
 			$fields['billing']['billing_last_name']['placeholder'] = 'Last name';
 		}
 		
-		// Add phone country code field before phone
+		// Add phone country code field - will be rendered inline with phone via filter
 		if ( isset( $fields['billing']['billing_phone'] ) ) {
 			$phone_priority = isset( $fields['billing']['billing_phone']['priority'] ) ? $fields['billing']['billing_phone']['priority'] : 100;
 			
-			// Add country code dropdown before phone
+			// Add country code dropdown - will be hidden and rendered inline with phone
 			$fields['billing']['billing_phone_country_code'] = array(
 				'label'       => 'Country code',
 				'placeholder' => 'Code',
 				'required'    => true,
-				'class'       => array( 'form-row-first', 'phone-country-code' ),
+				'class'       => array( 'form-row-wide', 'phone-country-code-wrapper' ),
 				'priority'    => $phone_priority - 1,
 				'type'        => 'select',
 				'options'     => wp_augoose_get_country_codes(),
 			);
 			
-			// Adjust phone field to be second column
-			$fields['billing']['billing_phone']['class'] = array( 'form-row-last' );
+			// Adjust phone field to be inline with country code
+			$fields['billing']['billing_phone']['class'] = array( 'form-row-wide', 'phone-with-country-code' );
 			$fields['billing']['billing_phone']['priority'] = $phone_priority;
 		}
 		
@@ -1958,6 +1958,15 @@ function wp_augoose_form_field_english( $args, $key, $value ) {
 	if ( strpos( $key, 'address_2' ) !== false ) {
 		if ( isset( $args['placeholder'] ) && ( strpos( $args['placeholder'], 'Apartemen' ) !== false || strpos( $args['placeholder'], 'apartemen' ) !== false ) ) {
 			$args['placeholder'] = 'Apartment, suite, unit, etc. (optional)';
+		}
+	}
+	// Force country/region placeholder to English
+	if ( strpos( $key, 'country' ) !== false && ! strpos( $key, 'phone_country_code' ) ) {
+		if ( isset( $args['placeholder'] ) && ( strpos( $args['placeholder'], 'Pilih negara' ) !== false || strpos( $args['placeholder'], 'pilih negara' ) !== false || strpos( $args['placeholder'], 'wilayah' ) !== false ) ) {
+			$args['placeholder'] = 'Select a country / region...';
+		}
+		if ( ! isset( $args['placeholder'] ) || empty( $args['placeholder'] ) ) {
+			$args['placeholder'] = 'Select a country / region...';
 		}
 	}
 	return $args;
@@ -3941,6 +3950,33 @@ function wp_augoose_translate_shipping_method_label( $label, $method = null ) {
 	}
 	
 	return $label;
+}
+
+/**
+ * Translate shipping message to English
+ */
+add_filter( 'woocommerce_shipping_may_be_available_html', 'wp_augoose_translate_shipping_message', 20 );
+function wp_augoose_translate_shipping_message( $message ) {
+	// Translate Indonesian shipping message to English
+	$indonesian_messages = array(
+		'Masukkan alamat Anda untuk melihat opsi pengiriman' => 'Enter your address to view shipping options.',
+		'Masukkan alamat Anda untuk melihat opsi' => 'Enter your address to view shipping options.',
+		'masukkan alamat anda untuk melihat opsi pengiriman' => 'Enter your address to view shipping options.',
+		'masukkan alamat anda untuk melihat opsi' => 'Enter your address to view shipping options.',
+	);
+	
+	foreach ( $indonesian_messages as $indonesian => $english ) {
+		if ( strpos( $message, $indonesian ) !== false ) {
+			$message = str_replace( $indonesian, $english, $message );
+		}
+	}
+	
+	// Also check if message contains Indonesian text
+	if ( stripos( $message, 'masukkan' ) !== false || stripos( $message, 'alamat' ) !== false || stripos( $message, 'opsi pengiriman' ) !== false ) {
+		$message = 'Enter your address to view shipping options.';
+	}
+	
+	return $message;
 }
 
 /**

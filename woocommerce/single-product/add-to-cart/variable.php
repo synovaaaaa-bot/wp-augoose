@@ -100,9 +100,34 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 						<?php if ( $is_size ) : ?>
 							<?php 
 							global $product;
-							$size_chart_url = wp_augoose_get_size_chart_url( $product );
+							// Determine guide based on product categories
+							$guide = 'jacket-regular'; // default
+							$product_cats = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'slugs' ) );
+							if ( is_array( $product_cats ) ) {
+								foreach ( $product_cats as $cat ) {
+									$cat_lower = strtolower( $cat );
+									if ( strpos( $cat_lower, 'jacket' ) !== false ) {
+										if ( strpos( $cat_lower, 'vintage' ) !== false || strpos( $cat_lower, 'boxy' ) !== false ) {
+											$guide = 'jacket-vintage';
+										} else {
+											$guide = 'jacket-regular';
+										}
+										break;
+									} elseif ( strpos( $cat_lower, 'pants' ) !== false || strpos( $cat_lower, 'pant' ) !== false ) {
+										if ( strpos( $cat_lower, 'straight' ) !== false || strpos( $cat_lower, 'sentinel' ) !== false || strpos( $cat_lower, 'fatigue' ) !== false ) {
+											$guide = 'pants-straight';
+										} else {
+											$guide = 'pants-regular';
+										}
+										break;
+									} elseif ( strpos( $cat_lower, 'shirt' ) !== false || strpos( $cat_lower, 'vest' ) !== false || strpos( $cat_lower, 'workshirt' ) !== false ) {
+										$guide = 'workshirt-vest';
+										break;
+									}
+								}
+							}
 							?>
-							<a href="<?php echo esc_url( $size_chart_url ); ?>" target="_blank" class="size-guide-link">SIZE GUIDE</a>
+							<a href="#" class="size-guide-link" data-guide="<?php echo esc_attr( $guide ); ?>">SIZE GUIDE</a>
 						<?php endif; ?>
 					</div>
 					

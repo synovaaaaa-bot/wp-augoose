@@ -3,15 +3,35 @@
  * Based on: https://fox-oak-07790223.figma.site/
  */
 
+/* Remove any space above header globally */
+body {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+html {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+body > *:first-child:not(.header-stack) {
+    margin-top: 0 !important;
+}
+
 /* ============================================
   Header stack (Announcement + Header)
    ============================================ */
 .header-stack {
-    position: sticky;
-    top: 0;
-    z-index: 200;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 200 !important;
     /* Prevent duplication */
-    display: block;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
 .announcement-bar {
@@ -40,12 +60,16 @@
     transition: all 0.3s ease;
     /* Override legacy header padding from `style.css` */
     padding: 0 !important;
+    margin: 0 !important;
     /* Override sticky from style.css to prevent duplication */
     position: relative !important;
     top: auto !important;
     z-index: 200;
     /* Prevent duplication */
-    display: block;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
 }
 
 .site-header.scrolled {
@@ -474,15 +498,40 @@ body.mobile-menu-open .mobile-menu {
     margin-bottom: 16px;
 }
 
+.mobile-menu .header-category-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-menu .header-category-menu li {
+    margin-bottom: 16px;
+}
+
+.mobile-menu .header-category-menu a {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    color: #000 !important;
+    text-decoration: none !important;
+    display: block !important;
+    padding: 12px 0 !important;
+    transition: color 0.3s !important;
+    font-family: inherit !important;
+}
+
 .mobile-menu a {
-    font-size: 1rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #000;
-    text-decoration: none;
-    display: block;
-    padding: 12px 0;
-    transition: color 0.3s;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    color: #000 !important;
+    text-decoration: none !important;
+    display: block !important;
+    padding: 12px 0 !important;
+    transition: color 0.3s !important;
+    font-family: inherit !important;
 }
 
 .mobile-menu a:hover {
@@ -530,13 +579,35 @@ body.mobile-menu-open .mobile-menu {
 @media (max-width: 768px) {
     /* Prevent header duplication */
     .header-stack {
-        position: sticky;
-        top: 0;
-        z-index: 200;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 200 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
     }
     
     .site-header {
         position: relative !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    /* Ensure mobile menu font matches desktop */
+    .mobile-menu a,
+    .mobile-menu .header-category-menu a {
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.5px !important;
+        font-family: inherit !important;
     }
     
     .header-container {
