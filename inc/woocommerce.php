@@ -5604,8 +5604,15 @@ function wp_augoose_save_original_currency_to_cart_item( $cart_item_data, $produ
 		}
 	}
 	
-	// Skip if currency is USD or not SGD/MYR
-	if ( ! $client_currency || $client_currency === 'USD' || ! in_array( $client_currency, array( 'SGD', 'MYR' ), true ) ) {
+	// IMPORTANT: For USD, save currency but don't convert
+	if ( $client_currency === 'USD' ) {
+		$cart_item_data['wp_augoose_original_currency'] = 'USD';
+		$cart_item_data['wp_augoose_no_conversion'] = true; // Flag to indicate no conversion needed
+		return $cart_item_data; // USD stays USD - no conversion
+	}
+	
+	// Skip if not SGD/MYR
+	if ( ! $client_currency || ! in_array( $client_currency, array( 'SGD', 'MYR' ), true ) ) {
 		return $cart_item_data;
 	}
 	
@@ -5780,6 +5787,14 @@ function wp_augoose_convert_cart_items_to_idr( $cart ) {
 	
 	// Process each cart item
 	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+		// IMPORTANT: Skip USD items completely (no conversion)
+		$item_currency_check = isset( $cart_item['wp_augoose_original_currency'] ) 
+			? $cart_item['wp_augoose_original_currency'] 
+			: '';
+		if ( $item_currency_check === 'USD' || isset( $cart_item['wp_augoose_no_conversion'] ) ) {
+			continue; // USD stays USD - skip conversion
+		}
+		
 		// Check if item already has converted price from add_to_cart
 		// If yes, use that price directly (already calculated in backend)
 		if ( isset( $cart_item['wp_augoose_converted_price_idr'] ) && $cart_item['wp_augoose_converted_price_idr'] > 0 ) {
@@ -5966,7 +5981,17 @@ function wp_augoose_use_converted_cart_item_price( $price_html, $cart_item, $car
 	$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
 		? $cart_item['wp_augoose_original_currency'] 
 		: '';
-	if ( $item_currency === 'USD' ) {
+	
+	// If no original currency set, check current client currency
+	if ( empty( $item_currency ) ) {
+		$item_currency = wp_augoose_safe_get_client_currency();
+		if ( ! $item_currency && isset( $_COOKIE['wp_augoose_currency'] ) ) {
+			$item_currency = strtoupper( trim( sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) ) );
+		}
+	}
+	
+	// Check if no conversion flag is set or currency is USD
+	if ( isset( $cart_item['wp_augoose_no_conversion'] ) || $item_currency === 'USD' ) {
 		return $price_html; // USD stays USD - no conversion
 	}
 	
@@ -5998,7 +6023,17 @@ function wp_augoose_use_converted_cart_item_subtotal( $subtotal_html, $cart_item
 	$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
 		? $cart_item['wp_augoose_original_currency'] 
 		: '';
-	if ( $item_currency === 'USD' ) {
+	
+	// If no original currency set, check current client currency
+	if ( empty( $item_currency ) ) {
+		$item_currency = wp_augoose_safe_get_client_currency();
+		if ( ! $item_currency && isset( $_COOKIE['wp_augoose_currency'] ) ) {
+			$item_currency = strtoupper( trim( sanitize_text_field( $_COOKIE['wp_augoose_currency'] ) ) );
+		}
+	}
+	
+	// Check if no conversion flag is set or currency is USD
+	if ( isset( $cart_item['wp_augoose_no_conversion'] ) || $item_currency === 'USD' ) {
 		return $subtotal_html; // USD stays USD - no conversion
 	}
 	
