@@ -2030,32 +2030,31 @@ function wp_augoose_countries_english( $countries ) {
 	}
 	
 	// Load default English country names from WooCommerce directly
-	if ( class_exists( 'WooCommerce' ) && function_exists( 'WC' ) ) {
-		$english_countries_file = WC()->plugin_path() . '/i18n/countries.php';
-		if ( file_exists( $english_countries_file ) ) {
-			// Temporarily switch locale to en_US to get English names (if function exists)
-			$original_locale = null;
-			if ( function_exists( 'switch_to_locale' ) ) {
-				$original_locale = get_locale();
-				switch_to_locale( 'en_US' );
-			}
-			
-			// Load English countries directly (this file contains English names by default)
-			$english_countries = include $english_countries_file;
-			
-			// Restore original locale (if we switched)
-			if ( function_exists( 'switch_to_locale' ) && $original_locale ) {
-				switch_to_locale( $original_locale );
-			}
-			
-			// Replace all country names with English versions
-			foreach ( $countries as $code => $name ) {
-				if ( isset( $english_countries[ $code ] ) ) {
-					$countries[ $code ] = $english_countries[ $code ];
+	if ( class_exists( 'WooCommerce' ) && function_exists( 'WC' ) && WC() ) {
+		try {
+			$english_countries_file = WC()->plugin_path() . '/i18n/countries.php';
+			if ( file_exists( $english_countries_file ) ) {
+				// Load English countries directly (this file contains English names by default)
+				// Don't use switch_to_locale as it may cause issues
+				$english_countries = include $english_countries_file;
+				
+				// Ensure we got an array
+				if ( is_array( $english_countries ) ) {
+					// Replace all country names with English versions
+					foreach ( $countries as $code => $name ) {
+						if ( isset( $english_countries[ $code ] ) ) {
+							$countries[ $code ] = $english_countries[ $code ];
+						}
+					}
+					
+					return $countries;
 				}
 			}
-			
-			return $countries;
+		} catch ( Exception $e ) {
+			// If there's an error loading the file, fall through to translation array
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Error loading countries file: ' . $e->getMessage() );
+			}
 		}
 	}
 	
@@ -2189,46 +2188,66 @@ function wp_augoose_countries_english( $countries ) {
  */
 add_filter( 'woocommerce_checkout_get_value', 'wp_augoose_set_billing_country_from_geolocation', 10, 2 );
 function wp_augoose_set_billing_country_from_geolocation( $value, $input ) {
+	// Guard checks - ensure WooCommerce is loaded
+	if ( ! function_exists( 'WC' ) ) {
+		return $value;
+	}
+	
+	$wc = WC();
+	if ( ! $wc ) {
+		return $value;
+	}
+	
 	// Only set billing_country if it's empty and we're on checkout
 	if ( $input === 'billing_country' && empty( $value ) && function_exists( 'is_checkout' ) && is_checkout() ) {
-		// Check if customer already has a saved country
-		if ( function_exists( 'WC' ) && WC()->customer ) {
-			$saved_country = WC()->customer->get_billing_country();
-			if ( ! empty( $saved_country ) ) {
-				return $saved_country;
+		try {
+			// Check if customer already has a saved country
+			if ( isset( $wc->customer ) && $wc->customer ) {
+				$saved_country = $wc->customer->get_billing_country();
+				if ( ! empty( $saved_country ) ) {
+					return $saved_country;
+				}
 			}
-		}
-		
-		// Get country from geolocation
-		if ( function_exists( 'wc_get_customer_geolocation' ) ) {
-			$geolocation = wc_get_customer_geolocation();
-			if ( ! empty( $geolocation['country'] ) ) {
-				// Validate country is in allowed list
-				$allowed_countries = WC()->countries->get_allowed_countries();
-				if ( isset( $allowed_countries[ $geolocation['country'] ] ) ) {
-					// Set customer billing country
-					if ( function_exists( 'WC' ) && WC()->customer ) {
-						WC()->customer->set_billing_country( $geolocation['country'] );
-						WC()->customer->save();
+			
+			// Get country from geolocation
+			if ( function_exists( 'wc_get_customer_geolocation' ) ) {
+				$geolocation = wc_get_customer_geolocation();
+				if ( ! empty( $geolocation['country'] ) && isset( $wc->countries ) && $wc->countries ) {
+					// Validate country is in allowed list
+					$allowed_countries = $wc->countries->get_allowed_countries();
+					if ( ! empty( $allowed_countries ) && isset( $allowed_countries[ $geolocation['country'] ] ) ) {
+						// Set customer billing country
+						if ( isset( $wc->customer ) && $wc->customer ) {
+							$wc->customer->set_billing_country( $geolocation['country'] );
+							$wc->customer->save();
+						}
+						return $geolocation['country'];
 					}
-					return $geolocation['country'];
 				}
 			}
-		}
-		
-		// Fallback: try our custom geolocation function
-		$country_code = wp_augoose_get_user_country_from_ip();
-		if ( ! empty( $country_code ) ) {
-			// Validate country is in allowed list
-			$allowed_countries = WC()->countries->get_allowed_countries();
-			if ( isset( $allowed_countries[ $country_code ] ) ) {
-				// Set customer billing country
-				if ( function_exists( 'WC' ) && WC()->customer ) {
-					WC()->customer->set_billing_country( $country_code );
-					WC()->customer->save();
+			
+			// Fallback: try our custom geolocation function
+			if ( function_exists( 'wp_augoose_get_user_country_from_ip' ) ) {
+				$country_code = wp_augoose_get_user_country_from_ip();
+				if ( ! empty( $country_code ) && isset( $wc->countries ) && $wc->countries ) {
+					// Validate country is in allowed list
+					$allowed_countries = $wc->countries->get_allowed_countries();
+					if ( ! empty( $allowed_countries ) && isset( $allowed_countries[ $country_code ] ) ) {
+						// Set customer billing country
+						if ( isset( $wc->customer ) && $wc->customer ) {
+							$wc->customer->set_billing_country( $country_code );
+							$wc->customer->save();
+						}
+						return $country_code;
+					}
 				}
-				return $country_code;
 			}
+		} catch ( Exception $e ) {
+			// If there's an error, just return the original value
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Error in wp_augoose_set_billing_country_from_geolocation: ' . $e->getMessage() );
+			}
+			return $value;
 		}
 	}
 	
