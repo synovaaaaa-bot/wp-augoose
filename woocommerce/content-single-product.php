@@ -182,6 +182,71 @@ if ( post_password_required() ) {
                                 echo '<p>' . esc_html__( 'Material information not available.', 'wp-augoose' ) . '</p>';
                             }
                             echo '</div>';
+                            
+                            // Get Material-care attribute from WooCommerce - try multiple methods
+                            $material_care_attr = '';
+                            
+                            // Method 1: Try taxonomy attribute (pa_material-care)
+                            if ( method_exists( $product, 'get_attribute' ) ) {
+                                $material_care_attr = $product->get_attribute( 'pa_material-care' );
+                            }
+                            
+                            // Method 2: Try custom attribute (Material-care)
+                            if ( empty( $material_care_attr ) && method_exists( $product, 'get_attribute' ) ) {
+                                $material_care_attr = $product->get_attribute( 'Material-care' );
+                            }
+                            
+                            // Method 3: Try lowercase (material-care)
+                            if ( empty( $material_care_attr ) && method_exists( $product, 'get_attribute' ) ) {
+                                $material_care_attr = $product->get_attribute( 'material-care' );
+                            }
+                            
+                            // Method 4: Search through all attributes
+                            if ( empty( $material_care_attr ) && method_exists( $product, 'get_attributes' ) ) {
+                                $attributes = $product->get_attributes();
+                                foreach ( $attributes as $attr_name => $attr_obj ) {
+                                    $attr_label = wc_attribute_label( $attr_name );
+                                    // Check if attribute name or label contains "material-care" or "material care"
+                                    if ( stripos( $attr_name, 'material-care' ) !== false || 
+                                         stripos( $attr_name, 'material_care' ) !== false ||
+                                         stripos( $attr_label, 'material-care' ) !== false ||
+                                         stripos( $attr_label, 'material care' ) !== false ) {
+                                        $material_care_attr = $product->get_attribute( $attr_name );
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // Method 5: Try product meta/custom fields
+                            if ( empty( $material_care_attr ) ) {
+                                $product_id = $product->get_id();
+                                $material_care_attr = get_post_meta( $product_id, '_material-care', true );
+                                if ( empty( $material_care_attr ) ) {
+                                    $material_care_attr = get_post_meta( $product_id, 'material-care', true );
+                                }
+                                if ( empty( $material_care_attr ) ) {
+                                    $material_care_attr = get_post_meta( $product_id, '_product_material_care', true );
+                                }
+                                if ( empty( $material_care_attr ) ) {
+                                    $material_care_attr = get_post_meta( $product_id, 'Material-care', true );
+                                }
+                            }
+                            
+                            // Method 6: Try ACF field if available
+                            if ( empty( $material_care_attr ) && function_exists( 'get_field' ) ) {
+                                $material_care_attr = get_field( 'material-care', $product->get_id() );
+                                if ( empty( $material_care_attr ) ) {
+                                    $material_care_attr = get_field( 'material_care', $product->get_id() );
+                                }
+                            }
+                            
+                            // Display Material care section only if data exists
+                            if ( ! empty( $material_care_attr ) ) {
+                                echo '<div class="material-info material-care-info">';
+                                echo '<strong>MATERIAL CARE</strong>';
+                                echo '<p>' . esc_html( wp_strip_all_tags( $material_care_attr ) ) . '</p>';
+                                echo '</div>';
+                            }
                             ?>
                         </div>
                         

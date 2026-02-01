@@ -3695,6 +3695,7 @@ function wp_augoose_handle_payment_success_redirect( $order_id ) {
  * Handle payment failure redirect
  * Redirect to custom payment failed page if payment fails
  * Also invalidate order and create new session
+ * IMPORTANT: Do NOT modify successful DOKU redirects
  */
 add_filter( 'woocommerce_payment_successful_result', 'wp_augoose_handle_payment_result_redirect', 10, 2 );
 function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
@@ -3707,6 +3708,13 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 		return $result;
 	}
 	
+	// Check if this is DOKU payment
+	$payment_method = $order->get_payment_method();
+	$is_doku = (
+		strpos( strtolower( $payment_method ), 'doku' ) !== false || 
+		strpos( strtolower( $payment_method ), 'jokul' ) !== false
+	);
+	
 	// If payment failed, invalidate order and redirect to new checkout
 	if ( isset( $result['result'] ) && 'failure' === $result['result'] ) {
 		// Invalidate the failed order
@@ -3715,9 +3723,50 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 		// Redirect to checkout with payment_failed parameter
 		$checkout_url = wc_get_checkout_url();
 		$result['redirect'] = add_query_arg( 'payment_failed', '1', $checkout_url );
+	} elseif ( isset( $result['result'] ) && 'success' === $result['result'] && $is_doku ) {
+		// For DOKU success, preserve the redirect URL from DOKU gateway
+		// DOKU returns redirect URL to payment page (checkout.doku.com) - don't modify it
+		// Just ensure redirect URL exists
+		if ( empty( $result['redirect'] ) ) {
+			// If no redirect URL, try to get from order meta (DOKU might store it there)
+			$doku_redirect = $order->get_meta( '_doku_redirect_url' );
+			if ( ! empty( $doku_redirect ) ) {
+				$result['redirect'] = $doku_redirect;
+			} else {
+				// Last resort: use order received page as fallback
+				$result['redirect'] = $order->get_checkout_order_received_url();
+			}
+		}
+		// Otherwise, keep DOKU's redirect URL as is (don't modify it)
 	}
 	
 	return $result;
+}
+
+/**
+ * Ensure DOKU process_payment redirect works correctly
+ * Hook before process_payment to ensure clean environment
+ */
+add_action( 'woocommerce_before_payment', 'wp_augoose_ensure_doku_redirect_works', 5 );
+function wp_augoose_ensure_doku_redirect_works() {
+	// Only for DOKU payments
+	if ( ! isset( $_POST['payment_method'] ) ) {
+		return;
+	}
+	
+	$payment_method = sanitize_text_field( $_POST['payment_method'] );
+	$is_doku = (
+		strpos( strtolower( $payment_method ), 'doku' ) !== false || 
+		strpos( strtolower( $payment_method ), 'jokul' ) !== false
+	);
+	
+	if ( ! $is_doku ) {
+		return;
+	}
+	
+	// Ensure output buffers don't interfere with redirect
+	// DOKU process_payment needs to be able to redirect
+	// Don't clean buffers here - let DOKU handle its own redirect
 }
 
 /**
@@ -4029,6 +4078,13 @@ function wp_augoose_clean_output_for_woocommerce_ajax() {
 		return; // This is Customizer, not WooCommerce AJAX - don't interfere
 	}
 	
+	// CRITICAL: Do NOT clean output during checkout place order
+	// This prevents DOKU redirect from being broken
+	if ( isset( $_POST['woocommerce_checkout_place_order'] ) || 
+	     isset( $_POST['place_order'] ) ) {
+		return; // This is checkout place order - don't clean output, let redirect work
+	}
+	
 	// CRITICAL: Only for actual AJAX requests (wp_doing_ajax OR wc-ajax endpoint)
 	// Do NOT interfere with regular form submissions or Customizer
 	$is_ajax = wp_doing_ajax();
@@ -4079,6 +4135,16 @@ function wp_augoose_final_clean_output_for_wc_ajax() {
 	     isset( $_POST['customize_changeset_uuid'] ) ||
 	     is_customize_preview() ) {
 		return; // This is Customizer, not WooCommerce AJAX
+	}
+	
+	// CRITICAL: Do NOT clean output during checkout place order
+	// This prevents DOKU redirect from being broken
+	if ( isset( $_POST['woocommerce_checkout_place_order'] ) || 
+	     isset( $_POST['place_order'] ) ||
+	     ( isset( $_POST['payment_method'] ) && 
+	       ( strpos( strtolower( $_POST['payment_method'] ), 'doku' ) !== false || 
+	         strpos( strtolower( $_POST['payment_method'] ), 'jokul' ) !== false ) ) ) {
+		return; // This is checkout place order with DOKU - don't clean output, let redirect work
 	}
 	
 	// Only for WooCommerce AJAX requests

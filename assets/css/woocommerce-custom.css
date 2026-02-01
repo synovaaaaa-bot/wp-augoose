@@ -591,8 +591,14 @@ body.term-shirts ul.products {
     margin-bottom: 16px;
 }
 
+.single-product-wrapper .product-shipping-material-info .material-care-info {
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
 .single-product-wrapper .product-shipping-material-info .shipping-info strong,
-.single-product-wrapper .product-shipping-material-info .material-info strong {
+.single-product-wrapper .product-shipping-material-info .material-info strong,
+.single-product-wrapper .product-shipping-material-info .material-care-info strong {
     display: block;
     font-size: 11px;
     letter-spacing: 2px;
@@ -603,7 +609,8 @@ body.term-shirts ul.products {
 }
 
 .single-product-wrapper .product-shipping-material-info .shipping-info p,
-.single-product-wrapper .product-shipping-material-info .material-info p {
+.single-product-wrapper .product-shipping-material-info .material-info p,
+.single-product-wrapper .product-shipping-material-info .material-care-info p {
     font-size: 14px;
     line-height: 1.6;
     color: #666;
