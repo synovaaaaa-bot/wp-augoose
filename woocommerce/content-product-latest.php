@@ -83,12 +83,19 @@ if ( $is_on_sale ) {
 			
 			<!-- Product Title -->
 			<?php
-			/**
-			 * Hook: woocommerce_shop_loop_item_title.
-			 *
-			 * @hooked woocommerce_template_loop_product_title - 10
-			 */
-			do_action( 'woocommerce_shop_loop_item_title' );
+			// Display product name directly to ensure it shows correctly
+			$product_name = $product->get_name();
+			if ( ! empty( $product_name ) ) {
+				$product_permalink = $product->get_permalink();
+				if ( $product_permalink ) {
+					echo '<h2 class="woocommerce-loop-product__title"><a href="' . esc_url( $product_permalink ) . '">' . esc_html( $product_name ) . '</a></h2>';
+				} else {
+					echo '<h2 class="woocommerce-loop-product__title">' . esc_html( $product_name ) . '</h2>';
+				}
+			} else {
+				// Fallback to hook if name is empty
+				do_action( 'woocommerce_shop_loop_item_title' );
+			}
 			?>
 			
 			<!-- Product Price -->
