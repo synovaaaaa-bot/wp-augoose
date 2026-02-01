@@ -4231,6 +4231,10 @@ function wp_augoose_translate_shipping_labels( $html ) {
 		'SHIPPING GRATIS' => 'FREE SHIPPING',
 		'Shipping Gratis' => 'Free Shipping',
 		'shipping gratis' => 'free shipping',
+		'Tarif tetap' => 'Fixed rate',
+		'TARIF TETAP' => 'FIXED RATE',
+		'tarif tetap' => 'fixed rate',
+		'Tarif Tetap' => 'Fixed Rate',
 	);
 	
 	foreach ( $translations as $indonesian => $english ) {
@@ -4259,6 +4263,10 @@ function wp_augoose_translate_shipping_method_label( $label, $method = null ) {
 		'SHIPPING GRATIS' => 'FREE SHIPPING',
 		'Shipping Gratis' => 'Free Shipping',
 		'shipping gratis' => 'free shipping',
+		'Tarif tetap' => 'Fixed rate',
+		'TARIF TETAP' => 'FIXED RATE',
+		'tarif tetap' => 'fixed rate',
+		'Tarif Tetap' => 'Fixed Rate',
 	);
 	
 	foreach ( $translations as $indonesian => $english ) {
@@ -5954,6 +5962,14 @@ function wp_augoose_use_converted_cart_item_price( $price_html, $cart_item, $car
 		return $price_html;
 	}
 	
+	// IMPORTANT: Skip if currency is USD (no conversion for USD)
+	$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
+		? $cart_item['wp_augoose_original_currency'] 
+		: '';
+	if ( $item_currency === 'USD' ) {
+		return $price_html; // USD stays USD - no conversion
+	}
+	
 	// Check if this item has been converted
 	if ( isset( $cart_item['wp_augoose_converted_price_idr'] ) ) {
 		$converted_price = (float) $cart_item['wp_augoose_converted_price_idr'];
@@ -5976,6 +5992,14 @@ function wp_augoose_use_converted_cart_item_subtotal( $subtotal_html, $cart_item
 	// Guard: Check if cart_item is valid array
 	if ( ! is_array( $cart_item ) ) {
 		return $subtotal_html;
+	}
+	
+	// IMPORTANT: Skip if currency is USD (no conversion for USD)
+	$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
+		? $cart_item['wp_augoose_original_currency'] 
+		: '';
+	if ( $item_currency === 'USD' ) {
+		return $subtotal_html; // USD stays USD - no conversion
 	}
 	
 	// Check if this item has been converted
@@ -6012,12 +6036,25 @@ function wp_augoose_force_idr_cart_subtotal( $subtotal_html, $compound, $cart ) 
 		return $subtotal_html;
 	}
 	
-	// Check if currency is IDR
+	// IMPORTANT: Skip if currency is USD (no conversion for USD)
 	$current_currency = get_woocommerce_currency();
+	if ( $current_currency === 'USD' ) {
+		return $subtotal_html; // USD stays USD - no conversion
+	}
+	
+	// Check if currency is IDR
 	$has_converted = ( $current_currency === 'IDR' );
 	
 	if ( ! $has_converted ) {
 		foreach ( $cart->get_cart() as $cart_item ) {
+			// Skip if item currency is USD
+			$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
+				? $cart_item['wp_augoose_original_currency'] 
+				: '';
+			if ( $item_currency === 'USD' ) {
+				continue; // Skip USD items
+			}
+			
 			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
 				$has_converted = true;
 				break;
@@ -6042,12 +6079,25 @@ function wp_augoose_force_idr_cart_total( $total_html ) {
 		return $total_html;
 	}
 	
-	// Check if currency is IDR or items were converted
+	// IMPORTANT: Skip if currency is USD (no conversion for USD)
 	$current_currency = get_woocommerce_currency();
+	if ( $current_currency === 'USD' ) {
+		return $total_html; // USD stays USD - no conversion
+	}
+	
+	// Check if currency is IDR or items were converted
 	$has_converted = ( $current_currency === 'IDR' );
 	
 	if ( ! $has_converted ) {
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			// Skip if item currency is USD
+			$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
+				? $cart_item['wp_augoose_original_currency'] 
+				: '';
+			if ( $item_currency === 'USD' ) {
+				continue; // Skip USD items
+			}
+			
 			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
 				$has_converted = true;
 				break;
@@ -6072,12 +6122,25 @@ function wp_augoose_force_idr_cart_totals_subtotal( $subtotal_html ) {
 		return $subtotal_html;
 	}
 	
-	// Check if currency is IDR
+	// IMPORTANT: Skip if currency is USD (no conversion for USD)
 	$current_currency = get_woocommerce_currency();
+	if ( $current_currency === 'USD' ) {
+		return $subtotal_html; // USD stays USD - no conversion
+	}
+	
+	// Check if currency is IDR
 	$has_converted = ( $current_currency === 'IDR' );
 	
 	if ( ! $has_converted ) {
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			// Skip if item currency is USD
+			$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
+				? $cart_item['wp_augoose_original_currency'] 
+				: '';
+			if ( $item_currency === 'USD' ) {
+				continue; // Skip USD items
+			}
+			
 			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
 				$has_converted = true;
 				break;
@@ -6099,12 +6162,25 @@ function wp_augoose_force_idr_cart_totals_order_total( $total_html ) {
 		return $total_html;
 	}
 	
-	// Check if currency is IDR or items were converted
+	// IMPORTANT: Skip if currency is USD (no conversion for USD)
 	$current_currency = get_woocommerce_currency();
+	if ( $current_currency === 'USD' ) {
+		return $total_html; // USD stays USD - no conversion
+	}
+	
+	// Check if currency is IDR or items were converted
 	$has_converted = ( $current_currency === 'IDR' );
 	
 	if ( ! $has_converted ) {
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			// Skip if item currency is USD
+			$item_currency = isset( $cart_item['wp_augoose_original_currency'] ) 
+				? $cart_item['wp_augoose_original_currency'] 
+				: '';
+			if ( $item_currency === 'USD' ) {
+				continue; // Skip USD items
+			}
+			
 			if ( isset( $cart_item['wp_augoose_converted_to_idr'] ) && $cart_item['wp_augoose_converted_to_idr'] === true ) {
 				$has_converted = true;
 				break;
