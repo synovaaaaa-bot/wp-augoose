@@ -98,11 +98,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							<?php echo esc_html( strtoupper( $attribute_label ) ); ?>
 						</label>
 						<?php if ( $is_size ) : ?>
-							<?php 
-							global $product;
-							$size_chart_url = wp_augoose_get_size_chart_url( $product );
-							?>
-							<a href="<?php echo esc_url( $size_chart_url ); ?>" target="_blank" class="size-guide-link">SIZE GUIDE</a>
+							<a href="#" class="size-guide-link">SIZE GUIDE</a>
 						<?php endif; ?>
 					</div>
 					

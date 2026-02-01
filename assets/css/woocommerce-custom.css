@@ -2196,6 +2196,45 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
     margin: 0;
 }
 
+/* Phone with country code - small country code next to phone */
+.woocommerce-input-wrapper.phone-field-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.woocommerce-input-wrapper.phone-field-wrapper .phone-country-code-select {
+    width: auto;
+    min-width: 100px;
+    flex-shrink: 0;
+    font-size: 12px;
+    padding: 10px 8px !important;
+    height: 44px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    border-radius: 0;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%231a1a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 30px !important;
+}
+
+.woocommerce-input-wrapper.phone-field-wrapper .phone-country-code-select:focus {
+    outline: none;
+    border-color: #1a1a1a;
+    box-shadow: 0 0 0 1px #1a1a1a;
+}
+
+.woocommerce-input-wrapper.phone-field-wrapper input[type="tel"] {
+    flex: 1;
+    margin: 0;
+}
+
 .woocommerce-checkout .form-row input:focus,
 .woocommerce-checkout .form-row select:focus,
 .woocommerce-checkout .form-row textarea:focus {
@@ -4145,6 +4184,27 @@ body.woocommerce-cart .site-main .entry-content {
 
 .size-guide-table-wrapper {
     margin-top: 20px;
+}
+
+.size-guide-image-wrapper {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.size-guide-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #e0e0e0;
+}
+
+.size-guide-image-wrapper[style*="display: none"] {
+    display: none !important;
+}
+
+.size-guide-image-wrapper[style*="display: block"] {
+    display: block !important;
 }
 
 .size-guide-table {

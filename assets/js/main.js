@@ -192,13 +192,30 @@
         });
     }
 
-    // Sticky Header
+    // Sticky Header - Ensure header always visible
     function initStickyHeader() {
+        const headerStack = $('.header-stack');
         const header = $('.site-header');
         const headerHeight = header.outerHeight();
 
+        // Ensure header is always visible
+        headerStack.css({
+            'display': 'block',
+            'visibility': 'visible',
+            'opacity': '1',
+            'transform': 'translateY(0)'
+        });
+
         $(window).on('scroll', function() {
             const currentScroll = $(this).scrollTop();
+
+            // Always keep header visible
+            headerStack.css({
+                'display': 'block',
+                'visibility': 'visible',
+                'opacity': '1',
+                'transform': 'translateY(0)'
+            });
 
             if (currentScroll > headerHeight) {
                 header.addClass('scrolled');
@@ -1250,6 +1267,32 @@
                 };
                 if (countryMap[text]) {
                     $(this).text(countryMap[text]);
+                }
+            });
+            
+            // Force country placeholder
+            $('select[name*="country"]').each(function() {
+                var $select = $(this);
+                var placeholder = $select.attr('data-placeholder') || $select.attr('placeholder') || '';
+                if (placeholder.includes('Pilih negara') || placeholder.includes('pilih negara') || placeholder.includes('wilayah')) {
+                    $select.attr('data-placeholder', 'Select a country / region...');
+                }
+                if (!placeholder || placeholder === '') {
+                    $select.attr('data-placeholder', 'Select a country / region...');
+                }
+                // Also update the first option text
+                var $firstOption = $select.find('option:first');
+                if ($firstOption.length && ($firstOption.text().includes('Pilih negara') || $firstOption.text().includes('pilih negara') || $firstOption.text().includes('wilayah'))) {
+                    $firstOption.text('Select a country / region...');
+                }
+            });
+            
+            // Force shipping message to English
+            $('.woocommerce-shipping-totals, .shipping').each(function() {
+                var $this = $(this);
+                var text = $this.text();
+                if (text.includes('Masukkan alamat Anda') || text.includes('untuk melihat opsi pengiriman')) {
+                    $this.html($this.html().replace(/Masukkan alamat Anda untuk melihat opsi pengiriman/gi, 'Enter your address to view shipping options'));
                 }
             });
         }
