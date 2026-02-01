@@ -1350,6 +1350,12 @@
             }, 100);
         });
         
+        // Update payment methods when country changes
+        $(document.body).on('change', 'select[name="billing_country"]', function() {
+            // Trigger checkout update to refresh payment methods
+            $('body').trigger('update_checkout');
+        });
+        
         // Handle variable product button - redirect to product page
         $(document).on('click', '.variable-product-btn', function(e) {
             e.preventDefault();

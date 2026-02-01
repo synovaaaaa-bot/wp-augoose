@@ -1996,6 +1996,81 @@ function wp_augoose_payment_method_error_english( $message ) {
 }
 
 /**
+ * Filter available payment gateways based on customer location
+ * SG, MY, ID -> DOKU only
+ * Others -> PayPal and Debit & Credit Cards only
+ */
+add_filter( 'woocommerce_available_payment_gateways', 'wp_augoose_filter_payment_gateways_by_location', 20, 1 );
+function wp_augoose_filter_payment_gateways_by_location( $available_gateways ) {
+	if ( empty( $available_gateways ) ) {
+		return $available_gateways;
+	}
+	
+	// Get customer billing country
+	$billing_country = '';
+	if ( WC()->customer && WC()->customer->get_billing_country() ) {
+		$billing_country = WC()->customer->get_billing_country();
+	} elseif ( isset( $_POST['billing_country'] ) ) {
+		$billing_country = sanitize_text_field( $_POST['billing_country'] );
+	} elseif ( WC()->checkout() && WC()->checkout()->get_value( 'billing_country' ) ) {
+		$billing_country = WC()->checkout()->get_value( 'billing_country' );
+	}
+	
+	// If no country selected yet, show all methods
+	if ( empty( $billing_country ) ) {
+		return $available_gateways;
+	}
+	
+	// Countries that should use DOKU
+	$doku_countries = array( 'SG', 'MY', 'ID' );
+	
+	// Filter gateways based on country
+	$filtered_gateways = array();
+	
+	if ( in_array( $billing_country, $doku_countries, true ) ) {
+		// SG, MY, ID -> Only DOKU
+		foreach ( $available_gateways as $gateway_id => $gateway ) {
+			$gateway_id_lower = strtolower( $gateway_id );
+			if ( strpos( $gateway_id_lower, 'doku' ) !== false || 
+			     strpos( $gateway_id_lower, 'jokul' ) !== false ) {
+				$filtered_gateways[ $gateway_id ] = $gateway;
+			}
+		}
+	} else {
+		// Other countries -> PayPal and Debit & Credit Cards only
+		foreach ( $available_gateways as $gateway_id => $gateway ) {
+			$gateway_id_lower = strtolower( $gateway_id );
+			$gateway_title_lower = strtolower( $gateway->get_title() );
+			
+			// Check if it's PayPal
+			$is_paypal = ( strpos( $gateway_id_lower, 'paypal' ) !== false || 
+			               strpos( $gateway_id_lower, 'ppcp' ) !== false ||
+			               strpos( $gateway_title_lower, 'paypal' ) !== false );
+			
+			// Check if it's Credit/Debit Card
+			$is_card = ( strpos( $gateway_id_lower, 'card' ) !== false || 
+			             strpos( $gateway_id_lower, 'credit' ) !== false || 
+			             strpos( $gateway_id_lower, 'debit' ) !== false ||
+			             strpos( $gateway_id_lower, 'stripe' ) !== false ||
+			             strpos( $gateway_title_lower, 'debit' ) !== false ||
+			             strpos( $gateway_title_lower, 'credit' ) !== false ||
+			             strpos( $gateway_title_lower, 'card' ) !== false );
+			
+			if ( $is_paypal || $is_card ) {
+				$filtered_gateways[ $gateway_id ] = $gateway;
+			}
+		}
+	}
+	
+	// If no gateways match, return original (fallback)
+	if ( empty( $filtered_gateways ) ) {
+		return $available_gateways;
+	}
+	
+	return $filtered_gateways;
+}
+
+/**
  * Force payment gateway titles and descriptions to English
  */
 add_filter( 'woocommerce_gateway_title', 'wp_augoose_payment_gateway_title_english', 20, 2 );

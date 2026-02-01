@@ -34,17 +34,26 @@ if ( strpos( $gateway_id_lower, 'card' ) !== false ||
 		<?php if ( $is_credit_card ) : ?>
 			<div class="wp-augoose-credit-card-icons">
 				<?php
-				// Use WooCommerce assets if available, otherwise use CDN
-				$wc_plugin_url = defined( 'WC_PLUGIN_URL' ) ? WC_PLUGIN_URL : '';
-				$icon_base = $wc_plugin_url ? $wc_plugin_url . 'assets/images/icons/credit-cards/' : 'https://cdn.jsdelivr.net/gh/woocommerce/woocommerce@trunk/assets/images/icons/credit-cards/';
+				// Use reliable CDN for credit card icons
+				$icon_base = 'https://cdn.jsdelivr.net/gh/woocommerce/woocommerce@8.0/assets/images/icons/credit-cards/';
+				// Fallback to local WooCommerce assets if available
+				if ( defined( 'WC_PLUGIN_URL' ) && file_exists( WP_PLUGIN_DIR . '/woocommerce/assets/images/icons/credit-cards/visa.svg' ) ) {
+					$icon_base = WC_PLUGIN_URL . 'assets/images/icons/credit-cards/';
+				}
 				?>
-				<img src="<?php echo esc_url( $icon_base . 'amex.svg' ); ?>" alt="American Express" class="credit-card-icon" />
-				<img src="<?php echo esc_url( $icon_base . 'jcb.svg' ); ?>" alt="JCB" class="credit-card-icon" />
-				<img src="<?php echo esc_url( $icon_base . 'mastercard.svg' ); ?>" alt="Mastercard" class="credit-card-icon" />
-				<img src="<?php echo esc_url( $icon_base . 'visa.svg' ); ?>" alt="Visa" class="credit-card-icon" />
+				<img src="<?php echo esc_url( $icon_base . 'visa.svg' ); ?>" alt="Visa" class="credit-card-icon" onerror="this.style.display='none';" />
+				<img src="<?php echo esc_url( $icon_base . 'mastercard.svg' ); ?>" alt="Mastercard" class="credit-card-icon" onerror="this.style.display='none';" />
+				<img src="<?php echo esc_url( $icon_base . 'amex.svg' ); ?>" alt="American Express" class="credit-card-icon" onerror="this.style.display='none';" />
+				<img src="<?php echo esc_url( $icon_base . 'jcb.svg' ); ?>" alt="JCB" class="credit-card-icon" onerror="this.style.display='none';" />
 			</div>
 		<?php else : ?>
-			<?php echo $gateway->get_icon(); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?>
+			<?php 
+			// Get gateway icon, but ensure it displays properly
+			$gateway_icon = $gateway->get_icon();
+			if ( ! empty( $gateway_icon ) ) {
+				echo $gateway_icon; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
+			}
+			?>
 		<?php endif; ?>
 	</label>
 	<?php if ( $gateway->has_fields() || $gateway->get_description() ) : ?>
