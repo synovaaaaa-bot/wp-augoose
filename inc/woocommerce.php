@@ -7644,3 +7644,129 @@ function wp_augoose_sanitize_variation_attributes( $variation_data, $product, $v
 	
 	return $variation_data;
 }
+
+/**
+ * CRITICAL: Ensure cart item variation attributes are strings for numeric values (28, 29, etc.)
+ * This prevents validation errors during checkout
+ */
+add_filter( 'woocommerce_get_cart_item_from_session', 'wp_augoose_sanitize_cart_item_variation_attributes', 10, 3 );
+function wp_augoose_sanitize_cart_item_variation_attributes( $cart_item, $values, $cart_item_key ) {
+	// Only process variation products
+	if ( ! isset( $cart_item['variation_id'] ) || ! $cart_item['variation_id'] ) {
+		return $cart_item;
+	}
+	
+	// Ensure variation attributes are strings (especially for numeric values like 28, 29, etc.)
+	if ( isset( $cart_item['variation'] ) && is_array( $cart_item['variation'] ) ) {
+		foreach ( $cart_item['variation'] as $key => $value ) {
+			// Convert all values to strings, including numbers (28, 29, etc.)
+			if ( $value !== null && $value !== false && $value !== '' ) {
+				$cart_item['variation'][ $key ] = (string) $value;
+			}
+		}
+	}
+	
+	return $cart_item;
+}
+
+/**
+ * CRITICAL: Sanitize variation attributes when adding to cart
+ * This ensures numeric values (28, 29, etc.) are stored as strings
+ */
+add_filter( 'woocommerce_add_cart_item_data', 'wp_augoose_sanitize_add_to_cart_variation_attributes', 10, 3 );
+function wp_augoose_sanitize_add_to_cart_variation_attributes( $cart_item_data, $product_id, $variation_id ) {
+	// Only process variation products
+	if ( ! $variation_id ) {
+		return $cart_item_data;
+	}
+	
+	// Ensure cart_item_data is array
+	if ( ! is_array( $cart_item_data ) ) {
+		$cart_item_data = array();
+	}
+	
+	// Get variation attributes from POST data
+	if ( isset( $_POST ) && is_array( $_POST ) ) {
+		$variation_attributes = array();
+		foreach ( $_POST as $key => $value ) {
+			if ( strpos( $key, 'attribute_' ) === 0 ) {
+				// Convert all values to strings, including numbers (28, 29, etc.)
+				if ( $value !== null && $value !== false && $value !== '' ) {
+					$variation_attributes[ $key ] = (string) $value;
+				}
+			}
+		}
+		
+		// Store sanitized attributes in cart item data
+		if ( ! empty( $variation_attributes ) ) {
+			$cart_item_data['variation'] = $variation_attributes;
+		}
+	}
+	
+	return $cart_item_data;
+}
+
+/**
+ * CRITICAL: Validate cart items before checkout - ensure variation attributes match
+ * This prevents "some problems with items in your cart" errors for numeric variations
+ */
+add_action( 'woocommerce_check_cart_items', 'wp_augoose_validate_cart_variation_attributes', 10 );
+function wp_augoose_validate_cart_variation_attributes() {
+	if ( ! WC()->cart || WC()->cart->is_empty() ) {
+		return;
+	}
+	
+	foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+		// Only validate variation products
+		if ( ! isset( $cart_item['variation_id'] ) || ! $cart_item['variation_id'] ) {
+			continue;
+		}
+		
+		// Get variation product
+		$variation = wc_get_product( $cart_item['variation_id'] );
+		if ( ! $variation || ! is_a( $variation, 'WC_Product_Variation' ) ) {
+			continue;
+		}
+		
+		// Get variation attributes from product
+		$variation_attributes = $variation->get_variation_attributes();
+		
+		// Get variation attributes from cart item
+		$cart_variation = isset( $cart_item['variation'] ) ? $cart_item['variation'] : array();
+		
+		// Ensure both are arrays
+		if ( ! is_array( $variation_attributes ) || ! is_array( $cart_variation ) ) {
+			continue;
+		}
+		
+		// Compare attributes - convert all to strings for comparison
+		$match = true;
+		foreach ( $variation_attributes as $key => $value ) {
+			$variation_value = (string) $value;
+			$cart_value = isset( $cart_variation[ $key ] ) ? (string) $cart_variation[ $key ] : '';
+			
+			// Try exact match first, then case-insensitive match
+			if ( $variation_value !== $cart_value && 
+				 strtolower( $variation_value ) !== strtolower( $cart_value ) ) {
+				$match = false;
+				break;
+			}
+		}
+		
+		// If attributes don't match, try to fix them
+		if ( ! $match ) {
+			// Update cart item with correct variation attributes
+			WC()->cart->cart_contents[ $cart_item_key ]['variation'] = array();
+			foreach ( $variation_attributes as $key => $value ) {
+				WC()->cart->cart_contents[ $cart_item_key ]['variation'][ $key ] = (string) $value;
+			}
+		} else {
+			// Ensure all values are strings even if they match
+			foreach ( $cart_variation as $key => $value ) {
+				if ( $value !== null && $value !== false && $value !== '' ) {
+					WC()->cart->cart_contents[ $cart_item_key ]['variation'][ $key ] = (string) $value;
+				}
+			}
+		}
+	}
+}

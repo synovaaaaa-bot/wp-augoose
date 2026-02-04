@@ -786,6 +786,16 @@ function wp_augoose_scripts() {
     
     // Checkout Coupon - Apply Coupon
     if ( class_exists( 'WooCommerce' ) && ( function_exists( 'is_checkout' ) && is_checkout() ) ) {
+        // CRITICAL: Ensure WooCommerce checkout script is enqueued first
+        // This ensures wc_checkout_form and wc_checkout_params are available
+        if ( ! wp_script_is( 'wc-checkout', 'enqueued' ) && ! wp_script_is( 'wc-checkout', 'registered' ) ) {
+            // Try to enqueue WooCommerce checkout script
+            if ( function_exists( 'WC' ) && WC()->frontend_includes() ) {
+                // WooCommerce should auto-enqueue, but ensure it's loaded
+                wp_enqueue_script( 'wc-checkout' );
+            }
+        }
+        
         if ( file_exists( $theme_dir . '/assets/js/checkout-coupon.js' ) ) {
             wp_enqueue_script( 'wp-augoose-checkout-coupon', $theme_dir_uri . '/assets/js/checkout-coupon.js', array( 'jquery', 'wc-checkout' ), $asset_ver( 'assets/js/checkout-coupon.js' ), true );
             // CRITICAL: Use unique object name to avoid overriding WooCommerce core wc_checkout_params

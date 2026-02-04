@@ -371,18 +371,48 @@ jQuery(document).ready(function($) {
 
     // CRITICAL: Ensure WooCommerce checkout script is loaded
     // If wc_checkout_form is not defined, checkout AJAX won't work
-    if (typeof wc_checkout_form === 'undefined') {
-        console.error('❌ CRITICAL: wc_checkout_form is NOT defined!');
-        console.error('WooCommerce checkout.min.js is NOT loaded!');
-        console.error('Checkout AJAX (wc-ajax=update_order_review) will NOT work!');
+    // Wait for WooCommerce checkout script to load with retry mechanism
+    function waitForWooCommerceCheckout(callback, maxAttempts) {
+        maxAttempts = maxAttempts || 10;
+        var attempts = 0;
         
-        // Try to trigger WooCommerce script load
-        if (typeof jQuery !== 'undefined' && jQuery(document.body)) {
-            jQuery(document.body).trigger('init_checkout');
+        function check() {
+            attempts++;
+            if (typeof wc_checkout_form !== 'undefined' && typeof wc_checkout_params !== 'undefined') {
+                console.log('✅ wc_checkout_form is loaded');
+                if (callback) callback();
+                return;
+            }
+            
+            if (attempts < maxAttempts) {
+                // Wait 200ms before next check
+                setTimeout(check, 200);
+            } else {
+                console.error('❌ CRITICAL: wc_checkout_form is NOT defined after ' + maxAttempts + ' attempts!');
+                console.error('WooCommerce checkout.min.js is NOT loaded!');
+                console.error('Checkout AJAX (wc-ajax=update_order_review) will NOT work!');
+                
+                // Try to trigger WooCommerce script load
+                if (typeof jQuery !== 'undefined' && jQuery(document.body)) {
+                    jQuery(document.body).trigger('init_checkout');
+                    // Try one more time after trigger
+                    setTimeout(function() {
+                        if (typeof wc_checkout_form !== 'undefined') {
+                            console.log('✅ wc_checkout_form loaded after init_checkout trigger');
+                            if (callback) callback();
+                        }
+                    }, 500);
+                }
+            }
         }
-    } else {
-        console.log('✅ wc_checkout_form is loaded');
+        
+        check();
     }
+    
+    // Wait for WooCommerce checkout script
+    waitForWooCommerceCheckout(function() {
+        console.log('✅ WooCommerce checkout script is ready');
+    });
     
     // CRITICAL: Monitor if update_checkout is being triggered
     // If not, checkout AJAX won't work
