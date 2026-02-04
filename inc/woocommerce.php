@@ -6840,6 +6840,7 @@ function wp_augoose_reset_conversion_flag_on_restore( $cart_item_key, $cart ) {
 /**
  * Ensure variations with stock > 0 are always active and purchasable
  * Fixes issue where variations with stock are disabled
+ * CRITICAL: This filter must work for ALL products (jacket, pants, etc.)
  */
 add_filter( 'woocommerce_variation_is_active', 'wp_augoose_ensure_variation_active_if_in_stock', 1, 2 );
 function wp_augoose_ensure_variation_active_if_in_stock( $is_active, $variation ) {
@@ -6848,39 +6849,56 @@ function wp_augoose_ensure_variation_active_if_in_stock( $is_active, $variation 
 		return $is_active;
 	}
 	
-	// If already active, return as is
-	if ( $is_active ) {
-		return $is_active;
-	}
+	$variation_id = $variation->get_id();
 	
 	// Get stock information - use multiple methods to ensure accuracy
+	// Method 1: WooCommerce methods
 	$stock_quantity = $variation->get_stock_quantity();
 	$stock_status = $variation->get_stock_status();
 	$manage_stock = $variation->get_manage_stock();
 	
-	// Also check meta directly as fallback
-	$stock_quantity_meta = get_post_meta( $variation->get_id(), '_stock', true );
-	$stock_status_meta = get_post_meta( $variation->get_id(), '_stock_status', true );
-	$manage_stock_meta = get_post_meta( $variation->get_id(), '_manage_stock', true );
+	// Method 2: Direct meta access (more reliable)
+	$stock_quantity_meta = get_post_meta( $variation_id, '_stock', true );
+	$stock_status_meta = get_post_meta( $variation_id, '_stock_status', true );
+	$manage_stock_meta = get_post_meta( $variation_id, '_manage_stock', true );
 	
-	// Use meta values if get methods return null/empty
-	if ( $stock_quantity === null && $stock_quantity_meta !== '' && $stock_quantity_meta !== null ) {
+	// Method 3: Check parent product stock settings if variation doesn't manage stock
+	$parent_id = $variation->get_parent_id();
+	$parent_manage_stock = false;
+	if ( $parent_id ) {
+		$parent_manage_stock_meta = get_post_meta( $parent_id, '_manage_stock', true );
+		if ( $parent_manage_stock_meta !== '' ) {
+			$parent_manage_stock = wc_string_to_bool( $parent_manage_stock_meta );
+		}
+	}
+	
+	// Use meta values if get methods return null/empty/false
+	if ( ( $stock_quantity === null || $stock_quantity === false ) && $stock_quantity_meta !== '' && $stock_quantity_meta !== null && $stock_quantity_meta !== false ) {
 		$stock_quantity = (int) $stock_quantity_meta;
 	}
 	if ( empty( $stock_status ) && ! empty( $stock_status_meta ) ) {
 		$stock_status = $stock_status_meta;
 	}
-	if ( $manage_stock === null && $manage_stock_meta !== '' ) {
+	if ( ( $manage_stock === null || $manage_stock === false ) && $manage_stock_meta !== '' ) {
 		$manage_stock = wc_string_to_bool( $manage_stock_meta );
 	}
 	
-	// If stock is managed and quantity > 0, make it active
-	if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+	// If parent manages stock but variation doesn't, check parent stock
+	if ( ! $manage_stock && $parent_manage_stock ) {
+		$parent_stock_quantity = get_post_meta( $parent_id, '_stock', true );
+		if ( $parent_stock_quantity !== '' && $parent_stock_quantity !== null && (int) $parent_stock_quantity > 0 ) {
+			$stock_quantity = (int) $parent_stock_quantity;
+			$manage_stock = true;
+		}
+	}
+	
+	// CRITICAL: If stock quantity exists and > 0, ALWAYS make it active (regardless of manage_stock setting)
+	if ( $stock_quantity !== null && $stock_quantity !== false && (int) $stock_quantity > 0 ) {
 		return true;
 	}
 	
-	// If stock quantity exists and > 0 (even if manage_stock is false), make it active
-	if ( $stock_quantity !== null && $stock_quantity > 0 ) {
+	// If stock is managed and quantity > 0, make it active
+	if ( $manage_stock && $stock_quantity !== null && $stock_quantity !== false && (int) $stock_quantity > 0 ) {
 		return true;
 	}
 	
@@ -6889,9 +6907,12 @@ function wp_augoose_ensure_variation_active_if_in_stock( $is_active, $variation 
 		return true;
 	}
 	
-	// If stock is not managed and product is published, make it active
-	if ( ! $manage_stock && $variation->get_status() === 'publish' ) {
-		return true;
+	// If variation is published and has a price, make it active (even without stock management)
+	if ( $variation->get_status() === 'publish' && $variation->get_price() ) {
+		// Only if stock quantity is not explicitly 0
+		if ( $stock_quantity === null || $stock_quantity === false || (int) $stock_quantity > 0 ) {
+			return true;
+		}
 	}
 	
 	return $is_active;
@@ -6904,39 +6925,56 @@ function wp_augoose_ensure_variation_purchasable_if_in_stock( $is_purchasable, $
 		return $is_purchasable;
 	}
 	
-	// If already purchasable, return as is
-	if ( $is_purchasable ) {
-		return $is_purchasable;
-	}
+	$variation_id = $variation->get_id();
 	
 	// Get stock information - use multiple methods to ensure accuracy
+	// Method 1: WooCommerce methods
 	$stock_quantity = $variation->get_stock_quantity();
 	$stock_status = $variation->get_stock_status();
 	$manage_stock = $variation->get_manage_stock();
 	
-	// Also check meta directly as fallback
-	$stock_quantity_meta = get_post_meta( $variation->get_id(), '_stock', true );
-	$stock_status_meta = get_post_meta( $variation->get_id(), '_stock_status', true );
-	$manage_stock_meta = get_post_meta( $variation->get_id(), '_manage_stock', true );
+	// Method 2: Direct meta access (more reliable)
+	$stock_quantity_meta = get_post_meta( $variation_id, '_stock', true );
+	$stock_status_meta = get_post_meta( $variation_id, '_stock_status', true );
+	$manage_stock_meta = get_post_meta( $variation_id, '_manage_stock', true );
 	
-	// Use meta values if get methods return null/empty
-	if ( $stock_quantity === null && $stock_quantity_meta !== '' && $stock_quantity_meta !== null ) {
+	// Method 3: Check parent product stock settings if variation doesn't manage stock
+	$parent_id = $variation->get_parent_id();
+	$parent_manage_stock = false;
+	if ( $parent_id ) {
+		$parent_manage_stock_meta = get_post_meta( $parent_id, '_manage_stock', true );
+		if ( $parent_manage_stock_meta !== '' ) {
+			$parent_manage_stock = wc_string_to_bool( $parent_manage_stock_meta );
+		}
+	}
+	
+	// Use meta values if get methods return null/empty/false
+	if ( ( $stock_quantity === null || $stock_quantity === false ) && $stock_quantity_meta !== '' && $stock_quantity_meta !== null && $stock_quantity_meta !== false ) {
 		$stock_quantity = (int) $stock_quantity_meta;
 	}
 	if ( empty( $stock_status ) && ! empty( $stock_status_meta ) ) {
 		$stock_status = $stock_status_meta;
 	}
-	if ( $manage_stock === null && $manage_stock_meta !== '' ) {
+	if ( ( $manage_stock === null || $manage_stock === false ) && $manage_stock_meta !== '' ) {
 		$manage_stock = wc_string_to_bool( $manage_stock_meta );
 	}
 	
-	// If stock is managed and quantity > 0, make it purchasable
-	if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+	// If parent manages stock but variation doesn't, check parent stock
+	if ( ! $manage_stock && $parent_manage_stock ) {
+		$parent_stock_quantity = get_post_meta( $parent_id, '_stock', true );
+		if ( $parent_stock_quantity !== '' && $parent_stock_quantity !== null && (int) $parent_stock_quantity > 0 ) {
+			$stock_quantity = (int) $parent_stock_quantity;
+			$manage_stock = true;
+		}
+	}
+	
+	// CRITICAL: If stock quantity exists and > 0, ALWAYS make it purchasable (regardless of manage_stock setting)
+	if ( $stock_quantity !== null && $stock_quantity !== false && (int) $stock_quantity > 0 ) {
 		return true;
 	}
 	
-	// If stock quantity exists and > 0 (even if manage_stock is false), make it purchasable
-	if ( $stock_quantity !== null && $stock_quantity > 0 ) {
+	// If stock is managed and quantity > 0, make it purchasable
+	if ( $manage_stock && $stock_quantity !== null && $stock_quantity !== false && (int) $stock_quantity > 0 ) {
 		return true;
 	}
 	
@@ -6945,9 +6983,12 @@ function wp_augoose_ensure_variation_purchasable_if_in_stock( $is_purchasable, $
 		return true;
 	}
 	
-	// If stock is not managed and product is published, make it purchasable
-	if ( ! $manage_stock && $variation->get_status() === 'publish' ) {
-		return true;
+	// If variation is published and has a price, make it purchasable (even without stock management)
+	if ( $variation->get_status() === 'publish' && $variation->get_price() ) {
+		// Only if stock quantity is not explicitly 0
+		if ( $stock_quantity === null || $stock_quantity === false || (int) $stock_quantity > 0 ) {
+			return true;
+		}
 	}
 	
 	return $is_purchasable;
@@ -7208,6 +7249,7 @@ function wp_augoose_include_variations_with_stock( $children, $product ) {
 
 /**
  * Ensure variations with stock are included in available variations
+ * CRITICAL: This must work for ALL products (jacket, pants, etc.)
  */
 add_filter( 'woocommerce_available_variation', 'wp_augoose_ensure_variation_available_if_in_stock', 1, 3 );
 function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $product, $variation ) {
@@ -7216,37 +7258,59 @@ function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $pr
 		return $variation_data;
 	}
 	
-	// Get stock information - use multiple methods
+	$variation_id = $variation->get_id();
+	
+	// Get stock information - use multiple methods to ensure accuracy
+	// Method 1: WooCommerce methods
 	$stock_quantity = $variation->get_stock_quantity();
 	$stock_status = $variation->get_stock_status();
 	$manage_stock = $variation->get_manage_stock();
 	
-	// Also check meta directly as fallback
-	$stock_quantity_meta = get_post_meta( $variation->get_id(), '_stock', true );
-	$stock_status_meta = get_post_meta( $variation->get_id(), '_stock_status', true );
-	$manage_stock_meta = get_post_meta( $variation->get_id(), '_manage_stock', true );
+	// Method 2: Direct meta access (more reliable)
+	$stock_quantity_meta = get_post_meta( $variation_id, '_stock', true );
+	$stock_status_meta = get_post_meta( $variation_id, '_stock_status', true );
+	$manage_stock_meta = get_post_meta( $variation_id, '_manage_stock', true );
 	
-	// Use meta values if get methods return null/empty
-	if ( $stock_quantity === null && $stock_quantity_meta !== '' && $stock_quantity_meta !== null ) {
+	// Method 3: Check parent product stock settings if variation doesn't manage stock
+	$parent_id = $variation->get_parent_id();
+	$parent_manage_stock = false;
+	if ( $parent_id ) {
+		$parent_manage_stock_meta = get_post_meta( $parent_id, '_manage_stock', true );
+		if ( $parent_manage_stock_meta !== '' ) {
+			$parent_manage_stock = wc_string_to_bool( $parent_manage_stock_meta );
+		}
+	}
+	
+	// Use meta values if get methods return null/empty/false
+	if ( ( $stock_quantity === null || $stock_quantity === false ) && $stock_quantity_meta !== '' && $stock_quantity_meta !== null && $stock_quantity_meta !== false ) {
 		$stock_quantity = (int) $stock_quantity_meta;
 	}
 	if ( empty( $stock_status ) && ! empty( $stock_status_meta ) ) {
 		$stock_status = $stock_status_meta;
 	}
-	if ( $manage_stock === null && $manage_stock_meta !== '' ) {
+	if ( ( $manage_stock === null || $manage_stock === false ) && $manage_stock_meta !== '' ) {
 		$manage_stock = wc_string_to_bool( $manage_stock_meta );
+	}
+	
+	// If parent manages stock but variation doesn't, check parent stock
+	if ( ! $manage_stock && $parent_manage_stock ) {
+		$parent_stock_quantity = get_post_meta( $parent_id, '_stock', true );
+		if ( $parent_stock_quantity !== '' && $parent_stock_quantity !== null && (int) $parent_stock_quantity > 0 ) {
+			$stock_quantity = (int) $parent_stock_quantity;
+			$manage_stock = true;
+		}
 	}
 	
 	// Check if variation has stock
 	$has_stock = false;
 	
-	// If stock is managed and quantity > 0
-	if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+	// CRITICAL: If stock quantity exists and > 0, ALWAYS consider it has stock (regardless of manage_stock setting)
+	if ( $stock_quantity !== null && $stock_quantity !== false && (int) $stock_quantity > 0 ) {
 		$has_stock = true;
 	}
 	
-	// If stock quantity exists and > 0 (even if manage_stock is false)
-	if ( $stock_quantity !== null && $stock_quantity > 0 ) {
+	// If stock is managed and quantity > 0
+	if ( $manage_stock && $stock_quantity !== null && $stock_quantity !== false && (int) $stock_quantity > 0 ) {
 		$has_stock = true;
 	}
 	
@@ -7258,7 +7322,7 @@ function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $pr
 	// If variation has stock, ensure it's available
 	if ( $has_stock ) {
 		// Initialize variation_data if empty
-		if ( empty( $variation_data ) ) {
+		if ( empty( $variation_data ) || ! is_array( $variation_data ) ) {
 			$variation_data = array();
 		}
 		
