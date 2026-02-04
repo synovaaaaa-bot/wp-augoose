@@ -4329,9 +4329,10 @@ function wp_augoose_handle_payment_success_redirect( $order_id ) {
  */
 add_filter( 'woocommerce_payment_successful_result', 'wp_augoose_handle_payment_result_redirect', 10, 2 );
 function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
-	if ( ! $order_id ) {
-		return $result;
-	}
+	try {
+		if ( ! $order_id ) {
+			return $result;
+		}
 	
 	$order = wc_get_order( $order_id );
 	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
@@ -4657,6 +4658,13 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 	}
 	
 	return $result;
+	} catch ( Exception $e ) {
+		// Log error but return result anyway so checkout doesn't completely fail
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'DOKU Payment Redirect Error: ' . $e->getMessage() );
+		}
+		return $result;
+	}
 }
 
 /**
