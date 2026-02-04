@@ -6836,3 +6836,196 @@ function wp_augoose_reset_conversion_flag_on_restore( $cart_item_key, $cart ) {
 		unset( $cart->cart_contents[ $cart_item_key ]['wp_augoose_exchange_rate'] );
 	}
 }
+
+/**
+ * Ensure variations with stock > 0 are always active and purchasable
+ * Fixes issue where variations with stock are disabled
+ */
+add_filter( 'woocommerce_variation_is_active', 'wp_augoose_ensure_variation_active_if_in_stock', 10, 2 );
+function wp_augoose_ensure_variation_active_if_in_stock( $is_active, $variation ) {
+	// If already active, return as is
+	if ( $is_active ) {
+		return $is_active;
+	}
+	
+	// Check if variation has stock
+	if ( ! $variation || ! is_a( $variation, 'WC_Product_Variation' ) ) {
+		return $is_active;
+	}
+	
+	// Get stock quantity
+	$stock_quantity = $variation->get_stock_quantity();
+	$stock_status = $variation->get_stock_status();
+	$manage_stock = $variation->get_manage_stock();
+	
+	// If stock is managed and quantity > 0, make it active
+	if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+		return true;
+	}
+	
+	// If stock status is 'instock' or 'onbackorder', make it active
+	if ( in_array( $stock_status, array( 'instock', 'onbackorder' ), true ) ) {
+		return true;
+	}
+	
+	// If stock is not managed and product is published, make it active
+	if ( ! $manage_stock && $variation->get_status() === 'publish' ) {
+		return true;
+	}
+	
+	return $is_active;
+}
+
+add_filter( 'woocommerce_variation_is_purchasable', 'wp_augoose_ensure_variation_purchasable_if_in_stock', 10, 2 );
+function wp_augoose_ensure_variation_purchasable_if_in_stock( $is_purchasable, $variation ) {
+	// If already purchasable, return as is
+	if ( $is_purchasable ) {
+		return $is_purchasable;
+	}
+	
+	// Check if variation has stock
+	if ( ! $variation || ! is_a( $variation, 'WC_Product_Variation' ) ) {
+		return $is_purchasable;
+	}
+	
+	// Get stock quantity
+	$stock_quantity = $variation->get_stock_quantity();
+	$stock_status = $variation->get_stock_status();
+	$manage_stock = $variation->get_manage_stock();
+	
+	// If stock is managed and quantity > 0, make it purchasable
+	if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+		return true;
+	}
+	
+	// If stock status is 'instock' or 'onbackorder', make it purchasable
+	if ( in_array( $stock_status, array( 'instock', 'onbackorder' ), true ) ) {
+		return true;
+	}
+	
+	// If stock is not managed and product is published, make it purchasable
+	if ( ! $manage_stock && $variation->get_status() === 'publish' ) {
+		return true;
+	}
+	
+	return $is_purchasable;
+}
+
+/**
+ * Ensure product stock status is correct based on actual stock quantity
+ */
+add_filter( 'woocommerce_product_is_in_stock', 'wp_augoose_fix_product_stock_status', 10, 2 );
+function wp_augoose_fix_product_stock_status( $in_stock, $product ) {
+	// Only process variations
+	if ( ! is_a( $product, 'WC_Product_Variation' ) ) {
+		return $in_stock;
+	}
+	
+	// If already in stock, return as is
+	if ( $in_stock ) {
+		return $in_stock;
+	}
+	
+	// Get stock quantity
+	$stock_quantity = $product->get_stock_quantity();
+	$manage_stock = $product->get_manage_stock();
+	
+	// If stock is managed and quantity > 0, it should be in stock
+	if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+		return true;
+	}
+	
+	return $in_stock;
+}
+
+/**
+ * Update stock status when stock quantity is set
+ * This ensures stock_status is synced with stock_quantity
+ */
+add_action( 'woocommerce_variation_set_stock_quantity', 'wp_augoose_sync_variation_stock_status', 10, 2 );
+function wp_augoose_sync_variation_stock_status( $variation_id, $stock_quantity ) {
+	$variation = wc_get_product( $variation_id );
+	if ( ! $variation || ! is_a( $variation, 'WC_Product_Variation' ) ) {
+		return;
+	}
+	
+	// Only sync if stock is managed
+	if ( ! $variation->get_manage_stock() ) {
+		return;
+	}
+	
+	// Update stock status based on quantity
+	if ( $stock_quantity !== null && $stock_quantity > 0 ) {
+		$variation->set_stock_status( 'instock' );
+		$variation->save();
+	} elseif ( $stock_quantity === 0 || $stock_quantity === null ) {
+		// Check if backorders are allowed
+		if ( $variation->backorders_allowed() ) {
+			$variation->set_stock_status( 'onbackorder' );
+		} else {
+			$variation->set_stock_status( 'outofstock' );
+		}
+		$variation->save();
+	}
+}
+
+/**
+ * Ensure variations with stock are not hidden
+ * This prevents WooCommerce from hiding variations that have stock
+ */
+add_filter( 'woocommerce_hide_invisible_variations', 'wp_augoose_show_variations_with_stock', 10, 3 );
+function wp_augoose_show_variations_with_stock( $hide, $product_id, $variation ) {
+	// If variation has stock, don't hide it
+	if ( ! $variation || ! is_a( $variation, 'WC_Product_Variation' ) ) {
+		return $hide;
+	}
+	
+	// Get stock quantity
+	$stock_quantity = $variation->get_stock_quantity();
+	$stock_status = $variation->get_stock_status();
+	$manage_stock = $variation->get_manage_stock();
+	
+	// If stock is managed and quantity > 0, don't hide
+	if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+		return false;
+	}
+	
+	// If stock status is 'instock' or 'onbackorder', don't hide
+	if ( in_array( $stock_status, array( 'instock', 'onbackorder' ), true ) ) {
+		return false;
+	}
+	
+	return $hide;
+}
+
+/**
+ * Ensure variations with stock are included in available variations
+ */
+add_filter( 'woocommerce_available_variation', 'wp_augoose_ensure_variation_available_if_in_stock', 10, 3 );
+function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $product, $variation ) {
+	// If variation data is empty or variation is not purchasable, check stock
+	if ( empty( $variation_data ) || ( isset( $variation_data['is_purchasable'] ) && ! $variation_data['is_purchasable'] ) ) {
+		// Get stock quantity
+		$stock_quantity = $variation->get_stock_quantity();
+		$stock_status = $variation->get_stock_status();
+		$manage_stock = $variation->get_manage_stock();
+		
+		// If stock is managed and quantity > 0, make it available
+		if ( $manage_stock && $stock_quantity !== null && $stock_quantity > 0 ) {
+			$variation_data['is_purchasable'] = true;
+			$variation_data['is_in_stock'] = true;
+			$variation_data['variation_is_active'] = true;
+			$variation_data['variation_is_visible'] = true;
+		}
+		
+		// If stock status is 'instock' or 'onbackorder', make it available
+		if ( in_array( $stock_status, array( 'instock', 'onbackorder' ), true ) ) {
+			$variation_data['is_purchasable'] = true;
+			$variation_data['is_in_stock'] = true;
+			$variation_data['variation_is_active'] = true;
+			$variation_data['variation_is_visible'] = true;
+		}
+	}
+	
+	return $variation_data;
+}
