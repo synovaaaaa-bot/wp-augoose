@@ -327,21 +327,21 @@ function wp_augoose_force_classic_checkout_template( $template, $template_name, 
 }
 
 /**
- * Price placeholder untuk konsistensi tinggi produk
- * Menambahkan placeholder jika produk tidak punya harga
+ * Price placeholder for consistent product height
+ * Add placeholder if product doesn't have a price
  */
 add_action('woocommerce_after_shop_loop_item_title', function () {
     global $product;
 
     if (!$product) return;
 
-    // Kalau sudah ada harga, WooCommerce sudah render <span class="price">...</span>
-    // Kalau tidak ada harga, kita render placeholder <span class="price"> supaya tinggi konsisten
+    // If price exists, WooCommerce already renders <span class="price">...</span>
+    // If no price, we render placeholder <span class="price"> to keep height consistent
     $price = $product->get_price();
     if (empty($price) || $price === '') {
         echo '<span class="price price--placeholder">&nbsp;</span>';
     }
-}, 25); // Priority 25 untuk memastikan dijalankan setelah price (10)
+}, 25); // Priority 25 to ensure it runs after price (10)
 
 /**
  * Cart page redirect removed.
@@ -567,26 +567,26 @@ function wp_augoose_suppress_harmless_warnings() {
  * Urutan logic:
  * 1. Di awal request (template_redirect): tentukan currency SEKALI
  *    - Priority 1: WCML cookie/session (user manual select) - JANGAN override
- *    - Priority 2: Auto-detect dari geolocation (hanya first visit)
+ *    - Priority 2: Auto-detect from geolocation (only first visit)
  *    - Priority 3: Base currency
- * 2. Set currency context via WCML SEKALI di awal
- * 3. Untuk output harga: cukup return $product->get_price_html()
- *    - JANGAN set currency lagi di fungsi price!
- *    - Biarkan WCML + WooCommerce handle conversion, tax, formatting
+ * 2. Set currency context via WCML ONCE at the start
+ * 3. For price output: just return $product->get_price_html()
+ *    - DON'T set currency again in price function!
+ *    - Let WCML + WooCommerce handle conversion, tax, formatting
  * 
- * PENTING:
- * - JANGAN set currency di tengah request (bisa bikin cache campur → harga beda)
- * - JANGAN hitung harga manual untuk variable product
- * - JANGAN hook woocommerce_get_price_html yang memanggil get_price_html() lagi
- * - JANGAN bikin cookie currency sendiri kalau WCML sudah ada
- * - Hapus manual price check (biarkan WCML handle)
+ * IMPORTANT:
+ * - DON'T set currency in middle of request (can mix cache → different prices)
+ * - DON'T calculate price manually for variable product
+ * - DON'T hook woocommerce_get_price_html that calls get_price_html() again
+ * - DON'T create custom currency cookie if WCML exists
+ * - Remove manual price check (let WCML handle)
  */
 
 /**
  * Step 1: Geolocate user country from IP
  * Returns country code (e.g., 'US', 'SG', 'MY', 'ID')
  * 
- * BULLETPROOF: Cache 24 jam, fail-safe (jangan retry berkali-kali), tidak bikin cookie currency sendiri
+ * BULLETPROOF: Cache 24 hours, fail-safe (don't retry multiple times), don't create custom currency cookie
  */
 function wp_augoose_get_user_country_from_ip() {
 	// Check if already cached in cookie (24 hours)
@@ -676,14 +676,14 @@ function wp_augoose_determine_currency( $country = '' ) {
 		if ( isset( $woocommerce_wpml->multi_currency ) ) {
 			$currency = $woocommerce_wpml->multi_currency->get_client_currency();
 			if ( $currency ) {
-				// User sudah pilih currency manual atau WCML sudah set - jangan override
+				// User already chose currency manually or WCML already set - don't override
 				return $currency;
 			}
 		}
 	}
 	
-	// Priority 2: Auto-detect from country (hanya kalau WCML belum set currency)
-	// Ini hanya untuk "first visit" - setelah user pilih manual, WCML akan handle
+	// Priority 2: Auto-detect from country (only if WCML hasn't set currency yet)
+	// This is only for "first visit" - after user chooses manually, WCML will handle
 	if ( $country ) {
 		$country_currency_map = array(
 			'US' => 'USD',
@@ -714,19 +714,19 @@ function wp_augoose_determine_currency( $country = '' ) {
 }
 
 /**
- * CRITICAL: Set currency SEKALI di awal request
+ * CRITICAL: Set currency ONCE at the beginning of the request
  * 
- * Ini harus dipanggil sebelum produk di-load untuk mencegah cache campur currency.
- * Hook di template_redirect dengan priority kecil (10-20) untuk set sebelum WooCommerce load produk.
+ * This must be called before products are loaded to prevent cache mixing currencies.
+ * Hook into template_redirect with early priority (10-20) to set before WooCommerce loads products.
  */
 add_action( 'template_redirect', 'wp_augoose_set_currency_once', 10 );
 function wp_augoose_set_currency_once() {
-	// Skip admin dan AJAX (kecuali frontend AJAX)
+	// Skip admin and AJAX (except frontend AJAX)
 	if ( is_admin() && ! wp_doing_ajax() ) {
 		return;
 	}
 	
-	// Skip jika WCML tidak aktif
+	// Skip if WCML is not active
 	if ( ! class_exists( 'WCML_Multi_Currency' ) ) {
 		return;
 	}
@@ -736,18 +736,18 @@ function wp_augoose_set_currency_once() {
 		return;
 	}
 	
-	// Priority 1: Check WCML currency (user manual select atau sudah set)
+	// Priority 1: Check WCML currency (user manual select or already set)
 	$currency = $woocommerce_wpml->multi_currency->get_client_currency();
 	$currency_source = 'wcml_cookie';
 	
-	// Priority 2: Jika belum ada, coba geolocation
+	// Priority 2: If not set, try geolocation
 	if ( ! $currency ) {
 		$country = wp_augoose_get_user_country_from_ip();
 		$currency = wp_augoose_determine_currency( $country );
 		$currency_source = $country ? 'geolocation' : 'base';
 	}
 	
-	// Priority 3: Fallback ke base currency
+	// Priority 3: Fallback to base currency
 	if ( ! $currency ) {
 		$currency = get_woocommerce_currency();
 		$currency_source = 'base';
@@ -783,28 +783,28 @@ function wp_augoose_set_currency_once() {
 /**
  * REMOVED: wp_augoose_get_product_price_for_currency()
  * 
- * Fungsi ini dihapus karena:
- * 1. Menghitung harga manual untuk variable product (get_variation_regular_price('min'))
- *    bisa tidak sejalan dengan WCML yang handle per variation
- * 2. Tidak perlu - cukup set currency context, lalu biarkan WCML + WooCommerce
- *    handle conversion via filter
+ * This function was removed because:
+ * 1. Manual price calculation for variable products (get_variation_regular_price('min'))
+ *    may not align with WCML which handles per-variation prices
+ * 2. Not necessary - just set currency context, then let WCML + WooCommerce
+ *    handle conversion via filters
  * 
- * Gunakan wp_augoose_get_product_price_html() saja yang lebih aman.
+ * Use wp_augoose_get_product_price_html() alone which is safer.
  */
 
 /**
  * Get formatted price HTML
  * 
- * CRITICAL FIX: Jangan set currency di sini! Currency sudah di-set SEKALI di awal request.
+ * CRITICAL FIX: Don't set currency here! Currency is already set ONCE at the beginning of the request.
  * 
  * BULLETPROOF IMPLEMENTATION:
- * 1. Currency sudah di-set di template_redirect hook (sekali di awal request)
- * 2. Cukup return $product->get_price_html() - biarkan WCML + WooCommerce handle
- * 3. Untuk variable product: biarkan get_price_html() handle min/max
- * 4. Tidak hook woocommerce_get_price_html untuk mencegah infinite loop
+ * 1. Currency is already set in template_redirect hook (once at start of request)
+ * 2. Just return $product->get_price_html() - let WCML + WooCommerce handle it
+ * 3. For variable products: let get_price_html() handle min/max
+ * 4. Don't hook woocommerce_get_price_html to prevent infinite loops
  * 
  * @param WC_Product $product Product object
- * @param string     $target_currency DEPRECATED - tidak digunakan lagi (currency sudah di-set di awal request)
+ * @param string     $target_currency DEPRECATED - no longer used (currency is already set at request start)
  * @return string Formatted price HTML
  */
 function wp_augoose_get_product_price_html( $product, $target_currency = '' ) {
@@ -812,14 +812,14 @@ function wp_augoose_get_product_price_html( $product, $target_currency = '' ) {
 		return '';
 	}
 	
-	// CRITICAL: Jangan set currency di sini!
-	// Currency sudah di-set SEKALI di awal request via wp_augoose_set_currency_once()
-	// Setting currency di tengah request bisa bikin cache campur → harga beda (63 vs 64)
+	// CRITICAL: Don't set currency here!
+	// Currency is already set ONCE at the start of the request via wp_augoose_set_currency_once()
+	// Setting currency in the middle of request can mix cache → different prices (63 vs 64)
 	
-	// Cukup return get_price_html() - WCML + WooCommerce akan handle:
+	// Just return get_price_html() - WCML + WooCommerce will handle:
 	// - Tax display (inc/exc) via WooCommerce settings
 	// - Formatting (decimals, symbol) via currency settings
-	// - WCML conversion (manual price atau auto convert) via filter
+	// - WCML conversion (manual price or auto convert) via filter
 	// - Variable product min/max price via WooCommerce internal logic
 	$price_html = $product->get_price_html();
 	
@@ -926,9 +926,9 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 		return '<p class="wishlist-empty">Your wishlist is empty.</p>';
 	}
 
-	// CRITICAL FIX: Jangan set currency di sini!
-	// Currency sudah di-set SEKALI di awal request via wp_augoose_set_currency_once()
-	// Setting currency di tengah request bisa bikin cache campur → harga beda
+	// CRITICAL FIX: Don't set currency here!
+	// Currency is already set ONCE at the start of the request via wp_augoose_set_currency_once()
+	// Setting currency in the middle of request can mix cache → different prices
 
 	$q = new WP_Query(
 		array(
@@ -948,15 +948,15 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			$q->the_post();
 			$pid = get_the_ID();
 			
-			// Get product object - force fresh load untuk mencegah cache issue
-			// CRITICAL: Untuk variable product, perlu clear cache agar harga benar per product
+			// Get product object - force fresh load to prevent cache issues
+			// CRITICAL: For variable product, need to clear cache for correct prices per product
 			$product = wc_get_product( $pid );
 			if ( ! $product ) {
 				continue;
 			}
 			
-			// CRITICAL FIX: Clear variable product price cache untuk memastikan harga fresh
-			// Variable product cache bisa bikin semua produk tampil harga sama
+			// CRITICAL FIX: Clear variable product price cache to ensure fresh prices
+			// Variable product cache can make all products show the same price
 			if ( $product->is_type( 'variable' ) ) {
 				// Clear WooCommerce variable product price cache
 				delete_transient( 'wc_var_prices_' . $pid );
@@ -967,11 +967,11 @@ function wp_augoose_wishlist_render_items_html( $ids ) {
 			$link = get_permalink( $pid );
 			$img  = $product->get_image( 'woocommerce_thumbnail' );
 			
-			// Get price HTML - currency sudah di-set di awal request
-			// Pastikan setiap product di-load dengan currency context yang benar
+			// Get price HTML - currency is already set at the start of request
+			// Ensure each product is loaded with correct currency context
 			$price = wp_augoose_get_product_price_html( $product );
 			
-			// Debug logging untuk wishlist (guarded by WP_DEBUG)
+			// Debug logging for wishlist (guarded by WP_DEBUG)
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				$current_currency = class_exists( 'WCML_Multi_Currency' ) && isset( $GLOBALS['woocommerce_wpml']->multi_currency ) 
 					? $GLOBALS['woocommerce_wpml']->multi_currency->get_client_currency() 
@@ -1103,9 +1103,9 @@ function wp_augoose_ajax_wishlist_get() {
 		check_ajax_referer( 'wp_augoose_nonce', 'nonce' );
 	}
 	
-	// CRITICAL FIX: Jangan set currency di sini!
-	// Currency sudah di-set SEKALI di awal request via wp_augoose_set_currency_once()
-	// Untuk AJAX, currency context sudah di-set sebelum AJAX handler dipanggil
+	// CRITICAL FIX: Don't set currency here!
+	// Currency is already set ONCE at the start of the request via wp_augoose_set_currency_once()
+	// For AJAX, currency context is already set before the AJAX handler is called
 	
 	$ids  = wp_augoose_wishlist_get_ids();
 	$html = wp_augoose_wishlist_render_items_html( $ids );

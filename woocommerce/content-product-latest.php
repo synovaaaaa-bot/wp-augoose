@@ -110,7 +110,7 @@ if ( $is_on_sale ) {
 			add_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_rating', 5 );
 			?>
 			
-			<!-- CTA Button: ADD TO CART (WAJIB untuk semua card) -->
+			<!-- CTA Button: ADD TO CART (REQUIRED for all cards) -->
 			<div class="lc-cta">
 				<?php
 				// Use WooCommerce add to cart button
