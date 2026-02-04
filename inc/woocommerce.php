@@ -3798,6 +3798,8 @@ function wp_augoose_ensure_doku_amount_from_order( $args, $order ) {
  */
 add_action( 'woocommerce_checkout_order_processed', 'wp_augoose_validate_doku_order_amount', 5, 3 );
 add_action( 'woocommerce_before_pay', 'wp_augoose_validate_doku_order_amount_before_pay', 5 );
+// CRITICAL: Clean up previous failed orders from session BEFORE checkout process
+add_action( 'woocommerce_before_checkout_process', 'wp_augoose_clean_previous_failed_orders', -1 );
 // Hook paling awal untuk membersihkan amount SEBELUM validasi gateway
 add_action( 'woocommerce_before_checkout_process', 'wp_augoose_clean_cart_total_for_doku', 0 );
 add_action( 'woocommerce_checkout_process', 'wp_augoose_force_clean_amount_before_gateway_validate', 0 );
@@ -3876,6 +3878,64 @@ function wp_augoose_force_clean_amount_before_gateway_validate() {
 		error_log( "DOKU PRE-VALIDATE: raw_total={$raw_total} currency={$currency} clean={$clean_amount}" );
 		error_log( "DOKU PRE-VALIDATE: _POST[amount]=" . ( isset( $_POST['amount'] ) ? $_POST['amount'] : 'not set' ) );
 		error_log( "DOKU PRE-VALIDATE: _POST[doku_amount]=" . ( isset( $_POST['doku_amount'] ) ? $_POST['doku_amount'] : 'not set' ) );
+	}
+}
+
+/**
+ * Clean previous failed orders from session before new checkout
+ * This prevents "stuck" orders from causing errors on subsequent checkout attempts
+ * Runs at priority -1 (before everything else in checkout process)
+ */
+function wp_augoose_clean_previous_failed_orders() {
+	if ( is_user_logged_in() ) {
+		// For logged-in users, check their previous orders
+		$user_id = get_current_user_id();
+		$args = array(
+			'customer' => $user_id,
+			'status'   => array( 'pending', 'failed', 'cancelled' ),
+			'limit'    => 5,
+			'return'   => 'ids',
+		);
+		
+		$orders = wc_get_orders( $args );
+		
+		// Delete failed/pending orders from last 30 minutes to prevent stuck orders
+		foreach ( $orders as $order_id ) {
+			$order = wc_get_order( $order_id );
+			if ( ! $order ) continue;
+			
+			// Check if order was created less than 30 minutes ago
+			$order_date = $order->get_date_created();
+			if ( ! $order_date ) continue;
+			
+			$time_diff = current_time( 'timestamp' ) - $order_date->getTimestamp();
+			
+			// If order is pending/failed and less than 30 minutes old, delete it
+			if ( $time_diff < 1800 && in_array( $order->get_status(), array( 'pending', 'failed', 'cancelled' ) ) ) {
+				// Delete the order to clean up session
+				wp_delete_post( $order_id, true );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( 'Deleted previous failed order #' . $order_id . ' (age: ' . $time_diff . 's)' );
+				}
+			}
+		}
+	} else {
+		// For non-logged-in users, clean session data
+		// Clear WooCommerce session order data
+		if ( WC()->session ) {
+			// Remove session orders
+			WC()->session->set( 'order_awaiting_payment', null );
+			WC()->session->set( 'woocommerce_order_awaiting_payment', null );
+			
+			// Also clear any temporary order data
+			$session_data = WC()->session->get_session_data();
+			if ( is_array( $session_data ) ) {
+				// Remove order-related temp data
+				unset( $session_data['order_id'] );
+				unset( $session_data['pending_order_id'] );
+				unset( $session_data['temp_order_id'] );
+			}
+		}
 	}
 }
 
@@ -4338,6 +4398,23 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
 		return $result;
 	}
+	
+	// CRITICAL: Validate this is a fresh order checkout (not a stuck/duplicate)
+	// Mark order as processed to prevent reprocessing
+	$order_lock = $order->get_meta( '_checkout_processed' );
+	if ( $order_lock === 'yes' ) {
+		// This order was already processed, prevent double processing
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'Order #' . $order_id . ' already processed, preventing duplicate' );
+		}
+		// Return original result but mark as handled
+		return $result;
+	}
+	
+	// Mark order as processed now
+	$order->update_meta_data( '_checkout_processed', 'yes' );
+	$order->update_meta_data( '_checkout_process_time', current_time( 'mysql' ) );
+	$order->save_meta_data();
 	
 	// Check if this is DOKU payment
 	$payment_method = $order->get_payment_method();
