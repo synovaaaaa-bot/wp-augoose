@@ -281,10 +281,15 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							}
 							?>
 							
+							<?php 
+							// CRITICAL: Ensure option value is always a string (for numeric values like 28, 29, etc.)
+							// This prevents "value.toLowerCase is not a function" errors in JavaScript
+							$option_value = (string) $option;
+							?>
 							<button 
 								type="button" 
 								class="variation-swatch <?php echo $is_selected ? 'is-active' : ''; ?> <?php echo $is_disabled ? 'is-disabled' : ''; ?> <?php echo $is_color ? 'swatch-color' : ( $is_size ? 'swatch-size' : 'swatch-text' ); ?>"
-								data-value="<?php echo esc_attr( $option ); ?>"
+								data-value="<?php echo esc_attr( $option_value ); ?>"
 								data-attribute="<?php echo esc_attr( $attribute_slug ); ?>"
 								<?php echo $is_disabled ? 'disabled aria-disabled="true"' : ''; ?>
 								<?php if ( $is_color && $color_hex ) : ?>
@@ -319,7 +324,12 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					>
 						<option value=""><?php echo esc_html( 'Choose an option' ); ?></option>
 						<?php foreach ( $display_options as $option ) : ?>
-							<option value="<?php echo esc_attr( $option ); ?>" <?php selected( sanitize_title( $selected_value ), sanitize_title( $option ) ); ?>><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ); ?></option>
+							<?php 
+							// CRITICAL: Ensure option value is always a string (for numeric values like 28, 29, etc.)
+							// This prevents "value.toLowerCase is not a function" errors in JavaScript
+							$option_value = (string) $option;
+							?>
+							<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( sanitize_title( $selected_value ), sanitize_title( $option_value ) ); ?>><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</div>

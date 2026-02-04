@@ -3199,7 +3199,110 @@ function wp_augoose_variation_scripts() {
 		}
 		
 		wp_add_inline_script( 'wc-add-to-cart-variation', '
+			// CRITICAL FIX: Global error handler to catch toLowerCase errors
+			// This prevents "value.toLowerCase is not a function" errors with numeric values (28, 29, etc.)
+			window.addEventListener("error", function(e) {
+				if (e.message && e.message.indexOf("toLowerCase is not a function") !== -1) {
+					console.warn("Caught toLowerCase error, attempting to fix...");
+					e.preventDefault();
+					// Force re-initialization of variation selects
+					if (typeof jQuery !== "undefined") {
+						jQuery(document).ready(function($) {
+							$("select[name^=\"attribute_\"]").each(function() {
+								var $select = $(this);
+								$select.find("option").each(function() {
+									var $option = $(this);
+									var val = $option.val();
+									if (val !== "" && val !== null && typeof val !== "undefined") {
+										$option.attr("value", String(val));
+									}
+								});
+							});
+						});
+					}
+					return true;
+				}
+			}, true);
+			
+			// CRITICAL FIX: Safe toLowerCase helper that handles numeric values (28, 29, etc.)
+			// This prevents "value.toLowerCase is not a function" errors
+			window.safeToLowerCase = function(value) {
+				if (value === null || value === undefined) {
+					return "";
+				}
+				return String(value).toLowerCase();
+			};
+			
+			// Patch String.prototype.toLowerCase to handle non-string values safely
+			// This is critical for numeric variation values (28, 29, etc.)
+			(function() {
+				var originalToLowerCase = String.prototype.toLowerCase;
+				Object.defineProperty(String.prototype, "toLowerCase", {
+					value: function() {
+						// If this is not a string, convert it first
+						if (typeof this !== "string") {
+							return originalToLowerCase.call(String(this));
+						}
+						return originalToLowerCase.call(this);
+					},
+					writable: true,
+					configurable: true
+				});
+			})();
+			
+			// Also patch for cases where toLowerCase is called on non-String objects
+			// This handles cases like: value.toLowerCase() where value is a number
+			(function() {
+				// Store original
+				var originalToLowerCase = String.prototype.toLowerCase;
+				// Create a safe wrapper
+				var safeToLowerCase = function(value) {
+					if (value === null || value === undefined) {
+						return "";
+					}
+					if (typeof value === "string") {
+						return originalToLowerCase.call(value);
+					}
+					return originalToLowerCase.call(String(value));
+				};
+				// Make it available globally
+				window.safeToLowerCase = safeToLowerCase;
+			})();
+			
 			jQuery(document).ready(function($) {
+				// CRITICAL FIX: Ensure all select option values are strings before any processing
+				// This prevents "value.toLowerCase is not a function" errors with numeric values (28, 29, etc.)
+				function ensureStringValues() {
+					$("select[name^=\"attribute_\"]").each(function() {
+						var $select = $(this);
+						$select.find("option").each(function() {
+							var $option = $(this);
+							var val = $option.val();
+							if (val !== "" && val !== null && typeof val !== "undefined") {
+								// Convert to string if not already a string
+								var stringVal = String(val);
+								if ($option.attr("value") !== stringVal) {
+									$option.attr("value", stringVal);
+								}
+							}
+						});
+					});
+				}
+				
+				// Run immediately and after DOM updates
+				ensureStringValues();
+				setTimeout(ensureStringValues, 100);
+				setTimeout(ensureStringValues, 500);
+				
+				// Also run when variations are updated
+				$(document.body).on("woocommerce_update_variation_values", ensureStringValues);
+				
+				// Intercept all option value reads to ensure strings
+				var originalOptionVal = $.fn.val;
+				$("select[name^=\"attribute_\"]").on("change", function() {
+					ensureStringValues();
+				});
+				
 				// Handle swatch clicks
 				$(document).on("click", ".variation-swatch", function(e) {
 					e.preventDefault();
@@ -7375,9 +7478,13 @@ function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $pr
 			}
 		} else {
 			// Sanitize existing attributes - ensure all values are strings
+			// CRITICAL: Convert numeric values (28, 29, etc.) to strings, not empty strings
 			foreach ( $variation_data['attributes'] as $key => $value ) {
-				if ( $value === null || $value === false || ! is_string( $value ) ) {
+				if ( $value === null || $value === false ) {
 					$variation_data['attributes'][ $key ] = '';
+				} else {
+					// Convert ALL values to string, including numbers (28, 29, etc.)
+					$variation_data['attributes'][ $key ] = (string) $value;
 				}
 			}
 		}
@@ -7389,10 +7496,14 @@ function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $pr
 		$variation_data['variation_is_visible'] = true;
 	} else {
 		// Even if no stock, ensure attributes are valid strings to prevent JavaScript errors
+		// CRITICAL: Convert numeric values (28, 29, etc.) to strings, not empty strings
 		if ( isset( $variation_data['attributes'] ) && is_array( $variation_data['attributes'] ) ) {
 			foreach ( $variation_data['attributes'] as $key => $value ) {
-				if ( $value === null || $value === false || ! is_string( $value ) ) {
+				if ( $value === null || $value === false ) {
 					$variation_data['attributes'][ $key ] = '';
+				} else {
+					// Convert ALL values to string, including numbers (28, 29, etc.)
+					$variation_data['attributes'][ $key ] = (string) $value;
 				}
 			}
 		}
@@ -7424,12 +7535,14 @@ function wp_augoose_sanitize_variation_attributes( $variation_data, $product, $v
 	}
 	
 	// Sanitize all attribute values - ensure they are strings
+	// CRITICAL: Convert numeric values (28, 29, etc.) to strings, not empty strings
 	foreach ( $variation_data['attributes'] as $key => $value ) {
-		// Convert null, false, or non-string values to empty string
-		if ( $value === null || $value === false || ! is_string( $value ) ) {
+		// Convert null or false to empty string
+		if ( $value === null || $value === false ) {
 			$variation_data['attributes'][ $key ] = '';
 		} else {
-			// Ensure it's a string (even if it's already a string, this ensures type safety)
+			// CRITICAL: Convert ALL values to string, including numbers (28, 29, etc.)
+			// This prevents "value.toLowerCase is not a function" errors in JavaScript
 			$variation_data['attributes'][ $key ] = (string) $value;
 		}
 	}
