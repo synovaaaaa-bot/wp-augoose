@@ -265,16 +265,24 @@ if ( post_password_required() ) {
                 <h2>YOU MAY ALSO LIKE</h2>
                 <?php
                 // Get related products
-                $related_ids = wc_get_related_products( $product->get_id(), 4 );
+                $related_ids = wc_get_related_products( $product->get_id(), 8 );
                 $has_products = false;
                 
                 if ( ! empty( $related_ids ) ) {
                     $args = array(
                         'post_type'      => 'product',
                         'posts_per_page' => 4,
-                        'post__in'        => $related_ids,
-                        'orderby'         => 'post__in',
-                        'post_status'     => 'publish',
+                        'post__in'       => $related_ids,
+                        'orderby'        => 'post__in',
+                        'post_status'    => 'publish',
+                        'tax_query'      => array(
+                            array(
+                                'taxonomy' => 'product_visibility',
+                                'field'    => 'slug',
+                                'terms'    => array( 'catalog', 'visible' ),
+                                'operator' => 'IN',
+                            ),
+                        ),
                     );
                     
                     $related_products = new WP_Query( $args );
@@ -291,15 +299,72 @@ if ( post_password_required() ) {
                     }
                 }
                 
-                // Fallback: show recent products if no related products
+                // Fallback: show products from same category if no related products
+                if ( ! $has_products ) {
+                    $categories = get_the_terms( $product->get_id(), 'product_cat' );
+                    $category_ids = array();
+                    
+                    if ( $categories && ! is_wp_error( $categories ) ) {
+                        foreach ( $categories as $category ) {
+                            $category_ids[] = $category->term_id;
+                        }
+                    }
+                    
+                    if ( ! empty( $category_ids ) ) {
+                        $args = array(
+                            'post_type'      => 'product',
+                            'posts_per_page' => 4,
+                            'post__not_in'   => array( $product->get_id() ),
+                            'orderby'        => 'date',
+                            'order'          => 'DESC',
+                            'post_status'    => 'publish',
+                            'tax_query'      => array(
+                                array(
+                                    'taxonomy' => 'product_cat',
+                                    'field'    => 'term_id',
+                                    'terms'    => $category_ids,
+                                ),
+                                array(
+                                    'taxonomy' => 'product_visibility',
+                                    'field'    => 'slug',
+                                    'terms'    => array( 'catalog', 'visible' ),
+                                    'operator' => 'IN',
+                                ),
+                            ),
+                        );
+                        
+                        $category_products = new WP_Query( $args );
+                        
+                        if ( $category_products->have_posts() ) {
+                            $has_products = true;
+                            echo '<ul class="products related-products-grid">';
+                            while ( $category_products->have_posts() ) {
+                                $category_products->the_post();
+                                wc_get_template_part( 'content', 'product' );
+                            }
+                            echo '</ul>';
+                            wp_reset_postdata();
+                        }
+                    }
+                }
+                
+                // Final fallback: show recent products if no category products
                 if ( ! $has_products ) {
                     $args = array(
                         'post_type'      => 'product',
                         'posts_per_page' => 4,
+                        'post__not_in'   => array( $product->get_id() ),
                         'orderby'        => 'date',
                         'order'          => 'DESC',
-                        'post__not_in'   => array( $product->get_id() ),
                         'post_status'    => 'publish',
+                        'tax_query'      => array(
+                            array(
+                                'taxonomy' => 'product_visibility',
+                                'field'    => 'slug',
+                                'terms'    => array( 'catalog', 'visible' ),
+                                'operator' => 'IN',
+                            ),
+                        ),
                     );
                     
                     $recent_products = new WP_Query( $args );
