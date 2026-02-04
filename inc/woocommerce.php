@@ -3798,6 +3798,36 @@ function wp_augoose_ensure_doku_amount_from_order( $args, $order ) {
  */
 add_action( 'woocommerce_checkout_order_processed', 'wp_augoose_validate_doku_order_amount', 5, 3 );
 add_action( 'woocommerce_before_pay', 'wp_augoose_validate_doku_order_amount_before_pay', 5 );
+// CRITICAL: Setup error handler to ensure checkout returns 200 status even if errors occur
+add_action( 'wp_ajax_checkout', 'wp_augoose_setup_checkout_error_handler', -9999 );
+add_action( 'wp_ajax_nopriv_checkout', 'wp_augoose_setup_checkout_error_handler', -9999 );
+function wp_augoose_setup_checkout_error_handler() {
+	// Set error handler to catch any fatal errors and ensure 200 status
+	set_error_handler( function( $errno, $errstr, $errfile, $errline ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'Checkout Error [' . $errno . ']: ' . $errstr . ' in ' . $errfile . ':' . $errline );
+		}
+		// Return false to let PHP handle it normally (so it doesn't suppress)
+		return false;
+	});
+	
+	// Register shutdown function to catch fatal errors and ensure 200 response
+	register_shutdown_function( function() {
+		$error = error_get_last();
+		if ( $error !== null && in_array( $error['type'], array( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR ) ) ) {
+			// Fatal error occurred - ensure we return JSON with 200 status
+			if ( ! headers_sent() ) {
+				http_response_code( 200 );
+				header( 'Content-Type: application/json; charset=utf-8' );
+			}
+			
+			// Log the error
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'Checkout Fatal Error: ' . $error['message'] . ' in ' . $error['file'] . ':' . $error['line'] );
+			}
+		}
+	});
+}
 // CRITICAL: Clean up previous failed orders from session BEFORE checkout process
 add_action( 'woocommerce_before_checkout_process', 'wp_augoose_clean_previous_failed_orders', -1 );
 // Hook paling awal untuk membersihkan amount SEBELUM validasi gateway
@@ -5981,8 +6011,9 @@ function wp_augoose_update_checkout_quantity() {
 		ob_end_clean();
 	}
 	
-	// Set proper headers
+	// CRITICAL: Set 200 OK status code before sending response
 	if ( ! headers_sent() ) {
+		http_response_code( 200 );
 		header( 'Content-Type: application/json; charset=utf-8' );
 	}
 	
