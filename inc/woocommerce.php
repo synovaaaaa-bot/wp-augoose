@@ -259,7 +259,7 @@ function wp_augoose_ensure_classic_checkout() {
 	// CRITICAL: Skip for WordPress Customizer requests
 	// Customizer needs to work normally, don't interfere
 	if ( isset( $_REQUEST['customize_changeset_uuid'] ) || 
-	     isset( $_GET['customize_changeset_uuid'] ) || 
+	     isset( $_GET['customize_changeset_uuid'] ) ||
 	     isset( $_POST['customize_changeset_uuid'] ) ||
 	     is_customize_preview() ) {
 		return;
@@ -285,6 +285,30 @@ function wp_augoose_ensure_classic_checkout() {
 	if ( function_exists( 'wc_get_template' ) ) {
 		// This ensures our custom checkout template is used
 		add_filter( 'woocommerce_locate_template', 'wp_augoose_force_classic_checkout_template', 10, 3 );
+	}
+}
+
+/**
+ * CRITICAL: Ensure WooCommerce checkout script is loaded on checkout page
+ * This ensures wc_checkout_form and wc_checkout_params are available
+ */
+add_action( 'wp_enqueue_scripts', 'wp_augoose_ensure_checkout_script', 999 );
+function wp_augoose_ensure_checkout_script() {
+	if ( ! is_checkout() ) {
+		return;
+	}
+	
+	// Ensure WooCommerce checkout script is enqueued
+	if ( ! wp_script_is( 'wc-checkout', 'enqueued' ) ) {
+		// WooCommerce should auto-enqueue, but force it if not
+		if ( function_exists( 'WC' ) ) {
+			// Include WooCommerce frontend includes
+			if ( ! class_exists( 'WC_Frontend_Scripts' ) ) {
+				WC()->frontend_includes();
+			}
+			// Enqueue checkout script
+			wp_enqueue_script( 'wc-checkout' );
+		}
 	}
 }
 
@@ -4334,13 +4358,40 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 		// DOKU returns redirect URL to payment page (checkout.doku.com) - don't modify it
 		// Just ensure redirect URL exists
 		if ( empty( $result['redirect'] ) ) {
-			// If no redirect URL, try to get from order meta (DOKU might store it there)
+			// Case: Direct payment gateway - invoice in email but no direct redirect
+			// Try to get payment URL from order meta (DOKU might store it there)
 			$doku_redirect = $order->get_meta( '_doku_redirect_url' );
 			if ( ! empty( $doku_redirect ) ) {
 				$result['redirect'] = $doku_redirect;
 			} else {
+				// Try to get payment URL from gateway directly
+				$gateway = WC()->payment_gateways->get_available_payment_gateways();
+				if ( isset( $gateway[ $payment_method ] ) ) {
+					$doku_gateway = $gateway[ $payment_method ];
+					// Try to get payment URL from gateway
+					if ( method_exists( $doku_gateway, 'get_payment_url' ) ) {
+						$payment_url = $doku_gateway->get_payment_url( $order_id );
+						if ( ! empty( $payment_url ) ) {
+							$result['redirect'] = $payment_url;
+							// Store it for future use
+							$order->update_meta_data( '_doku_redirect_url', $payment_url );
+							$order->save_meta_data();
+						}
+					}
+					// Try alternative method: get_checkout_payment_url
+					if ( empty( $result['redirect'] ) ) {
+						$payment_url = $order->get_checkout_payment_url( true );
+						// If payment URL is order-pay page, we need to process payment
+						if ( ! empty( $payment_url ) && strpos( $payment_url, 'order-pay' ) !== false ) {
+							// Store order-pay URL - will be handled by order-pay handler
+							$result['redirect'] = $payment_url;
+						}
+					}
+				}
 				// Last resort: use order received page as fallback
-				$result['redirect'] = $order->get_checkout_order_received_url();
+				if ( empty( $result['redirect'] ) ) {
+					$result['redirect'] = $order->get_checkout_order_received_url();
+				}
 			}
 		}
 		// Otherwise, keep DOKU's redirect URL as is (don't modify it)
@@ -6013,6 +6064,110 @@ function wp_augoose_check_expired_payment( $order_id, $old_status, $new_status, 
 }
 
 /**
+ * Handle order-pay page for DOKU direct payment gateway
+ * When user clicks invoice link from email, process payment and redirect to Doku
+ */
+add_action( 'template_redirect', 'wp_augoose_handle_order_pay_doku_redirect', 4 );
+function wp_augoose_handle_order_pay_doku_redirect() {
+	global $wp;
+	
+	// Only handle order-pay page
+	if ( ! isset( $wp->query_vars['order-pay'] ) ) {
+		return;
+	}
+	
+	$order_id = absint( $wp->query_vars['order-pay'] );
+	if ( ! $order_id ) {
+		return;
+	}
+	
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return;
+	}
+	
+	// Only handle DOKU payments
+	$payment_method = $order->get_payment_method();
+	$is_doku = (
+		strpos( strtolower( $payment_method ), 'doku' ) !== false || 
+		strpos( strtolower( $payment_method ), 'jokul' ) !== false
+	);
+	
+	if ( ! $is_doku ) {
+		return;
+	}
+	
+	// If order is already paid, redirect to thank you page
+	if ( $order->is_paid() ) {
+		wp_safe_redirect( $order->get_checkout_order_received_url() );
+		exit;
+	}
+	
+	// Check if order is failed/cancelled/expired
+	$order_status = $order->get_status();
+	$failure_statuses = array( 'failed', 'cancelled', 'expired' );
+	$is_invalidated = $order->get_meta( '_payment_failed_invalidated' );
+	
+	if ( $is_invalidated === 'yes' || in_array( $order_status, $failure_statuses, true ) ) {
+		// Redirect to checkout with message
+		$checkout_url = wc_get_checkout_url();
+		wp_safe_redirect( add_query_arg( 'payment_failed', '1', $checkout_url ) );
+		exit;
+	}
+	
+	// For pending orders with DOKU, try to get payment URL and redirect
+	// This handles the case where invoice is in email but no direct redirect
+	if ( $order->has_status( 'pending' ) || $order->has_status( 'on-hold' ) ) {
+		// Try to get payment URL from order meta first
+		$doku_redirect = $order->get_meta( '_doku_redirect_url' );
+		if ( ! empty( $doku_redirect ) ) {
+			wp_safe_redirect( $doku_redirect );
+			exit;
+		}
+		
+		// Try to get payment URL from gateway
+		$gateway = WC()->payment_gateways->get_available_payment_gateways();
+		if ( isset( $gateway[ $payment_method ] ) ) {
+			$doku_gateway = $gateway[ $payment_method ];
+			
+			// Try to get payment URL using gateway method if available
+			if ( method_exists( $doku_gateway, 'get_payment_url' ) ) {
+				$payment_url = $doku_gateway->get_payment_url( $order_id );
+				if ( ! empty( $payment_url ) ) {
+					// Store it for future use
+					$order->update_meta_data( '_doku_redirect_url', $payment_url );
+					$order->save_meta_data();
+					wp_safe_redirect( $payment_url );
+					exit;
+				}
+			}
+			
+			// Last resort: try to process payment to get redirect URL
+			// Only if order is truly pending and needs payment
+			if ( $order->needs_payment() && method_exists( $doku_gateway, 'process_payment' ) ) {
+				// Set order as awaiting payment
+				if ( WC()->session ) {
+					WC()->session->set( 'order_awaiting_payment', $order_id );
+				}
+				
+				// Process payment to get redirect URL
+				$payment_result = $doku_gateway->process_payment( $order_id );
+				if ( isset( $payment_result['result'] ) && $payment_result['result'] === 'success' && ! empty( $payment_result['redirect'] ) ) {
+					// Store redirect URL for future use
+					$order->update_meta_data( '_doku_redirect_url', $payment_result['redirect'] );
+					$order->save_meta_data();
+					wp_safe_redirect( $payment_result['redirect'] );
+					exit;
+				}
+			}
+		}
+		
+		// If we can't get payment URL, let WooCommerce handle the order-pay page normally
+		// The user will see the payment form and can proceed from there
+	}
+}
+
+/**
  * Prevent access to failed/cancelled orders - redirect to new checkout
  */
 add_action( 'template_redirect', 'wp_augoose_redirect_failed_order_to_checkout', 5 );
@@ -6073,6 +6228,25 @@ function wp_augoose_show_payment_failed_message() {
 		'An error occurred while processing your order. Please check if there are any changes in your payment method and review your order history before placing another order.',
 		'error'
 	);
+}
+
+/**
+ * Ensure checkout URL redirects to checkout-2
+ * This maintains the checkout-2 page structure as before
+ */
+add_filter( 'woocommerce_get_checkout_url', 'wp_augoose_redirect_checkout_to_checkout2', 10, 1 );
+function wp_augoose_redirect_checkout_to_checkout2( $checkout_url ) {
+	// Check if checkout-2 page exists
+	$checkout2_page = get_page_by_path( 'checkout-2' );
+	if ( $checkout2_page && $checkout2_page->post_status === 'publish' ) {
+		$checkout2_url = get_permalink( $checkout2_page->ID );
+		if ( $checkout2_url ) {
+			return $checkout2_url;
+		}
+	}
+	
+	// If checkout-2 doesn't exist, use default checkout URL
+	return $checkout_url;
 }
 
 /**
@@ -7760,11 +7934,89 @@ function wp_augoose_validate_cart_variation_attributes() {
 			foreach ( $variation_attributes as $key => $value ) {
 				WC()->cart->cart_contents[ $cart_item_key ]['variation'][ $key ] = (string) $value;
 			}
+			// Mark that we fixed this item to prevent WooCommerce from adding error notice
+			WC()->cart->cart_contents[ $cart_item_key ]['wp_augoose_variation_fixed'] = true;
 		} else {
 			// Ensure all values are strings even if they match
+			$needs_update = false;
 			foreach ( $cart_variation as $key => $value ) {
 				if ( $value !== null && $value !== false && $value !== '' ) {
-					WC()->cart->cart_contents[ $cart_item_key ]['variation'][ $key ] = (string) $value;
+					$string_value = (string) $value;
+					if ( $cart_variation[ $key ] !== $string_value ) {
+						WC()->cart->cart_contents[ $cart_item_key ]['variation'][ $key ] = $string_value;
+						$needs_update = true;
+					}
+				}
+			}
+			if ( $needs_update ) {
+				WC()->cart->cart_contents[ $cart_item_key ]['wp_augoose_variation_fixed'] = true;
+			}
+		}
+	}
+	
+	// Save cart after fixing variations to persist changes
+	if ( ! empty( WC()->cart->cart_contents ) ) {
+		WC()->cart->set_session();
+	}
+}
+
+/**
+ * CRITICAL: Prevent WooCommerce from adding error notice if we already fixed the variation
+ * This prevents "some problems with items in your cart" error for numeric variations
+ */
+add_filter( 'woocommerce_cart_item_removed_because_modified_message', 'wp_augoose_prevent_cart_error_if_fixed', 10, 2 );
+function wp_augoose_prevent_cart_error_if_fixed( $message, $product_name ) {
+	// Check if any cart item was fixed by our validation
+	$has_fixed_item = false;
+	if ( WC()->cart && ! WC()->cart->is_empty() ) {
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['wp_augoose_variation_fixed'] ) && $cart_item['wp_augoose_variation_fixed'] ) {
+				$has_fixed_item = true;
+				break;
+			}
+		}
+	}
+	
+	// If we fixed the variation, don't show error message
+	if ( $has_fixed_item ) {
+		return ''; // Return empty string to prevent error notice
+	}
+	
+	return $message;
+}
+
+/**
+ * CRITICAL: Clear error notices if cart items were fixed
+ * This prevents "some problems with items in your cart" error message
+ */
+add_action( 'woocommerce_check_cart_items', 'wp_augoose_clear_cart_errors_if_fixed', 999 );
+function wp_augoose_clear_cart_errors_if_fixed() {
+	// Check if any cart item was fixed by our validation
+	$has_fixed_item = false;
+	if ( WC()->cart && ! WC()->cart->is_empty() ) {
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['wp_augoose_variation_fixed'] ) && $cart_item['wp_augoose_variation_fixed'] ) {
+				$has_fixed_item = true;
+				break;
+			}
+		}
+	}
+	
+	// If we fixed any variation, clear error notices related to cart items
+	if ( $has_fixed_item && function_exists( 'wc_get_notices' ) ) {
+		$notices = wc_get_notices( 'error' );
+		if ( ! empty( $notices ) ) {
+			foreach ( $notices as $key => $notice ) {
+				// Remove notices about cart items being modified or having problems
+				if ( isset( $notice['notice'] ) && (
+					stripos( $notice['notice'], 'some problems with items in your cart' ) !== false ||
+					stripos( $notice['notice'], 'beberapa masalah dengan barang' ) !== false ||
+					stripos( $notice['notice'], 'has been removed' ) !== false ||
+					stripos( $notice['notice'], 'telah dihapus' ) !== false ||
+					stripos( $notice['notice'], 'has been modified' ) !== false ||
+					stripos( $notice['notice'], 'telah dimodifikasi' ) !== false
+				) ) {
+					wc_remove_notice( $key, 'error' );
 				}
 			}
 		}
