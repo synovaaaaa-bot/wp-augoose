@@ -7326,11 +7326,43 @@ function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $pr
 			$variation_data = array();
 		}
 		
+		// CRITICAL: Ensure attributes array exists and all values are strings
+		// WooCommerce JavaScript expects all attribute values to be strings for toLowerCase() to work
+		if ( ! isset( $variation_data['attributes'] ) || ! is_array( $variation_data['attributes'] ) ) {
+			// Get attributes from variation if not set
+			$variation_attributes = $variation->get_variation_attributes();
+			if ( is_array( $variation_attributes ) ) {
+				$variation_data['attributes'] = array();
+				foreach ( $variation_attributes as $key => $value ) {
+					// Ensure all values are strings (convert null/empty to empty string)
+					$variation_data['attributes'][ $key ] = ( $value === null || $value === false ) ? '' : (string) $value;
+				}
+			} else {
+				$variation_data['attributes'] = array();
+			}
+		} else {
+			// Sanitize existing attributes - ensure all values are strings
+			foreach ( $variation_data['attributes'] as $key => $value ) {
+				if ( $value === null || $value === false || ! is_string( $value ) ) {
+					$variation_data['attributes'][ $key ] = '';
+				}
+			}
+		}
+		
 		// Force all availability flags to true
 		$variation_data['is_purchasable'] = true;
 		$variation_data['is_in_stock'] = true;
 		$variation_data['variation_is_active'] = true;
 		$variation_data['variation_is_visible'] = true;
+	} else {
+		// Even if no stock, ensure attributes are valid strings to prevent JavaScript errors
+		if ( isset( $variation_data['attributes'] ) && is_array( $variation_data['attributes'] ) ) {
+			foreach ( $variation_data['attributes'] as $key => $value ) {
+				if ( $value === null || $value === false || ! is_string( $value ) ) {
+					$variation_data['attributes'][ $key ] = '';
+				}
+			}
+		}
 	}
 	
 	return $variation_data;
