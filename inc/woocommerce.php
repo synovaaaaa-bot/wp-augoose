@@ -3943,9 +3943,16 @@ function wp_augoose_clean_previous_failed_orders() {
 			// If order is pending/failed and less than 30 minutes old, delete it
 			if ( $time_diff < 1800 && in_array( $order->get_status(), array( 'pending', 'failed', 'cancelled' ) ) ) {
 				// Delete the order to clean up session
-				wp_delete_post( $order_id, true );
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					error_log( 'Deleted previous failed order #' . $order_id . ' (age: ' . $time_diff . 's)' );
+				try {
+					wp_delete_post( $order_id, true );
+					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+						error_log( 'Deleted previous failed order #' . $order_id . ' (age: ' . $time_diff . 's)' );
+					}
+				} catch ( Exception $e ) {
+					// Log but continue
+					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+						error_log( 'Error deleting order #' . $order_id . ': ' . $e->getMessage() );
+					}
 				}
 			}
 		}
@@ -4419,6 +4426,12 @@ function wp_augoose_handle_payment_success_redirect( $order_id ) {
  */
 add_filter( 'woocommerce_payment_successful_result', 'wp_augoose_handle_payment_result_redirect', 10, 2 );
 function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
+	// CRITICAL: Ensure HTTP status 200 before processing
+	// This runs at top of function to guarantee 200 response
+	if ( ! headers_sent() ) {
+		http_response_code( 200 );
+	}
+	
 	try {
 		if ( ! $order_id ) {
 			return $result;
@@ -4442,9 +4455,16 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 	}
 	
 	// Mark order as processed now
-	$order->update_meta_data( '_checkout_processed', 'yes' );
-	$order->update_meta_data( '_checkout_process_time', current_time( 'mysql' ) );
-	$order->save_meta_data();
+	try {
+		$order->update_meta_data( '_checkout_processed', 'yes' );
+		$order->update_meta_data( '_checkout_process_time', current_time( 'mysql' ) );
+		$order->save_meta_data();
+	} catch ( Exception $e ) {
+		// Log error but continue
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( 'Error marking order as processed: ' . $e->getMessage() );
+		}
+	}
 	
 	// Check if this is DOKU payment
 	$payment_method = $order->get_payment_method();
