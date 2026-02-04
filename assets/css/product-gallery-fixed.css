@@ -215,6 +215,7 @@
     margin-top: 60px;
     padding-top: 60px;
     border-top: 1px solid #e0e0e0;
+    min-height: auto;
 }
 
 .related-products-section > h2 {
@@ -235,6 +236,8 @@
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .related-products-grid li.product-item,

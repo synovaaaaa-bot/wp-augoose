@@ -264,9 +264,10 @@ if ( post_password_required() ) {
             <div class="related-products-section">
                 <h2>YOU MAY ALSO LIKE</h2>
                 <?php
-                // Get related products
-                $related_ids = wc_get_related_products( $product->get_id(), 8 );
                 $has_products = false;
+                
+                // Step 1: Try related products
+                $related_ids = wc_get_related_products( $product->get_id(), 8 );
                 
                 if ( ! empty( $related_ids ) ) {
                     $args = array(
@@ -275,23 +276,15 @@ if ( post_password_required() ) {
                         'post__in'       => $related_ids,
                         'orderby'        => 'post__in',
                         'post_status'    => 'publish',
-                        'tax_query'      => array(
-                            array(
-                                'taxonomy' => 'product_visibility',
-                                'field'    => 'slug',
-                                'terms'    => array( 'catalog', 'visible' ),
-                                'operator' => 'IN',
-                            ),
-                        ),
                     );
                     
-                    $related_products = new WP_Query( $args );
+                    $query = new WP_Query( $args );
                     
-                    if ( $related_products->have_posts() ) {
+                    if ( $query->have_posts() ) {
                         $has_products = true;
                         echo '<ul class="products related-products-grid">';
-                        while ( $related_products->have_posts() ) {
-                            $related_products->the_post();
+                        while ( $query->have_posts() ) {
+                            $query->the_post();
                             wc_get_template_part( 'content', 'product' );
                         }
                         echo '</ul>';
@@ -299,47 +292,34 @@ if ( post_password_required() ) {
                     }
                 }
                 
-                // Fallback: show products from same category if no related products
+                // Step 2: Try category fallback
                 if ( ! $has_products ) {
-                    $categories = get_the_terms( $product->get_id(), 'product_cat' );
-                    $category_ids = array();
+                    $current_cat_ids = get_the_terms( $product->get_id(), 'product_cat' );
                     
-                    if ( $categories && ! is_wp_error( $categories ) ) {
-                        foreach ( $categories as $category ) {
-                            $category_ids[] = $category->term_id;
-                        }
-                    }
-                    
-                    if ( ! empty( $category_ids ) ) {
+                    if ( $current_cat_ids && ! is_wp_error( $current_cat_ids ) ) {
+                        $cat_ids = wp_list_pluck( $current_cat_ids, 'term_id' );
+                        
                         $args = array(
                             'post_type'      => 'product',
                             'posts_per_page' => 4,
                             'post__not_in'   => array( $product->get_id() ),
-                            'orderby'        => 'date',
-                            'order'          => 'DESC',
-                            'post_status'    => 'publish',
+                            'orderby'        => 'rand',
                             'tax_query'      => array(
                                 array(
                                     'taxonomy' => 'product_cat',
                                     'field'    => 'term_id',
-                                    'terms'    => $category_ids,
-                                ),
-                                array(
-                                    'taxonomy' => 'product_visibility',
-                                    'field'    => 'slug',
-                                    'terms'    => array( 'catalog', 'visible' ),
-                                    'operator' => 'IN',
+                                    'terms'    => $cat_ids,
                                 ),
                             ),
                         );
                         
-                        $category_products = new WP_Query( $args );
+                        $query = new WP_Query( $args );
                         
-                        if ( $category_products->have_posts() ) {
+                        if ( $query->have_posts() ) {
                             $has_products = true;
                             echo '<ul class="products related-products-grid">';
-                            while ( $category_products->have_posts() ) {
-                                $category_products->the_post();
+                            while ( $query->have_posts() ) {
+                                $query->the_post();
                                 wc_get_template_part( 'content', 'product' );
                             }
                             echo '</ul>';
@@ -348,31 +328,21 @@ if ( post_password_required() ) {
                     }
                 }
                 
-                // Final fallback: show recent products if no category products
+                // Step 3: Final fallback - any random products
                 if ( ! $has_products ) {
                     $args = array(
                         'post_type'      => 'product',
                         'posts_per_page' => 4,
                         'post__not_in'   => array( $product->get_id() ),
-                        'orderby'        => 'date',
-                        'order'          => 'DESC',
-                        'post_status'    => 'publish',
-                        'tax_query'      => array(
-                            array(
-                                'taxonomy' => 'product_visibility',
-                                'field'    => 'slug',
-                                'terms'    => array( 'catalog', 'visible' ),
-                                'operator' => 'IN',
-                            ),
-                        ),
+                        'orderby'        => 'rand',
                     );
                     
-                    $recent_products = new WP_Query( $args );
+                    $query = new WP_Query( $args );
                     
-                    if ( $recent_products->have_posts() ) {
+                    if ( $query->have_posts() ) {
                         echo '<ul class="products related-products-grid">';
-                        while ( $recent_products->have_posts() ) {
-                            $recent_products->the_post();
+                        while ( $query->have_posts() ) {
+                            $query->the_post();
                             wc_get_template_part( 'content', 'product' );
                         }
                         echo '</ul>';
