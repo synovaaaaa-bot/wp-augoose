@@ -212,17 +212,17 @@
 
 /* Related Products Section - YOU MAY ALSO LIKE */
 .related-products-section {
-    margin-top: 60px;
-    padding-top: 60px;
+    margin-top: 40px;
+    padding-top: 40px;
     border-top: 1px solid #e0e0e0;
     min-height: auto;
 }
 
 .related-products-section > h2 {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #1a1a1a;
-    margin: 0 0 40px;
+    margin: 0 0 30px;
     text-transform: uppercase;
     letter-spacing: 2px;
     text-align: center;
@@ -231,13 +231,56 @@
 
 .related-products-grid {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 24px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
     list-style: none !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
+}
+
+/* Tablet: 2-3 columns */
+@media (min-width: 768px) {
+    .related-products-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 20px !important;
+    }
+    
+    .related-products-section {
+        margin-top: 80px;
+        padding-top: 80px;
+    }
+    
+    .related-products-section > h2 {
+        margin: 0 0 50px;
+        font-size: 20px;
+    }
+}
+
+/* Desktop: 4 columns */
+@media (min-width: 1024px) {
+    .related-products-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 24px !important;
+    }
+    
+    .related-products-section {
+        margin-top: 60px;
+        padding-top: 60px;
+    }
+    
+    .related-products-section > h2 {
+        margin: 0 0 40px;
+        font-size: 18px;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1400px) {
+    .related-products-grid {
+        gap: 28px !important;
+    }
 }
 
 .related-products-grid li.product-item,
@@ -262,6 +305,47 @@
     font-weight: 600;
     line-height: 1.4;
     color: #1a1a1a;
+}
+
+/* Mobile: Responsive font sizes */
+@media (max-width: 767px) {
+    .related-products-grid .product-title {
+        font-size: 12px;
+    }
+    
+    .related-products-grid .product-price {
+        font-size: 11px;
+    }
+    
+    .related-products-grid .product-add-to-cart {
+        padding: 0 10px 10px;
+    }
+    
+    .related-products-grid .product-add-to-cart .add-to-cart-btn,
+    .related-products-grid .product-add-to-cart button,
+    .related-products-grid .product-add-to-cart a,
+    .related-products-grid .product-add-to-cart .view-product-btn {
+        padding: 0 10px !important;
+        font-size: 10px !important;
+        min-height: 40px !important;
+        height: 40px !important;
+        max-height: 40px !important;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .related-products-grid .product-title {
+        font-size: 12px;
+    }
+    
+    .related-products-grid .product-price {
+        font-size: 11px;
+    }
+    
+    .related-products-grid .product-info {
+        padding: 12px 12px 0;
+    }
 }
 
 .related-products-grid .product-title a {
