@@ -4360,6 +4360,7 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 		$is_order_received = ! empty( $current_redirect ) && strpos( $current_redirect, 'order-received' ) !== false;
 		$is_doku_url = ! empty( $current_redirect ) && (
 			strpos( $current_redirect, 'checkout.doku.com' ) !== false ||
+			strpos( $current_redirect, 'checkout-link-v2' ) !== false ||
 			strpos( $current_redirect, 'doku.com' ) !== false ||
 			strpos( $current_redirect, 'jokul' ) !== false
 		);
@@ -4375,18 +4376,51 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 					'_payment_url', 
 					'_doku_checkout_url',
 					'_doku_checkout_url_response',
-					'_jokul_checkout_url'
+					'_jokul_checkout_url',
+					'_doku_payment_link',
+					'_jokul_payment_link',
+					'_checkout_url',
+					'_payment_link',
+					'_doku_url',
+					'_jokul_url'
 				);
 				
 				$doku_payment_url = null;
 				foreach ( $meta_keys as $meta_key ) {
 					$meta_value = $order->get_meta( $meta_key );
 					if ( ! empty( $meta_value ) ) {
-						// Check if it's a Doku URL
+						// Check if it's a Doku URL (including checkout-link-v2)
 						if ( strpos( $meta_value, 'checkout.doku.com' ) !== false ||
+						     strpos( $meta_value, 'checkout-link-v2' ) !== false ||
 						     strpos( $meta_value, 'doku.com' ) !== false ||
 						     strpos( $meta_value, 'jokul' ) !== false ) {
 							$doku_payment_url = $meta_value;
+							break;
+						}
+					}
+				}
+				
+				// Method 1b: Search ALL order meta for Doku URL (in case key is unknown)
+				if ( empty( $doku_payment_url ) ) {
+					$all_meta = $order->get_meta_data();
+					foreach ( $all_meta as $meta ) {
+						$meta_key = $meta->key;
+						$meta_value = $meta->value;
+						
+						// Skip if value is not a string or doesn't look like a URL
+						if ( ! is_string( $meta_value ) || strpos( $meta_value, 'http' ) === false ) {
+							continue;
+						}
+						
+						// Check if it's a Doku URL
+						if ( strpos( $meta_value, 'checkout.doku.com' ) !== false ||
+						     strpos( $meta_value, 'checkout-link-v2' ) !== false ||
+						     ( strpos( $meta_value, 'doku.com' ) !== false && strpos( $meta_value, 'checkout' ) !== false ) ||
+						     ( strpos( $meta_value, 'jokul' ) !== false && strpos( $meta_value, 'checkout' ) !== false ) ) {
+							$doku_payment_url = $meta_value;
+							if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+								error_log( 'DOKU Payment: Found payment URL in order meta key: ' . $meta_key );
+							}
 							break;
 						}
 					}
@@ -4403,6 +4437,7 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 							$payment_url = $doku_gateway->get_payment_url( $order_id );
 							if ( ! empty( $payment_url ) && (
 								strpos( $payment_url, 'checkout.doku.com' ) !== false ||
+								strpos( $payment_url, 'checkout-link-v2' ) !== false ||
 								strpos( $payment_url, 'doku.com' ) !== false ||
 								strpos( $payment_url, 'jokul' ) !== false
 							) ) {
@@ -4422,6 +4457,7 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 							if ( isset( $payment_result['result'] ) && $payment_result['result'] === 'success' && ! empty( $payment_result['redirect'] ) ) {
 								// Check if it's a Doku URL
 								if ( strpos( $payment_result['redirect'], 'checkout.doku.com' ) !== false ||
+								     strpos( $payment_result['redirect'], 'checkout-link-v2' ) !== false ||
 								     strpos( $payment_result['redirect'], 'doku.com' ) !== false ||
 								     strpos( $payment_result['redirect'], 'jokul' ) !== false ) {
 									$doku_payment_url = $payment_result['redirect'];
@@ -4524,6 +4560,7 @@ function wp_augoose_capture_doku_payment_url( $result, $order_id ) {
 	if ( ! empty( $result['redirect'] ) ) {
 		$redirect_url = $result['redirect'];
 		if ( strpos( $redirect_url, 'checkout.doku.com' ) !== false ||
+		     strpos( $redirect_url, 'checkout-link-v2' ) !== false ||
 		     strpos( $redirect_url, 'doku.com' ) !== false ||
 		     strpos( $redirect_url, 'jokul' ) !== false ) {
 			try {
