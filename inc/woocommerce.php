@@ -3227,7 +3227,10 @@ function wp_augoose_variation_scripts() {
 					var found = false;
 					$select.find("option").each(function() {
 						var optionValue = $(this).val();
-						if (optionValue === value || optionValue.toLowerCase() === value.toLowerCase()) {
+						// Convert to string before toLowerCase() to handle numeric values (28, 29, etc.)
+						var optionValueStr = String(optionValue || "");
+						var valueStr = String(value || "");
+						if (optionValue === value || optionValueStr.toLowerCase() === valueStr.toLowerCase()) {
 							$select.val(optionValue);
 							found = true;
 							return false;
@@ -3236,10 +3239,13 @@ function wp_augoose_variation_scripts() {
 					
 					if (!found) {
 						// Try sanitized title match
-						var sanitizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+						// Convert to string before toLowerCase() to handle numeric values (28, 29, etc.)
+						var valueStr = String(value || "");
+						var sanitizedValue = valueStr.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 						$select.find("option").each(function() {
 							var optionValue = $(this).val();
-							var sanitizedOption = optionValue.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+							var optionValueStr = String(optionValue || "");
+							var sanitizedOption = optionValueStr.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 							if (sanitizedOption === sanitizedValue) {
 								$select.val(optionValue);
 								found = true;
