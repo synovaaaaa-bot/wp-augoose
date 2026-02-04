@@ -4360,41 +4360,60 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 		if ( empty( $result['redirect'] ) ) {
 			// Case: Direct payment gateway - invoice in email but no direct redirect
 			// Try to get payment URL from order meta (DOKU might store it there)
-			$doku_redirect = $order->get_meta( '_doku_redirect_url' );
-			if ( ! empty( $doku_redirect ) ) {
-				$result['redirect'] = $doku_redirect;
-			} else {
-				// Try to get payment URL from gateway directly
-				$gateway = WC()->payment_gateways->get_available_payment_gateways();
-				if ( isset( $gateway[ $payment_method ] ) ) {
-					$doku_gateway = $gateway[ $payment_method ];
-					// Try to get payment URL from gateway
-					if ( method_exists( $doku_gateway, 'get_payment_url' ) ) {
-						$payment_url = $doku_gateway->get_payment_url( $order_id );
-						if ( ! empty( $payment_url ) ) {
-							$result['redirect'] = $payment_url;
-							// Store it for future use
-							$order->update_meta_data( '_doku_redirect_url', $payment_url );
-							$order->save_meta_data();
+			try {
+				$doku_redirect = $order->get_meta( '_doku_redirect_url' );
+				if ( ! empty( $doku_redirect ) ) {
+					$result['redirect'] = $doku_redirect;
+				} else {
+					// Try to get payment URL from gateway directly
+					$gateway = WC()->payment_gateways->get_available_payment_gateways();
+					if ( isset( $gateway[ $payment_method ] ) ) {
+						$doku_gateway = $gateway[ $payment_method ];
+						// Try to get payment URL from gateway
+						if ( method_exists( $doku_gateway, 'get_payment_url' ) ) {
+							$payment_url = $doku_gateway->get_payment_url( $order_id );
+							if ( ! empty( $payment_url ) ) {
+								$result['redirect'] = $payment_url;
+								// Store it for future use (with error handling)
+								try {
+									$order->update_meta_data( '_doku_redirect_url', $payment_url );
+									$order->save_meta_data();
+								} catch ( Exception $e ) {
+									// Log error but don't break the redirect
+									if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+										error_log( 'DOKU Payment: Failed to save redirect URL: ' . $e->getMessage() );
+									}
+								}
+							}
+						}
+						// Try alternative method: get_checkout_payment_url
+						if ( empty( $result['redirect'] ) ) {
+							$payment_url = $order->get_checkout_payment_url( true );
+							// If payment URL is order-pay page, we need to process payment
+							if ( ! empty( $payment_url ) && strpos( $payment_url, 'order-pay' ) !== false ) {
+								// Store order-pay URL - will be handled by order-pay handler
+								$result['redirect'] = $payment_url;
+							}
 						}
 					}
-					// Try alternative method: get_checkout_payment_url
+					// Last resort: use order received page as fallback
 					if ( empty( $result['redirect'] ) ) {
-						$payment_url = $order->get_checkout_payment_url( true );
-						// If payment URL is order-pay page, we need to process payment
-						if ( ! empty( $payment_url ) && strpos( $payment_url, 'order-pay' ) !== false ) {
-							// Store order-pay URL - will be handled by order-pay handler
-							$result['redirect'] = $payment_url;
-						}
+						$result['redirect'] = $order->get_checkout_order_received_url();
 					}
 				}
-				// Last resort: use order received page as fallback
-				if ( empty( $result['redirect'] ) ) {
-					$result['redirect'] = $order->get_checkout_order_received_url();
+			} catch ( Exception $e ) {
+				// If any error occurs, use order received page as safe fallback
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( 'DOKU Payment: Error getting redirect URL: ' . $e->getMessage() );
 				}
+				$result['redirect'] = $order->get_checkout_order_received_url();
 			}
 		}
 		// Otherwise, keep DOKU's redirect URL as is (don't modify it)
+		// Ensure redirect URL is valid and doesn't cause errors
+		if ( ! empty( $result['redirect'] ) ) {
+			$result['redirect'] = esc_url_raw( $result['redirect'] );
+		}
 	}
 	
 	return $result;
@@ -4738,7 +4757,9 @@ function wp_augoose_clean_output_for_woocommerce_ajax() {
 	// CRITICAL: Do NOT clean output during checkout place order
 	// This prevents DOKU redirect from being broken
 	if ( isset( $_POST['woocommerce_checkout_place_order'] ) || 
-	     isset( $_POST['place_order'] ) ) {
+	     isset( $_POST['place_order'] ) ||
+	     ( isset( $_POST['wc-ajax'] ) && $_POST['wc-ajax'] === 'checkout' ) ||
+	     ( isset( $_REQUEST['wc-ajax'] ) && $_REQUEST['wc-ajax'] === 'checkout' ) ) {
 		return; // This is checkout place order - don't clean output, let redirect work
 	}
 	
@@ -4798,6 +4819,8 @@ function wp_augoose_final_clean_output_for_wc_ajax() {
 	// This prevents DOKU redirect from being broken
 	if ( isset( $_POST['woocommerce_checkout_place_order'] ) || 
 	     isset( $_POST['place_order'] ) ||
+	     ( isset( $_POST['wc-ajax'] ) && $_POST['wc-ajax'] === 'checkout' ) ||
+	     ( isset( $_REQUEST['wc-ajax'] ) && $_REQUEST['wc-ajax'] === 'checkout' ) ||
 	     ( isset( $_POST['payment_method'] ) && 
 	       ( strpos( strtolower( $_POST['payment_method'] ), 'doku' ) !== false || 
 	         strpos( strtolower( $_POST['payment_method'] ), 'jokul' ) !== false ) ) ) {
