@@ -3227,7 +3227,10 @@ function wp_augoose_variation_scripts() {
 					var found = false;
 					$select.find("option").each(function() {
 						var optionValue = $(this).val();
-						if (optionValue === value || optionValue.toLowerCase() === value.toLowerCase()) {
+						// Convert to strings before calling toLowerCase() to handle numeric values
+						var optionValueStr = String(optionValue || '');
+						var valueStr = String(value || '');
+						if (optionValue === value || optionValueStr.toLowerCase() === valueStr.toLowerCase()) {
 							$select.val(optionValue);
 							found = true;
 							return false;
@@ -3236,10 +3239,12 @@ function wp_augoose_variation_scripts() {
 					
 					if (!found) {
 						// Try sanitized title match
-						var sanitizedValue = value.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+						var valueStr = String(value || '');
+						var sanitizedValue = valueStr.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 						$select.find("option").each(function() {
 							var optionValue = $(this).val();
-							var sanitizedOption = optionValue.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+							var optionValueStr = String(optionValue || '');
+							var sanitizedOption = optionValueStr.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 							if (sanitizedOption === sanitizedValue) {
 								$select.val(optionValue);
 								found = true;
@@ -7250,12 +7255,39 @@ function wp_augoose_include_variations_with_stock( $children, $product ) {
 /**
  * Ensure variations with stock are included in available variations
  * CRITICAL: This must work for ALL products (jacket, pants, etc.)
+ * Also ensures all attributes are valid strings to prevent JavaScript errors
  */
 add_filter( 'woocommerce_available_variation', 'wp_augoose_ensure_variation_available_if_in_stock', 1, 3 );
 function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $product, $variation ) {
 	// Check if variation is valid
 	if ( ! $variation || ! is_a( $variation, 'WC_Product_Variation' ) ) {
 		return $variation_data;
+	}
+	
+	// CRITICAL: Always ensure attributes array exists and all values are strings
+	// This prevents JavaScript errors like "value.toLowerCase is not a function"
+	if ( ! isset( $variation_data['attributes'] ) || ! is_array( $variation_data['attributes'] ) ) {
+		// Get attributes from variation if not set
+		$variation_attributes = $variation->get_variation_attributes();
+		if ( is_array( $variation_attributes ) && ! empty( $variation_attributes ) ) {
+			$variation_data['attributes'] = array();
+			foreach ( $variation_attributes as $key => $value ) {
+				// Ensure all values are strings (convert null/empty to empty string)
+				$variation_data['attributes'][ $key ] = ( $value === null || $value === false ) ? '' : (string) $value;
+			}
+		} else {
+			$variation_data['attributes'] = array();
+		}
+	} else {
+		// Sanitize existing attributes - ensure all values are strings
+		foreach ( $variation_data['attributes'] as $key => $value ) {
+			if ( $value === null || $value === false || ! is_string( $value ) ) {
+				$variation_data['attributes'][ $key ] = '';
+			} else {
+				// Ensure it's a string even if it's already a string
+				$variation_data['attributes'][ $key ] = (string) $value;
+			}
+		}
 	}
 	
 	$variation_id = $variation->get_id();
@@ -7362,6 +7394,42 @@ function wp_augoose_ensure_variation_available_if_in_stock( $variation_data, $pr
 					$variation_data['attributes'][ $key ] = '';
 				}
 			}
+		}
+	}
+	
+	return $variation_data;
+}
+
+/**
+ * CRITICAL: Sanitize all variation attributes to ensure they are strings
+ * This prevents JavaScript errors like "value.toLowerCase is not a function"
+ * This filter runs with very high priority to catch all variations
+ */
+add_filter( 'woocommerce_available_variation', 'wp_augoose_sanitize_variation_attributes', 999, 3 );
+function wp_augoose_sanitize_variation_attributes( $variation_data, $product, $variation ) {
+	// Always ensure attributes array exists and all values are strings
+	if ( ! is_array( $variation_data ) ) {
+		return $variation_data;
+	}
+	
+	// Ensure attributes array exists
+	if ( ! isset( $variation_data['attributes'] ) ) {
+		$variation_data['attributes'] = array();
+	}
+	
+	// If attributes is not an array, make it an array
+	if ( ! is_array( $variation_data['attributes'] ) ) {
+		$variation_data['attributes'] = array();
+	}
+	
+	// Sanitize all attribute values - ensure they are strings
+	foreach ( $variation_data['attributes'] as $key => $value ) {
+		// Convert null, false, or non-string values to empty string
+		if ( $value === null || $value === false || ! is_string( $value ) ) {
+			$variation_data['attributes'][ $key ] = '';
+		} else {
+			// Ensure it's a string (even if it's already a string, this ensures type safety)
+			$variation_data['attributes'][ $key ] = (string) $value;
 		}
 	}
 	
