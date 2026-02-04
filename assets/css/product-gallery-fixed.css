@@ -251,6 +251,40 @@
 /* Related Products - CTA Button
    NOTE: Keep ADD TO CART as primary (filled), but make VIEW PRODUCT secondary (outlined)
    to match the rest of the site. */
+.related-products-grid .product-info {
+    padding: 14px 14px 0;
+    flex-grow: 1;
+}
+
+.related-products-grid .product-title {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #1a1a1a;
+}
+
+.related-products-grid .product-title a {
+    color: #1a1a1a;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.related-products-grid .product-title a:hover {
+    color: #666;
+}
+
+.related-products-grid .product-price {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.related-products-grid .product-price .woocommerce-Price-amount {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
 .related-products-grid .product-add-to-cart {
     padding: 0 14px 14px;
     margin-top: auto; /* Push button to bottom of card */

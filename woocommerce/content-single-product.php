@@ -264,7 +264,7 @@ if ( post_password_required() ) {
             <div class="related-products-section">
                 <h2>YOU MAY ALSO LIKE</h2>
                 <?php
-                $has_products = false;
+                $displayed = false;
                 
                 // Step 1: Try related products
                 $related_ids = wc_get_related_products( $product->get_id(), 8 );
@@ -275,25 +275,40 @@ if ( post_password_required() ) {
                         'posts_per_page' => 4,
                         'post__in'       => $related_ids,
                         'orderby'        => 'post__in',
-                        'post_status'    => 'publish',
                     );
                     
                     $query = new WP_Query( $args );
                     
                     if ( $query->have_posts() ) {
-                        $has_products = true;
                         echo '<ul class="products related-products-grid">';
                         while ( $query->have_posts() ) {
                             $query->the_post();
-                            wc_get_template_part( 'content', 'product' );
+                            $related_product = wc_get_product( get_the_ID() );
+                            ?>
+                            <li class="product">
+                                <div class="product-inner">
+                                    <a href="<?php echo esc_url( get_the_permalink() ); ?>" class="product-thumbnail">
+                                        <?php echo wp_kses_post( $related_product->get_image( 'woocommerce_thumbnail' ) ); ?>
+                                    </a>
+                                    <div class="product-info">
+                                        <h3 class="product-title"><a href="<?php echo esc_url( get_the_permalink() ); ?>"><?php echo esc_html( get_the_title() ); ?></a></h3>
+                                        <div class="product-price"><?php echo wp_kses_post( $related_product->get_price_html() ); ?></div>
+                                    </div>
+                                    <div class="product-add-to-cart">
+                                        <?php woocommerce_template_loop_add_to_cart(); ?>
+                                    </div>
+                                </div>
+                            </li>
+                            <?php
                         }
                         echo '</ul>';
                         wp_reset_postdata();
+                        $displayed = true;
                     }
                 }
                 
                 // Step 2: Try category fallback
-                if ( ! $has_products ) {
+                if ( ! $displayed ) {
                     $current_cat_ids = get_the_terms( $product->get_id(), 'product_cat' );
                     
                     if ( $current_cat_ids && ! is_wp_error( $current_cat_ids ) ) {
@@ -316,20 +331,36 @@ if ( post_password_required() ) {
                         $query = new WP_Query( $args );
                         
                         if ( $query->have_posts() ) {
-                            $has_products = true;
                             echo '<ul class="products related-products-grid">';
                             while ( $query->have_posts() ) {
                                 $query->the_post();
-                                wc_get_template_part( 'content', 'product' );
+                                $related_product = wc_get_product( get_the_ID() );
+                                ?>
+                                <li class="product">
+                                    <div class="product-inner">
+                                        <a href="<?php echo esc_url( get_the_permalink() ); ?>" class="product-thumbnail">
+                                            <?php echo wp_kses_post( $related_product->get_image( 'woocommerce_thumbnail' ) ); ?>
+                                        </a>
+                                        <div class="product-info">
+                                            <h3 class="product-title"><a href="<?php echo esc_url( get_the_permalink() ); ?>"><?php echo esc_html( get_the_title() ); ?></a></h3>
+                                            <div class="product-price"><?php echo wp_kses_post( $related_product->get_price_html() ); ?></div>
+                                        </div>
+                                        <div class="product-add-to-cart">
+                                            <?php woocommerce_template_loop_add_to_cart(); ?>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php
                             }
                             echo '</ul>';
                             wp_reset_postdata();
+                            $displayed = true;
                         }
                     }
                 }
                 
                 // Step 3: Final fallback - any random products
-                if ( ! $has_products ) {
+                if ( ! $displayed ) {
                     $args = array(
                         'post_type'      => 'product',
                         'posts_per_page' => 4,
@@ -343,7 +374,23 @@ if ( post_password_required() ) {
                         echo '<ul class="products related-products-grid">';
                         while ( $query->have_posts() ) {
                             $query->the_post();
-                            wc_get_template_part( 'content', 'product' );
+                            $related_product = wc_get_product( get_the_ID() );
+                            ?>
+                            <li class="product">
+                                <div class="product-inner">
+                                    <a href="<?php echo esc_url( get_the_permalink() ); ?>" class="product-thumbnail">
+                                        <?php echo wp_kses_post( $related_product->get_image( 'woocommerce_thumbnail' ) ); ?>
+                                    </a>
+                                    <div class="product-info">
+                                        <h3 class="product-title"><a href="<?php echo esc_url( get_the_permalink() ); ?>"><?php echo esc_html( get_the_title() ); ?></a></h3>
+                                        <div class="product-price"><?php echo wp_kses_post( $related_product->get_price_html() ); ?></div>
+                                    </div>
+                                    <div class="product-add-to-cart">
+                                        <?php woocommerce_template_loop_add_to_cart(); ?>
+                                    </div>
+                                </div>
+                            </li>
+                            <?php
                         }
                         echo '</ul>';
                         wp_reset_postdata();
