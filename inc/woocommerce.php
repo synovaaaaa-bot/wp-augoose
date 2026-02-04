@@ -3359,9 +3359,141 @@ function wp_augoose_variation_scripts() {
 					
 					// Trigger change event to update variation
 					if (found) {
+						// CRITICAL: Ensure the value is set as string to match variation data
+						var selectedValue = String($select.val() || "");
+						$select.val(selectedValue);
 						$select.trigger("change");
+						
+						// Force WooCommerce to re-check variation matching
+						setTimeout(function() {
+							var $form = $select.closest("form.variations_form");
+							if ($form.length) {
+								// Trigger WooCommerce variation update
+								$form.trigger("check_variations");
+								$form.trigger("woocommerce_variation_select_change");
+							}
+						}, 100);
 					} else {
 						console.warn("Could not find matching option for value: " + value);
+					}
+				});
+				
+				// CRITICAL FIX: Ensure variation matching works for numeric values (28, 29, etc.)
+				// Hook into WooCommerce variation change to ensure values are strings
+				$(document.body).on("found_variation", function(event, variation) {
+					// Variation found - ensure all select values are strings
+					$("select[name^=\"attribute_\"]").each(function() {
+						var $select = $(this);
+						var val = $select.val();
+						if (val !== "" && val !== null && typeof val !== "undefined") {
+							var stringVal = String(val);
+							if ($select.val() !== stringVal) {
+								$select.val(stringVal);
+							}
+						}
+					});
+				});
+				
+				// CRITICAL FIX: Before form submit, ensure all values are strings and match variation data
+				// This handles numeric variation values (28, 29, etc.) that might not match properly
+				$(document).on("submit", ".variations_form.cart", function(e) {
+					var $form = $(this);
+					var $variationsData = $form.data("product_variations");
+					
+					// Step 1: Ensure all select values are strings
+					$form.find("select[name^=\"attribute_\"]").each(function() {
+						var $select = $(this);
+						var val = $select.val();
+						if (val !== "" && val !== null && typeof val !== "undefined") {
+							var stringVal = String(val);
+							if ($select.val() !== stringVal) {
+								$select.val(stringVal);
+							}
+						}
+					});
+					
+					// Step 2: Check if all required variations are selected
+					var allSelected = true;
+					var missingAttributes = [];
+					
+					$form.find(".variation-select-hidden").each(function() {
+						var $select = $(this);
+						var attributeName = $select.data("attribute_name") || $select.attr("name");
+						var val = $select.val();
+						if (val === "" || val === null || val === undefined) {
+							allSelected = false;
+							var label = $select.closest(".variation-group").find(".variation-header label").text() || attributeName;
+							missingAttributes.push(label);
+						}
+					});
+					
+					if (!allSelected) {
+						e.preventDefault();
+						var message = "Please select: " + missingAttributes.join(", ");
+						alert(message);
+						
+						// Highlight missing fields
+						$form.find(".variation-select-hidden").each(function() {
+							var $select = $(this);
+							if ($select.val() === "" || $select.val() === null) {
+								$select.closest(".variation-group").addClass("error");
+								setTimeout(function() {
+									$select.closest(".variation-group").removeClass("error");
+								}, 3000);
+							}
+						});
+						
+						return false;
+					}
+					
+					// Step 3: Check if variation is found, if not try to match manually
+					var variationId = $form.find("input[name=\"variation_id\"]").val();
+					if (!variationId || variationId === "") {
+						// Try to find matching variation
+						var attributes = {};
+						$form.find("select[name^=\"attribute_\"]").each(function() {
+							var $select = $(this);
+							var name = $select.attr("name");
+							var val = String($select.val() || "");
+							if (val !== "") {
+								attributes[name] = val;
+							}
+						});
+						
+						// If we have all attributes but no variation ID, WooCommerce might not have matched
+						// This can happen with numeric values (28, 29, etc.) if matching fails
+						if (Object.keys(attributes).length > 0 && $variationsData && $variationsData.length > 0) {
+							// Try to find matching variation manually
+							for (var i = 0; i < $variationsData.length; i++) {
+								var variation = $variationsData[i];
+								if (!variation.attributes) continue;
+								
+								var match = true;
+								for (var attrName in attributes) {
+									var selectedValue = String(attributes[attrName] || "");
+									var variationValue = String(variation.attributes[attrName] || "");
+									// Try exact match first, then case-insensitive match
+									if (selectedValue !== variationValue && 
+										selectedValue.toLowerCase() !== variationValue.toLowerCase()) {
+										match = false;
+										break;
+									}
+								}
+								if (match && variation.variation_id) {
+									// Found matching variation - set it
+									$form.find("input[name=\"variation_id\"]").val(variation.variation_id);
+									break;
+								}
+							}
+						}
+						
+						// If still no variation ID found, prevent submit
+						variationId = $form.find("input[name=\"variation_id\"]").val();
+						if (!variationId || variationId === "") {
+							e.preventDefault();
+							alert("Please select a valid variation combination.");
+							return false;
+						}
 					}
 				});
 				
@@ -3404,43 +3536,6 @@ function wp_augoose_variation_scripts() {
 								alert("Link copied to clipboard!");
 							});
 						}
-					}
-				});
-				
-				// Ensure form can be submitted
-				$(document).on("submit", ".variations_form.cart", function(e) {
-					// Check if all required variations are selected
-					var allSelected = true;
-					var missingAttributes = [];
-					
-					$(".variation-select-hidden").each(function() {
-						var $select = $(this);
-						var attributeName = $select.data("attribute_name") || $select.attr("name");
-						if ($select.val() === "" || $select.val() === null) {
-							allSelected = false;
-							// Get label
-							var label = $select.closest(".variation-group").find(".variation-header label").text() || attributeName;
-							missingAttributes.push(label);
-						}
-					});
-					
-					if (!allSelected) {
-						e.preventDefault();
-						var message = "Please select: " + missingAttributes.join(", ");
-						alert(message);
-						
-						// Highlight missing fields
-						$(".variation-select-hidden").each(function() {
-							var $select = $(this);
-							if ($select.val() === "" || $select.val() === null) {
-								$select.closest(".variation-group").addClass("error");
-								setTimeout(function() {
-									$select.closest(".variation-group").removeClass("error");
-								}, 3000);
-							}
-						});
-						
-						return false;
 					}
 				});
 				
