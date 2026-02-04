@@ -4355,7 +4355,7 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 		$result['redirect'] = add_query_arg( 'payment_failed', '1', $checkout_url );
 	} elseif ( isset( $result['result'] ) && 'success' === $result['result'] && $is_doku ) {
 		// For DOKU success, we MUST redirect to Doku payment page, not order-received
-		// ALWAYS get Doku payment URL - don't trust the redirect from gateway
+		// CRITICAL: ALWAYS replace order-received redirect with Doku payment URL
 		$current_redirect = isset( $result['redirect'] ) ? $result['redirect'] : '';
 		$is_order_received = ! empty( $current_redirect ) && strpos( $current_redirect, 'order-received' ) !== false;
 		$is_doku_url = ! empty( $current_redirect ) && (
@@ -4365,8 +4365,8 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 			strpos( $current_redirect, 'jokul' ) !== false
 		);
 		
-		// ALWAYS try to get Doku payment URL - even if redirect looks correct
-		// This ensures we have the correct URL for direct redirect
+		// CRITICAL: If redirect is order-received, we MUST get Doku URL and replace it
+		// DOKU should NEVER redirect to order-received - always to payment page
 		if ( empty( $current_redirect ) || $is_order_received || ! $is_doku_url ) {
 			try {
 				// Method 1: Check all possible order meta keys for Doku payment URL
@@ -4535,25 +4535,65 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 								ob_end_clean();
 								
 								if ( isset( $payment_result['result'] ) && $payment_result['result'] === 'success' && ! empty( $payment_result['redirect'] ) ) {
-									// Use the redirect URL from process_payment
-									$result['redirect'] = $payment_result['redirect'];
+									// Check if it's a Doku URL - if not, it might be order-received
+									$payment_redirect = $payment_result['redirect'];
+									$is_doku_redirect = (
+										strpos( $payment_redirect, 'checkout.doku.com' ) !== false ||
+										strpos( $payment_redirect, 'checkout-link-v2' ) !== false ||
+										strpos( $payment_redirect, 'doku.com' ) !== false ||
+										strpos( $payment_redirect, 'jokul' ) !== false
+									);
 									
-									// Store it
-									try {
-										$order->update_meta_data( '_doku_redirect_url', $payment_result['redirect'] );
-										$order->save_meta_data();
-									} catch ( Exception $e ) {
-										// Ignore
+									if ( $is_doku_redirect ) {
+										// Use the redirect URL from process_payment
+										$result['redirect'] = $payment_redirect;
+										
+										// Store it
+										try {
+											$order->update_meta_data( '_doku_redirect_url', $payment_redirect );
+											$order->save_meta_data();
+										} catch ( Exception $e ) {
+											// Ignore
+										}
+										
+										if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+											error_log( 'DOKU Payment: Got payment URL from process_payment for order #' . $order_id . ': ' . $payment_redirect );
+										}
+									} else {
+										// process_payment returned non-Doku URL (probably order-received)
+										// Try to get URL from order meta or gateway properties
+										if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+											error_log( 'DOKU Payment: process_payment returned non-Doku URL for order #' . $order_id . ': ' . $payment_redirect );
+										}
+										// Continue to search for Doku URL below
+									}
+								}
+								
+								// If we still don't have Doku URL, try to get from gateway properties
+								if ( empty( $result['redirect'] ) || strpos( $result['redirect'], 'order-received' ) !== false ) {
+									// Try to access gateway properties that might contain payment URL
+									if ( isset( $doku_gateway->payment_url ) && ! empty( $doku_gateway->payment_url ) ) {
+										$gateway_url = $doku_gateway->payment_url;
+										if ( strpos( $gateway_url, 'checkout.doku.com' ) !== false ||
+										     strpos( $gateway_url, 'checkout-link-v2' ) !== false ||
+										     strpos( $gateway_url, 'doku.com' ) !== false ||
+										     strpos( $gateway_url, 'jokul' ) !== false ) {
+											$result['redirect'] = $gateway_url;
+											try {
+												$order->update_meta_data( '_doku_redirect_url', $gateway_url );
+												$order->save_meta_data();
+											} catch ( Exception $e ) {
+												// Ignore
+											}
+										}
 									}
 									
-									if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-										error_log( 'DOKU Payment: Got payment URL from process_payment for order #' . $order_id );
-									}
-								} else {
-									// Last resort: redirect to order-pay
-									$result['redirect'] = $order->get_checkout_payment_url( true );
-									if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-										error_log( 'DOKU Payment: process_payment did not return URL for order #' . $order_id );
+									// Last resort: redirect to order-pay (not order-received)
+									if ( empty( $result['redirect'] ) || strpos( $result['redirect'], 'order-received' ) !== false ) {
+										$result['redirect'] = $order->get_checkout_payment_url( true );
+										if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+											error_log( 'DOKU Payment: Could not get Doku URL, redirecting to order-pay for order #' . $order_id );
+										}
 									}
 								}
 							} catch ( Exception $e ) {
@@ -4581,10 +4621,38 @@ function wp_augoose_handle_payment_result_redirect( $result, $order_id ) {
 				$result['redirect'] = $order->get_checkout_payment_url( true );
 			}
 		}
-		// Otherwise, keep DOKU's redirect URL as is (it's already a Doku URL)
-		// Ensure redirect URL is valid
+		// CRITICAL: Final check - if redirect is still order-received, we MUST replace it
+		// This is a safety net to ensure we NEVER redirect to order-received for DOKU
+		if ( ! empty( $result['redirect'] ) && strpos( $result['redirect'], 'order-received' ) !== false ) {
+			// Try one more time to get Doku URL from order meta
+			$doku_url = $order->get_meta( '_doku_redirect_url' );
+			if ( ! empty( $doku_url ) && (
+				strpos( $doku_url, 'checkout.doku.com' ) !== false ||
+				strpos( $doku_url, 'checkout-link-v2' ) !== false ||
+				strpos( $doku_url, 'doku.com' ) !== false ||
+				strpos( $doku_url, 'jokul' ) !== false
+			) ) {
+				$result['redirect'] = $doku_url;
+			} else {
+				// Last resort: redirect to order-pay (NOT order-received)
+				$result['redirect'] = $order->get_checkout_payment_url( true );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( 'DOKU Payment: CRITICAL - Redirect was order-received, replaced with order-pay for order #' . $order_id );
+				}
+			}
+		}
+		
+		// Ensure redirect URL is valid and is NOT order-received
 		if ( ! empty( $result['redirect'] ) ) {
 			$result['redirect'] = esc_url_raw( $result['redirect'] );
+			
+			// Final safety check - if somehow still order-received, force to order-pay
+			if ( strpos( $result['redirect'], 'order-received' ) !== false ) {
+				$result['redirect'] = $order->get_checkout_payment_url( true );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( 'DOKU Payment: CRITICAL - Final check found order-received, forcing order-pay for order #' . $order_id );
+				}
+			}
 		}
 	}
 	
@@ -4615,6 +4683,74 @@ function wp_augoose_ensure_doku_redirect_works() {
 	// Ensure output buffers don't interfere with redirect
 	// DOKU process_payment needs to be able to redirect
 	// Don't clean buffers here - let DOKU handle its own redirect
+}
+
+/**
+ * Intercept DOKU process_payment result to capture payment URL
+ * This runs immediately after process_payment to capture the redirect URL
+ */
+add_filter( 'woocommerce_payment_successful_result', 'wp_augoose_intercept_doku_process_payment_result', 1, 2 );
+function wp_augoose_intercept_doku_process_payment_result( $result, $order_id ) {
+	if ( ! $order_id || ! isset( $result['result'] ) || $result['result'] !== 'success' ) {
+		return $result;
+	}
+	
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+		return $result;
+	}
+	
+	// Only for DOKU payments
+	$payment_method = $order->get_payment_method();
+	$is_doku = (
+		strpos( strtolower( $payment_method ), 'doku' ) !== false || 
+		strpos( strtolower( $payment_method ), 'jokul' ) !== false
+	);
+	
+	if ( ! $is_doku ) {
+		return $result;
+	}
+	
+	// If redirect URL is order-received, we need to get Doku URL immediately
+	if ( ! empty( $result['redirect'] ) && strpos( $result['redirect'], 'order-received' ) !== false ) {
+		// Try to get Doku URL from order meta first
+		$doku_url = $order->get_meta( '_doku_redirect_url' );
+		if ( ! empty( $doku_url ) && (
+			strpos( $doku_url, 'checkout.doku.com' ) !== false ||
+			strpos( $doku_url, 'checkout-link-v2' ) !== false ||
+			strpos( $doku_url, 'doku.com' ) !== false ||
+			strpos( $doku_url, 'jokul' ) !== false
+		) ) {
+			$result['redirect'] = $doku_url;
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( 'DOKU Payment: Intercepted order-received redirect, replaced with Doku URL from meta for order #' . $order_id );
+			}
+		} else {
+			// Try to get from gateway
+			$gateway = WC()->payment_gateways->get_available_payment_gateways();
+			if ( isset( $gateway[ $payment_method ] ) ) {
+				$doku_gateway = $gateway[ $payment_method ];
+				
+				// Check gateway properties for payment URL
+				if ( isset( $doku_gateway->payment_url ) && ! empty( $doku_gateway->payment_url ) ) {
+					$gateway_url = $doku_gateway->payment_url;
+					if ( strpos( $gateway_url, 'checkout.doku.com' ) !== false ||
+					     strpos( $gateway_url, 'checkout-link-v2' ) !== false ||
+					     strpos( $gateway_url, 'doku.com' ) !== false ||
+					     strpos( $gateway_url, 'jokul' ) !== false ) {
+						$result['redirect'] = $gateway_url;
+						$order->update_meta_data( '_doku_redirect_url', $gateway_url );
+						$order->save_meta_data();
+						if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+							error_log( 'DOKU Payment: Intercepted order-received redirect, replaced with Doku URL from gateway for order #' . $order_id );
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return $result;
 }
 
 /**
