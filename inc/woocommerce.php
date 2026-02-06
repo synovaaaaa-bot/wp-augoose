@@ -30,8 +30,20 @@ function wp_augoose_get_size_chart_url( $product = null ) {
 		return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
 	}
 	
+	// Check cache first to avoid repeated queries
+	$product_id = $product->get_id();
+	$cache_key = 'size_chart_' . $product_id;
+	$cached_url = wp_cache_get( $cache_key );
+	
+	if ( false !== $cached_url ) {
+		return $cached_url;
+	}
+	
 	$product_name = strtolower( $product->get_name() );
-	$product_categories = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) );
+	// Use cached category function to avoid N+1 queries
+	$product_categories = function_exists( 'wp_augoose_get_product_categories_cached' ) 
+		? wp_augoose_get_product_categories_cached( $product_id )
+		: wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
 	$category_names = array_map( 'strtolower', $product_categories );
 	
 	// Check product name and categories to determine size chart
@@ -41,7 +53,9 @@ function wp_augoose_get_size_chart_url( $product = null ) {
 		( strpos( $product_name, 'regular' ) !== false || strpos( $product_name, 'service' ) !== false ) &&
 		strpos( $product_name, 'vintage' ) === false && strpos( $product_name, 'boxy' ) === false
 	) {
-		return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg';
+		$url = 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg';
+		wp_cache_set( $cache_key, $url, '', 3600 );
+		return $url;
 	}
 	
 	// Jacket Vintage Boxy Fit
@@ -49,7 +63,9 @@ function wp_augoose_get_size_chart_url( $product = null ) {
 		strpos( $product_name, 'jacket' ) !== false && 
 		( strpos( $product_name, 'vintage' ) !== false || strpos( $product_name, 'boxy' ) !== false )
 	) {
-		return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Vintage-Boxy-Fit_Size-Chart.jpg';
+		$url = 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Vintage-Boxy-Fit_Size-Chart.jpg';
+		wp_cache_set( $cache_key, $url, '', 3600 );
+		return $url;
 	}
 	
 	// Pants Straight Fit (Sentinel, Fatigue)
@@ -57,7 +73,9 @@ function wp_augoose_get_size_chart_url( $product = null ) {
 		strpos( $product_name, 'pants' ) !== false && 
 		( strpos( $product_name, 'straight' ) !== false || strpos( $product_name, 'sentinel' ) !== false || strpos( $product_name, 'fatigue' ) !== false )
 	) {
-		return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Straight-Fit-Sentinel-Fatigue_Size-Chart.jpg';
+		$url = 'https://augoose.co/wp-content/uploads/2026/01/Pants-Straight-Fit-Sentinel-Fatigue_Size-Chart.jpg';
+		wp_cache_set( $cache_key, $url, '', 3600 );
+		return $url;
 	}
 	
 	// Workshirt and Vest
@@ -67,12 +85,16 @@ function wp_augoose_get_size_chart_url( $product = null ) {
 		strpos( $product_name, 'vest' ) !== false ||
 		( strpos( $product_name, 'shirt' ) !== false && strpos( $product_name, 'work' ) !== false )
 	) {
-		return 'https://augoose.co/wp-content/uploads/2026/01/Workshirt-and-Vest_Size-Chart.jpg';
+		$url = 'https://augoose.co/wp-content/uploads/2026/01/Workshirt-and-Vest_Size-Chart.jpg';
+		wp_cache_set( $cache_key, $url, '', 3600 );
+		return $url;
 	}
 	
 	// Pants Regular Fit (Double Knee, Carpenter, Utility) - default for pants
 	if ( strpos( $product_name, 'pants' ) !== false ) {
-		return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+		$url = 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+		wp_cache_set( $cache_key, $url, '', 3600 );
+		return $url;
 	}
 	
 	// Check categories as fallback
@@ -80,22 +102,32 @@ function wp_augoose_get_size_chart_url( $product = null ) {
 		// Jacket categories
 		if ( strpos( $cat_name, 'jacket' ) !== false ) {
 			if ( strpos( $cat_name, 'vintage' ) !== false || strpos( $cat_name, 'boxy' ) !== false ) {
-				return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Vintage-Boxy-Fit_Size-Chart.jpg';
+				$url = 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Vintage-Boxy-Fit_Size-Chart.jpg';
+				wp_cache_set( $cache_key, $url, '', 3600 );
+				return $url;
 			}
-			return 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg';
+			$url = 'https://augoose.co/wp-content/uploads/2026/01/Jacket-Regular-Service_Size-Chart.jpg';
+			wp_cache_set( $cache_key, $url, '', 3600 );
+			return $url;
 		}
 		
 		// Pants categories
 		if ( strpos( $cat_name, 'pants' ) !== false || strpos( $cat_name, 'trouser' ) !== false ) {
 			if ( strpos( $cat_name, 'straight' ) !== false || strpos( $cat_name, 'sentinel' ) !== false || strpos( $cat_name, 'fatigue' ) !== false ) {
-				return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Straight-Fit-Sentinel-Fatigue_Size-Chart.jpg';
+				$url = 'https://augoose.co/wp-content/uploads/2026/01/Pants-Straight-Fit-Sentinel-Fatigue_Size-Chart.jpg';
+				wp_cache_set( $cache_key, $url, '', 3600 );
+				return $url;
 			}
-			return 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+			$url = 'https://augoose.co/wp-content/uploads/2026/01/Pants-Regular-Fit-Double-Knee-Carpenter-Utility_-Size-CHart.jpg';
+			wp_cache_set( $cache_key, $url, '', 3600 );
+			return $url;
 		}
 		
 		// Shirt/Vest categories
 		if ( strpos( $cat_name, 'shirt' ) !== false || strpos( $cat_name, 'vest' ) !== false ) {
-			return 'https://augoose.co/wp-content/uploads/2026/01/Workshirt-and-Vest_Size-Chart.jpg';
+			$url = 'https://augoose.co/wp-content/uploads/2026/01/Workshirt-and-Vest_Size-Chart.jpg';
+			wp_cache_set( $cache_key, $url, '', 3600 );
+			return $url;
 		}
 	}
 	

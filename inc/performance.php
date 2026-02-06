@@ -157,6 +157,36 @@ function wp_augoose_optimize_product_query( $query ) {
 }
 
 /**
+ * Cache product categories to avoid N+1 queries
+ * Instead of calling wp_get_post_terms for every product
+ */
+function wp_augoose_get_product_categories_cached( $product_id ) {
+    $cache_key = 'product_cats_' . $product_id;
+    $categories = wp_cache_get( $cache_key );
+    
+    if ( false === $categories ) {
+        $categories = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
+        wp_cache_set( $cache_key, $categories, '', 3600 ); // Cache for 1 hour
+    }
+    
+    return $categories;
+}
+
+/**
+ * Add transient caching for expensive queries
+ */
+function wp_augoose_cache_expensive_query( $query_key, $callback, $ttl = 3600 ) {
+    $result = get_transient( $query_key );
+    
+    if ( false === $result ) {
+        $result = call_user_func( $callback );
+        set_transient( $query_key, $result, $ttl );
+    }
+    
+    return $result;
+}
+
+/**
  * Minify inline CSS (basic)
  */
 function wp_augoose_minify_css( $css ) {

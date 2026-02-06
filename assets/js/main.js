@@ -9,11 +9,8 @@
 
     // Mobile Menu Toggle - Fixed with event delegation
     function initMobileMenu() {
-        console.log('=== INIT MOBILE MENU ===');
-        
         // Use event delegation for mobile menu toggle
         $(document).on('click', '.mobile-menu-toggle', function(e) {
-            console.log('=== MOBILE MENU TOGGLE CLICKED ===');
             e.preventDefault();
             e.stopPropagation();
             
@@ -57,17 +54,13 @@
                 $('body').removeClass('mobile-menu-open');
             }
         });
-        
-        console.log('Mobile menu initialized');
     }
 
     // Search Toggle - Fixed for mobile with event delegation
     function initSearchToggle() {
-        console.log('=== INIT SEARCH TOGGLE ===');
         
         // Use event delegation to catch clicks on search toggle button (including SVG inside)
         $(document).on('click', '.search-toggle, .search-toggle *', function(e) {
-            console.log('=== SEARCH TOGGLE CLICKED ===', e.target);
             e.preventDefault();
             e.stopPropagation();
             
@@ -78,7 +71,6 @@
             }
             
             if ($button.length === 0) {
-                console.error('Search toggle button not found!');
                 return;
             }
             
@@ -87,8 +79,6 @@
                 // Fallback: find by class
                 $searchFormContainer = $('.search-form-container');
             }
-            
-            console.log('Search container found:', $searchFormContainer.length);
             
             // Toggle search form
             if ($searchFormContainer.is(':visible')) {
@@ -116,15 +106,18 @@
         });
 
         // Close search when clicking outside - improved for mobile
+        let lastClickOutside = 0;
         $(document).on('click touchstart', function(e) {
+            const now = Date.now();
+            if (now - lastClickOutside < 100) return; // Debounce
+            lastClickOutside = now;
+            
             const searchFormContainer = $('.search-form-container');
-            const headerSearch = $('.header-search');
             
             // Check if click is outside search area
             if (!$(e.target).closest('.header-search').length && 
                 !$(e.target).closest('.search-form-container').length &&
                 searchFormContainer.is(':visible')) {
-                console.log('Closing search - clicked outside');
                 searchFormContainer.slideUp(300, function() {
                     $(this).attr('aria-hidden', 'true');
                 });
@@ -196,6 +189,7 @@
     function initStickyHeader() {
         const headerStack = $('.header-stack');
         const header = $('.site-header');
+        let resizeTimeout = null;
         
         // Ensure header is always visible and no space above
         function ensureHeaderVisible() {
@@ -227,25 +221,26 @@
         // Run immediately
         ensureHeaderVisible();
         
-        // Run on scroll - ensure header stays visible
+        // Run on scroll with throttling - max 16 times/sec (60fps)
+        let lastScroll = 0;
         $(window).on('scroll', function() {
-            ensureHeaderVisible();
-
-            const currentScroll = $(this).scrollTop();
-            if (currentScroll > 50) {
-                header.addClass('scrolled');
-            } else {
-                header.removeClass('scrolled');
+            const now = Date.now();
+            if (now - lastScroll > 16) {
+                lastScroll = now;
+                const currentScroll = $(this).scrollTop();
+                if (currentScroll > 50) {
+                    header.addClass('scrolled');
+                } else {
+                    header.removeClass('scrolled');
+                }
             }
         });
         
-        // Run on resize
+        // Run on resize with debouncing - only after resize stops
         $(window).on('resize', function() {
-            ensureHeaderVisible();
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(ensureHeaderVisible, 250);
         });
-        
-        // Run periodically to ensure it stays visible
-        setInterval(ensureHeaderVisible, 500);
     }
 
     // Shop Filters Toggle (Archive pages) - Off-Canvas with No Layout Shift
