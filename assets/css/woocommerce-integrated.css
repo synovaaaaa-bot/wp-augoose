@@ -311,6 +311,41 @@
 }
 
 /* ===================================
+   Mobile Overrides - fix gallery & container spacing on small screens
+   =================================== */
+@media (max-width: 767px) {
+    /* Restore comfortable side padding for single product container */
+    .single-product-wrapper .product-main-content .container,
+    .single-product-wrapper .container,
+    .single-product-wrapper .product-layout .container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    /* Reduce forced min-height on product gallery items so images don't become excessively tall */
+    .single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__item,
+    .single-product-wrapper .product-gallery-two__item,
+    .single-product-wrapper .product-gallery-portrait .product-gallery-two__item {
+        min-height: 220px !important;
+    }
+
+    /* Allow image height to size naturally on mobile */
+    .single-product-wrapper .product-gallery-portrait.is-single .product-gallery-two__img,
+    .single-product-wrapper .product-gallery-two__img,
+    .woocommerce-product-gallery__image img {
+        height: auto !important;
+        max-height: none !important;
+        object-fit: cover !important;
+    }
+
+    /* Slightly reduce gaps so content fits better on narrow screens */
+    .single-product-wrapper .product-layout {
+        gap: 20px;
+        grid-template-columns: 1fr; /* stack gallery and info */
+    }
+}
+
+/* ===================================
    4. CART & MINI CART
    =================================== */
 
