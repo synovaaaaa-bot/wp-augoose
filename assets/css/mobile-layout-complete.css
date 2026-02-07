@@ -1375,6 +1375,14 @@
         width: 100% !important;
         max-width: 100% !important;
         height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        background: #fff !important;
+        z-index: 9999 !important;
+        transition: right 0.3s ease !important;
     }
     
     .woocommerce.widget_shopping_cart.open,
@@ -1388,13 +1396,17 @@
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
+        border-bottom: 1px solid #e6e6e6 !important;
+        flex-shrink: 0 !important;
     }
     
     /* Cart sidebar items */
     .cart-sidebar-items {
         padding: 12px 14px !important;
-        max-height: calc(100vh - 300px) !important;
+        flex: 1 !important;
         overflow-y: auto !important;
+        overflow-x: hidden !important;
+        min-height: 0 !important;
     }
     
     /* Cart sidebar footer - CRITICAL: Make sure buttons are visible */
@@ -1402,15 +1414,12 @@
         padding: 14px 16px !important;
         border-top: 1px solid #e6e6e6 !important;
         background: #fff !important;
-        position: absolute !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        flex-shrink: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         gap: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
     
     /* Total section */
@@ -1419,7 +1428,7 @@
         justify-content: space-between !important;
         align-items: center !important;
         padding: 10px 0 !important;
-        margin: 0 0 12px 0 !important;
+        margin: 0 !important;
         border-bottom: 1px solid #e6e6e6 !important;
     }
     
@@ -1453,6 +1462,10 @@
         box-sizing: border-box !important;
         cursor: pointer !important;
         border: 1px solid !important;
+        min-height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     
     .cart-sidebar-btn-view {
