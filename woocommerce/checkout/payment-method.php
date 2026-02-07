@@ -9,31 +9,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Check if this is DOKU gateway
-$is_doku = false;
+// Get gateway info
 $gateway_id_lower = strtolower( $gateway->id );
-if ( strpos( $gateway_id_lower, 'doku' ) !== false || strpos( $gateway_id_lower, 'jokul' ) !== false ) {
-	$is_doku = true;
-}
-
-// Check if this is PayPal gateway
-$is_paypal = false;
 $gateway_title_lower = strtolower( $gateway->get_title() );
-if ( strpos( $gateway_id_lower, 'paypal' ) !== false || 
-     strpos( $gateway_id_lower, 'ppcp' ) !== false ||
-     strpos( $gateway_title_lower, 'paypal' ) !== false ) {
-	$is_paypal = true;
-}
 
-// Check if this is Credit/Debit Card gateway
-$is_credit_card = false;
-if ( ( strpos( $gateway_id_lower, 'card' ) !== false || 
-      strpos( $gateway_id_lower, 'credit' ) !== false || 
-      strpos( $gateway_id_lower, 'debit' ) !== false ||
-      strpos( $gateway_id_lower, 'stripe' ) !== false ) &&
-     ! $is_paypal ) {
-	$is_credit_card = true;
-}
+// Detect payment method type
+$is_doku = strpos( $gateway_id_lower, 'doku' ) !== false || strpos( $gateway_id_lower, 'jokul' ) !== false;
+$is_paypal = strpos( $gateway_id_lower, 'paypal' ) !== false || strpos( $gateway_id_lower, 'ppcp' ) !== false || strpos( $gateway_title_lower, 'paypal' ) !== false;
+$is_google_pay = strpos( $gateway_id_lower, 'google' ) !== false || strpos( $gateway_title_lower, 'google pay' ) !== false;
+$is_apple_pay = strpos( $gateway_id_lower, 'apple' ) !== false || strpos( $gateway_title_lower, 'apple pay' ) !== false;
+$is_credit_card = ( strpos( $gateway_id_lower, 'card' ) !== false || 
+                    strpos( $gateway_id_lower, 'credit' ) !== false || 
+                    strpos( $gateway_id_lower, 'debit' ) !== false ||
+                    strpos( $gateway_id_lower, 'stripe' ) !== false ) && 
+                  ! $is_paypal && ! $is_google_pay && ! $is_apple_pay;
 ?>
 <li class="wc_payment_method payment_method_<?php echo esc_attr( $gateway->id ); ?>">
 	<input id="payment_method_<?php echo esc_attr( $gateway->id ); ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> data-order_button_text="<?php echo esc_attr( $gateway->order_button_text ); ?>" />
@@ -43,9 +32,8 @@ if ( ( strpos( $gateway_id_lower, 'card' ) !== false ||
 		<?php if ( $is_credit_card ) : ?>
 			<div class="wp-augoose-credit-card-icons">
 				<?php
-				// Use reliable CDN for credit card icons
+				// Credit card icons
 				$icon_base = 'https://cdn.jsdelivr.net/gh/woocommerce/woocommerce@8.0/assets/images/icons/credit-cards/';
-				// Fallback to local WooCommerce assets if available
 				if ( defined( 'WC_PLUGIN_URL' ) && file_exists( WP_PLUGIN_DIR . '/woocommerce/assets/images/icons/credit-cards/visa.svg' ) ) {
 					$icon_base = WC_PLUGIN_URL . 'assets/images/icons/credit-cards/';
 				}
@@ -57,17 +45,27 @@ if ( ( strpos( $gateway_id_lower, 'card' ) !== false ||
 			</div>
 		<?php elseif ( $is_paypal ) : ?>
 			<div class="wp-augoose-paypal-icon">
-				<?php
-				// Use PayPal official logo
-				$paypal_logo_url = 'https://www.paypalobjects.com/webstatic/mktg/logo-center/logo_paypal_marcas_206x29.png';
-				// Fallback to SVG if PNG fails
-				$paypal_fallback = 'https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg';
-				?>
-				<img src="<?php echo esc_url( $paypal_logo_url ); ?>" alt="PayPal" class="paypal-icon" onerror="this.onerror=null; this.src='<?php echo esc_js( $paypal_fallback ); ?>';" />
+				<img src="https://www.paypalobjects.com/webstatic/mktg/logo-center/logo_paypal_marcas_206x29.png" alt="PayPal" class="paypal-icon" onerror="this.onerror=null; this.src='https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg';" />
+			</div>
+		<?php elseif ( $is_google_pay ) : ?>
+			<div class="wp-augoose-google-pay-icon">
+				<svg width="40" height="24" viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect width="40" height="24" rx="4" fill="#ffffff" stroke="#e0e0e0" stroke-width="0.5"/>
+					<!-- Google Pay logo -->
+					<text x="4" y="16" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#1f2937">Google Pay</text>
+				</svg>
+			</div>
+		<?php elseif ( $is_apple_pay ) : ?>
+			<div class="wp-augoose-apple-pay-icon">
+				<svg width="40" height="24" viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect width="40" height="24" rx="4" fill="#000000"/>
+					<!-- Apple Pay logo -->
+					<text x="4" y="16" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#ffffff">Apple Pay</text>
+				</svg>
 			</div>
 		<?php else : ?>
 			<?php 
-			// Get gateway icon, but ensure it displays properly
+			// Get gateway icon fallback
 			$gateway_icon = $gateway->get_icon();
 			if ( ! empty( $gateway_icon ) ) {
 				echo $gateway_icon; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */
@@ -75,6 +73,19 @@ if ( ( strpos( $gateway_id_lower, 'card' ) !== false ||
 			?>
 		<?php endif; ?>
 	</label>
+	<?php if ( $gateway->has_fields() || $gateway->get_description() ) : ?>
+		<div class="payment_box payment_method_<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>style="display:none;"<?php endif; /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>>
+			<?php $gateway->payment_fields(); ?>
+		</div>
+	<?php endif; ?>
+	
+	<?php if ( $is_doku ) : ?>
+		<div class="wp-augoose-payment-notice wp-augoose-doku-notice" data-payment-method="<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : ?>style="display:none;"<?php endif; ?>>
+			<p>You can pay securely using DOKU payment gateway.</p>
+			<p class="wp-augoose-notice-highlight">All payments made using this method will be converted to Indonesian Rupiah (IDR) in accordance with applicable national regulations. Thank you.</p>
+		</div>
+	<?php endif; ?>
+</li>
 	<?php if ( $gateway->has_fields() || $gateway->get_description() ) : ?>
 		<div class="payment_box payment_method_<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>style="display:none;"<?php endif; /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>>
 			<?php $gateway->payment_fields(); ?>

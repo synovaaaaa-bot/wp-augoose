@@ -466,6 +466,29 @@
         cursor: pointer;
     }
     
+    /* Payment Method Icons */
+    .wp-augoose-credit-card-icons,
+    .wp-augoose-paypal-icon,
+    .wp-augoose-google-pay-icon,
+    .wp-augoose-apple-pay-icon {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .wp-augoose-credit-card-icons img,
+    .wp-augoose-paypal-icon img {
+        height: 20px;
+        width: auto;
+        object-fit: contain;
+    }
+    
+    .wp-augoose-google-pay-icon svg,
+    .wp-augoose-apple-pay-icon svg {
+        width: 40px;
+        height: 24px;
+    }
+    
     /* CRITICAL: Place Order Button - MUST BE VISIBLE */
     .checkout-place-order-section {
         margin-top: 20px;
