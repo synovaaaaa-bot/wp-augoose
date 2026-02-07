@@ -3507,7 +3507,7 @@ function wp_augoose_variation_scripts() {
 					
 					if (!allSelected) {
 						e.preventDefault();
-						var message = "Please select: " + missingAttributes.join(", ");
+						var message = "Please select Size And Color before adding this product to your cart.";
 						alert(message);
 						
 						// Highlight missing fields
