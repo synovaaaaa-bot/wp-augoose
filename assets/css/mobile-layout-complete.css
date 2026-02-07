@@ -1352,7 +1352,7 @@
     
     /* Cart sidebar items */
     .cart-sidebar-items {
-        padding: 14px 16px !important;
+        padding: 14px 16px 30px 16px !important;
         flex: 1 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
@@ -1362,7 +1362,7 @@
     
     /* Cart sidebar footer - CRITICAL: Make sure buttons are visible - SIMPLIFIED */
     .cart-sidebar-footer {
-        padding: 14px 16px 20px 16px !important;
+        padding: 16px 16px max(24px, env(safe-area-inset-bottom)) 16px !important;
         border-top: 1px solid #e6e6e6 !important;
         background: #fff !important;
         flex-shrink: 0 !important;
@@ -1371,9 +1371,9 @@
         gap: 10px !important;
         width: 100% !important;
         box-sizing: border-box !important;
-        position: relative !important;
+        position: sticky !important;
+        bottom: 0 !important;
         z-index: 10 !important;
-        padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
     }
     
     /* Total section */

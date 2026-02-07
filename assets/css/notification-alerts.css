@@ -14,18 +14,21 @@
 .woocommerce-message,
 .woocommerce-error,
 .woocommerce-info {
-    display: block !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
     padding: 14px 16px !important;
     margin: 12px 12px 16px 12px !important;
     font-size: 13px !important;
     border-radius: 6px !important;
-    border: 1px solid transparent !important;
+    border: 2px solid transparent !important;
     clear: both !important;
     width: calc(100% - 24px) !important;
     box-sizing: border-box !important;
     line-height: 1.5 !important;
     word-wrap: break-word !important;
     overflow-wrap: break-word !important;
+    gap: 10px !important;
 }
 
 /* ===================================
@@ -117,20 +120,22 @@
 .woocommerce-info a,
 .woocommerce-error a,
 .woocommerce-notices-wrapper a {
-    display: block !important;
-    margin-top: 12px !important;
-    margin-bottom: 0 !important;
-    padding: 12px 16px !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 10px 14px !important;
     background: #000 !important;
     color: #fff !important;
     text-decoration: none !important;
     border-radius: 4px !important;
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: 600 !important;
     cursor: pointer !important;
     border: 1px solid #000 !important;
     transition: all 0.3s ease !important;
     text-align: center !important;
+    white-space: nowrap !important;
+    min-height: 40px !important;
+    line-height: 20px !important;
 }
 
 .woocommerce-message a:hover,
@@ -146,18 +151,20 @@
    MOBILE RESPONSIVE
    =================================== */
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     
     .alert,
     .notice,
     .woocommerce-message,
     .woocommerce-error,
     .woocommerce-info {
+        display: flex !important;
+        flex-direction: column !important;
         padding: 14px 16px !important;
         margin: 12px 0 16px 0 !important;
         font-size: 13px !important;
         border-radius: 6px !important;
-        border: 1px solid transparent !important;
+        border: 2px solid !important;
     }
     
     .woocommerce-notices-wrapper {
@@ -181,11 +188,15 @@
     .woocommerce-error a,
     .woocommerce-notices-wrapper a {
         display: block !important;
+        width: 100% !important;
         padding: 12px 16px !important;
         font-size: 13px !important;
         font-weight: 600 !important;
+        margin-top: 8px !important;
         text-align: center !important;
-        margin-top: 12px !important;
+    }
+    
+}
         margin-bottom: 0 !important;
     }
     
