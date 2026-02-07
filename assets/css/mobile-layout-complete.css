@@ -1444,13 +1444,14 @@
        CART SIDEBAR MOBILE FIXES
        =================================== */
     
-    /* Cart sidebar drawer - mobile width */
+    /* Cart sidebar drawer - mobile width - SAFARI SAFE AREA FIX */
     .woocommerce.widget_shopping_cart,
     .widget_shopping_cart {
         right: -100% !important;
         width: 100% !important;
         max-width: 100% !important;
-        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
         display: flex !important;
         flex-direction: column !important;
         position: fixed !important;
@@ -1459,6 +1460,7 @@
         background: #fff !important;
         z-index: 9999 !important;
         transition: right 0.3s ease !important;
+        padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
     }
     
     .woocommerce.widget_shopping_cart.open,
@@ -1469,6 +1471,7 @@
     /* Cart sidebar header */
     .cart-sidebar-header {
         padding: 14px 16px !important;
+        padding-top: max(14px, env(safe-area-inset-top)) !important;
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
@@ -1479,15 +1482,21 @@
     /* Cart sidebar items */
     .cart-sidebar-items {
         padding: 12px 14px !important;
+        padding-left: max(14px, calc(14px + env(safe-area-inset-left))) !important;
+        padding-right: max(14px, calc(14px + env(safe-area-inset-right))) !important;
         flex: 1 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         min-height: 0 !important;
+        -webkit-overflow-scrolling: touch !important;
     }
     
     /* Cart sidebar footer - CRITICAL: Make sure buttons are visible */
     .cart-sidebar-footer {
         padding: 14px 16px !important;
+        padding-bottom: max(14px, calc(14px + env(safe-area-inset-bottom))) !important;
+        padding-left: max(16px, calc(16px + env(safe-area-inset-left))) !important;
+        padding-right: max(16px, calc(16px + env(safe-area-inset-right))) !important;
         border-top: 1px solid #e6e6e6 !important;
         background: #fff !important;
         flex-shrink: 0 !important;
