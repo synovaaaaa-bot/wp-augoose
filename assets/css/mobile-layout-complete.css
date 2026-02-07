@@ -1310,23 +1310,53 @@
         clear: both !important;
         width: 100% !important;
         box-sizing: border-box !important;
-        line-height: 1.5 !important;
+        line-height: 1.6 !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    /* Wrapper for notices */
+    .woocommerce-notices-wrapper {
+        display: block !important;
+        width: 100% !important;
+        margin: 16px 0 !important;
+    }
+    
+    .woocommerce-notices-wrapper ul {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .woocommerce-notices-wrapper li {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        padding: 14px 16px !important;
+        margin: 0 !important;
+        border-radius: 4px !important;
+        border-left: 4px solid !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
     }
     
     /* Color-specific notification styles */
-    .woocommerce-message {
+    .woocommerce-message,
+    .woocommerce-notices-wrapper .woocommerce-message li {
         background: #d4edda !important;
         color: #155724 !important;
         border-left-color: #28a745 !important;
     }
     
-    .woocommerce-info {
+    .woocommerce-info,
+    .woocommerce-notices-wrapper .woocommerce-info li {
         background: #d1ecf1 !important;
         color: #0c5460 !important;
         border-left-color: #17a2b8 !important;
     }
     
-    .woocommerce-error {
+    .woocommerce-error,
+    .woocommerce-notices-wrapper .woocommerce-error li {
         background: #f8d7da !important;
         color: #721c24 !important;
         border-left-color: #dc3545 !important;
@@ -1335,20 +1365,24 @@
     /* Notification button styling on mobile */
     .woocommerce-message a,
     .woocommerce-info a,
-    .woocommerce-error a {
+    .woocommerce-error a,
+    .woocommerce-notices-wrapper a {
         display: inline-block !important;
-        margin-left: 8px !important;
-        padding: 6px 12px !important;
+        margin-top: 8px !important;
+        padding: 8px 14px !important;
         background: #000 !important;
         color: #fff !important;
         text-decoration: none !important;
         border-radius: 3px !important;
         font-size: 12px !important;
         font-weight: 600 !important;
+        white-space: nowrap !important;
     }
     
     /* Fix notification on single product page */
-    .single-product .woocommerce-message {
+    .single-product .woocommerce-message,
+    .single-product .woocommerce-error,
+    .single-product .woocommerce-info {
         margin-top: 20px !important;
         margin-bottom: 20px !important;
     }
