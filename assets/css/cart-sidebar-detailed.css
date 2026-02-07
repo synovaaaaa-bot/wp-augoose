@@ -298,7 +298,6 @@ body.admin-bar .widget_shopping_cart {
   border-top: 1px solid #e6e6e6;
   background: #fff;
   flex-shrink: 0;
-  margin-top: auto;
 }
 
 .cart-sidebar-total {
@@ -736,5 +735,56 @@ body.admin-bar .widget_shopping_cart {
     padding: 11px 12px;
     font-size: 10px;
     letter-spacing: 0.8px;
+  }
+}
+/* =========================
+   Side Cart Footer - Sticky + iOS Safe Area
+   ========================= */
+   
+.woocommerce.widget_shopping_cart,
+.cart-sidebar,
+.cart-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+/* Content scrollable */
+.cart-sidebar-items {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 140px;
+}
+
+/* Sticky footer with iOS safe-area */
+.cart-sidebar-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 50;
+  background: #fff;
+  border-top: 1px solid rgba(0,0,0,.08);
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+}
+
+/* Hide duplicate footer if rendered twice */
+.cart-sidebar-footer + .cart-sidebar-footer { 
+  display: none !important; 
+}
+
+/* iOS fix - footer button visibility */
+.cart-sidebar-footer {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+}
+
+.cart-sidebar-buttons {
+  padding-top: 12px !important;
+}
+
+@media (max-width: 768px) {
+  .cart-sidebar-footer {
+    bottom: 17px !important;
   }
 }

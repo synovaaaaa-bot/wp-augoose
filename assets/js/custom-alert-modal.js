@@ -1,129 +1,61 @@
 /**
  * Custom Alert Modal - Replace browser alert with styled modal
- * Ensures proper text wrapping and visibility on mobile
- * CRITICAL: Disabled on checkout page to prevent conflicts
+ * Uses theme classes instead of inline styles so appearance matches the theme
  */
 
 (function() {
     'use strict';
-    
-    // CRITICAL: Don't override alert on checkout page
-    // Checkout page needs native alerts for WooCommerce validation
-    const isCheckoutPage = document.body.classList.contains('woocommerce-checkout') || 
+
+    const isCheckoutPage = document.body.classList.contains('woocommerce-checkout') ||
                           document.body.classList.contains('checkout') ||
                           window.location.href.indexOf('/checkout') !== -1 ||
                           window.location.pathname.indexOf('/checkout') !== -1;
-    
-    if (isCheckoutPage) {
-        // On checkout, use native alert - don't override
-        return;
-    }
-    
-    // Override window.alert with custom modal
+
+    if (isCheckoutPage) return;
+
     const originalAlert = window.alert;
-    
+
     window.alert = function(message) {
-        // CRITICAL: Don't show modal if cart sidebar is open
-        // Check if cart sidebar is open
         const cartSidebar = document.querySelector('.woocommerce.widget_shopping_cart, .widget_shopping_cart');
         const isCartOpen = cartSidebar && cartSidebar.classList.contains('open');
-        
-        if (isCartOpen) {
-            // If cart is open, use native alert to avoid conflicts
-            return originalAlert(message);
-        }
-        
-        // Create modal HTML
+        if (isCartOpen) return originalAlert(message);
+
         const modalHTML = `
-            <div class="custom-alert-overlay" style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 10000;
-            ">
-                <div class="custom-alert-modal" style="
-                    background: #fff;
-                    border-radius: 8px;
-                    padding: 20px;
-                    max-width: 85vw;
-                    width: 100%;
-                    max-height: 80vh;
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-                    overflow-y: auto;
-                    box-sizing: border-box;
-                    margin: 0 auto;
-                ">
-                    <div class="custom-alert-message" style="
-                        font-size: 14px;
-                        line-height: 1.6;
-                        color: #333;
-                        word-wrap: break-word;
-                        white-space: normal;
-                        margin-bottom: 20px;
-                    ">
-                        ${escapeHtml(message)}
-                    </div>
-                    <button class="custom-alert-button" style="
-                        background: #007bff;
-                        color: #fff;
-                        border: none;
-                        padding: 12px 24px;
-                        border-radius: 4px;
-                        font-size: 14px;
-                        font-weight: 600;
-                        cursor: pointer;
-                        width: 100%;
-                        box-sizing: border-box;
-                    ">OK</button>
+            <div class="custom-alert-overlay">
+                <div class="custom-alert-modal">
+                    <div class="custom-alert-message">${escapeHtml(message)}</div>
+                    <button class="custom-alert-button">OK</button>
                 </div>
             </div>
         `;
-        
-        // Create container
+
         const container = document.createElement('div');
         container.innerHTML = modalHTML;
         document.body.appendChild(container);
-        
-        // Get button and set click handler
+
         const button = container.querySelector('.custom-alert-button');
         const overlay = container.querySelector('.custom-alert-overlay');
-        
-        const closeModal = () => {
+
+        function closeModal() {
             container.remove();
-        };
-        
+        }
+
         button.addEventListener('click', closeModal);
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) closeModal();
-        });
-        
-        // Focus button for keyboard accessibility
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
         button.focus();
-        
-        // Allow Enter key to close
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+
+        document.addEventListener('keydown', function onKey(e) {
+            if (e.key === 'Enter' || e.key === 'Escape') {
                 closeModal();
-                document.removeEventListener('keydown', arguments.callee);
+                document.removeEventListener('keydown', onKey);
             }
         });
     };
-    
-    // Escape HTML to prevent XSS
+
     function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, (m) => map[m]);
+        if (typeof text !== 'string') return text;
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 })();
