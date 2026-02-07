@@ -2338,6 +2338,37 @@ html body .woocommerce-checkout .woocommerce-shipping-fields__field-wrapper {
 /* Note: Payment method hook removed from woocommerce_checkout_order_review in inc/woocommerce.php
    to prevent duplication. Payment method is rendered in custom section .checkout-payment-section */
 
+/* CRITICAL: Hide payment method that appears inside #order_review (WooCommerce default)
+   We render payment method in custom section .checkout-payment-section instead */
+#order_review #payment,
+#order_review .woocommerce-checkout-payment,
+.woocommerce-checkout-review-order #payment,
+.woocommerce-checkout-review-order .woocommerce-checkout-payment {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 0 !important;
+}
+
+/* Hide payment method inside order summary wrapper (except in our custom section) */
+.order-summary-wrapper #payment:not(.checkout-payment-section #payment),
+.order-summary-wrapper .woocommerce-checkout-payment:not(.checkout-payment-section .woocommerce-checkout-payment) {
+    display: none !important;
+}
+
+/* Only show payment method in our custom section */
+.checkout-payment-section #payment,
+.checkout-payment-section .woocommerce-checkout-payment {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+}
+
 .woocommerce-checkout #payment {
     margin: 0;
     padding: 0;

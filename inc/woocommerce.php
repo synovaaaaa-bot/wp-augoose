@@ -2682,6 +2682,7 @@ function wp_augoose_validate_payment_method_by_country() {
 
 /**
  * Auto-select DOKU payment method via JavaScript when country changes
+ * Also hide duplicate payment method in order review
  */
 add_action( 'wp_footer', 'wp_augoose_auto_select_doku_js' );
 function wp_augoose_auto_select_doku_js() {
@@ -2692,6 +2693,50 @@ function wp_augoose_auto_select_doku_js() {
 	<script type="text/javascript">
 	jQuery(document).ready(function($) {
 		var dokuCountries = ['SG', 'MY', 'ID'];
+		
+		// CRITICAL: Hide payment method that appears in order review (duplicate)
+		// Payment method should only appear in .checkout-payment-section
+		function hideDuplicatePaymentMethod() {
+			// Hide payment method inside order review
+			$('#order_review #payment, #order_review .woocommerce-checkout-payment').hide();
+			$('.woocommerce-checkout-review-order #payment, .woocommerce-checkout-review-order .woocommerce-checkout-payment').hide();
+			
+			// Hide payment method in order summary wrapper (except in custom section)
+			$('.order-summary-wrapper #payment').each(function() {
+				if (!$(this).closest('.checkout-payment-section').length) {
+					$(this).hide();
+				}
+			});
+			$('.order-summary-wrapper .woocommerce-checkout-payment').each(function() {
+				if (!$(this).closest('.checkout-payment-section').length) {
+					$(this).hide();
+				}
+			});
+		}
+		
+		// Run on page load
+		hideDuplicatePaymentMethod();
+		
+		// Run after checkout update (AJAX)
+		$(document.body).on('updated_checkout', function() {
+			hideDuplicatePaymentMethod();
+		});
+		
+		// Use MutationObserver to catch dynamically added payment methods
+		if (typeof MutationObserver !== 'undefined') {
+			var observer = new MutationObserver(function(mutations) {
+				hideDuplicatePaymentMethod();
+			});
+			
+			// Observe order review container for changes
+			var orderReview = document.getElementById('order_review');
+			if (orderReview) {
+				observer.observe(orderReview, {
+					childList: true,
+					subtree: true
+				});
+			}
+		}
 		
 		function autoSelectDoku() {
 			var billingCountry = $('select[name="billing_country"]').val();
