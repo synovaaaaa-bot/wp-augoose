@@ -697,20 +697,8 @@ function wp_augoose_scripts() {
     // Cart page - redirect to shop, menggunakan cart sidebar saja
     // No CSS needed for cart page karena sudah redirect
     
-    // Custom Alert Modal - Mobile-friendly alternative to browser alert
-    // CRITICAL: Don't load on checkout page to prevent conflicts with WooCommerce validation
-    if ( file_exists( $theme_dir . '/assets/js/custom-alert-modal.js' ) ) {
-        // Skip on checkout page - WooCommerce needs native alerts
-        if ( ! ( class_exists( 'WooCommerce' ) && function_exists( 'is_checkout' ) && is_checkout() ) ) {
-            wp_enqueue_script( 
-                'wp-augoose-custom-alert-modal', 
-                $theme_dir_uri . '/assets/js/custom-alert-modal.js', 
-                array(), 
-                $asset_ver( 'assets/js/custom-alert-modal.js' ), 
-                true 
-            );
-        }
-    }
+    // Custom Alert Modal - DISABLED: the custom modal produced duplicate alerts.
+    // To restore, re-enable loading of assets/js/custom-alert-modal.js here.
     
     // Single Product Fixed - Sale Badge di dalam gambar
     if ( class_exists( 'WooCommerce' ) && ( function_exists( 'is_product' ) && is_product() ) ) {
