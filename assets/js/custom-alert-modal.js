@@ -50,7 +50,7 @@
                 <div class="custom-alert-modal" style="
                     background: #fff;
                     border-radius: 8px;
-                    padding: 24px;
+                    padding: 20px;
                     max-width: 85vw;
                     width: 100%;
                     max-height: 80vh;
@@ -60,41 +60,26 @@
                     margin: 0 auto;
                 ">
                     <div class="custom-alert-message" style="
-                        font-size: 13px;
+                        font-size: 14px;
                         line-height: 1.6;
-                        color: #1a1a1a;
+                        color: #333;
                         word-wrap: break-word;
                         white-space: normal;
-                        margin-bottom: 24px;
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                        text-align: left;
+                        margin-bottom: 20px;
                     ">
                         ${escapeHtml(message)}
                     </div>
                     <button class="custom-alert-button" style="
-                        background: #000000;
-                        background-color: #000000;
-                        color: #ffffff;
+                        background: #007bff;
+                        color: #fff;
                         border: none;
-                        padding: 0 14px;
-                        border-radius: 8px;
-                        font-size: 11px;
-                        font-weight: 800;
-                        letter-spacing: 0.08em;
-                        text-transform: uppercase;
+                        padding: 12px 24px;
+                        border-radius: 4px;
+                        font-size: 14px;
+                        font-weight: 600;
                         cursor: pointer;
                         width: 100%;
                         box-sizing: border-box;
-                        height: 44px;
-                        min-height: 44px;
-                        max-height: 44px;
-                        font-family: 'Killarney', Georgia, 'Times New Roman', serif;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        text-align: center;
-                        transition: all 0.2s ease;
-                        line-height: 1;
                     ">OK</button>
                 </div>
             </div>
@@ -116,24 +101,6 @@
         button.addEventListener('click', closeModal);
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) closeModal();
-        });
-        
-        // Add hover effects to match theme button style
-        button.addEventListener('mouseenter', function() {
-            this.style.background = '#222222';
-            this.style.transform = 'translateY(-1px)';
-        });
-        button.addEventListener('mouseleave', function() {
-            this.style.background = '#000000';
-            this.style.transform = 'translateY(0)';
-        });
-        button.addEventListener('mousedown', function() {
-            this.style.background = '#111111';
-            this.style.transform = 'translateY(0)';
-        });
-        button.addEventListener('mouseup', function() {
-            this.style.background = '#222222';
-            this.style.transform = 'translateY(-1px)';
         });
         
         // Focus button for keyboard accessibility
