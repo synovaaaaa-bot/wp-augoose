@@ -1117,12 +1117,58 @@
     .alert,
     .notice,
     .woocommerce-message,
+    .woocommerce-error,
+    .woocommerce-info {
+        padding: 14px 16px !important;
+        margin: 16px 0 !important;
+        font-size: 13px !important;
+        border-radius: 4px !important;
+        border-left: 4px solid #333 !important;
+        display: block !important;
+        clear: both !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        line-height: 1.5 !important;
+    }
+    
+    /* Color-specific notification styles */
+    .woocommerce-message {
+        background: #d4edda !important;
+        color: #155724 !important;
+        border-left-color: #28a745 !important;
+    }
+    
+    .woocommerce-info {
+        background: #d1ecf1 !important;
+        color: #0c5460 !important;
+        border-left-color: #17a2b8 !important;
+    }
+    
     .woocommerce-error {
-        padding: 12px 16px;
-        margin: 12px 0;
-        font-size: 13px;
-        border-radius: 4px;
-        border-left: 4px solid #333;
+        background: #f8d7da !important;
+        color: #721c24 !important;
+        border-left-color: #dc3545 !important;
+    }
+    
+    /* Notification button styling on mobile */
+    .woocommerce-message a,
+    .woocommerce-info a,
+    .woocommerce-error a {
+        display: inline-block !important;
+        margin-left: 8px !important;
+        padding: 6px 12px !important;
+        background: #000 !important;
+        color: #fff !important;
+        text-decoration: none !important;
+        border-radius: 3px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Fix notification on single product page */
+    .single-product .woocommerce-message {
+        margin-top: 20px !important;
+        margin-bottom: 20px !important;
     }
     
     /* Sections & dividers */
