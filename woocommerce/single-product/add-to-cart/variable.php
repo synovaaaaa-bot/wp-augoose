@@ -90,20 +90,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 				
 				// Use all terms if available, otherwise fallback to options from variations
 				$display_options = ! empty( $all_attribute_terms ) ? $all_attribute_terms : $options;
-				
-				// Sort size options numerically if this is a size attribute
-				if ( $is_size ) {
-					usort( $display_options, function( $a, $b ) {
-						$a_num = (int) $a;
-						$b_num = (int) $b;
-						// If both are numeric, sort numerically
-						if ( $a_num > 0 && $b_num > 0 ) {
-							return $a_num - $b_num;
-						}
-						// Otherwise sort alphabetically
-						return strcasecmp( $a, $b );
-					});
-				}
+				?>
 				
 				<div class="variation-group variation-<?php echo esc_attr( $attribute_slug ); ?>">
 					<div class="variation-header">
