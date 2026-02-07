@@ -1295,35 +1295,33 @@
         padding: 0;
     }
     
-    /* Alerts & notifications - MODERN STYLING */
+    /* Alerts & notifications - CLEAN STYLING */
     .alert,
     .notice,
     .woocommerce-message,
     .woocommerce-error,
     .woocommerce-info {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-        padding: 16px !important;
-        margin: 16px 0 !important;
-        font-size: 14px !important;
-        border-radius: 8px !important;
-        border: 2px solid transparent !important;
+        display: block !important;
+        padding: 14px 16px !important;
+        margin: 12px 12px 16px 12px !important;
+        font-size: 13px !important;
+        border-radius: 6px !important;
+        border: 1px solid transparent !important;
         clear: both !important;
-        width: 100% !important;
+        width: calc(100% - 24px) !important;
         box-sizing: border-box !important;
-        line-height: 1.6 !important;
+        line-height: 1.5 !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
     }
     
-    /* Wrapper for notices */
+    /* Wrapper for notices - IMPROVED STYLING */
     .woocommerce-notices-wrapper {
         display: block !important;
         width: 100% !important;
-        margin: 16px 0 !important;
-        padding: 0 !important;
+        margin: 12px 0 16px 0 !important;
+        padding: 0 12px !important;
+        box-sizing: border-box !important;
     }
     
     .woocommerce-notices-wrapper ul {
@@ -1333,61 +1331,57 @@
     }
     
     .woocommerce-notices-wrapper li {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-        padding: 16px !important;
+        display: block !important;
+        padding: 14px 16px !important;
         margin: 0 !important;
-        border-radius: 8px !important;
-        border: 2px solid transparent !important;
+        border-radius: 6px !important;
+        border: 1px solid transparent !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-        font-size: 14px !important;
-        line-height: 1.6 !important;
+        font-size: 13px !important;
+        line-height: 1.5 !important;
     }
     
     /* Single message (not in list) */
     .woocommerce-notices-wrapper .woocommerce-message,
     .woocommerce-notices-wrapper .woocommerce-error,
     .woocommerce-notices-wrapper .woocommerce-info {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 12px !important;
-        padding: 16px !important;
+        display: block !important;
+        padding: 14px 16px !important;
         margin: 0 !important;
-        border-radius: 8px !important;
-        border: 2px solid transparent !important;
+        border-radius: 6px !important;
+        border: 1px solid transparent !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+        font-size: 13px !important;
+        line-height: 1.5 !important;
     }
     
     /* Color-specific notification styles - SUCCESS */
     .woocommerce-message,
     .woocommerce-notices-wrapper .woocommerce-message,
     .woocommerce-notices-wrapper .woocommerce-message li {
-        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
-        color: #155724 !important;
-        border-color: #28a745 !important;
+        background: #d4f1d4 !important;
+        color: #1e5e20 !important;
+        border-color: #4caf50 !important;
     }
     
     /* Color-specific notification styles - INFO */
     .woocommerce-info,
     .woocommerce-notices-wrapper .woocommerce-info,
     .woocommerce-notices-wrapper .woocommerce-info li {
-        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%) !important;
-        color: #0c5460 !important;
-        border-color: #17a2b8 !important;
+        background: #cde4f0 !important;
+        color: #01579b !important;
+        border-color: #2196f3 !important;
     }
     
     /* Color-specific notification styles - ERROR */
     .woocommerce-error,
     .woocommerce-notices-wrapper .woocommerce-error,
     .woocommerce-notices-wrapper .woocommerce-error li {
-        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
-        color: #721c24 !important;
-        border-color: #dc3545 !important;
+        background: #ffebee !important;
+        color: #c62828 !important;
+        border-color: #e53935 !important;
     }
     
     /* Notification button styling on mobile */
@@ -1396,19 +1390,17 @@
     .woocommerce-error a,
     .woocommerce-notices-wrapper a {
         display: inline-block !important;
-        padding: 10px 18px !important;
+        margin-top: 8px !important;
+        padding: 8px 16px !important;
         background: #000 !important;
         color: #fff !important;
         text-decoration: none !important;
         border-radius: 4px !important;
         font-size: 12px !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         white-space: nowrap !important;
         cursor: pointer !important;
-        border: 2px solid #000 !important;
-        transition: all 0.3s ease !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
+        border: 1px solid #000 !important;
     }
     
     .woocommerce-message a:hover,
@@ -1417,8 +1409,6 @@
     .woocommerce-notices-wrapper a:hover {
         background: #333 !important;
         border-color: #333 !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
     }
     
     /* Fix notification on single product page */
@@ -1491,10 +1481,11 @@
         -webkit-overflow-scrolling: touch !important;
     }
     
-    /* Cart sidebar footer - CRITICAL: Make sure buttons are visible */
+    /* Cart sidebar footer - CRITICAL: Make sure buttons are visible - SAFARI FIX */
     .cart-sidebar-footer {
-        padding: 14px 16px !important;
-        padding-bottom: max(14px, calc(14px + env(safe-area-inset-bottom))) !important;
+        padding: 12px 16px !important;
+        padding-top: 12px !important;
+        padding-bottom: max(12px, calc(12px + env(safe-area-inset-bottom))) !important;
         padding-left: max(16px, calc(16px + env(safe-area-inset-left))) !important;
         padding-right: max(16px, calc(16px + env(safe-area-inset-right))) !important;
         border-top: 1px solid #e6e6e6 !important;
@@ -1502,9 +1493,10 @@
         flex-shrink: 0 !important;
         display: flex !important;
         flex-direction: column !important;
-        gap: 12px !important;
+        gap: 10px !important;
         width: 100% !important;
         box-sizing: border-box !important;
+        z-index: 10000 !important;
     }
     
     /* Total section */
