@@ -248,7 +248,7 @@
         box-sizing: border-box !important;
     }
     
-    /* Gallery grid - 2 columns on mobile */
+    /* Gallery grid - 2 columns on small tablets */
     .single-product-wrapper .product-gallery-portrait,
     .single-product-wrapper .product-gallery-two {
         display: grid !important;
@@ -257,6 +257,27 @@
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+    }
+
+    /* On narrow phones show one large image per row with a small gap */
+    @media (max-width: 480px) {
+        .single-product-wrapper .product-gallery-portrait,
+        .single-product-wrapper .product-gallery-two {
+            grid-template-columns: 1fr !important; /* one image per row */
+            gap: 10px !important;
+        }
+
+        .single-product-wrapper .product-gallery-wrapper {
+            padding: 0 12px !important;
+            margin-left: calc(-50vw + 50%) !important;
+        }
+
+        .single-product-wrapper .product-gallery-portrait .product-gallery-two__item,
+        .single-product-wrapper .product-gallery-two .product-gallery-two__item {
+            aspect-ratio: 3/4 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
     }
     
     /* Gallery item - proper aspect ratio */

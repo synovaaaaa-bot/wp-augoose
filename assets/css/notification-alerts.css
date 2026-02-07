@@ -16,7 +16,8 @@
 .woocommerce-info {
     display: flex !important;
     flex-wrap: wrap !important;
-    align-items: flex-start !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     padding: 14px 16px !important;
     margin: 12px 12px 16px 12px !important;
     font-size: 13px !important;
@@ -59,6 +60,13 @@
     overflow-wrap: break-word !important;
     font-size: 13px !important;
     line-height: 1.5 !important;
+}
+
+/* Keep buttons from stretching — on wide screens they sit to the right */
+.woocommerce-message a,
+.woocommerce-info a,
+.woocommerce-error a {
+    flex: 0 0 auto !important;
 }
 
 /* Single message (not in list) */
@@ -194,10 +202,6 @@
         font-weight: 600 !important;
         margin-top: 8px !important;
         text-align: center !important;
-    }
-    
-}
-        margin-bottom: 0 !important;
     }
     
 }
