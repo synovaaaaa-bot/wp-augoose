@@ -685,6 +685,13 @@ function wp_augoose_scripts() {
             wp_enqueue_style( 'wp-augoose-notification-alerts', $theme_dir_uri . '/assets/css/notification-alerts.css', array( 'wp-augoose-mobile-layout-complete' ), $asset_ver( 'assets/css/notification-alerts.css' ), 'all' );
             wp_style_add_data( 'wp-augoose-notification-alerts', 'priority', 'high' );
         }
+        
+        // Additional Fixes - Latest Collection, Product Details, Checkout, Notices
+        // No conflicts - consolidates several fixes into one file
+        if ( file_exists( $theme_dir . '/assets/css/additional-fixes.css' ) ) {
+            wp_enqueue_style( 'wp-augoose-additional-fixes', $theme_dir_uri . '/assets/css/additional-fixes.css', array( 'wp-augoose-notification-alerts' ), $asset_ver( 'assets/css/additional-fixes.css' ), 'all' );
+            wp_style_add_data( 'wp-augoose-additional-fixes', 'priority', 'high' );
+        }
     }
     
     // Cart page - redirect to shop, menggunakan cart sidebar saja
