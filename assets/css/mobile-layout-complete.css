@@ -113,69 +113,32 @@
         display: none;
     }
     
-    /* Checkout Layout - STACK EVERYTHING ON MOBILE */
+    /* Checkout Layout - STACK EVERYTHING ON MOBILE - USING GRID */
     .checkout-layout {
-        display: flex !important;
-        flex-direction: column !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto !important;
         gap: 24px !important;
-        grid-template-columns: unset !important;
         padding: 20px 0 !important;
-        align-items: stretch !important;
     }
     
+    /* FORMS COLUMN - FIRST (TOP) */
     .checkout-forms-column {
-        order: 1;
-        width: 100%;
+        grid-row: 1 !important;
+        grid-column: 1 !important;
+        width: 100% !important;
         min-width: 0;
     }
     
+    /* SUMMARY COLUMN - SECOND (BOTTOM) */
     .checkout-summary-column {
-        order: 2 !important;
+        grid-row: 2 !important;
+        grid-column: 1 !important;
         width: 100% !important;
         position: static !important;
         top: unset !important;
         height: auto !important;
-        flex-basis: 100% !important;
-        margin-top: 24px !important;
-    }
-    
-    /* Force order summary to BOTTOM using multiple selectors */
-    .woocommerce-checkout #order_review_heading,
-    .woocommerce-checkout #order_review {
-        order: 2 !important;
-    }
-    
-    .woocommerce-checkout .order-review {
-        order: 2 !important;
-    }
-    
-    /* WooCommerce 3.x+ structure - ensure summary at bottom */
-    .woocommerce form.checkout {
-        display: flex !important;
-        flex-wrap: wrap !important;
-    }
-    
-    .woocommerce form.checkout > .form-row,
-    .woocommerce form.checkout > .form-row:not(.form-row-wide),
-    .woocommerce form.checkout > .form-row.col2-set,
-    .woocommerce form.checkout > .col2-set {
-        order: 1 !important;
-        flex-basis: 100% !important;
-        margin-bottom: 16px !important;
-    }
-    
-    /* Payment methods - BEFORE summary */
-    .woocommerce-checkout .payment {
-        order: 1 !important;
-        flex-basis: 100% !important;
-    }
-    
-    /* ORDER SUMMARY - ABSOLUTELY AT BOTTOM */
-    .woocommerce-checkout .woocommerce-checkout-review-order {
-        order: 999 !important;
-        flex-basis: 100% !important;
-        margin-top: 24px !important;
-        width: 100% !important;
+        margin-top: 0 !important;
     }
     
     /* Sections - better mobile spacing */
