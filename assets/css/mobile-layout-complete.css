@@ -113,27 +113,22 @@
         display: none;
     }
     
-    /* Checkout Layout - STACK EVERYTHING ON MOBILE - USING GRID */
+    /* Checkout Layout - STACK EVERYTHING ON MOBILE - REVERSE ORDER */
     .checkout-layout {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        grid-template-rows: auto auto !important;
+        display: flex !important;
+        flex-direction: column-reverse !important;
         gap: 24px !important;
         padding: 20px 0 !important;
     }
     
-    /* FORMS COLUMN - FIRST (TOP) */
+    /* FORMS COLUMN - WILL APPEAR FIRST DUE TO REVERSE */
     .checkout-forms-column {
-        grid-row: 1 !important;
-        grid-column: 1 !important;
         width: 100% !important;
         min-width: 0;
     }
     
-    /* SUMMARY COLUMN - SECOND (BOTTOM) */
+    /* SUMMARY COLUMN - WILL APPEAR SECOND DUE TO REVERSE */
     .checkout-summary-column {
-        grid-row: 2 !important;
-        grid-column: 1 !important;
         width: 100% !important;
         position: static !important;
         top: unset !important;
