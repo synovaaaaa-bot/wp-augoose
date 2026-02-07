@@ -130,11 +130,52 @@
     }
     
     .checkout-summary-column {
-        order: 2;
+        order: 2 !important;
         width: 100% !important;
         position: static !important;
         top: unset !important;
         height: auto !important;
+        flex-basis: 100% !important;
+        margin-top: 24px !important;
+    }
+    
+    /* Force order summary to BOTTOM using multiple selectors */
+    .woocommerce-checkout #order_review_heading,
+    .woocommerce-checkout #order_review {
+        order: 2 !important;
+    }
+    
+    .woocommerce-checkout .order-review {
+        order: 2 !important;
+    }
+    
+    /* WooCommerce 3.x+ structure - ensure summary at bottom */
+    .woocommerce form.checkout {
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .woocommerce form.checkout > .form-row,
+    .woocommerce form.checkout > .form-row:not(.form-row-wide),
+    .woocommerce form.checkout > .form-row.col2-set,
+    .woocommerce form.checkout > .col2-set {
+        order: 1 !important;
+        flex-basis: 100% !important;
+        margin-bottom: 16px !important;
+    }
+    
+    /* Payment methods - BEFORE summary */
+    .woocommerce-checkout .payment {
+        order: 1 !important;
+        flex-basis: 100% !important;
+    }
+    
+    /* ORDER SUMMARY - ABSOLUTELY AT BOTTOM */
+    .woocommerce-checkout .woocommerce-checkout-review-order {
+        order: 999 !important;
+        flex-basis: 100% !important;
+        margin-top: 24px !important;
+        width: 100% !important;
     }
     
     /* Sections - better mobile spacing */
