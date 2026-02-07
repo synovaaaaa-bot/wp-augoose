@@ -1301,12 +1301,14 @@
     .woocommerce-message,
     .woocommerce-error,
     .woocommerce-info {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
         padding: 14px 16px !important;
         margin: 16px 0 !important;
         font-size: 13px !important;
         border-radius: 4px !important;
         border-left: 4px solid #333 !important;
-        display: block !important;
         clear: both !important;
         width: 100% !important;
         box-sizing: border-box !important;
@@ -1320,6 +1322,7 @@
         display: block !important;
         width: 100% !important;
         margin: 16px 0 !important;
+        padding: 0 !important;
     }
     
     .woocommerce-notices-wrapper ul {
@@ -1338,6 +1341,23 @@
         border-left: 4px solid !important;
         word-wrap: break-word !important;
         overflow-wrap: break-word !important;
+    }
+    
+    /* Single message (not in list) */
+    .woocommerce-notices-wrapper .woocommerce-message,
+    .woocommerce-notices-wrapper .woocommerce-error,
+    .woocommerce-notices-wrapper .woocommerce-info {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        padding: 14px 16px !important;
+        margin: 0 !important;
+        border-radius: 4px !important;
+        border-left: 4px solid !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.6 !important;
+        font-size: 13px !important;
     }
     
     /* Color-specific notification styles */
@@ -1368,7 +1388,6 @@
     .woocommerce-error a,
     .woocommerce-notices-wrapper a {
         display: inline-block !important;
-        margin-top: 8px !important;
         padding: 8px 14px !important;
         background: #000 !important;
         color: #fff !important;
@@ -1377,6 +1396,16 @@
         font-size: 12px !important;
         font-weight: 600 !important;
         white-space: nowrap !important;
+        cursor: pointer !important;
+        border: 1px solid #000 !important;
+    }
+    
+    .woocommerce-message a:hover,
+    .woocommerce-info a:hover,
+    .woocommerce-error a:hover,
+    .woocommerce-notices-wrapper a:hover {
+        background: #333 !important;
+        border-color: #333 !important;
     }
     
     /* Fix notification on single product page */
