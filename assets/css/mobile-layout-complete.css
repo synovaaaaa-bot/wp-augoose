@@ -199,10 +199,25 @@
     /* Form fields - full width with proper spacing */
     .woocommerce-checkout .form-row {
         margin-bottom: 14px !important;
+        float: none !important;
+        width: 100% !important;
+        clear: both !important;
     }
     
     .woocommerce-checkout .form-row:last-child {
         margin-bottom: 0 !important;
+    }
+    
+    /* Multi-column form rows - STACK ON MOBILE */
+    .woocommerce-checkout .form-row.form-row-first,
+    .woocommerce-checkout .form-row.form-row-last,
+    .woocommerce-checkout .form-row.form-col-1,
+    .woocommerce-checkout .form-row.form-col-2 {
+        float: none !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        clear: none !important;
     }
     
     .woocommerce-checkout .form-row label {
@@ -231,6 +246,7 @@
         appearance: none !important;
         -webkit-appearance: none !important;
         -moz-appearance: none !important;
+        box-sizing: border-box !important;
     }
     
     .woocommerce-checkout .form-row input:focus,
@@ -250,6 +266,7 @@
         padding: 0 !important;
         border: none !important;
         margin: 0 !important;
+        width: 100% !important;
     }
     
     .woocommerce-checkout .col2-set#customer_details > .col-1,
@@ -257,8 +274,33 @@
         float: none !important;
         width: 100% !important;
         max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 0 !important;
+        clear: none !important;
+    }
+    
+    /* ANY OTHER col2-set in forms (city/state combinations) */
+    .woocommerce-checkout .col2-set {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+        width: 100% !important;
+        float: none !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+    }
+    
+    .woocommerce-checkout .col2-set > div,
+    .woocommerce-checkout .col2-set > .col-1,
+    .woocommerce-checkout .col2-set > .col-2 {
+        float: none !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        clear: none !important;
     }
     
     /* BILLING DETAILS - FIRST (TOP) */
