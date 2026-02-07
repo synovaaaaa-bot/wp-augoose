@@ -219,7 +219,55 @@ body.page-template-page-cart .site-main {
     max-width: 100%;
 }
 
-/* Custom alert modal styles removed — using single alert implementation */
+/* Custom alert modal styles to match theme */
+.custom-alert-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 24px;
+}
+
+.custom-alert-modal {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 680px;
+    width: 100%;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    box-sizing: border-box;
+    color: #1a1a1a;
+}
+
+.custom-alert-message {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #222;
+    margin-bottom: 22px;
+}
+
+.custom-alert-button {
+    display: inline-block;
+    width: 100%;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+}
+
+.custom-alert-button:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.08); }
+
+@media (max-width: 480px) {
+    .custom-alert-modal { padding: 20px; border-radius: 10px; }
+    .custom-alert-message { font-size: 15px; }
+}
 
 /* Hide sidebar on checkout and cart */
 body.woocommerce-checkout #secondary,
