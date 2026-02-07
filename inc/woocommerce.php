@@ -1200,7 +1200,10 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 			'Produk habis' => 'Product is out of stock',
 			'Produk kehabisan stok' => 'Product is out of stock',
 			'Silakan pilih opsi produk' => 'Please choose product options',
-			'Keranjang diperbarui' => 'Cart updated',
+			'Silakan pilih beberapa pilihan produk' => 'Please select color and size options before adding products to your cart.',
+			'Silakan pilih beberapa pilihan produk sebelum menambahkan' => 'Please select color and size options before adding',
+			'Silakan pilih beberapa pilihan produk sebelum menambahkan produk ini ke keranjang Anda.' => 'Please select color and size options before adding products to your cart.',
+			'sebelum menambahkan produk ini ke keranjang' => 'before adding products to your cart',
 			'Item keranjang tidak valid' => 'Invalid cart item',
 			// Cart removal messages
 			'%s telah dihapus dari keranjang karena tidak bisa dibeli lagi. Hubungi kami jika Anda butuh bantuan.' => '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.',
@@ -1400,6 +1403,25 @@ function wp_augoose_force_english_text( $translated_text, $text, $domain ) {
 		}
 		if ( strpos( $translated_text, 'Lanjutkan belanja' ) !== false || strpos( $translated_text, 'Lanjutkan Belanja' ) !== false ) {
 			return 'Continue shopping';
+		}
+		
+		// Catch-all for product attribute selection messages
+		if ( strpos( $translated_text, 'Silakan pilih' ) !== false && strpos( $translated_text, 'produk' ) !== false ) {
+			if ( strpos( $translated_text, 'sebelum' ) !== false ) {
+				return 'Please select color and size options before adding products to your cart.';
+			}
+			return 'Please choose product options';
+		}
+		
+		// Catch any remaining Indonesian words and translate them
+		if ( strpos( $translated_text, 'Warna' ) !== false || strpos( $translated_text, 'warna' ) !== false ) {
+			return str_replace( array( 'Warna', 'warna' ), array( 'Color', 'color' ), $translated_text );
+		}
+		if ( strpos( $translated_text, 'Ukuran' ) !== false || strpos( $translated_text, 'ukuran' ) !== false ) {
+			return str_replace( array( 'Ukuran', 'ukuran' ), array( 'Size', 'size' ), $translated_text );
+		}
+		if ( strpos( $translated_text, 'Stok' ) !== false || strpos( $translated_text, 'stok' ) !== false ) {
+			return str_replace( array( 'Stok', 'stok' ), array( 'Stock', 'stock' ), $translated_text );
 		}
 	}
 	return $translated_text;
