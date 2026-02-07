@@ -3542,7 +3542,7 @@ function wp_augoose_variation_scripts() {
 						e.stopPropagation();
 						e.stopImmediatePropagation();
 						
-						var message = "Please select Size And Color before adding this product to your cart.";
+						var message = "Please select Size and Color before adding this product to your cart.";
 						alert(message);
 						
 						// Highlight missing fields
@@ -3595,7 +3595,7 @@ function wp_augoose_variation_scripts() {
 					
 					if (!allSelected) {
 						e.preventDefault();
-						var message = "Please select Size And Color before adding this product to your cart.";
+						var message = "Please select Size and Color before adding this product to your cart.";
 						alert(message);
 						
 						// Highlight missing fields
@@ -3657,7 +3657,7 @@ function wp_augoose_variation_scripts() {
 						variationId = $form.find("input[name=\"variation_id\"]").val();
 						if (!variationId || variationId === "") {
 							e.preventDefault();
-							alert("Please select Size And Color before adding this product to your cart.");
+							alert("Please select Size and Color before adding this product to your cart.");
 							return false;
 						}
 					}
