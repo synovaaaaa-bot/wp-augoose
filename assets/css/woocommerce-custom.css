@@ -463,6 +463,18 @@ body.term-shirts ul.products {
     gap: 10px;
 }
 
+/* Size Swatches - Numeric Ordering by data-value */
+.variation-swatches.is-size > button[data-value="28"] { order: 1 !important; }
+.variation-swatches.is-size > button[data-value="30"] { order: 2 !important; }
+.variation-swatches.is-size > button[data-value="32"] { order: 3 !important; }
+.variation-swatches.is-size > button[data-value="34"] { order: 4 !important; }
+.variation-swatches.is-size > button[data-value="36"] { order: 5 !important; }
+.variation-swatches.is-size > button[data-value="38"] { order: 6 !important; }
+.variation-swatches.is-size > button[data-value="40"] { order: 7 !important; }
+.variation-swatches.is-size > button[data-value="42"] { order: 8 !important; }
+.variation-swatches.is-size > button[data-value="44"] { order: 9 !important; }
+.variation-swatches.is-size > button[data-value="46"] { order: 10 !important; }
+
 .single-product-wrapper .variation-swatch {
     border: 1px solid #e0e0e0;
     background: #fff;
