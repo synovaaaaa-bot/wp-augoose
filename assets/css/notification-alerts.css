@@ -1,0 +1,188 @@
+/**
+ * Notification & Alert Styling
+ * Modern, clean design for success/error/info messages
+ * 
+ * @package WP_Augoose
+ */
+
+/* ===================================
+   ALERTS & NOTIFICATIONS - CLEAN STYLING
+   =================================== */
+
+.alert,
+.notice,
+.woocommerce-message,
+.woocommerce-error,
+.woocommerce-info {
+    display: block !important;
+    padding: 14px 16px !important;
+    margin: 12px 12px 16px 12px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    border: 1px solid transparent !important;
+    clear: both !important;
+    width: calc(100% - 24px) !important;
+    box-sizing: border-box !important;
+    line-height: 1.5 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+}
+
+/* ===================================
+   WRAPPER FOR NOTICES
+   =================================== */
+
+.woocommerce-notices-wrapper {
+    display: block !important;
+    width: 100% !important;
+    margin: 12px 0 16px 0 !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+}
+
+.woocommerce-notices-wrapper ul {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.woocommerce-notices-wrapper li {
+    display: block !important;
+    padding: 14px 16px !important;
+    margin: 0 !important;
+    border-radius: 6px !important;
+    border: 1px solid transparent !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+}
+
+/* Single message (not in list) */
+.woocommerce-notices-wrapper .woocommerce-message,
+.woocommerce-notices-wrapper .woocommerce-error,
+.woocommerce-notices-wrapper .woocommerce-info {
+    display: block !important;
+    padding: 14px 16px !important;
+    margin: 0 !important;
+    border-radius: 6px !important;
+    border: 1px solid transparent !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+}
+
+/* ===================================
+   SUCCESS MESSAGE STYLING
+   =================================== */
+
+.woocommerce-message,
+.woocommerce-notices-wrapper .woocommerce-message,
+.woocommerce-notices-wrapper .woocommerce-message li {
+    background: #d4f1d4 !important;
+    color: #1e5e20 !important;
+    border-color: #4caf50 !important;
+}
+
+/* ===================================
+   INFO MESSAGE STYLING
+   =================================== */
+
+.woocommerce-info,
+.woocommerce-notices-wrapper .woocommerce-info,
+.woocommerce-notices-wrapper .woocommerce-info li {
+    background: #cde4f0 !important;
+    color: #01579b !important;
+    border-color: #2196f3 !important;
+}
+
+/* ===================================
+   ERROR MESSAGE STYLING
+   =================================== */
+
+.woocommerce-error,
+.woocommerce-notices-wrapper .woocommerce-error,
+.woocommerce-notices-wrapper .woocommerce-error li {
+    background: #ffebee !important;
+    color: #c62828 !important;
+    border-color: #e53935 !important;
+}
+
+/* ===================================
+   NOTIFICATION BUTTON STYLING
+   =================================== */
+
+.woocommerce-message a,
+.woocommerce-info a,
+.woocommerce-error a,
+.woocommerce-notices-wrapper a {
+    display: inline-block !important;
+    margin-top: 8px !important;
+    padding: 8px 16px !important;
+    background: #000 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    border: 1px solid #000 !important;
+    transition: all 0.3s ease !important;
+}
+
+.woocommerce-message a:hover,
+.woocommerce-info a:hover,
+.woocommerce-error a:hover,
+.woocommerce-notices-wrapper a:hover {
+    background: #333 !important;
+    border-color: #333 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+}
+
+/* ===================================
+   MOBILE RESPONSIVE
+   =================================== */
+
+@media (max-width: 768px) {
+    
+    .alert,
+    .notice,
+    .woocommerce-message,
+    .woocommerce-error,
+    .woocommerce-info {
+        padding: 14px 16px !important;
+        margin: 12px 0 16px 0 !important;
+        font-size: 13px !important;
+        border-radius: 6px !important;
+        border: 1px solid transparent !important;
+    }
+    
+    .woocommerce-notices-wrapper {
+        margin: 12px 0 16px 0 !important;
+        padding: 0 !important;
+    }
+    
+    .woocommerce-notices-wrapper li,
+    .woocommerce-notices-wrapper .woocommerce-message,
+    .woocommerce-notices-wrapper .woocommerce-error,
+    .woocommerce-notices-wrapper .woocommerce-info {
+        padding: 14px 16px !important;
+        margin: 0 !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        line-height: 1.5 !important;
+    }
+    
+    .woocommerce-message a,
+    .woocommerce-info a,
+    .woocommerce-error a,
+    .woocommerce-notices-wrapper a {
+        display: inline-block !important;
+        padding: 8px 16px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+    }
+    
+}

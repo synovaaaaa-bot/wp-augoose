@@ -679,6 +679,12 @@ function wp_augoose_scripts() {
         // Comprehensive Mobile Layout Fix - Checkout button visibility + all mobile layouts
         wp_enqueue_style( 'wp-augoose-mobile-layout-complete', $theme_dir_uri . '/assets/css/mobile-layout-complete.css', array( 'wp-augoose-woocommerce-integrated', 'wp-augoose-button-global-style' ), $asset_ver( 'assets/css/mobile-layout-complete.css' ), 'all' );
         wp_style_add_data( 'wp-augoose-mobile-layout-complete', 'priority', 'high' );
+        
+        // Notification & Alert Styling - Separate CSS file for clean notifications
+        if ( file_exists( $theme_dir . '/assets/css/notification-alerts.css' ) ) {
+            wp_enqueue_style( 'wp-augoose-notification-alerts', $theme_dir_uri . '/assets/css/notification-alerts.css', array( 'wp-augoose-mobile-layout-complete' ), $asset_ver( 'assets/css/notification-alerts.css' ), 'all' );
+            wp_style_add_data( 'wp-augoose-notification-alerts', 'priority', 'high' );
+        }
     }
     
     // Cart page - redirect to shop, menggunakan cart sidebar saja
