@@ -34,6 +34,7 @@
                     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
                     overflow-y: auto;
                     box-sizing: border-box;
+                    margin: 0 auto;
                 ">
                     <div class="custom-alert-message" style="
                         font-size: 14px;

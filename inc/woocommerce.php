@@ -3472,6 +3472,49 @@ function wp_augoose_variation_scripts() {
 					});
 				});
 				
+				// CRITICAL FIX: Intercept Add to Cart button click to validate before WooCommerce does
+				// This prevents WooCommerce default "Please select some product options" message
+				$(document).on("click", ".variations_form.cart .single_add_to_cart_button", function(e) {
+					var $button = $(this);
+					var $form = $button.closest(".variations_form.cart");
+					
+					// Check if all required variations are selected
+					var allSelected = true;
+					var missingAttributes = [];
+					
+					$form.find(".variation-select-hidden").each(function() {
+						var $select = $(this);
+						var val = $select.val();
+						if (val === "" || val === null || val === undefined) {
+							allSelected = false;
+							var label = $select.closest(".variation-group").find(".variation-header label").text() || $select.data("attribute_name") || $select.attr("name");
+							missingAttributes.push(label);
+						}
+					});
+					
+					if (!allSelected) {
+						e.preventDefault();
+						e.stopPropagation();
+						e.stopImmediatePropagation();
+						
+						var message = "Please select Size And Color before adding this product to your cart.";
+						alert(message);
+						
+						// Highlight missing fields
+						$form.find(".variation-select-hidden").each(function() {
+							var $select = $(this);
+							if ($select.val() === "" || $select.val() === null) {
+								$select.closest(".variation-group").addClass("error");
+								setTimeout(function() {
+									$select.closest(".variation-group").removeClass("error");
+								}, 3000);
+							}
+						});
+						
+						return false;
+					}
+				});
+				
 				// CRITICAL FIX: Before form submit, ensure all values are strings and match variation data
 				// This handles numeric variation values (28, 29, etc.) that might not match properly
 				$(document).on("submit", ".variations_form.cart", function(e) {
@@ -3569,7 +3612,7 @@ function wp_augoose_variation_scripts() {
 						variationId = $form.find("input[name=\"variation_id\"]").val();
 						if (!variationId || variationId === "") {
 							e.preventDefault();
-							alert("Please select a valid variation combination.");
+							alert("Please select Size And Color before adding this product to your cart.");
 							return false;
 						}
 					}
