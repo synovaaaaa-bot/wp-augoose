@@ -6,51 +6,35 @@
 (function() {
     'use strict';
 
-    const isCheckoutPage = document.body.classList.contains('woocommerce-checkout') ||
-                          document.body.classList.contains('checkout') ||
-                          window.location.href.indexOf('/checkout') !== -1 ||
-                          window.location.pathname.indexOf('/checkout') !== -1;
-
-    if (isCheckoutPage) return;
-
+    // Minimal message-only modal: simply replace window.alert with a themed modal
+    // No conditional logic or page checks — displays the message and an OK button.
     const originalAlert = window.alert;
 
     window.alert = function(message) {
-        const cartSidebar = document.querySelector('.woocommerce.widget_shopping_cart, .widget_shopping_cart');
-        const isCartOpen = cartSidebar && cartSidebar.classList.contains('open');
-        if (isCartOpen) return originalAlert(message);
+        try {
+            const modalHTML = `
+                <div class="custom-alert-overlay">
+                    <div class="custom-alert-modal">
+                        <div class="custom-alert-message">${escapeHtml(message)}</div>
+                        <button class="custom-alert-button">OK</button>
+                    </div>
+                </div>`;
 
-        const modalHTML = `
-            <div class="custom-alert-overlay">
-                <div class="custom-alert-modal">
-                    <div class="custom-alert-message">${escapeHtml(message)}</div>
-                    <button class="custom-alert-button">OK</button>
-                </div>
-            </div>
-        `;
+            const container = document.createElement('div');
+            container.innerHTML = modalHTML;
+            document.body.appendChild(container);
 
-        const container = document.createElement('div');
-        container.innerHTML = modalHTML;
-        document.body.appendChild(container);
+            const button = container.querySelector('.custom-alert-button');
+            const overlay = container.querySelector('.custom-alert-overlay');
 
-        const button = container.querySelector('.custom-alert-button');
-        const overlay = container.querySelector('.custom-alert-overlay');
+            function closeModal() { container.remove(); }
 
-        function closeModal() {
-            container.remove();
+            button.addEventListener('click', closeModal);
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+        } catch (e) {
+            // Fallback to original alert if anything goes wrong
+            originalAlert(message);
         }
-
-        button.addEventListener('click', closeModal);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
-
-        button.focus();
-
-        document.addEventListener('keydown', function onKey(e) {
-            if (e.key === 'Enter' || e.key === 'Escape') {
-                closeModal();
-                document.removeEventListener('keydown', onKey);
-            }
-        });
     };
 
     function escapeHtml(text) {
