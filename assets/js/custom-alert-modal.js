@@ -23,6 +23,23 @@
     const originalAlert = window.alert;
     
     window.alert = function(message) {
+        // CRITICAL: Replace WooCommerce default variation messages with our custom message
+        const customMessage = "Please select Size And Color before adding this product to your cart.";
+        
+        if (typeof message === 'string') {
+            const messageLower = message.toLowerCase();
+            // Check if this is a WooCommerce variation/option selection message
+            if ((messageLower.indexOf('select') !== -1 && 
+                 (messageLower.indexOf('option') !== -1 || 
+                  messageLower.indexOf('variation') !== -1 ||
+                  messageLower.indexOf('attribute') !== -1 ||
+                  messageLower.indexOf('product option') !== -1)) ||
+                messageLower.indexOf('please select') !== -1) {
+                // Replace with our custom message
+                message = customMessage;
+            }
+        }
+        
         // CRITICAL: Don't show modal if cart sidebar is open
         // Check if cart sidebar is open
         const cartSidebar = document.querySelector('.woocommerce.widget_shopping_cart, .widget_shopping_cart');

@@ -3517,6 +3517,26 @@ function wp_augoose_variation_scripts() {
 					});
 				});
 				
+				// CRITICAL FIX: Override WooCommerce default alert message
+				// Store original alert function
+				var originalAlert = window.alert;
+				var customAlertMessage = "Please select Size And Color before adding this product to your cart.";
+				
+				// Override alert to replace WooCommerce default messages
+				window.alert = function(message) {
+					// Replace any WooCommerce default variation messages with our custom message
+					if (typeof message === 'string') {
+						var messageLower = message.toLowerCase();
+						if (messageLower.indexOf('select') !== -1 && 
+						    (messageLower.indexOf('option') !== -1 || 
+						     messageLower.indexOf('variation') !== -1 ||
+						     messageLower.indexOf('attribute') !== -1)) {
+							message = customAlertMessage;
+						}
+					}
+					return originalAlert(message);
+				};
+				
 				// CRITICAL FIX: Intercept Add to Cart button click to validate before WooCommerce does
 				// This prevents WooCommerce default "Please select some product options" message
 				$(document).on("click", ".variations_form.cart .single_add_to_cart_button", function(e) {
@@ -3542,8 +3562,8 @@ function wp_augoose_variation_scripts() {
 						e.stopPropagation();
 						e.stopImmediatePropagation();
 						
-						var message = "Please select Size And Color before adding this product to your cart.";
-						alert(message);
+						// Use our custom message
+						alert(customAlertMessage);
 						
 						// Highlight missing fields
 						$form.find(".variation-select-hidden").each(function() {
