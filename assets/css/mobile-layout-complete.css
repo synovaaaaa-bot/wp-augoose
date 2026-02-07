@@ -601,6 +601,95 @@
         object-fit: cover;
     }
     
+    /* CART TOTALS AND BUTTONS - MOBILE VISIBLE */
+    .cart-totals-simple {
+        display: block !important;
+        width: 100% !important;
+        margin-top: 20px !important;
+        padding: 20px !important;
+        background: #f9f9f9 !important;
+        border: 1px solid #e0e0e0 !important;
+        box-sizing: border-box !important;
+    }
+    
+    .cart-total-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        margin-bottom: 20px !important;
+        padding-bottom: 15px !important;
+        border-bottom: 2px solid #ddd !important;
+    }
+    
+    .cart-total-row .total-label {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+    }
+    
+    .cart-total-row .total-amount {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #000 !important;
+    }
+    
+    /* Cart Buttons - FULL WIDTH, STACKED, ALWAYS VISIBLE */
+    .cart-buttons {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .btn-view-cart,
+    .btn-checkout {
+        display: block !important;
+        width: 100% !important;
+        padding: 14px 16px !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+        text-align: center !important;
+        border: 2px solid !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+        box-sizing: border-box !important;
+        transition: all 0.3s ease !important;
+        line-height: 1.4 !important;
+        min-height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .btn-view-cart {
+        background: #fff !important;
+        color: #000 !important;
+        border-color: #000 !important;
+    }
+    
+    .btn-view-cart:hover {
+        background: #f0f0f0 !important;
+    }
+    
+    .btn-checkout {
+        background: #000 !important;
+        color: #fff !important;
+        border-color: #000 !important;
+    }
+    
+    .btn-checkout:hover {
+        background: #333 !important;
+    }
+    
+    .btn-checkout:active,
+    .btn-view-cart:active {
+        opacity: 0.8 !important;
+    }
+    
     /* ===================================
        GENERAL BUTTONS MOBILE
        =================================== */
