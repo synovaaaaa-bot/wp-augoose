@@ -335,10 +335,15 @@ body.admin-bar .widget_shopping_cart {
   font-weight: 600;
   text-decoration: none;
   text-align: center;
-  border-radius: 0;
-  line-height: 1;
-  display: block;
+  border-radius: 6px;
+  line-height: 1.4;
   width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: none;
 }
 
 .cart-sidebar-btn-view {
@@ -355,6 +360,8 @@ body.admin-bar .widget_shopping_cart {
   background: #111;
   color: #fff;
   border: 1px solid #111;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 .cart-sidebar-btn-checkout:hover {
   background: #2a2a2a;
@@ -638,8 +645,8 @@ body.admin-bar .widget_shopping_cart {
   
   .cart-sidebar-btn {
     padding: 12px 14px;
-    font-size: 11px;
-    letter-spacing: 1px;
+    font-size: 13px;
+    min-height: 44px;
   }
 }
 
@@ -733,14 +740,15 @@ body.admin-bar .widget_shopping_cart {
   
   .cart-sidebar-btn {
     padding: 11px 12px;
-    font-size: 10px;
-    letter-spacing: 0.8px;
+    font-size: 12px;
+    min-height: 42px;
   }
 }
+
 /* =========================
    Side Cart Footer - Sticky + iOS Safe Area
    ========================= */
-   
+
 .woocommerce.widget_shopping_cart,
 .cart-sidebar,
 .cart-drawer {
@@ -751,22 +759,22 @@ body.admin-bar .widget_shopping_cart {
   overflow: hidden;
 }
 
-/* Content scrollable */
+/* Content scrollable with proper spacing */
 .cart-sidebar-items {
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 140px;
 }
 
-/* Sticky footer with iOS safe-area */
+/* Sticky footer - replaces old margin-top: auto approach */
 .cart-sidebar-footer {
   position: sticky;
   bottom: 0;
   z-index: 50;
   background: #fff;
   border-top: 1px solid rgba(0,0,0,.08);
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  flex-shrink: 0;
 }
 
 /* Hide duplicate footer if rendered twice */
@@ -774,17 +782,9 @@ body.admin-bar .widget_shopping_cart {
   display: none !important; 
 }
 
-/* iOS fix - footer button visibility */
-.cart-sidebar-footer {
-  padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
-}
-
-.cart-sidebar-buttons {
-  padding-top: 12px !important;
-}
-
+/* Mobile / iOS safe area adjustments */
 @media (max-width: 768px) {
   .cart-sidebar-footer {
-    bottom: 17px !important;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
   }
 }
