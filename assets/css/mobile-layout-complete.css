@@ -879,6 +879,19 @@
 }
 
 /* ===================================
+   ULTRA SMALL PHONES (< 430px) - iOS FOOTER FIX
+   =================================== */
+
+@media (max-width: 430px) {
+    
+    /* iOS: Extra padding for footer to prevent cutoff */
+    .cart-sidebar-footer {
+        padding-bottom: calc(35px + env(safe-area-inset-bottom)) !important;
+    }
+    
+}
+
+/* ===================================
    ALL PAGES MOBILE FIXES
    =================================== */
 
@@ -1438,10 +1451,10 @@
         padding-bottom: 16px !important;
     }
     
-    /* Cart sidebar footer - STICKY AT BOTTOM WITH SAFE AREA */
+    /* Cart sidebar footer - STICKY AT BOTTOM WITH SAFE AREA + iOS FIX */
     .cart-sidebar-footer {
         padding: 16px 16px !important;
-        padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+        padding-bottom: calc(28px + env(safe-area-inset-bottom)) !important;
         border-top: 1px solid #e6e6e6 !important;
         background: #fff !important;
         flex-shrink: 0 !important;
@@ -1471,14 +1484,14 @@
         color: #111 !important;
     }
     
-    /* Buttons - MUST BE VISIBLE */
+    /* Buttons - MUST BE VISIBLE + iOS spacing fix */
     .cart-sidebar-buttons {
         display: grid !important;
         grid-template-columns: 1fr !important;
         gap: 10px !important;
         width: 100% !important;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 10px 0 0 0 !important;
     }
     
     .cart-sidebar-btn {
