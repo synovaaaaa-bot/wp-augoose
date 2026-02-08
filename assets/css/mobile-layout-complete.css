@@ -653,17 +653,20 @@
     }
     
     /* ===================================
-       CART PAGE MOBILE
+       CART PAGE MOBILE (SAFARI FULLSCREEN FIX)
        =================================== */
     
     .woocommerce-cart {
         padding: 20px 0;
+        padding-bottom: 300px !important;
+        min-height: auto !important;
     }
     
     .cart-page-simple {
         display: grid;
         grid-template-columns: 1fr !important;
         gap: 20px !important;
+        padding-bottom: 40px !important;
     }
     
     .woocommerce table.cart {
@@ -727,14 +730,23 @@
         color: #000 !important;
     }
     
-    /* Cart Buttons - FULL WIDTH, STACKED, ALWAYS VISIBLE */
+    /* Cart Buttons - STICKY, ALWAYS VISIBLE (SAFARI FIX) */
     .cart-buttons {
         display: grid !important;
         grid-template-columns: 1fr !important;
         gap: 12px !important;
         width: 100% !important;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 12px 16px !important;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+        background: #fff !important;
+        border-top: 1px solid #ddd !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 100 !important;
+        box-sizing: border-box !important;
     }
     
     .btn-view-cart,
@@ -781,6 +793,19 @@
     .btn-checkout:active,
     .btn-view-cart:active {
         opacity: 0.8 !important;
+    }
+    
+    /* SAFARI FULLSCREEN FIX - Cart page padding adjustment */
+    @supports (padding: max(0px)) {
+        .woocommerce-cart {
+            padding-bottom: calc(20px + 200px) !important;
+        }
+        
+        .cart-buttons {
+            position: fixed !important;
+            bottom: 0 !important;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+        }
     }
     
     /* ===================================
