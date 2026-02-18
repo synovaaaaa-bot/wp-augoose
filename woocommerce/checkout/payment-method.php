@@ -86,19 +86,6 @@ $is_credit_card = ( strpos( $gateway_id_lower, 'card' ) !== false ||
 		</div>
 	<?php endif; ?>
 </li>
-	<?php if ( $gateway->has_fields() || $gateway->get_description() ) : ?>
-		<div class="payment_box payment_method_<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>style="display:none;"<?php endif; /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>>
-			<?php $gateway->payment_fields(); ?>
-		</div>
-	<?php endif; ?>
-	
-	<?php if ( $is_doku ) : ?>
-		<div class="wp-augoose-payment-notice wp-augoose-doku-notice" data-payment-method="<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : ?>style="display:none;"<?php endif; ?>>
-			<p>You can pay securely using DOKU payment gateway.</p>
-			<p class="wp-augoose-notice-highlight">All payments made using this method will be converted to Indonesian Rupiah (IDR) in accordance with applicable national regulations. Thank you.</p>
-		</div>
-	<?php endif; ?>
-</li>
 <script>
 (function() {
 	var paymentMethod = '<?php echo esc_js( $gateway->id ); ?>';
