@@ -89,13 +89,35 @@ function wp_augoose_get_customer_country_code() {
 /**
  * Hard fallback: if visitor country is Indonesia, ensure WCML currency becomes IDR.
  */
-function wp_augoose_force_idr_for_indonesia_if_needed() {
+function wp_augoose_get_expected_currency_by_country( $country_code ) {
+	$country_code = strtoupper( (string) $country_code );
+
+	if ( $country_code === 'ID' ) {
+		return 'IDR';
+	}
+
+	if ( $country_code === 'SG' ) {
+		return 'SGD';
+	}
+
+	if ( $country_code === 'MY' ) {
+		return 'MYR';
+	}
+
+	return 'USD';
+}
+
+/**
+ * Hard fallback: sync WCML currency to country mapping:
+ * ID -> IDR, SG -> SGD, MY -> MYR, others -> USD.
+ */
+function wp_augoose_force_currency_by_country_if_needed() {
 	if ( ! class_exists( 'woocommerce_wpml' ) ) {
 		return;
 	}
 
 	$country_code = wp_augoose_get_customer_country_code();
-	if ( $country_code !== 'ID' ) {
+	if ( empty( $country_code ) ) {
 		return;
 	}
 
@@ -104,26 +126,28 @@ function wp_augoose_force_idr_for_indonesia_if_needed() {
 		return;
 	}
 
-	$multi_currency = $woocommerce_wpml->multi_currency;
-	$current        = wp_augoose_get_client_currency();
-	if ( $current === 'IDR' ) {
+	$multi_currency     = $woocommerce_wpml->multi_currency;
+	$current            = wp_augoose_get_client_currency();
+	$expected_currency  = wp_augoose_get_expected_currency_by_country( $country_code );
+
+	if ( $current === $expected_currency ) {
 		return;
 	}
 
 	$available_currencies = method_exists( $multi_currency, 'get_currency_codes' ) ? $multi_currency->get_currency_codes() : array();
-	if ( ! in_array( 'IDR', $available_currencies, true ) ) {
+	if ( ! in_array( $expected_currency, $available_currencies, true ) ) {
 		return;
 	}
 
-	$multi_currency->set_client_currency( 'IDR' );
+	$multi_currency->set_client_currency( $expected_currency );
 
 	// Keep WCML cookie aligned to reduce stale currency from previous cached sessions.
 	if ( ! headers_sent() && function_exists( 'wc_setcookie' ) ) {
-		wc_setcookie( 'wcml_client_currency', 'IDR', time() + DAY_IN_SECONDS );
+		wc_setcookie( 'wcml_client_currency', $expected_currency, time() + DAY_IN_SECONDS );
 	}
 
 	if ( function_exists( 'WC' ) && WC() && WC()->session ) {
-		WC()->session->set( 'client_currency', 'IDR' );
+		WC()->session->set( 'client_currency', $expected_currency );
 	}
 
 	if ( function_exists( 'WC' ) && WC() && WC()->cart && ! WC()->cart->is_empty() ) {
@@ -265,8 +289,8 @@ function wp_augoose_filter_payment_gateways_by_currency( $available_gateways ) {
  */
 add_action( 'woocommerce_checkout_update_order_review', 'wp_augoose_handle_doku_currency_on_review_update', 10, 1 );
 function wp_augoose_handle_doku_currency_on_review_update( $posted_data ) {
-	// Ensure Indonesian visitors settle on IDR first even if WCML geolocation/cached value is stale.
-	wp_augoose_force_idr_for_indonesia_if_needed();
+	// Ensure visitor currency follows country mapping even if WCML cache/geolocation is stale.
+	wp_augoose_force_currency_by_country_if_needed();
 
 	if ( empty( $posted_data ) ) {
 		return;
@@ -281,8 +305,8 @@ function wp_augoose_handle_doku_currency_on_review_update( $posted_data ) {
 	wp_augoose_restore_currency_after_doku_if_needed();
 }
 
-// Run early on frontend requests to make Indonesia -> IDR decision more deterministic.
-add_action( 'wp_loaded', 'wp_augoose_force_idr_for_indonesia_if_needed', 5 );
+// Run early on frontend requests to make country->currency mapping deterministic.
+add_action( 'wp_loaded', 'wp_augoose_force_currency_by_country_if_needed', 5 );
 
 /**
  * Final safeguard before checkout validation.
