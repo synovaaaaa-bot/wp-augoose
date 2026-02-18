@@ -8048,6 +8048,16 @@ function wp_augoose_use_converted_price_in_order( $item, $cart_item_key, $values
 	if ( isset( $values['wp_augoose_converted_price_idr'] ) && $values['wp_augoose_converted_price_idr'] > 0 ) {
 		$converted_price = (float) $values['wp_augoose_converted_price_idr'];
 		$quantity = isset( $values['quantity'] ) ? (int) $values['quantity'] : 1;
+
+		// when we see the first converted item, force the order currency to IDR
+		// so the admin list and email templates use the correct symbol/code.
+		if ( $order && is_a( $order, 'WC_Order' ) ) {
+			// Only update once
+			if ( 'IDR' !== $order->get_currency() ) {
+				$order->set_currency( 'IDR' );
+				$order->set_total( 0 ); // will be recalculated below
+			}
+		}
 		
 		// Validate price and quantity
 		if ( $converted_price > 0 && is_finite( $converted_price ) && $quantity > 0 ) {
@@ -8093,6 +8103,27 @@ function wp_augoose_use_converted_price_in_order( $item, $cart_item_key, $values
 			}
 		}
 	}
+}
+
+add_action( 'woocommerce_checkout_create_order', 'wp_augoose_force_order_currency_and_recalculate', 20, 2 );
+function wp_augoose_force_order_currency_and_recalculate( $order, $data ) {
+    // If order is already IDR we already handled it in line item callback.
+    if ( ! $order || ! is_a( $order, 'WC_Order' ) ) {
+        return;
+    }
+
+    if ( 'IDR' !== $order->get_currency() ) {
+        return; // nothing to do
+    }
+
+    // recalc totals from line items, taxes, etc
+    try {
+        $order->calculate_totals( true );
+    } catch ( Exception $e ) {
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'WP_Augoose: Error recalculating order totals - ' . $e->getMessage() );
+        }
+    }
 }
 
 /**
