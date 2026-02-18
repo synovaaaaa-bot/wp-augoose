@@ -7318,6 +7318,42 @@ function wp_augoose_convert_price_with_wcml( $price, $from_currency, $to_currenc
  * Calculate conversion in backend using WCML rate
  */
 add_filter( 'woocommerce_add_cart_item_data', 'wp_augoose_save_original_currency_to_cart_item', 10, 3 );
+
+// After the item has been inserted into the cart we also force the product
+// object to use the converted IDR price (if available). This guarantees that
+// `WC()->cart->get_cart_contents_total()` and all WooCommerce totals reflect
+// the converted value immediately, which is important for AJAX fragments
+// such as the mini‑cart.
+add_filter( 'woocommerce_add_cart_item', 'wp_augoose_apply_idr_price_to_cart_item', 20, 1 );
+
+function wp_augoose_apply_idr_price_to_cart_item( $cart_item ) {
+    if ( isset( $cart_item['wp_augoose_converted_price_idr'] ) && $cart_item['wp_augoose_converted_price_idr'] > 0 ) {
+        $product = isset( $cart_item['data'] ) ? $cart_item['data'] : null;
+        if ( $product && is_a( $product, 'WC_Product' ) ) {
+            try {
+                $product->set_price( (float) $cart_item['wp_augoose_converted_price_idr'] );
+                if ( isset( $product->data ) && is_array( $product->data ) ) {
+                    $product->data['price'] = (string) $cart_item['wp_augoose_converted_price_idr'];
+                }
+                // also update cart_contents directly in case calculation has
+                // already run once during this request
+                if ( function_exists( 'WC' ) && WC()->cart ) {
+                    foreach ( WC()->cart->get_cart() as $key => $item ) {
+                        if ( $key === $cart_item['key'] ) {
+                            WC()->cart->cart_contents[ $key ]['data'] = $product;
+                            break;
+                        }
+                    }
+                }
+            } catch ( Exception $e ) {
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( 'WP_Augoose: Error applying IDR price to cart item - ' . $e->getMessage() );
+                }
+            }
+        }
+    }
+    return $cart_item;
+}
 function wp_augoose_save_original_currency_to_cart_item( $cart_item_data, $product_id, $variation_id ) {
 	// Guard: Ensure cart_item_data is array
 	if ( ! is_array( $cart_item_data ) ) {
@@ -7340,115 +7376,79 @@ function wp_augoose_save_original_currency_to_cart_item( $cart_item_data, $produ
 		return $cart_item_data;
 	}
 	
-	// Get client currency at the time item is added
+	// Determine client currency – prefer WCML but fall back to cookie
 	$client_currency = wp_augoose_safe_get_client_currency();
 	
-	// If not from WCML, try cookie
+	// If WCML returned nothing, try the manual cookie
 	if ( ! $client_currency && isset( $_COOKIE['wp_augoose_currency'] ) ) {
 		$cookie_currency = sanitize_text_field( $_COOKIE['wp_augoose_currency'] );
 		if ( $cookie_currency ) {
 			$client_currency = strtoupper( trim( $cookie_currency ) );
 		}
 	}
-	
-// If WooCommerce is already running in IDR we don't need to perform any
-	// conversion here. This can happen when a cart update/add-to-cart AJAX
-	// request is processed before WCML has finished updating its internal
-	// client currency. In that case `wp_augoose_safe_get_client_currency()`
-	// may return a stale value like SGD or MYR even though the storefront is
-	// already showing IDR prices. Converting again would inflate the price
-	// (e.g. 690k → 974k) which is exactly what customers have reported.
-	//
-	// By bailing out early when the current WooCommerce currency is IDR we
-	// avoid double-converting the price; the cart will already be in the
-	// correct currency and no further action is necessary.
-	if ( function_exists( 'get_woocommerce_currency' ) && 'IDR' === get_woocommerce_currency() ) {
-		return $cart_item_data;
-	}
 
-	// IMPORTANT: For USD, save currency but don't convert
-	if ( $client_currency === 'USD' ) {
-		$cart_item_data['wp_augoose_original_currency'] = 'USD';
-		$cart_item_data['wp_augoose_no_conversion'] = true; // Flag to indicate no conversion needed
-		return $cart_item_data; // USD stays USD - no conversion
+	// **Important:** if the shop currency has already been forced to IDR
+	// (e.g. Indonesian IP) we override whatever we read above. This avoids
+	// cases where a stale cookie/previous session says SGD but the store is
+	// already showing IDR prices.
+	if ( function_exists( 'get_woocommerce_currency' ) && 'IDR' === get_woocommerce_currency() ) {
+		$client_currency = 'IDR';
 	}
 	
-	// Skip if not SGD/MYR
+
+
+	// IMPORTANT: For USD or IDR, save currency but don't convert
+	if ( $client_currency === 'USD' || $client_currency === 'IDR' ) {
+		$cart_item_data['wp_augoose_original_currency'] = $client_currency;
+		$cart_item_data['wp_augoose_no_conversion'] = true; // Flag to indicate no conversion needed
+		return $cart_item_data; // USD and IDR stay as-is
+	}
+	
+	// Skip if not SGD/MYR (only these two get converted to IDR)
 	if ( ! $client_currency || ! in_array( $client_currency, array( 'SGD', 'MYR' ), true ) ) {
 		return $cart_item_data;
 	}
 	
 	// Get price that was displayed (already converted by WCML to client_currency)
-	// This is the price user saw on product page (e.g., 80 SGD)
+	// This is the price user saw on product page (e.g., 80 SGD, or 750000 IDR
+	// if the store currency has already flipped). If the store is IDR we
+	// reverse‑convert the displayed price so `original_price` always represents
+	// the amount in the customer's currency.
 	$displayed_price = (float) $product->get_price( 'edit' );
-	
 	if ( $displayed_price <= 0 ) {
 		return $cart_item_data;
 	}
 	
-	// Get WCML exchange rate to convert to IDR
-	global $woocommerce_wpml;
-	$price_idr = null;
-	
-	if ( $woocommerce_wpml && isset( $woocommerce_wpml->multi_currency ) ) {
-		$multi_currency = $woocommerce_wpml->multi_currency;
-		
-		try {
-			// Get rate from WCML - get_exchange_rates() returns latest rates (updated per hour)
-			// This ensures we always use the most current exchange rates
-			if ( method_exists( $multi_currency, 'get_exchange_rates' ) ) {
-				$exchange_rates = $multi_currency->get_exchange_rates();
-				
-				if ( is_array( $exchange_rates ) && ! empty( $exchange_rates ) ) {
-					// Get rates from exchange_rates array (this is the source of truth from WCML)
-					$item_rate = isset( $exchange_rates[ $client_currency ] ) ? (float) $exchange_rates[ $client_currency ] : null;
-					$idr_rate = isset( $exchange_rates['IDR'] ) ? (float) $exchange_rates['IDR'] : null;
-					
-					if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
-						// Convert: displayed_price (dalam client_currency) ke IDR
-						// Formula: price_idr = displayed_price * (idr_rate / item_rate)
-						$conversion_rate = $idr_rate / $item_rate;
-						$price_idr = $displayed_price * $conversion_rate;
-						$price_idr = round( $price_idr, 2 );
-						
-						if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-							error_log( "WP_Augoose: Add to cart - Product #{$product_id}, {$client_currency} {$displayed_price} → IDR {$price_idr} (item_rate: {$item_rate}, idr_rate: {$idr_rate}, conversion_rate: {$conversion_rate})" );
-						}
-					}
-				}
-			}
-			
-			// Fallback to get_currency_rate() if get_exchange_rates() not available
-			if ( $price_idr === null && method_exists( $multi_currency, 'get_currency_rate' ) ) {
-				$item_rate = $multi_currency->get_currency_rate( $client_currency );
-				$idr_rate = $multi_currency->get_currency_rate( 'IDR' );
-				
-				if ( $item_rate && $item_rate > 0 && $idr_rate && $idr_rate > 0 ) {
-					$conversion_rate = $idr_rate / $item_rate;
-					$price_idr = $displayed_price * $conversion_rate;
-					$price_idr = round( $price_idr, 2 );
-					
-					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-						error_log( "WP_Augoose: Add to cart (fallback) - Product #{$product_id}, {$client_currency} {$displayed_price} → IDR {$price_idr} (rate: {$conversion_rate})" );
-					}
-				}
-			}
-		} catch ( Exception $e ) {
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				error_log( 'WP_Augoose: Error calculating conversion on add to cart - ' . $e->getMessage() );
-			}
+	// figure out original price in customer currency
+	$original_price = $displayed_price;
+	$store_currency = function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '';
+	if ( $store_currency === 'IDR' && $client_currency && in_array( $client_currency, array( 'SGD', 'MYR' ), true ) ) {
+		$reverse_rate = wp_augoose_safe_get_exchange_rate_to_idr( $client_currency );
+		if ( $reverse_rate && $reverse_rate > 0 ) {
+			$original_price = round( $displayed_price / $reverse_rate, 2 );
 		}
 	}
 	
-	// Save to cart item data
+	// Get WCML exchange rate to convert original price to IDR
+	$rate = wp_augoose_safe_get_exchange_rate_to_idr( $client_currency );
+	$price_idr = null;
+	if ( $rate && $rate > 0 ) {
+		$price_idr = round( $original_price * $rate, 2 );
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( "WP_Augoose: Add to cart - Product #{$product_id}, {$client_currency} {$original_price} → IDR {$price_idr} (rate: {$rate})" );
+		}
+	}
+	
+	// Save to cart item data (store both original and displayed for debugging)
 	if ( $price_idr && $price_idr > 0 ) {
 		$cart_item_data['wp_augoose_original_currency'] = $client_currency;
-		$cart_item_data['wp_augoose_original_price'] = $displayed_price;
+		$cart_item_data['wp_augoose_original_price'] = $original_price;
+		$cart_item_data['wp_augoose_displayed_price'] = $displayed_price;
 		$cart_item_data['wp_augoose_converted_price_idr'] = $price_idr;
 		$cart_item_data['wp_augoose_converted_to_idr'] = true;
 		
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( "WP_Augoose: Saved conversion data - currency: {$client_currency}, original: {$displayed_price}, converted: {$price_idr}" );
+			error_log( "WP_Augoose: Saved conversion data - currency: {$client_currency}, original: {$original_price}, displayed: {$displayed_price}, converted: {$price_idr}" );
 		}
 	}
 	
