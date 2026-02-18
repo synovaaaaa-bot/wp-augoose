@@ -64,15 +64,28 @@ function wp_augoose_get_customer_country() {
 		return WC()->customer->get_billing_country();
 	}
 	
-	// Priority 4: Geolocation (if available)
+	// Priority 4: Geolocation (if available via WCML helper)
 	if ( function_exists( 'wc_get_customer_default_location' ) ) {
 		$location = wc_get_customer_default_location();
 		if ( ! empty( $location['country'] ) ) {
 			return $location['country'];
 		}
 	}
-	
-	// Priority 5: WooCommerce geo location cookie
+
+	// Priority 5: direct IP geolocation fallback (runs even if the helper didn't return anything)
+	// This is important because WCML sometimes only resolves a hash and not
+	// the actual country until later; geolocate_ip gives us a strict ISO code.
+	if ( class_exists( 'WC_Geolocation' ) ) {
+		$ip = WC()->customer ? WC()->customer->get_ip_address() : '';
+		if ( $ip ) {
+			$geo = WC_Geolocation::geolocate_ip( $ip );
+			if ( ! empty( $geo['country'] ) ) {
+				return $geo['country'];
+			}
+		}
+	}
+
+	// Priority 6: WooCommerce geo location cookie
 	if ( isset( $_COOKIE['woocommerce_geo_hash'] ) ) {
 		// Try to get from WooCommerce geolocation if available
 		$geo_hash = sanitize_text_field( $_COOKIE['woocommerce_geo_hash'] );
