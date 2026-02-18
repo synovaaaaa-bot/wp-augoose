@@ -132,8 +132,16 @@ if ( ! function_exists( 'woocommerce_mini_cart' ) ) {
 					}
 
 					if ( $force_idr && function_exists( 'WC' ) && WC()->cart ) {
-						$total_raw = WC()->cart->get_total( 'edit' );
-						echo wc_price( $total_raw, array( 'currency' => 'IDR' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						// Calculate total from converted item prices, not the raw cart total
+						// (raw total may still be in the original currency, e.g. SGD 71).
+						$total_raw = WC()->cart->get_cart_contents_total();
+						if ( $total_raw > 0 ) {
+							echo wc_price( $total_raw, array( 'currency' => 'IDR' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						} else {
+							// Fallback: use get_total() if something went wrong above
+							$total_fallback = WC()->cart->get_total( 'edit' );
+							echo wc_price( $total_fallback, array( 'currency' => 'IDR' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						}
 					} else {
 						// Fallback to WooCommerce default rendering (e.g. USD for PayPal flow)
 						wc_cart_totals_order_total_html();

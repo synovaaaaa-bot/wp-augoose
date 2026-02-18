@@ -7920,8 +7920,14 @@ function wp_augoose_force_idr_cart_total( $total_html ) {
 	}
 	
 	if ( $has_converted ) {
-		$total = WC()->cart->get_total( 'edit' );
-		$total_html = wc_price( $total, array( 'currency' => 'IDR' ) );
+		// use cart_contents_total (IDR prices) rather than raw total
+		$total_raw = WC()->cart->get_cart_contents_total();
+		if ( $total_raw > 0 ) {
+			$total_html = wc_price( $total_raw, array( 'currency' => 'IDR' ) );
+		} else {
+			$total = WC()->cart->get_total( 'edit' );
+			$total_html = wc_price( $total, array( 'currency' => 'IDR' ) );
+		}
 	}
 	
 	return $total_html;
@@ -8011,8 +8017,13 @@ function wp_augoose_force_idr_cart_totals_order_total( $total_html ) {
 	}
 	
 	if ( $has_converted ) {
-		$total = WC()->cart->get_total( 'edit' );
-		$total_html = wc_price( $total, array( 'currency' => 'IDR' ) );
+		$total_raw = WC()->cart->get_cart_contents_total();
+		if ( $total_raw > 0 ) {
+			$total_html = wc_price( $total_raw, array( 'currency' => 'IDR' ) );
+		} else {
+			$total = WC()->cart->get_total( 'edit' );
+			$total_html = wc_price( $total, array( 'currency' => 'IDR' ) );
+		}
 	}
 	
 	return $total_html;
