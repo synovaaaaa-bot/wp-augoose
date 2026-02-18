@@ -94,6 +94,8 @@ function wp_augoose_get_customer_country() {
  * This runs early to override WCML currency selection.
  * IMPORTANT: Must trigger cart recalculation after currency change to ensure proper conversion.
  */
+// run very early so WCML price functions pick up the correct currency
+add_action( 'init', 'wp_augoose_force_currency_for_mapped_countries', 0 );
 add_action( 'template_redirect', 'wp_augoose_force_currency_for_mapped_countries', 1 );
 add_action( 'woocommerce_checkout_init', 'wp_augoose_force_currency_for_mapped_countries', 5 );
 add_action( 'woocommerce_before_checkout_process', 'wp_augoose_force_currency_for_mapped_countries', 5 );
@@ -167,6 +169,11 @@ function wp_augoose_force_currency_for_mapped_countries() {
 
             // Change currency
             $multi_currency->set_client_currency( $local_currency );
+
+            // if we just moved away from USD clear explicit flag
+            if ( $current_currency === 'USD' && WC()->session ) {
+                WC()->session->set( 'wp_augoose_explicit_usd', false );
+            }
 
             // Recalculate cart if needed
             if ( $current_currency !== $local_currency && WC()->cart && ! WC()->cart->is_empty() ) {
