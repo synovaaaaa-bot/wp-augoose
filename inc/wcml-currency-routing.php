@@ -604,6 +604,16 @@ function wp_augoose_display_currency_conversion_notice() {
 		return;
 	}
 
+	// If WooCommerce is currently rendering the cart in a different currency
+	// than WCML believes the client is using, then we have forcibly converted
+	// prices (typically to IDR for DOKU). In that case the notice would be
+	// confusing or wildly inaccurate (see ticket about Rp12 bn message). Bail
+	// out early rather than showing misleading information.
+	$display_currency = get_woocommerce_currency();
+	if ( $display_currency && $display_currency !== $current_currency ) {
+		return;
+	}
+
 	// Get base currency (store default currency)
 	$base_currency = wcml_get_woocommerce_currency_option();
 
