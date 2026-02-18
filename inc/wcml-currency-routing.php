@@ -36,6 +36,102 @@ function wp_augoose_get_client_currency() {
 }
 
 /**
+ * Resolve customer country with WooCommerce signals first, then geolocation fallback.
+ */
+function wp_augoose_get_customer_country_code() {
+	// Checkout payload has highest priority during AJAX order-review refresh.
+	if ( isset( $_POST['post_data'] ) ) {
+		$posted_data = wp_unslash( $_POST['post_data'] );
+		if ( is_string( $posted_data ) ) {
+			parse_str( $posted_data, $checkout_data );
+			if ( ! empty( $checkout_data['billing_country'] ) ) {
+				return strtoupper( sanitize_text_field( $checkout_data['billing_country'] ) );
+			}
+		}
+	}
+
+	if ( isset( $_POST['billing_country'] ) && ! empty( $_POST['billing_country'] ) ) {
+		return strtoupper( sanitize_text_field( wp_unslash( $_POST['billing_country'] ) ) );
+	}
+
+	if ( function_exists( 'WC' ) && WC() && WC()->customer ) {
+		$billing_country = WC()->customer->get_billing_country();
+		if ( ! empty( $billing_country ) ) {
+			return strtoupper( (string) $billing_country );
+		}
+
+		$shipping_country = WC()->customer->get_shipping_country();
+		if ( ! empty( $shipping_country ) ) {
+			return strtoupper( (string) $shipping_country );
+		}
+	}
+
+	if ( function_exists( 'wc_get_customer_default_location' ) ) {
+		$location = wc_get_customer_default_location();
+		if ( ! empty( $location['country'] ) ) {
+			return strtoupper( (string) $location['country'] );
+		}
+	}
+
+	if ( class_exists( 'WC_Geolocation' ) && function_exists( 'WC' ) && WC() && WC()->customer ) {
+		$ip = WC()->customer->get_ip_address();
+		if ( ! empty( $ip ) ) {
+			$geo = WC_Geolocation::geolocate_ip( $ip );
+			if ( ! empty( $geo['country'] ) ) {
+				return strtoupper( (string) $geo['country'] );
+			}
+		}
+	}
+
+	return '';
+}
+
+/**
+ * Hard fallback: if visitor country is Indonesia, ensure WCML currency becomes IDR.
+ */
+function wp_augoose_force_idr_for_indonesia_if_needed() {
+	if ( ! class_exists( 'woocommerce_wpml' ) ) {
+		return;
+	}
+
+	$country_code = wp_augoose_get_customer_country_code();
+	if ( $country_code !== 'ID' ) {
+		return;
+	}
+
+	global $woocommerce_wpml;
+	if ( ! $woocommerce_wpml || ! isset( $woocommerce_wpml->multi_currency ) ) {
+		return;
+	}
+
+	$multi_currency = $woocommerce_wpml->multi_currency;
+	$current        = wp_augoose_get_client_currency();
+	if ( $current === 'IDR' ) {
+		return;
+	}
+
+	$available_currencies = method_exists( $multi_currency, 'get_currency_codes' ) ? $multi_currency->get_currency_codes() : array();
+	if ( ! in_array( 'IDR', $available_currencies, true ) ) {
+		return;
+	}
+
+	$multi_currency->set_client_currency( 'IDR' );
+
+	// Keep WCML cookie aligned to reduce stale currency from previous cached sessions.
+	if ( ! headers_sent() && function_exists( 'wc_setcookie' ) ) {
+		wc_setcookie( 'wcml_client_currency', 'IDR', time() + DAY_IN_SECONDS );
+	}
+
+	if ( function_exists( 'WC' ) && WC() && WC()->session ) {
+		WC()->session->set( 'client_currency', 'IDR' );
+	}
+
+	if ( function_exists( 'WC' ) && WC() && WC()->cart && ! WC()->cart->is_empty() ) {
+		WC()->cart->calculate_totals();
+	}
+}
+
+/**
  * Check if gateway id is DOKU/Jokul.
  */
 function wp_augoose_is_doku_gateway( $gateway_id ) {
@@ -169,6 +265,9 @@ function wp_augoose_filter_payment_gateways_by_currency( $available_gateways ) {
  */
 add_action( 'woocommerce_checkout_update_order_review', 'wp_augoose_handle_doku_currency_on_review_update', 10, 1 );
 function wp_augoose_handle_doku_currency_on_review_update( $posted_data ) {
+	// Ensure Indonesian visitors settle on IDR first even if WCML geolocation/cached value is stale.
+	wp_augoose_force_idr_for_indonesia_if_needed();
+
 	if ( empty( $posted_data ) ) {
 		return;
 	}
@@ -181,6 +280,9 @@ function wp_augoose_handle_doku_currency_on_review_update( $posted_data ) {
 
 	wp_augoose_restore_currency_after_doku_if_needed();
 }
+
+// Run early on frontend requests to make Indonesia -> IDR decision more deterministic.
+add_action( 'wp_loaded', 'wp_augoose_force_idr_for_indonesia_if_needed', 5 );
 
 /**
  * Final safeguard before checkout validation.
