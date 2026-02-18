@@ -107,10 +107,9 @@ function wp_augoose_force_currency_for_mapped_countries() {
         return;
     }
 
-    // Only on checkout page or cart page
-    if ( ! is_checkout() && ! is_cart() ) {
-        return;
-    }
+    // No page restriction: we want the client currency to be set
+    // early so that product listings, homepage, etc. display correctly.
+    // (currency switching is cheap and WCML handles caching internally)
 
     $country = wp_augoose_get_customer_country();
     if ( ! $country ) {
@@ -133,10 +132,20 @@ function wp_augoose_force_currency_for_mapped_countries() {
         }
     }
 
-    // IMPORTANT: If current currency is USD, do NOT override
-    // User might have explicitly chosen to pay in USD for PayPal.
+    // IMPORTANT: If current currency is USD we only skip the override when
+    // the customer explicitly chose USD (e.g. via the WCML switcher).  In
+    // other cases USD is just the default/geo result and we should still
+    // force the local currency for countries that require it.
     if ( $current_currency === 'USD' ) {
-        return;
+        $explicit_usd = false;
+        if ( WC()->session ) {
+            $explicit_usd = WC()->session->get( 'wp_augoose_explicit_usd' );
+        }
+
+        if ( $explicit_usd ) {
+            return; // user really wanted USD
+        }
+        // otherwise fall through and force the mapped currency
     }
 
     // Only change if current currency is set and differs from desired local
@@ -186,10 +195,9 @@ function wp_augoose_ensure_local_currency_before_cart_calc( $cart ) {
         return;
     }
 
-    // Only on checkout or cart page
-    if ( ! is_checkout() && ! is_cart() ) {
-        return;
-    }
+    // Run on all front-end pages so local currency is always applied.
+    // We restrict nothing here because set_client_currency itself is
+    // harmless if called repeatedly.
 
     $country = wp_augoose_get_customer_country();
     if ( ! $country ) {
