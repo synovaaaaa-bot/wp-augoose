@@ -7351,6 +7351,21 @@ function wp_augoose_save_original_currency_to_cart_item( $cart_item_data, $produ
 		}
 	}
 	
+// If WooCommerce is already running in IDR we don't need to perform any
+	// conversion here. This can happen when a cart update/add-to-cart AJAX
+	// request is processed before WCML has finished updating its internal
+	// client currency. In that case `wp_augoose_safe_get_client_currency()`
+	// may return a stale value like SGD or MYR even though the storefront is
+	// already showing IDR prices. Converting again would inflate the price
+	// (e.g. 690k → 974k) which is exactly what customers have reported.
+	//
+	// By bailing out early when the current WooCommerce currency is IDR we
+	// avoid double-converting the price; the cart will already be in the
+	// correct currency and no further action is necessary.
+	if ( function_exists( 'get_woocommerce_currency' ) && 'IDR' === get_woocommerce_currency() ) {
+		return $cart_item_data;
+	}
+
 	// IMPORTANT: For USD, save currency but don't convert
 	if ( $client_currency === 'USD' ) {
 		$cart_item_data['wp_augoose_original_currency'] = 'USD';
@@ -7459,6 +7474,15 @@ add_action( 'woocommerce_cart_loaded_from_session', 'wp_augoose_convert_cart_ite
 function wp_augoose_convert_cart_items_to_idr( $cart ) {
 	// Guard: Cart must exist and not empty
 	if ( ! $cart || ! is_a( $cart, 'WC_Cart' ) ) {
+		return;
+	}
+
+	// If WooCommerce currency is already IDR we should not touch the cart at
+	// all. Conversion routines below assume the client currency matches the
+	// displayed prices; when the store has been forced to IDR (common for
+	// Indonesian customers) further attempts to reconvert can push the total
+	// higher than expected (e.g. 690k → 974k). Bail early to avoid that.
+	if ( function_exists( 'get_woocommerce_currency' ) && 'IDR' === get_woocommerce_currency() ) {
 		return;
 	}
 	

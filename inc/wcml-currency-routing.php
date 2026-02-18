@@ -110,6 +110,8 @@ function wp_augoose_get_customer_country() {
 // run very early so WCML price functions pick up the correct currency
 add_action( 'init', 'wp_augoose_force_currency_for_mapped_countries', 0 );
 add_action( 'template_redirect', 'wp_augoose_force_currency_for_mapped_countries', 1 );
+add_action( 'woocommerce_add_to_cart', 'wp_augoose_force_currency_for_mapped_countries', 0 );
+add_action( 'woocommerce_ajax_added_to_cart', 'wp_augoose_force_currency_for_mapped_countries' );
 add_action( 'woocommerce_checkout_init', 'wp_augoose_force_currency_for_mapped_countries', 5 );
 add_action( 'woocommerce_before_checkout_process', 'wp_augoose_force_currency_for_mapped_countries', 5 );
 add_action( 'wp_loaded', 'wp_augoose_force_currency_for_mapped_countries', 20 ); // After cart is loaded
