@@ -401,3 +401,68 @@
     padding-right: 16px !important;
   }
 }
+
+/* =========================================================
+   PRODUCT PAGE NOTICE (ADD TO CART) - clean button/layout
+   Targets: <div class="woocommerce-message"> ... <a class="button wc-forward">
+   ========================================================= */
+.woocommerce div.woocommerce-message {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: 10px 0 16px !important;
+  padding: 12px 14px !important;
+  border: 1px solid #d9d9d9 !important;
+  border-left: 2px solid #111 !important;
+  border-radius: 2px !important;
+  background: #f7f7f7 !important;
+  color: #1a1a1a !important;
+  line-height: 1.45 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.woocommerce div.woocommerce-message::before {
+  content: none !important;
+}
+
+.woocommerce div.woocommerce-message .button.wc-forward {
+  float: none !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 9px 14px !important;
+  min-height: 38px !important;
+  border-radius: 2px !important;
+  border: 1px solid #111 !important;
+  background: #111 !important;
+  color: #fff !important;
+  text-decoration: none !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease !important;
+}
+
+.woocommerce div.woocommerce-message .button.wc-forward:hover {
+  background: #2a2a2a !important;
+  border-color: #2a2a2a !important;
+}
+
+@media (max-width: 768px) {
+  .woocommerce div.woocommerce-message {
+    display: block !important;
+    padding: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .woocommerce div.woocommerce-message .button.wc-forward {
+    display: block !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+    text-align: center !important;
+    white-space: normal !important;
+    letter-spacing: 0.08em !important;
+  }
+}
