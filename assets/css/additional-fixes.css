@@ -376,3 +376,28 @@
 .wc_payment_methods.payment_methods.methods > .wp-augoose-payment-notice {
   display: none !important;
 }
+
+/* =========================================================
+   CHECKOUT MOBILE HEADER/SPACING TUNE
+   Make top area more compact on checkout mobile/tablet
+   ========================================================= */
+@media (max-width: 1024px) {
+  body.woocommerce-checkout .header-category-nav {
+    display: none !important;
+  }
+
+  body.woocommerce-checkout .site-header {
+    margin-bottom: 0 !important;
+  }
+
+  body.woocommerce-checkout .checkout-progress {
+    padding: 14px 0 !important;
+    margin-bottom: 18px !important;
+  }
+
+  body.woocommerce-checkout .checkout-progress .container,
+  body.woocommerce-checkout .checkout-content .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}

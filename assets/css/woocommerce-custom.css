@@ -4201,6 +4201,26 @@ body.woocommerce-cart .site-main .entry-content {
 }
 
 /* ===================================
+   CHECKOUT MOBILE ORDER OVERRIDE
+   Force forms (billing/shipping) before order summary
+   =================================== */
+@media (max-width: 1024px) {
+    body.woocommerce-checkout .checkout-layout {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    body.woocommerce-checkout .checkout-forms-column {
+        order: 1 !important;
+    }
+
+    body.woocommerce-checkout .checkout-summary-column {
+        order: 2 !important;
+        position: static !important;
+    }
+}
+
+/* ===================================
    Size Guide Modal
    =================================== */
 .size-guide-modal {
