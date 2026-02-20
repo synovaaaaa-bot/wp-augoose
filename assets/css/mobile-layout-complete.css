@@ -131,27 +131,27 @@
         margin: 0 !important;
     }
     
-    /* Checkout Layout - STACK EVERYTHING ON MOBILE - REVERSE ORDER */
+    /* Checkout Layout - STACK EVERYTHING ON MOBILE */
     .checkout-layout {
         display: flex !important;
-        flex-direction: column-reverse !important;
+        flex-direction: column !important;
         gap: 0 !important;
         padding: 0 !important;
         width: 100% !important;
         margin: 0 !important;
     }
     
-    /* FORMS COLUMN - WILL APPEAR FIRST DUE TO REVERSE */
+    /* Forms column first on mobile */
     .checkout-forms-column {
         width: 100% !important;
         min-width: 0 !important;
         padding: 20px !important;
         margin: 0 !important;
         box-sizing: border-box !important;
-        order: 2 !important;
+        order: 1 !important;
     }
     
-    /* SUMMARY COLUMN - WILL APPEAR SECOND DUE TO REVERSE */
+    /* Order summary last on mobile */
     .checkout-summary-column {
         width: 100% !important;
         position: static !important;
@@ -160,7 +160,7 @@
         margin: 0 !important;
         padding: 20px !important;
         box-sizing: border-box !important;
-        order: 1 !important;
+        order: 2 !important;
         border-bottom: 1px solid #e0e0e0 !important;
     }
     
