@@ -4071,7 +4071,8 @@ function wp_augoose_clean_previous_failed_orders() {
 		
 		$orders = wc_get_orders( $args );
 		
-		// Delete failed/pending orders from last 30 minutes to prevent stuck orders
+		// IMPORTANT: Never hard-delete orders here.
+		// Gateway callbacks/webhooks can arrive asynchronously and still need the order record.
 		foreach ( $orders as $order_id ) {
 			$order = wc_get_order( $order_id );
 			if ( ! $order ) continue;
@@ -4082,19 +4083,15 @@ function wp_augoose_clean_previous_failed_orders() {
 			
 			$time_diff = current_time( 'timestamp' ) - $order_date->getTimestamp();
 			
-			// If order is pending/failed and less than 30 minutes old, delete it
-			if ( $time_diff < 1800 && in_array( $order->get_status(), array( 'pending', 'failed', 'cancelled' ) ) ) {
-				// Delete the order to clean up session
+			// Keep a lightweight marker only for very recent failed/cancelled non-DOKU orders.
+			$payment_method = strtolower( (string) $order->get_payment_method() );
+			$is_doku_order  = ( strpos( $payment_method, 'doku' ) !== false || strpos( $payment_method, 'jokul' ) !== false );
+			if ( $time_diff < 1800 && ! $is_doku_order && in_array( $order->get_status(), array( 'failed', 'cancelled' ), true ) ) {
 				try {
-					wp_delete_post( $order_id, true );
-					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-						error_log( 'Deleted previous failed order #' . $order_id . ' (age: ' . $time_diff . 's)' );
-					}
+					$order->update_meta_data( '_wp_augoose_recent_failed_checkout', 'yes' );
+					$order->save_meta_data();
 				} catch ( Exception $e ) {
-					// Log but continue
-					if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-						error_log( 'Error deleting order #' . $order_id . ': ' . $e->getMessage() );
-					}
+					// Non-fatal: keep checkout flow running.
 				}
 			}
 		}
@@ -5205,7 +5202,7 @@ function wp_augoose_handle_doku_payment_callback() {
 		exit;
 	}
 	
-	// Check payment status
+	// Check payment status from order and callback payload.
 	$order_status = $order->get_status();
 	$payment_status = $order->get_meta( '_payment_status' );
 	
@@ -5213,16 +5210,42 @@ function wp_augoose_handle_doku_payment_callback() {
 	$failure_statuses = array( 'failed', 'cancelled', 'expired' );
 	$is_expired = in_array( strtolower( $payment_status ), array( 'expired', 'expire', 'timeout' ), true );
 	
-	if ( $order->is_paid() && ! in_array( $order_status, $failure_statuses, true ) && ! $is_expired ) {
+	// Read callback payload status safely (GET/POST can vary by gateway implementation).
+	$payload_status_raw = '';
+	$status_keys        = array( 'transaction_status', 'payment_status', 'status', 'result', 'order_status', 'response_code' );
+	foreach ( $status_keys as $key ) {
+		if ( isset( $_GET[ $key ] ) && '' !== (string) $_GET[ $key ] ) {
+			$payload_status_raw = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
+			break;
+		}
+		if ( isset( $_POST[ $key ] ) && '' !== (string) $_POST[ $key ] ) {
+			$payload_status_raw = sanitize_text_field( wp_unslash( $_POST[ $key ] ) );
+			break;
+		}
+	}
+	$payload_status = strtolower( trim( $payload_status_raw ) );
+	
+	$success_payload_statuses = array( 'success', 'paid', 'settlement', 'capture', 'completed' );
+	$failed_payload_statuses  = array( 'failed', 'deny', 'denied', 'cancel', 'cancelled', 'expired', 'expire', 'timeout', 'void' );
+	
+	$is_payload_success = in_array( $payload_status, $success_payload_statuses, true );
+	$is_payload_failed  = in_array( $payload_status, $failed_payload_statuses, true );
+	
+	if ( ( $order->is_paid() || $is_payload_success ) && ! in_array( $order_status, $failure_statuses, true ) && ! $is_expired ) {
 		// Payment successful - redirect to thank you page
-		wp_redirect( $order->get_checkout_order_received_url() );
+		wp_safe_redirect( $order->get_checkout_order_received_url() );
 		exit;
-	} else {
+	} elseif ( in_array( $order_status, $failure_statuses, true ) || $is_expired || $is_payload_failed ) {
 		// Payment failed/expired/cancelled - invalidate order and redirect to new checkout
 		wp_augoose_invalidate_failed_order( $order_id, $order, $order_status );
 		
 		$checkout_url = wc_get_checkout_url();
-		wp_redirect( add_query_arg( 'payment_failed', '1', $checkout_url ) );
+		wp_safe_redirect( add_query_arg( 'payment_failed', '1', $checkout_url ) );
+		exit;
+	} else {
+		// Unknown/in-progress status: do NOT invalidate order.
+		// Keep WooCommerce/DOKU flow alive and allow async webhook to finalize status.
+		wp_safe_redirect( $order->get_checkout_payment_url( true ) );
 		exit;
 	}
 }
