@@ -5186,33 +5186,56 @@ function wp_augoose_preserve_cart_for_doku( $order_id, $posted_data, $order ) {
  */
 add_action( 'woocommerce_api_doku_payment_callback', 'wp_augoose_handle_doku_payment_callback' );
 add_action( 'woocommerce_api_jokul_payment_callback', 'wp_augoose_handle_doku_payment_callback' );
+add_action( 'woocommerce_api_wc_gateway_paypal', 'wp_augoose_handle_doku_payment_callback' );
+add_action( 'woocommerce_api_wc_gateway_ppcp', 'wp_augoose_handle_doku_payment_callback' );
 function wp_augoose_handle_doku_payment_callback() {
-	// Get order ID from request
-	$order_id = isset( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;
-	$order_key = isset( $_GET['key'] ) ? sanitize_text_field( $_GET['key'] ) : '';
+	// Get order ID from request (DOKU: order_id/key; PayPal: invoice/custom)
+	$order_id = isset( $_REQUEST['order_id'] ) ? absint( $_REQUEST['order_id'] ) : 0;
+	if ( ! $order_id ) {
+		$order_id = isset( $_REQUEST['invoice'] ) ? absint( $_REQUEST['invoice'] ) : 0;
+	}
+	if ( ! $order_id && isset( $_REQUEST['custom'] ) ) {
+		// PayPal often uses custom field for order ID
+		$order_id = absint( $_REQUEST['custom'] );
+	}
+	$order_key = isset( $_REQUEST['key'] ) ? sanitize_text_field( $_REQUEST['key'] ) : '';
 	
-	if ( ! $order_id || ! $order_key ) {
+	if ( ! $order_id ) {
 		wp_redirect( wc_get_page_permalink( 'checkout' ) . 'payment-failed/' );
 		exit;
 	}
 	
+	// Ensure callback responses are sent with 200 status to avoid AJAX/front-end error pages
+	if ( ! headers_sent() ) {
+		status_header( 200 );
+	}
+
 	$order = wc_get_order( $order_id );
-	if ( ! $order || $order->get_order_key() !== $order_key ) {
+	if ( ! $order ) {
+		wp_redirect( wc_get_page_permalink( 'checkout' ) . 'payment-failed/' );
+		exit;
+	}
+	
+	if ( ! empty( $order_key ) && $order->get_order_key() !== $order_key ) {
 		wp_redirect( wc_get_page_permalink( 'checkout' ) . 'payment-failed/' );
 		exit;
 	}
 	
 	// Check payment status from order and callback payload.
 	$order_status = $order->get_status();
-	$payment_status = $order->get_meta( '_payment_status' );
+	$payment_status = strtolower( trim( (string) $order->get_meta( '_payment_status' ) ) );
 	
-	// Check if payment expired/failed/cancelled
-	$failure_statuses = array( 'failed', 'cancelled', 'expired' );
-	$is_expired = in_array( strtolower( $payment_status ), array( 'expired', 'expire', 'timeout' ), true );
+	// Unified status maps used for DOKU and PayPal
+	$success_statuses = array( 'success', 'paid', 'settlement', 'capture', 'captured', 'completed', 'processed', 'approved' );
+	$failure_statuses = array( 'failed', 'cancelled', 'expired', 'denied', 'void', 'reversed', 'refunded' );
+	$expired_aliases  = array( 'expired', 'expire', 'timeout', 'payment_expired', 'payment-expired' );
+
+	$is_expired = in_array( $payment_status, $expired_aliases, true );
+	$is_order_success = $order->is_paid() || in_array( $order_status, array( 'completed', 'processing', 'on-hold' ), true ) || in_array( $payment_status, $success_statuses, true );
 	
 	// Read callback payload status safely (GET/POST can vary by gateway implementation).
 	$payload_status_raw = '';
-	$status_keys        = array( 'transaction_status', 'payment_status', 'status', 'result', 'order_status', 'response_code' );
+	$status_keys        = array( 'transaction_status', 'payment_status', 'status', 'result', 'order_status', 'response_code', 'payment_state', 'txn_type' );
 	foreach ( $status_keys as $key ) {
 		if ( isset( $_GET[ $key ] ) && '' !== (string) $_GET[ $key ] ) {
 			$payload_status_raw = sanitize_text_field( wp_unslash( $_GET[ $key ] ) );
@@ -5224,15 +5247,28 @@ function wp_augoose_handle_doku_payment_callback() {
 		}
 	}
 	$payload_status = strtolower( trim( $payload_status_raw ) );
-	
-	$success_payload_statuses = array( 'success', 'paid', 'settlement', 'capture', 'completed' );
-	$failed_payload_statuses  = array( 'failed', 'deny', 'denied', 'cancel', 'cancelled', 'expired', 'expire', 'timeout', 'void' );
-	
-	$is_payload_success = in_array( $payload_status, $success_payload_statuses, true );
-	$is_payload_failed  = in_array( $payload_status, $failed_payload_statuses, true );
-	
-	if ( ( $order->is_paid() || $is_payload_success ) && ! in_array( $order_status, $failure_statuses, true ) && ! $is_expired ) {
-		// Payment successful - redirect to thank you page
+
+	$is_payload_success = in_array( $payload_status, $success_statuses, true );
+	$is_payload_failed  = in_array( $payload_status, $failure_statuses, true );
+
+	// Extract transaction ID for payment completion (PayPal/Doku may use txn_id or transaction_id)
+	$transaction_id = '';
+	if ( isset( $_REQUEST['transaction_id'] ) && ! empty( $_REQUEST['transaction_id'] ) ) {
+		$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['transaction_id'] ) );
+	} elseif ( isset( $_REQUEST['txn_id'] ) && ! empty( $_REQUEST['txn_id'] ) ) {
+		$transaction_id = sanitize_text_field( wp_unslash( $_REQUEST['txn_id'] ) );
+	}
+
+	if ( ( $is_order_success || $is_payload_success ) && ! in_array( $order_status, $failure_statuses, true ) && ! $is_expired ) {
+		// If order is not already marked paid, complete now to avoid missing confirmation
+		if ( ! $order->is_paid() ) {
+			if ( ! empty( $transaction_id ) ) {
+				$order->set_transaction_id( $transaction_id );
+			}
+			$order->payment_complete( $transaction_id );
+			$order->add_order_note( sprintf( 'Auto-completed via callback: %s (status=%s)', $transaction_id ?: 'no-txn-id', $payload_status ) );
+		}
+
 		wp_safe_redirect( $order->get_checkout_order_received_url() );
 		exit;
 	} elseif ( in_array( $order_status, $failure_statuses, true ) || $is_expired || $is_payload_failed ) {
